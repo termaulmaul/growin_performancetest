@@ -48,3 +48,9 @@ Thumbs.db
 *.mov
 *.wmv
 
+# Ignore seluruh folder Report/
+Report/*
+
+# Tapi jangan ignore Template_Report
+!Report/[Template_Report]/
+!Report/[Template_Report]/**

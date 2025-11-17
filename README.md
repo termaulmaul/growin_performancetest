@@ -27,3 +27,14 @@ This README would normally document whatever steps are necessary to get your app
 
 * Repo owner or admin
 * Other community or team contact
+
+Compiling mostngk6x
+To compile mostngk6x extension, first compile mostngk6x.go using this command
+go mod init mostngk6x
+go mod tidy
+
+Create mostngk6x extension
+To create mostngk6x extension use this command
+xk6 build --with mostngk6x=.
+xk6 build --with github.com/grafana/xk6-dashboard --with github.com/avitalique/xk6-file --with github.com/grafana/xk6-sql --with github.com/denyshuzovskyi/xk6-sql-driver-oracle --with github.com/grafana/xk6-sql-driver-postgres --with github.com/stefnedelchevbrady/xk6-sql-with-oracle 
+--with mostngk6x=.
