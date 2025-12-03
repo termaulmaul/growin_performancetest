@@ -63,21 +63,21 @@ const CommunityDetailUserTrialSwitch = {
 export function BP005(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;
-    
+
     const mapping = data.vuMapping[vuId];
     if (!mapping) {
         console.error(`❌ VU${vuId} - No mapping found, skipping iteration`);
         return;
     }
-    
+
     const userKey = mapping.userKey;
     const userToken = data.tokens[userKey];
-    
+
     if (!userToken || !userToken.token || !userToken.pin_token) {
         console.error(`❌ VU${vuId} (User ${userKey}) - No valid token or pin_token available, skipping iteration`);
         return;
     }
-    
+
     const token = userToken.token;
     const pin_token = userToken.pin_token;
     const email = userToken.email;
@@ -85,14 +85,13 @@ export function BP005(data) {
 
     // ✅ Ambil channel_id untuk BP ini dari data yang sudah di-fetch di setup()
     const channel_id = data.channelIds ? data.channelIds[bp] : null;
-    
+
     if (!channel_id) {
         console.error(`❌ ${email} (${bp}) - No channel_id available, skipping iteration`);
         return;
     }
 
     // Batch 1
-    let switchChannelID;
     if (token) {
         const urls = [
             base_url + `/socialinvesting/api/v1/channel/get-list`,
@@ -128,32 +127,6 @@ export function BP005(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
 
-                // Parse response dan ambil channel_id yang berbeda
-                try {
-                    const responseData = JSON.parse(response.body);
-                    
-                    if (responseData.data && Array.isArray(responseData.data)) {
-                        // Filter channel yang channel_id-nya TIDAK sama dengan channel_id yang sudah dimiliki
-                        const differentChannels = responseData.data.filter(
-                            channel => channel.channel_id !== channel_id // channel_id adalah variable yang lu punya sebelumnya
-                        );
-                        
-                        // Ambil channel_id yang pertama dari hasil filter
-                        if (differentChannels.length > 0) {
-                            switchChannelID = differentChannels[0].channel_id;
-                            // console.log(`[BATCH 1] switchChannelID SET TO: ${switchChannelID}`);
-                            // console.log(`[BATCH 1] Type: ${typeof switchChannelID}`);
-                        } else {
-                            console.error(`${email} Tidak ada channel lain selain ${channel_id}`);
-                            switchChannelID = null;
-                            // console.log(`[BATCH 1] switchChannelID SET TO NULL`);
-                        }
-                    }
-                } catch (parseError) {
-                    console.error(`${email} Error parsing response: ${parseError}`);
-                    switchChannelID = null;
-                }
-
                 if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
@@ -170,12 +143,11 @@ export function BP005(data) {
                     console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
                 }
             }
-
-            
         });
     }
 
     // Batch 2
+    let leftChannelId;
     if (token) {
         const urls = [
             base_url + `/socialinvesting/api/v1/channel/get-profile?channel_id=${channel_id}`,
@@ -217,6 +189,30 @@ export function BP005(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
 
+                // ✅ Tambahkan logika untuk mengambil channel_id dengan status LEFT
+                if (index === 2) { // index 2 = joined-by-user endpoint
+                    try {
+                        const joinedChannels = response.json();
+                        if (joinedChannels && joinedChannels.data && joinedChannels.data.length > 0) {
+                            // Cari channel pertama dengan join_status === "LEFT"
+                            const leftChannel = joinedChannels.data.find(ch => ch.join_status === "LEFT");
+
+                            if (leftChannel) {
+                                leftChannelId = leftChannel.channel_id;
+                                if (`${__ENV.ENV}` != 'INT') {
+                                    console.log(`Got LEFT Channel ID: ${leftChannelId}`);
+                                }
+                            } else {
+                                if (`${__ENV.ENV}` != 'INT') {
+                                    console.log(`No channel with LEFT status found`);
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.error(`Failed to parse LEFT Channel ID: ${e.message}`);
+                    }
+                }
+
                 if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
@@ -237,19 +233,15 @@ export function BP005(data) {
     }
 
     // Batch 3
-    // console.log(`[BEFORE BATCH 3] switchChannelID: ${switchChannelID}`);
-    // console.log(`[BEFORE BATCH 3] Type: ${typeof switchChannelID}`);
     if (token) {
         const urls = [
             base_url + `/socialinvesting/api/v1/social/switch`,
         ];
 
-        // console.log(`[BATCH 3 START] switchChannelID: ${switchChannelID}`);
         const Socialinvesting_Social_Switch_Payload = JSON.stringify({
-            new_channel_id: switchChannelID,
+            new_channel_id: leftChannelId,
         });
-        
-        // console.log(`[BATCH 3] Payload: ${Socialinvesting_Social_Switch_Payload}`);
+
 
         const stepThreeHeaders = {
             // 'Cookie': `ACCESS_TOKEN=${token}`,

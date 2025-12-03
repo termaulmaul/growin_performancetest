@@ -6,10 +6,10 @@ import { htmlReport } from '../../Helper/bundle.js';
 import { textSummary } from "../../Helper/textSummary.js";
 
 // ##READ ME
-//BP001 - Stock Detail Keystat Tab
-//RUN QA : ../../k6 run BP001.js -e RUNBY=Manual -e ENV=QA -e USER=1 -e DURATION=1m -e NUMSTART=90 --out dashboard=export=../../Report/Growin_AI_Summarizer/BP001/Manual/Manual_DryRun_2021_1706_BP001_Local.html
-//RUN INT: ../../k6 run BP001.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../Report/Growin_AI_Summarizer/BP001/Manual/Manual_DryRun_1112_1330_BP001_Local.html
-//RUN STRESS TEST: ../../k6 run BP001.js -e RUNBY=Manual -e ENV=INT -e NUMSTART=0 --out dashboard=export=../../Report/Growin_AI_Summarizer/BP001/Manual/Manual_DryRun_2021_1128_BP001_Local.html
+//BP008 - Stock Detail - News Tab
+//RUN QA : ../../k6 run BP008.js -e RUNBY=Manual -e ENV=QA -e USER=1 -e DURATION=1m -e NUMSTART=98 --out dashboard=export=../../Report/Growin_AI_Summarizer/BP008/Manual/Manual_DryRun_1027_1630_BP008_Local.html
+//RUN INT: ../../k6 run BP008.js -e RUNBY=Manual -e ENV=INT -e USER=75 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../Report/Growin_AI_Summarizer/BP008/Manual/Manual_DryRun_1023_1130_BP008_Local.html
+//RUN STRESS TEST: ../../k6 run BP008.js -e RUNBY=Manual -e ENV=INT -e NUMSTART=0 --out dashboard=export=../../Report/Growin_AI_Summarizer/BP008/Manual/Manual_DryRun_2021_1128_BP008_Local.html
 // ITER - type of int, many iteration each vUser
 // USER - type of int, many of vUser
 // NUMSTART - set user starting number example : if 0 the user will be MOSTNG1@guysmail.com
@@ -43,13 +43,14 @@ export const options = {
 // };
 
 // marketdata/api/v1/gpt/financial_summarizer
-// marketdata/api/v1/gpt/feedback?user_id={}&feature_name=KETSTAT&ticker={}
+// marketdata/api/v1/gpt/feedback?user_id={}&feature_name=NEWS&ticker={}
 // marketdata/api/v1/gpt/recommendation_question
 // marketdata/api/v1/gpt/title_insert?title_name={}
 // marketdata/api/v1/gpt/conversation_activity_insert
 // marketdata/api/v1/gpt/conversation_activity_insert
 // marketdata/api/v1/gpt/feedback_insert
 // marketdata/api/v1/gpt/feedback_update
+// /news/api/v2
 
 // Marketdata_Gpt_FinancialSummarizer
 // Marketdata_Gpt_Feedback
@@ -59,72 +60,81 @@ export const options = {
 // Marketdata_Gpt_ConversationActivityInsert_2
 // Marketdata_Gpt_FeedbackInsert
 // Marketdata_Gpt_FeedbackUpdate
+// News_v2
 
 // Define custom metrics
-const StockDetailKeystatTab = {
+const StockDetailNewsTab = {
     Marketdata_Gpt_FinancialSummarizer: {
-        errorCount: new Counter("error_count_001_01_01_Marketdata_Gpt_FinancialSummarizer"),
-        errorRate: new Rate("error_rate_001_01_01_Marketdata_Gpt_FinancialSummarizer"),
-        httpDuration: new Trend("duration_001_01_01_Marketdata_Gpt_FinancialSummarizer"),
-        httpWaiting: new Trend("waiting_001_01_01_Marketdata_Gpt_FinancialSummarizer"),
-        requestRate: new Counter("rps_001_01_01_Marketdata_Gpt_FinancialSummarizer"),
-        http_reqs: new Counter("sample_001_01_01_Marketdata_Gpt_FinancialSummarizer"),
+        errorCount: new Counter("error_count_008_01_01_Marketdata_Gpt_FinancialSummarizer"),
+        errorRate: new Rate("error_rate_008_01_01_Marketdata_Gpt_FinancialSummarizer"),
+        httpDuration: new Trend("duration_008_01_01_Marketdata_Gpt_FinancialSummarizer"),
+        httpWaiting: new Trend("waiting_008_01_01_Marketdata_Gpt_FinancialSummarizer"),
+        requestRate: new Counter("rps_008_01_01_Marketdata_Gpt_FinancialSummarizer"),
+        http_reqs: new Counter("sample_008_01_01_Marketdata_Gpt_FinancialSummarizer"),
     },
     Marketdata_Gpt_Feedback: {
-        errorCount: new Counter("error_count_001_01_02_Marketdata_Gpt_Feedback"),
-        errorRate: new Rate("error_rate_001_01_02_Marketdata_Gpt_Feedback"),
-        httpDuration: new Trend("duration_001_01_02_Marketdata_Gpt_Feedback"),
-        httpWaiting: new Trend("waiting_001_01_02_Marketdata_Gpt_Feedback"),
-        requestRate: new Counter("rps_001_01_02_Marketdata_Gpt_Feedback"),
-        http_reqs: new Counter("sample_001_01_02_Marketdata_Gpt_Feedback"),
+        errorCount: new Counter("error_count_008_01_02_Marketdata_Gpt_Feedback"),
+        errorRate: new Rate("error_rate_008_01_02_Marketdata_Gpt_Feedback"),
+        httpDuration: new Trend("duration_008_01_02_Marketdata_Gpt_Feedback"),
+        httpWaiting: new Trend("waiting_008_01_02_Marketdata_Gpt_Feedback"),
+        requestRate: new Counter("rps_008_01_02_Marketdata_Gpt_Feedback"),
+        http_reqs: new Counter("sample_008_01_02_Marketdata_Gpt_Feedback"),
     },
     Marketdata_Gpt_RecommendationQuestion: {
-        errorCount: new Counter("error_count_001_01_03_Marketdata_Gpt_RecommendationQuestion"),
-        errorRate: new Rate("error_rate_001_01_03_Marketdata_Gpt_RecommendationQuestion"),
-        httpDuration: new Trend("duration_001_01_03_Marketdata_Gpt_RecommendationQuestion"),
-        httpWaiting: new Trend("waiting_001_01_03_Marketdata_Gpt_RecommendationQuestion"),
-        requestRate: new Counter("rps_001_01_03_Marketdata_Gpt_RecommendationQuestion"),
-        http_reqs: new Counter("sample_001_01_03_Marketdata_Gpt_RecommendationQuestion"),
+        errorCount: new Counter("error_count_008_01_03_Marketdata_Gpt_RecommendationQuestion"),
+        errorRate: new Rate("error_rate_008_01_03_Marketdata_Gpt_RecommendationQuestion"),
+        httpDuration: new Trend("duration_008_01_03_Marketdata_Gpt_RecommendationQuestion"),
+        httpWaiting: new Trend("waiting_008_01_03_Marketdata_Gpt_RecommendationQuestion"),
+        requestRate: new Counter("rps_008_01_03_Marketdata_Gpt_RecommendationQuestion"),
+        http_reqs: new Counter("sample_008_01_03_Marketdata_Gpt_RecommendationQuestion"),
     },
     Marketdata_Gpt_TitleInsert: {
-        errorCount: new Counter("error_count_001_01_04_Marketdata_Gpt_TitleInsert"),
-        errorRate: new Rate("error_rate_001_01_04_Marketdata_Gpt_TitleInsert"),
-        httpDuration: new Trend("duration_001_01_04_Marketdata_Gpt_TitleInsert"),
-        httpWaiting: new Trend("waiting_001_01_04_Marketdata_Gpt_TitleInsert"),
-        requestRate: new Counter("rps_001_01_04_Marketdata_Gpt_TitleInsert"),
-        http_reqs: new Counter("sample_001_01_04_Marketdata_Gpt_TitleInsert"),
+        errorCount: new Counter("error_count_008_01_04_Marketdata_Gpt_TitleInsert"),
+        errorRate: new Rate("error_rate_008_01_04_Marketdata_Gpt_TitleInsert"),
+        httpDuration: new Trend("duration_008_01_04_Marketdata_Gpt_TitleInsert"),
+        httpWaiting: new Trend("waiting_008_01_04_Marketdata_Gpt_TitleInsert"),
+        requestRate: new Counter("rps_008_01_04_Marketdata_Gpt_TitleInsert"),
+        http_reqs: new Counter("sample_008_01_04_Marketdata_Gpt_TitleInsert"),
     },
     Marketdata_Gpt_ConversationActivityInsert_1: {
-        errorCount: new Counter("error_count_001_01_05_Marketdata_Gpt_ConversationActivityInsert_1"),
-        errorRate: new Rate("error_rate_001_01_05_Marketdata_Gpt_ConversationActivityInsert_1"),
-        httpDuration: new Trend("duration_001_01_05_Marketdata_Gpt_ConversationActivityInsert_1"),
-        httpWaiting: new Trend("waiting_001_01_05_Marketdata_Gpt_ConversationActivityInsert_1"),
-        requestRate: new Counter("rps_001_01_05_Marketdata_Gpt_ConversationActivityInsert_1"),
-        http_reqs: new Counter("sample_001_01_05_Marketdata_Gpt_ConversationActivityInsert_1"),
+        errorCount: new Counter("error_count_008_01_05_Marketdata_Gpt_ConversationActivityInsert_1"),
+        errorRate: new Rate("error_rate_008_01_05_Marketdata_Gpt_ConversationActivityInsert_1"),
+        httpDuration: new Trend("duration_008_01_05_Marketdata_Gpt_ConversationActivityInsert_1"),
+        httpWaiting: new Trend("waiting_008_01_05_Marketdata_Gpt_ConversationActivityInsert_1"),
+        requestRate: new Counter("rps_008_01_05_Marketdata_Gpt_ConversationActivityInsert_1"),
+        http_reqs: new Counter("sample_008_01_05_Marketdata_Gpt_ConversationActivityInsert_1"),
     },
     Marketdata_Gpt_ConversationActivityInsert_2: {
-        errorCount: new Counter("error_count_001_01_06_Marketdata_Gpt_ConversationActivityInsert_2"),
-        errorRate: new Rate("error_rate_001_01_06_Marketdata_Gpt_ConversationActivityInsert_2"),
-        httpDuration: new Trend("duration_001_01_06_Marketdata_Gpt_ConversationActivityInsert_2"),
-        httpWaiting: new Trend("waiting_001_01_06_Marketdata_Gpt_ConversationActivityInsert_2"),
-        requestRate: new Counter("rps_001_01_06_Marketdata_Gpt_ConversationActivityInsert_2"),
-        http_reqs: new Counter("sample_001_01_06_Marketdata_Gpt_ConversationActivityInsert_2"),
+        errorCount: new Counter("error_count_008_01_06_Marketdata_Gpt_ConversationActivityInsert_2"),
+        errorRate: new Rate("error_rate_008_01_06_Marketdata_Gpt_ConversationActivityInsert_2"),
+        httpDuration: new Trend("duration_008_01_06_Marketdata_Gpt_ConversationActivityInsert_2"),
+        httpWaiting: new Trend("waiting_008_01_06_Marketdata_Gpt_ConversationActivityInsert_2"),
+        requestRate: new Counter("rps_008_01_06_Marketdata_Gpt_ConversationActivityInsert_2"),
+        http_reqs: new Counter("sample_008_01_06_Marketdata_Gpt_ConversationActivityInsert_2"),
     },
     Marketdata_Gpt_FeedbackInsert: {
-        errorCount: new Counter("error_count_001_01_07_Marketdata_Gpt_FeedbackInsert"),
-        errorRate: new Rate("error_rate_001_01_07_Marketdata_Gpt_FeedbackInsert"),
-        httpDuration: new Trend("duration_001_01_07_Marketdata_Gpt_FeedbackInsert"),
-        httpWaiting: new Trend("waiting_001_01_07_Marketdata_Gpt_FeedbackInsert"),
-        requestRate: new Counter("rps_001_01_07_Marketdata_Gpt_FeedbackInsert"),
-        http_reqs: new Counter("sample_001_01_07_Marketdata_Gpt_FeedbackInsert"),
+        errorCount: new Counter("error_count_008_01_07_Marketdata_Gpt_FeedbackInsert"),
+        errorRate: new Rate("error_rate_008_01_07_Marketdata_Gpt_FeedbackInsert"),
+        httpDuration: new Trend("duration_008_01_07_Marketdata_Gpt_FeedbackInsert"),
+        httpWaiting: new Trend("waiting_008_01_07_Marketdata_Gpt_FeedbackInsert"),
+        requestRate: new Counter("rps_008_01_07_Marketdata_Gpt_FeedbackInsert"),
+        http_reqs: new Counter("sample_008_01_07_Marketdata_Gpt_FeedbackInsert"),
     },
     Marketdata_Gpt_FeedbackUpdate: {
-        errorCount: new Counter("error_count_001_01_08_Marketdata_Gpt_FeedbackUpdate"),
-        errorRate: new Rate("error_rate_001_01_08_Marketdata_Gpt_FeedbackUpdate"),
-        httpDuration: new Trend("duration_001_01_08_Marketdata_Gpt_FeedbackUpdate"),
-        httpWaiting: new Trend("waiting_001_01_08_Marketdata_Gpt_FeedbackUpdate"),
-        requestRate: new Counter("rps_001_01_08_Marketdata_Gpt_FeedbackUpdate"),
-        http_reqs: new Counter("sample_001_01_08_Marketdata_Gpt_FeedbackUpdate"),
+        errorCount: new Counter("error_count_008_01_08_Marketdata_Gpt_FeedbackUpdate"),
+        errorRate: new Rate("error_rate_008_01_08_Marketdata_Gpt_FeedbackUpdate"),
+        httpDuration: new Trend("duration_008_01_08_Marketdata_Gpt_FeedbackUpdate"),
+        httpWaiting: new Trend("waiting_008_01_08_Marketdata_Gpt_FeedbackUpdate"),
+        requestRate: new Counter("rps_008_01_08_Marketdata_Gpt_FeedbackUpdate"),
+        http_reqs: new Counter("sample_008_01_08_Marketdata_Gpt_FeedbackUpdate"),
+    },
+    News_v2: {
+        errorCount: new Counter("error_count_008_01_09_News_v2"),
+        errorRate: new Rate("error_rate_008_01_09_News_v2"),
+        httpDuration: new Trend("duration_008_01_09_News_v2"),
+        httpWaiting: new Trend("waiting_008_01_09_News_v2"),
+        requestRate: new Counter("rps_008_01_09_News_v2"),
+        http_reqs: new Counter("sample_008_01_09_News_v2"),
     },
 };
 
@@ -262,7 +272,7 @@ export default function (data) {
         const responses = http.batch(requests);
 
         responses.forEach((response, index) => {
-            const metric = StockDetailKeystatTab.Marketdata_Gpt_ConversationActivityInsert_1;
+            const metric = StockDetailNewsTab.Marketdata_Gpt_ConversationActivityInsert_1;
             metric.httpDuration.add(response.timings.duration);
             if (response.status === 200 || response.status === 201) {
                 title_id = response.json().data.title_id;
@@ -292,7 +302,6 @@ export default function (data) {
             'Accept':'*/*',
         };
 
-        // PERBAIKAN: Kirim object, bukan array
         const Marketdata_Gpt_FinancialSummarizer_Payload = JSON.stringify({
             message: "How the company solvency",
             feature: "KEYSTAT", 
@@ -307,7 +316,7 @@ export default function (data) {
         const responses = http.batch(requests);
 
         responses.forEach((response, index) => {
-            const metric = StockDetailKeystatTab.Marketdata_Gpt_FinancialSummarizer;
+            const metric = StockDetailNewsTab.Marketdata_Gpt_FinancialSummarizer;
             metric.httpDuration.add(response.timings.duration);
             if (response.status === 200 || response.status === 201) {
                 metric.errorRate.add(false);
@@ -357,7 +366,7 @@ export default function (data) {
         });
 
         const urls = [
-            base_url + `/marketdata/api/v1/gpt/feedback?user_id=${userID}&feature_name=KEYSTAT&ticker=BMRI`,
+            base_url + `/marketdata/api/v1/gpt/feedback?user_id=${userID}&feature_name=NEWS&ticker=`,
             base_url + `/marketdata/api/v1/gpt/recommendation_question`,
             base_url + `/marketdata/api/v1/gpt/title_insert?title_name=Test%20Title`,
         ];
@@ -371,9 +380,9 @@ export default function (data) {
 
         responses.forEach((response, index) => {
             const metrics = [
-                StockDetailKeystatTab.Marketdata_Gpt_Feedback,
-                StockDetailKeystatTab.Marketdata_Gpt_RecommendationQuestion,
-                StockDetailKeystatTab.Marketdata_Gpt_TitleInsert,
+                StockDetailNewsTab.Marketdata_Gpt_Feedback,
+                StockDetailNewsTab.Marketdata_Gpt_RecommendationQuestion,
+                StockDetailNewsTab.Marketdata_Gpt_TitleInsert,
             ];
             
             const metric = metrics[index];
@@ -440,7 +449,7 @@ export default function (data) {
         const responses = http.batch(requests);
 
         responses.forEach((response, index) => {
-            const metric = StockDetailKeystatTab.Marketdata_Gpt_ConversationActivityInsert_1;
+            const metric = StockDetailNewsTab.Marketdata_Gpt_ConversationActivityInsert_1;
             metric.httpDuration.add(response.timings.duration);
             if (response.status === 200 || response.status === 201) {
                 metric.errorRate.add(false);
@@ -502,7 +511,7 @@ export default function (data) {
         const responses = http.batch(requests);
 
         responses.forEach((response, index) => {
-            const metric = StockDetailKeystatTab.Marketdata_Gpt_ConversationActivityInsert_2;
+            const metric = StockDetailNewsTab.Marketdata_Gpt_ConversationActivityInsert_2;
             metric.httpDuration.add(response.timings.duration);
             if (response.status === 200 || response.status === 201) {
                 metric.errorRate.add(false);
@@ -560,7 +569,7 @@ export default function (data) {
         const responses = http.batch(requests);
 
         responses.forEach((response, index) => {
-            const metric = StockDetailKeystatTab.Marketdata_Gpt_FeedbackInsert;
+            const metric = StockDetailNewsTab.Marketdata_Gpt_FeedbackInsert;
             metric.httpDuration.add(response.timings.duration);
             if (response.status === 200 || response.status === 201) {
                 metric.errorRate.add(false);
@@ -618,7 +627,62 @@ export default function (data) {
         const responses = http.batch(requests);
 
         responses.forEach((response, index) => {
-            const metric = StockDetailKeystatTab.Marketdata_Gpt_FeedbackUpdate;
+            const metric = StockDetailNewsTab.Marketdata_Gpt_FeedbackUpdate;
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200 || response.status === 201) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}`!='INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
+    
+    // 9. News v2
+    if (token && userID) {
+        const urls = [base_url + `/news/api/v2`];
+
+        const News_v2_Payload = JSON.stringify({
+            items: 5,
+            ticker: ticker, 
+            page: 1,
+            category: 0
+        });
+
+        const stepSevenHeaders = {
+            // 'Cookie': `ACCESS_TOKEN=${token}`,
+            // 'Content-Type': 'application/json',
+
+            'Cookie': `ACCESS_TOKEN=${token}`,
+            'Content-Type': 'application/json',
+            'Accept-Language':'en',
+            'Connection':'keep-alive',
+            'Accept-Encoding':'gzip, deflate, br',
+            'Accept':'*/*',
+        };
+
+        const requests = [
+            ['GET', urls[0], News_v2_Payload, { headers: stepOneHeaders }],
+        ];
+        const responses = http.batch(requests);
+
+        responses.forEach((response, index) => {
+            const metric = StockDetailNewsTab.News_v2;
             metric.httpDuration.add(response.timings.duration);
             if (response.status === 200 || response.status === 201) {
                 metric.errorRate.add(false);
@@ -664,7 +728,7 @@ export function handleSummary(data) {
         console.log(`[${dateStr}_${timeStr}] Starting report generation...`);
         
         if(`${__ENV.RUNBY}`=='Manual'){
-            const htmlPath = `../../Report/Growin_AI_Summarizer/BP001/Manual/${__ENV.RUNBY}_Detail_BP001_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../Report/Growin_AI_Summarizer/BP008/Manual/${__ENV.RUNBY}_Detail_BP008_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -672,7 +736,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if(`${__ENV.RUNBY}`=='Regression'){
-            const htmlPath = `../../Report/Growin_AI_Summarizer/BP001/Regression/${__ENV.RUNBY}_Detail_BP001_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../Report/Growin_AI_Summarizer/BP008/Regression/${__ENV.RUNBY}_Detail_BP008_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {

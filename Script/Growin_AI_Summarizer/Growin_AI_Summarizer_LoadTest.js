@@ -1,22 +1,21 @@
 // Command
 // Run Multiple BP
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=2h -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Community/Web/LoadTest/Manual_LoadTest_1120_2220.html
+// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=2h -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_AI_Summarizer/LoadTest/Manual_LoadTest_1120_2220.html
 
 // Run Single BP
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP001 --out dashboard=export=../../../Report/Growin_Community/Web/BP001/Manual/Manual_DryRun_1203_2000_BP001_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP002 --out dashboard=export=../../../Report/Growin_Community/Web/BP002/Manual/Manual_DryRun_1203_2001_BP002_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP003 --out dashboard=export=../../../Report/Growin_Community/Web/BP003/Manual/Manual_DryRun_1203_2002_BP003_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=25 -e DURATION=5m -e NUMSTART=2051 -e SCENARIO=BP004 --out dashboard=export=../../../Report/Growin_Community/Web/BP004/Manual/Manual_DryRun_1203_2003_BP004_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP005 --out dashboard=export=../../../Report/Growin_Community/Web/BP005/Manual/Manual_DryRun_1203_1953_BP005_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP006 --out dashboard=export=../../../Report/Growin_Community/Web/BP006/Manual/Manual_DryRun_1203_1526_BP006_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP007 --out dashboard=export=../../../Report/Growin_Community/Web/BP007/Manual/Manual_DryRun_1203_2009_BP007_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=25 -e DURATION=5m -e NUMSTART=2051 -e SCENARIO=BP008 --out dashboard=export=../../../Report/Growin_Community/Web/BP008/Manual/Manual_DryRun_1203_2010_BP008_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP009 --out dashboard=export=../../../Report/Growin_Community/Web/BP009/Manual/Manual_DryRun_1203_2015_BP009_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP010 --out dashboard=export=../../../Report/Growin_Community/Web/BP010/Manual/Manual_DryRun_1203_2017_BP010_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=50 -e DURATION=5m -e NUMSTART=2001 -e SCENARIO=BP011 --out dashboard=export=../../../Report/Growin_Community/Web/BP011/Manual/Manual_DryRun_1203_2018_BP011_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP012 --out dashboard=export=../../../Report/Growin_Community/Web/BP012/Manual/Manual_DryRun_1203_2018_BP012_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=25 -e DURATION=5m -e NUMSTART=2051 -e SCENARIO=BP013 --out dashboard=export=../../../Report/Growin_Community/Web/BP013/Manual/Manual_DryRun_1203_2019_BP013_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=50 -e DURATION=5m -e NUMSTART=2001 -e SCENARIO=BP014 --out dashboard=export=../../../Report/Growin_Community/Web/BP014/Manual/Manual_DryRun_1203_2020_BP014_Local.html
+// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP001 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP001/Manual/Manual_DryRun_1201_1104_BP001_Local.html
+// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP002 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP002/Manual/Manual_DryRun_1126_2201_BP002_Local.html
+// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP003 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP003/Manual/Manual_DryRun_1126_2201_BP003_Local.html
+// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP004 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP004/Manual/Manual_DryRun_1126_2202_BP004_Local.html
+// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP005 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP005/Manual/Manual_DryRun_1128_1506_BP005_Local.html
+// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP006 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP006/Manual/Manual_DryRun_1128_1530_BP006_Local.html
+// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP007 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP007/Manual/Manual_DryRun_1126_2208_BP007_Local.html
+// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP008 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP008/Manual/Manual_DryRun_1126_2146_BP008_Local.html
+// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP009 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP009/Manual/Manual_DryRun_1128_1539_BP009_Local.html
+// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP010 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP010/Manual/Manual_DryRun_1126_2150_BP010_Local.html
+// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP011 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP011/Manual/Manual_DryRun_1126_2151_BP011_Local.html
+// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP012 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP012/Manual/Manual_DryRun_1126_2153_BP012_Local.html
+// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP013 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP013/Manual/Manual_DryRun_1126_2156_BP013_Local.html
 
 import { textSummary } from "../../../Helper/textSummary.js";
 import { htmlReport } from '../../../Helper/bundle.js';
@@ -33,28 +32,26 @@ import { BP010 } from "./BP010.js";
 import { BP011 } from "./BP011.js";
 import { BP012 } from "./BP012.js";
 import { BP013 } from "./BP013.js";
-import { BP014 } from "./BP014.js";
 import http from "k6/http";
 import { sleep } from "k6";
 
-export { BP001, BP002, BP003, BP004, BP005, BP006, BP007, BP008, BP009, BP010, BP011, BP012, BP013, BP014 }
+export { BP001, BP002, BP003, BP004, BP005, BP006, BP007, BP008, BP009, BP010, BP011, BP012, BP013 }
 
 // ✅ DEFINISI PERSENTASE USER PER BP
 const BP_USER_PERCENTAGE = {
-    BP001: 40,
-    BP002: 10,
-    BP003: 10,
-    BP004: 0.25,
-    BP005: 5,
-    BP006: 5,
-    BP007: 5,
-    BP008: 0.25,
-    BP009: 9.5,
-    BP010: 10,
-    BP011: 1,
-    BP012: 2,
-    BP013: 1,
-    BP014: 1,
+    BP001: 7.7,
+    BP002: 7.7,
+    BP003: 7.7,
+    BP004: 7.7,
+    BP005: 7.7,
+    BP006: 7.7,
+    BP007: 7.7,
+    BP008: 7.7,
+    BP009: 7.7,
+    BP010: 7.7,
+    BP011: 7.7,
+    BP012: 7.7,
+    BP013: 7.7,
 };
 
 // ✅ Function untuk calculate user distribution
@@ -125,7 +122,7 @@ selectedBPs.forEach(bp => {
 export const options = {
     scenarios: scenarios,
     noConnectionReuse: false,
-    setupTimeout: '3600s', // ✅ Increased for large user counts
+    setupTimeout: '3600s',
     teardownTimeout: '3600s',
     summaryTimeUnit: '3600s',
 }
@@ -291,7 +288,7 @@ export function setup() {
         
         // ✅ FETCH CHANNEL_ID untuk BP ini
         console.log(`\n🔍 Fetching channel_id for ${bp}...`);
-
+        
         // Cari token yang valid untuk BP ini
         let validToken = null;
         for (let i = 1; i <= usersForThisBP; i++) {
@@ -301,7 +298,7 @@ export function setup() {
                 break;
             }
         }
-
+        
         if (validToken) {
             const channelListHeaders = {
                 'Cookie': `ACCESS_TOKEN=${validToken}`,
@@ -312,57 +309,26 @@ export function setup() {
                 'Accept': '*/*',
             };
 
-            // ✅ Step 1: Coba ambil dari joined-by-user dengan filter JOINED
-            let channelListRes = http.get(base_url + '/socialinvesting/api/v1/channel/joined-by-user', { headers: channelListHeaders });
-            
-            let foundChannelId = null;
+            let channelListRes = http.get(base_url + '/socialinvesting/api/v1/channel/joined-by-user', null, { headers: channelListHeaders });
             
             if (channelListRes.status === 200) {
                 try {
                     const channelData = channelListRes.json();
                     if (channelData.data && channelData.data.length > 0) {
-                        // Filter channel dengan join_status = "JOINED"
-                        const joinedChannels = channelData.data.filter(ch => ch.join_status === "JOINED");
-                        
-                        if (joinedChannels.length > 0) {
-                            foundChannelId = joinedChannels[0].channel_id;
-                            console.log(`   ✅ ${bp} found JOINED channel: ${foundChannelId}`);
-                        } else {
-                            console.log(`   ⚠️  ${bp} - No JOINED channels found in joined-by-user, trying get-list...`);
-                        }
+                        channelIds[bp] = channelData.data[0].channel_id;
+                        console.log(`   ✅ ${bp} channel_id: ${channelIds[bp]}`);
                     } else {
-                        console.log(`   ⚠️  ${bp} - Empty response from joined-by-user, trying get-list...`);
+                        console.error(`   ❌ ${bp} - No channels found in response`);
+                        channelIds[bp] = null;
                     }
                 } catch (e) {
-                    console.error(`   ❌ ${bp} - Failed to parse joined-by-user: ${e.message}`);
+                    console.error(`   ❌ ${bp} - Failed to parse channel list: ${e.message}`);
+                    channelIds[bp] = null;
                 }
             } else {
-                console.error(`   ❌ ${bp} - joined-by-user failed (${channelListRes.status}), trying get-list...`);
+                console.error(`   ❌ ${bp} - Failed to get channel list. Status: ${channelListRes.status}`);
+                channelIds[bp] = null;
             }
-            
-            // ✅ Step 2: Fallback ke get-list jika tidak dapat channel dari joined-by-user
-            if (!foundChannelId) {
-                let getListRes = http.get(base_url + '/socialinvesting/api/v1/channel/get-list', { headers: channelListHeaders });
-                
-                if (getListRes.status === 200) {
-                    try {
-                        const listData = getListRes.json();
-                        if (listData.data && listData.data.length > 0) {
-                            foundChannelId = listData.data[0].channel_id;
-                            console.log(`   ✅ ${bp} fallback channel from get-list: ${foundChannelId}`);
-                        } else {
-                            console.error(`   ❌ ${bp} - Empty response from get-list`);
-                        }
-                    } catch (e) {
-                        console.error(`   ❌ ${bp} - Failed to parse get-list: ${e.message}`);
-                    }
-                } else {
-                    console.error(`   ❌ ${bp} - get-list failed (${getListRes.status})`);
-                }
-            }
-            
-            channelIds[bp] = foundChannelId;
-            
         } else {
             console.error(`   ❌ ${bp} - No valid token available to fetch channel_id`);
             channelIds[bp] = null;
@@ -434,7 +400,7 @@ export function handleSummary(data) {
         console.log(`[${dateStr}_${timeStr}] Starting report generation for ${bp_name}...`);
         
         if(`${__ENV.RUNBY}`=='Manual'){
-            const htmlPath = `../../../Report/Growin_Community/Web/${SCENARIO}/Manual/${__ENV.RUNBY}_Detail_${SCENARIO}_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_AI_Summarizer/${SCENARIO}/Manual/${__ENV.RUNBY}_Detail_${SCENARIO}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -442,7 +408,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if(`${__ENV.RUNBY}`=='Regression'){
-            const htmlPath = `../../../Report/Growin_Community/Web/${SCENARIO}/Regression/${__ENV.RUNBY}_Detail_${SCENARIO}_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_AI_Summarizer/${SCENARIO}/Regression/${__ENV.RUNBY}_Detail_${SCENARIO}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -450,7 +416,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if(`${__ENV.RUNBY}`=='LoadTest'){
-            const htmlPath = `../../../Report/Growin_Community/Web/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_AI_Summarizer/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {

@@ -96,10 +96,10 @@ export function BP001(data) {
     // ✅ Ambil channel_id untuk BP ini dari data yang sudah di-fetch di setup()
     const channel_id = data.channelIds ? data.channelIds[bp] : null;
     
-    // if (!channel_id) {
-    //     console.error(`❌ ${email} (${bp}) - No channel_id available, skipping iteration`);
-    //     return;
-    // }
+    if (!channel_id) {
+        console.error(`❌ ${email} (${bp}) - No channel_id available, skipping iteration`);
+        return;
+    }
 
     // Batch 1
     if (token) {
