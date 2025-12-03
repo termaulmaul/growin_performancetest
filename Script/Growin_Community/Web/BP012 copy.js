@@ -7,55 +7,55 @@ import { textSummary } from "../../../Helper/textSummary.js";
 import { SharedArray } from 'k6/data';
 
 // ##READ ME
-//BP007 - Share Portfolio
-//RUN QA : ../../../k6 run BP007_User.js -e RUNBY=Manual -e ENV=QA -e USER=1 -e DURATION=1m -e NUMSTART=98 --out dashboard=export=../../../Report/Growin_Community/BP007/Manual/Manual_DryRun_1103_1518_BP007_Web_User_Local.html
-//RUN INT: ../../../k6 run BP007_User.js -e RUNBY=Manual -e ENV=INT -e USER=58 -e DURATION=10m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Community/BP007/Manual/Manual_DryRun_1023_1656_BP007_Web_User_Local.html
-//RUN STRESS TEST: ../../../k6 run BP007_User.js -e RUNBY=Manual -e ENV=INT -e NUMSTART=0 --out dashboard=export=../../../Report/Growin_Community/BP007/Manual/Manual_DryRun_2021_1128_BP007_Web_User_Local.html
+//BP012 - Share Portfolio
+//RUN QA : ../../../k6 run BP012.js -e RUNBY=Manual -e ENV=QA -e USER=1 -e DURATION=1m -e NUMSTART=16 --out dashboard=export=../../../Report/Growin_Community/Web/BP012/Manual/Manual_DryRun_1112_1059_BP012_Web_Local.html
+//RUN INT: ../../../k6 run BP012.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=10m -e NUMSTART=1 --out dashboard=export=../../../Report/Growin_Community/Web/BP012/Manual/Manual_DryRun_1117_1525_BP012_Web_Local.html
+//RUN STRESS TEST: ../../../k6 run BP012.js -e RUNBY=Manual -e ENV=INT -e NUMSTART=0 --out dashboard=export=../../../Report/Growin_Community/Web/BP012/Manual/Manual_DryRun_2021_1128_BP012_Web_Local.html
 // ITER - type of int, many iteration each vUser
 // USER - type of int, many of vUser
 // NUMSTART - set user starting number example : if 0 the user will be MOSTNG1@guysmail.com
 // ENV options [DEV,QA,IR,DRC,INT]
 
 // Define options for test execution
-// export const options = {
-//     scenarios: {
-//         contacts: {
-//             executor: 'constant-vus',
-//             vus: `${__ENV.USER}`,
-//             duration: `${__ENV.DURATION}`,
-//             gracefulStop: '30s',
-//         },
-//     },
-//     noConnectionReuse: false,
-//     setupTimeout: '120m',
-//     teardownTimeout: '120m',
-//     summaryTimeUnit: '120m',
-// };
-
 export const options = {
     scenarios: {
         contacts: {
-            executor: 'per-vu-iterations',
-            vus: 1,
-            iterations: 1,
-            maxDuration: '1h',
+            executor: 'constant-vus',
+            vus: `${__ENV.USER}`,
+            duration: `${__ENV.DURATION}`,
+            gracefulStop: '30s',
         },
     },
+    noConnectionReuse: false,
+    setupTimeout: '3600s',
+    teardownTimeout: '3600s',
+    summaryTimeUnit: '3600s',
 };
 
-// /portfolio-sharing/share-to-community?portfolio_id=string&template_type=bear-metal&channel_id=string&channel_type=string
+// export const options = {
+//     scenarios: {
+//         contacts: {
+//             executor: 'per-vu-iterations',
+//             vus: 1,
+//             iterations: 1,
+//             maxDuration: '1h',
+//         },
+//     },
+// };
 
-// PortfolioSharing_ShareToCommunity
+// /socialinvesting/api/v1/portfolio-sharing/share-to-community?portfolio_id=string&template_type=bear-metal&channel_id=string&channel_type=string
+
+// Socialinvesting_PortfolioSharing_ShareToCommunity
 
 // Define custom metrics
 const SharePortfolio = {
-    PortfolioSharing_ShareToCommunity: {
-        errorCount: new Counter("error_count_007_01_01_PortfolioSharing_ShareToCommunity"),
-        errorRate: new Rate("error_rate_007_01_01_PortfolioSharing_ShareToCommunity"),
-        httpDuration: new Trend("duration_007_01_01_PortfolioSharing_ShareToCommunity"),
-        httpWaiting: new Trend("waiting_007_01_01_PortfolioSharing_ShareToCommunity"),
-        requestRate: new Counter("rps_007_01_01_PortfolioSharing_ShareToCommunity"),
-        http_reqs: new Counter("sample_007_01_01_PortfolioSharing_ShareToCommunity"),
+    Socialinvesting_PortfolioSharing_ShareToCommunity: {
+        errorCount: new Counter("error_count_012_01_01_Socialinvesting_PortfolioSharing_ShareToCommunity"),
+        errorRate: new Rate("error_rate_012_01_01_Socialinvesting_PortfolioSharing_ShareToCommunity"),
+        httpDuration: new Trend("duration_012_01_01_Socialinvesting_PortfolioSharing_ShareToCommunity"),
+        httpWaiting: new Trend("waiting_012_01_01_Socialinvesting_PortfolioSharing_ShareToCommunity"),
+        requestRate: new Counter("rps_012_01_01_Socialinvesting_PortfolioSharing_ShareToCommunity"),
+        http_reqs: new Counter("sample_012_01_01_Socialinvesting_PortfolioSharing_ShareToCommunity"),
     },
 };
 
@@ -65,7 +65,6 @@ export function setup() {
     const totalUsers = parseInt(`${__ENV.USER}`) || 1;
     const startNum = parseInt(`${__ENV.NUMSTART}`) || 0;
     
-    // Determine base_url
     if(`${__ENV.ENV}`=='DEV'){
         base_url = 'https://dev-api.growin.id';
     } else if ((`${__ENV.ENV}`=='QA')) {
@@ -78,9 +77,8 @@ export function setup() {
 
     const tokens = {};
     
-    console.log(`Starting login for ${totalUsers} users...`);
+    console.log(`Starting login and PIN login for ${totalUsers} users...`);
     
-    // Login untuk semua user sekaligus di setup phase
     for (let i = 1; i <= totalUsers; i++) {
         let email = '';
         let formattedNum = '';
@@ -96,7 +94,7 @@ export function setup() {
             email = 'TESTMON' + formattedNum + '@guysmail.com';
         }
 
-        const payload = JSON.stringify({
+        const loginPayload = JSON.stringify({
             password: 'M@nsek.123',
             email: email,
             recaptcha: '',
@@ -104,51 +102,128 @@ export function setup() {
 
         const headers = {
             // 'Content-Type': 'application/json',
-
+            
             'Content-Type': 'application/json',
             'Accept-Language':'en',
             'Connection':'keep-alive',
             'Accept-Encoding':'gzip, deflate, br',
             'Accept':'*/*',
-            'User-Agent':'PostmanRuntime/7.43.0'
         };
 
-        const res = http.post(base_url + '/auth/api/v1/login', payload, { headers: headers });
+        let res = http.post(base_url + '/auth/api/v1/login', loginPayload, { headers: headers });
+
+        let token = null;
+        let pin_token = null;
 
         if (res.status === 200) {
-            const token = res.json().data.token;
-            tokens[i] = { email: email, token: token };
+            token = res.json().data.token;
             console.log(`User ${i}/${totalUsers} - ${email} Login Success`);
+
+            const pinPayload = JSON.stringify({ value: "123456" });
+            const pinHeaders = { 
+                // 'Cookie': `ACCESS_TOKEN=${token}`
+                // 'Content-Type': 'application/json', 
+
+                'Cookie': `ACCESS_TOKEN=${token}` ,
+                'Content-Type': 'application/json',
+                'Accept-Language':'en',
+                'Connection':'keep-alive',
+                'Accept-Encoding':'gzip, deflate, br',
+                'Accept':'*/*',
+            };
+
+            res = http.post(base_url + '/auth/api/v1/protected/pin-login', pinPayload, { headers: pinHeaders });
+
+            if (res.status === 200) {
+                pin_token = res.json().data.pin_token;
+                console.log(`User ${i}/${totalUsers} - ${email} PIN Login Success`);
+            } else {
+                console.error(`User ${i}/${totalUsers} - ${email} PIN Login Failed - Status: ${res.status}`);
+            }
         } else {
             console.error(`User ${i}/${totalUsers} - ${email} Login Failed - Status: ${res.status}`);
-            tokens[i] = { email: email, token: null };
         }
+
+        tokens[i] = { 
+            email: email, 
+            token: token,
+            pin_token: pin_token
+        };
     }
     
-    console.log(`Login phase completed for ${totalUsers} users`);
+    console.log(`Login and PIN login phase completed for ${totalUsers} users`);
     
     return { base_url: base_url, tokens: tokens };
 }
 
-// MAIN TEST FUNCTION - Runs for each iteration
 export default function (data) {
-    // Get token for this VU
     const vuId = exec.vu.idInTest;
     const userToken = data.tokens[vuId];
     
-    if (!userToken || !userToken.token) {
-        console.error(`VU${vuId} - No valid token available, skipping iteration`);
+    if (!userToken || !userToken.token || !userToken.pin_token) {
+        console.error(`VU${vuId} - No valid token or pin_token available, skipping iteration`);
         return;
     }
     
     const token = userToken.token;
+    const pin_token = userToken.pin_token;
     const email = userToken.email;
     const base_url = data.base_url;
 
+    // Portfolio ID
+    let portfolio_id;
+    const user_Portfolio_Stock_Headers = {
+        // 'Cookie': `ACCESS_TOKEN=${token}`,
+        // 'Content-Type': 'application/json',
+
+        'Cookie': `ACCESS_TOKEN=${token}; PIN_ACCESS_TOKEN=${pin_token}`,
+        'Content-Type': 'application/json',
+        'Accept-Language':'en',
+        'Connection':'keep-alive',
+        'Accept-Encoding':'gzip, deflate, br',
+        'Accept':'*/*',
+    };
+
+    let resUserPortfolioStock = http.get(base_url + `/user/api/protected/v2/portfolio/stock`, { headers: user_Portfolio_Stock_Headers })
+
+    if (resUserPortfolioStock.status === 200) {
+        const UserPortfolioStock = resUserPortfolioStock.json();
+        portfolio_id = UserPortfolioStock.data[0].PortfolioId;
+        
+        console.log(UserPortfolioStock);
+    } else {
+        console.error(`${email} UserPortfolioStock Failed - Status: ${resUserPortfolioStock.status} - Body: ${resUserPortfolioStock.body}`);
+    }
+
+    // Joined by user - Channel ID 
+    let channel_id;
+    const channel_JoinedByUser_Headers = {
+        // 'Cookie': `ACCESS_TOKEN=${token}`,
+        // 'Content-Type': 'application/json',
+
+        'Cookie': `ACCESS_TOKEN=${token}`,
+        'Content-Type': 'application/json',
+        'Accept-Language':'en',
+        'Connection':'keep-alive',
+        'Accept-Encoding':'gzip, deflate, br',
+        'Accept':'*/*',
+    };
+
+    let resChannelJoinedByUser = http.get(base_url + `/socialinvesting/api/v1/channel/joined-by-user`, { headers: channel_JoinedByUser_Headers })
+
+    if (resChannelJoinedByUser.status === 200) {
+        const ChannelJoinedByUser = resChannelJoinedByUser.json();
+        channel_id = ChannelJoinedByUser.data[0].channel_id;
+
+        console.log(ChannelJoinedByUser);
+    } else {
+        console.error(`${email} ChannelJoinedByUser Failed - Status: ${resChannelJoinedByUser.status} - Body: ${resChannelJoinedByUser.body}`);
+    }
+
     // Batch 1
-    if (token) {
+    if (token && portfolio_id && channel_id) {
         const urls = [
-            base_url + `/portfolio-sharing/share-to-community?portfolio_id=string&template_type=bear-metal&channel_id=string&channel_type=string`,
+            base_url + `/socialinvesting/api/v1/portfolio-sharing/share-to-community?portfolio_id=${portfolio_id}&template_type=bear-metal&channel_id=${channel_id}&channel_type=messaging`,
         ];
 
         const stepOneHeaders = {
@@ -170,7 +245,7 @@ export default function (data) {
 
         responses.forEach((response, index) => {
             const metrics = [
-                SharePortfolio.PortfolioSharing_ShareToCommunity
+                SharePortfolio.Socialinvesting_PortfolioSharing_ShareToCommunity,
             ];
 
             const metric = metrics[index];
@@ -180,6 +255,7 @@ export default function (data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
+
                 if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
@@ -219,7 +295,7 @@ export function handleSummary(data) {
         console.log(`[${dateStr}_${timeStr}] Starting report generation...`);
         
         if(`${__ENV.RUNBY}`=='Manual'){
-            const htmlPath = `../../../Report/Growin_Community/BP007/Manual/${__ENV.RUNBY}_Detail_BP007_Web_User_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_Community/Web/BP012/Manual/${__ENV.RUNBY}_Detail_BP012_Web_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -227,7 +303,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if(`${__ENV.RUNBY}`=='Regression'){
-            const htmlPath = `../../../Report/Growin_Community/BP007/Regression/${__ENV.RUNBY}_Detail_BP007_Web_User_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_Community/Web/BP012/Regression/${__ENV.RUNBY}_Detail_BP012_Web_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -235,7 +311,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if(`${__ENV.RUNBY}`=='LoadTest'){
-            const htmlPath = `../../../Report/Growin_Community/BP007/LoadTest/${__ENV.RUNBY}_Detail_BP007_Web_User_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_Community/Web/BP012/LoadTest/${__ENV.RUNBY}_Detail_BP012_Web_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {

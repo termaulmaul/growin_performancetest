@@ -6,7 +6,7 @@ import exec from 'k6/execution';
 
 
 // ✅ EXPORTED FUNCTION - dengan proper VU mapping
-export function BP001(data) {
+export function BP00X(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;
     
@@ -20,12 +20,13 @@ export function BP001(data) {
     const userKey = mapping.userKey;
     const userToken = data.tokens[userKey];
     
-    if (!userToken || !userToken.token) {
-        console.error(`❌ VU${vuId} (User ${userKey}) - No valid token available, skipping iteration`);
+    if (!userToken || !userToken.token || !userToken.pin_token) {
+        console.error(`❌ VU${vuId} (User ${userKey}) - No valid token or pin_token available, skipping iteration`);
         return;
     }
     
     const token = userToken.token;
+    const pin_token = userToken.pin_token;
     const email = userToken.email;
 
     // ... rest of BP001 logic

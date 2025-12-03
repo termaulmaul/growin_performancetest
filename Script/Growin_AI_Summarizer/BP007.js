@@ -16,31 +16,31 @@ import { textSummary } from "../../Helper/textSummary.js";
 // ENV options [DEV,QA,IR,DRC,INT]
 
 // Define options for test execution
-// export const options = {
-//     scenarios: {
-//         contacts: {
-//             executor: 'constant-vus',
-//             vus: `${__ENV.USER}`,
-//             duration: `${__ENV.DURATION}`,
-//             gracefulStop: '30s',
-//         },
-//     },
-//     noConnectionReuse: false,
-//     setupTimeout: '120m',
-//     teardownTimeout: '120m',
-//     summaryTimeUnit: '120m',
-// };
-
 export const options = {
     scenarios: {
         contacts: {
-            executor: 'per-vu-iterations',
-            vus: 1,
-            iterations: 1,
-            maxDuration: '1h',
+            executor: 'constant-vus',
+            vus: `${__ENV.USER}`,
+            duration: `${__ENV.DURATION}`,
+            gracefulStop: '30s',
         },
     },
+    noConnectionReuse: false,
+    setupTimeout: '3600s',
+    teardownTimeout: '3600s',
+    summaryTimeUnit: '3600s',
 };
+
+// export const options = {
+//     scenarios: {
+//         contacts: {
+//             executor: 'per-vu-iterations',
+//             vus: 1,
+//             iterations: 1,
+//             maxDuration: '1h',
+//         },
+//     },
+// };
 
 // /marketdata/api/v1/marketinfo/financial-statements/
 

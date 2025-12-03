@@ -29,9 +29,9 @@ export const options = {
         },
     },
     noConnectionReuse: false,
-    setupTimeout: '120m',
-    teardownTimeout: '120m',
-    summaryTimeUnit: '120m',
+    setupTimeout: '3600s',
+    teardownTimeout: '3600s',
+    summaryTimeUnit: '3600s',
 };
 
 // export const options = {

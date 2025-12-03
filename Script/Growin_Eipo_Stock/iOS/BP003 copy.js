@@ -7,65 +7,75 @@ import { textSummary } from "../../../Helper/textSummary.js";
 import { SharedArray } from 'k6/data';
 
 // ##READ ME
-//BP006 - Community Member
-//RUN QA : ../../../k6 run BP006_Suhu.js -e RUNBY=Manual -e ENV=QA -e USER=1 -e DURATION=1m -e NUMSTART=98 --out dashboard=export=../../../Report/Growin_Community/BP006/Manual/Manual_DryRun_1103_1518_BP006_Web_Suhu_Local.html
-//RUN INT: ../../../k6 run BP006_Suhu.js -e RUNBY=Manual -e ENV=INT -e USER=58 -e DURATION=10m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Community/BP006/Manual/Manual_DryRun_1023_1656_BP006_Web_Suhu_Local.html
-//RUN STRESS TEST: ../../../k6 run BP006_Suhu.js -e RUNBY=Manual -e ENV=INT -e NUMSTART=0 --out dashboard=export=../../../Report/Growin_Community/BP006/Manual/Manual_DryRun_2021_1128_BP006_Web_Suhu_Local.html
+//BP003 - e-IPO Detail Screen
+//RUN QA : ../../../k6 run BP003.js -e RUNBY=Manual -e ENV=QA -e USER=10 -e DURATION=1m -e NUMSTART=98 --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/BP003/Manual/Manual_DryRun_1029_1343_BP003.html
+//RUN INT: ../../../k6 run BP003.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=10m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/BP003/Manual/Manual_DryRun_1031_1545_BP003.html
+//RUN STRESS TEST: ../../k6 run BP003.js -e RUNBY=Manual -e ENV=INT -e NUMSTART=0 --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/BP003/Manual/Manual_DryRun_2021_1128_BP003.html
 // ITER - type of int, many iteration each vUser
 // USER - type of int, many of vUser
 // NUMSTART - set user starting number example : if 0 the user will be MOSTNG1@guysmail.com
 // ENV options [DEV,QA,IR,DRC,INT]
 
 // Define options for test execution
-// export const options = {
-//     scenarios: {
-//         contacts: {
-//             executor: 'constant-vus',
-//             vus: `${__ENV.USER}`,
-//             duration: `${__ENV.DURATION}`,
-//             gracefulStop: '30s',
-//         },
-//     },
-//     noConnectionReuse: false,
-//     setupTimeout: '120m',
-//     teardownTimeout: '120m',
-//     summaryTimeUnit: '120m',
-// };
-
 export const options = {
     scenarios: {
         contacts: {
-            executor: 'per-vu-iterations',
-            vus: 1,
-            iterations: 1,
-            maxDuration: '1h',
+            executor: 'constant-vus',
+            vus: `${__ENV.USER}`,
+            duration: `${__ENV.DURATION}`,
+            gracefulStop: '30s',
         },
     },
+    noConnectionReuse: false,
+    setupTimeout: '3600s',
+    teardownTimeout: '3600s',
+    summaryTimeUnit: '3600s',
 };
 
-// /social/profiles-by-join-status
-// /social/request-kick-member?channel_id=${param.channel_id}
+// export const options = {
+//     scenarios: {
+//         contacts: {
+//             executor: 'per-vu-iterations',
+//             vus: 1,
+//             iterations: 1,
+//             maxDuration: '1h',
+//         },
+//     },
+// };
 
-// Social_ProfilesByJoinStatus
-// Social_RequestKickMember
+// /eipo/pipeline/CRIM/timeline
+// /eipo/investor
+// /eipo/pipeline/CRIM
+
+// Eipo_Pipeline_CRIM_Timeline
+// Eipo_Investor
+// Eipo_Pipeline_CRIM
 
 // Define custom metrics
-const CommunityMember = {
-    Social_ProfilesByJoinStatus: {
-        errorCount: new Counter("error_count_006_01_01_Social_ProfilesByJoinStatus"),
-        errorRate: new Rate("error_rate_006_01_01_Social_ProfilesByJoinStatus"),
-        httpDuration: new Trend("duration_006_01_01_Social_ProfilesByJoinStatus"),
-        httpWaiting: new Trend("waiting_006_01_01_Social_ProfilesByJoinStatus"),
-        requestRate: new Counter("rps_006_01_01_Social_ProfilesByJoinStatus"),
-        http_reqs: new Counter("sample_006_01_01_Social_ProfilesByJoinStatus"),
+const DetailScreen = {
+    Eipo_Pipeline_CRIM_Timeline: {
+        errorCount: new Counter("error_count_003_01_01_Eipo_Pipeline_CRIM_Timeline"),
+        errorRate: new Rate("error_rate_003_01_01_Eipo_Pipeline_CRIM_Timeline"),
+        httpDuration: new Trend("duration_003_01_01_Eipo_Pipeline_CRIM_Timeline"),
+        httpWaiting: new Trend("waiting_003_01_01_Eipo_Pipeline_CRIM_Timeline"),
+        requestRate: new Counter("rps_003_01_01_Eipo_Pipeline_CRIM_Timeline"),
+        http_reqs: new Counter("sample_003_01_01_Eipo_Pipeline_CRIM_Timeline"),
     },
-    Social_RequestKickMember: {
-        errorCount: new Counter("error_count_006_01_02_Social_Social_RequestKickMember"),
-        errorRate: new Rate("error_rate_006_01_02_Social_Social_RequestKickMember"),
-        httpDuration: new Trend("duration_006_01_02_Social_Social_RequestKickMember"),
-        httpWaiting: new Trend("waiting_006_01_02_Social_Social_RequestKickMember"),
-        requestRate: new Counter("rps_006_01_02_Social_Social_RequestKickMember"),
-        http_reqs: new Counter("sample_006_01_02_Social_Social_RequestKickMember"),
+    Eipo_Investor: {
+        errorCount: new Counter("error_count_003_01_02_Eipo_Investor"),
+        errorRate: new Rate("error_rate_003_01_02_Eipo_Investor"),
+        httpDuration: new Trend("duration_003_01_02_Eipo_Investor"),
+        httpWaiting: new Trend("waiting_003_01_02_Eipo_Investor"),
+        requestRate: new Counter("rps_003_01_02_Eipo_Investor"),
+        http_reqs: new Counter("sample_003_01_02_Eipo_Investor"),
+    },
+    Eipo_Pipeline_CRIM: {
+        errorCount: new Counter("error_count_003_01_03_Eipo_Pipeline_CRIM"),
+        errorRate: new Rate("error_rate_003_01_03_Eipo_Pipeline_CRIM"),
+        httpDuration: new Trend("duration_003_01_03_Eipo_Pipeline_CRIM"),
+        httpWaiting: new Trend("waiting_003_01_03_Eipo_Pipeline_CRIM"),
+        requestRate: new Counter("rps_003_01_03_Eipo_Pipeline_CRIM"),
+        http_reqs: new Counter("sample_003_01_03_Eipo_Pipeline_CRIM"),
     },
 };
 
@@ -77,7 +87,7 @@ export function setup() {
     
     // Determine base_url
     if(`${__ENV.ENV}`=='DEV'){
-        base_url = 'https://dev-api.growin.id';
+        base_url = 'https://api-dev.growin.id';
     } else if ((`${__ENV.ENV}`=='QA')) {
         base_url = 'https://api-qa.growin.id';
     } else if (`${__ENV.ENV}`=='DRC') {
@@ -158,11 +168,13 @@ export default function (data) {
     // Batch 1
     if (token) {
         const urls = [
-            base_url + `/social/profiles-by-join-status`,
+            base_url + `/eipo/pipeline/CRIM/timeline`,
+            base_url + `/eipo/investor`,
+            base_url + `/eipo/pipeline/CRIM`,
         ];
 
         const stepOneHeaders = {
-            // 'Cookie': `ACCESS_TOKEN=${token}`,
+            // 'Cookie': `ACCESS_TOKEN=${token}; PIN_ACCESS_TOKEN=${pin_token}`,
             // 'Content-Type': 'application/json',
 
             'Cookie': `ACCESS_TOKEN=${token}`,
@@ -175,12 +187,16 @@ export default function (data) {
 
         const requests = [
             ['GET', urls[0], null, { headers: stepOneHeaders }],
+            ['GET', urls[1], null, { headers: stepOneHeaders }],
+            ['GET', urls[2], null, { headers: stepOneHeaders }],
         ];
         const responses = http.batch(requests);
 
         responses.forEach((response, index) => {
             const metrics = [
-                CommunityMember.Social_ProfilesByJoinStatus
+                DetailScreen.Eipo_Pipeline_CRIM_Timeline,
+                DetailScreen.Eipo_Investor,
+                DetailScreen.Eipo_Pipeline_CRIM,
             ];
 
             const metric = metrics[index];
@@ -229,7 +245,7 @@ export function handleSummary(data) {
         console.log(`[${dateStr}_${timeStr}] Starting report generation...`);
         
         if(`${__ENV.RUNBY}`=='Manual'){
-            const htmlPath = `../../../Report/Growin_Community/BP006/Manual/${__ENV.RUNBY}_Detail_BP006_Web_Suhu_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_Eipo_Stock/iOS/BP003/Manual/${__ENV.RUNBY}_Detail_BP003_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -237,7 +253,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if(`${__ENV.RUNBY}`=='Regression'){
-            const htmlPath = `../../../Report/Growin_Community/BP006/Regression/${__ENV.RUNBY}_Detail_BP006_Web_Suhu_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_Eipo_Stock/iOS/BP003/Regression/${__ENV.RUNBY}_Detail_BP003_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -245,7 +261,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if(`${__ENV.RUNBY}`=='LoadTest'){
-            const htmlPath = `../../../Report/Growin_Community/BP006/LoadTest/${__ENV.RUNBY}_Detail_BP006_Web_Suhu_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_Eipo_Stock/iOS/BP003/LoadTest/${__ENV.RUNBY}_Detail_BP003_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {

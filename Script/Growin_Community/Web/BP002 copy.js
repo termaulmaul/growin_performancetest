@@ -8,40 +8,40 @@ import { SharedArray } from 'k6/data';
 
 // ##READ ME
 //BP002 - Chat Room
-//RUN QA : ../../../k6 run BP002_Admin.js -e RUNBY=Manual -e ENV=QA -e USER=1 -e DURATION=1m -e NUMSTART=75 --out dashboard=export=../../../Report/Growin_Community/BP002/Manual/Manual_DryRun_1103_1631_BP002_Web_Admin_Local.html
-//RUN INT: ../../../k6 run BP002_Admin.js -e RUNBY=Manual -e ENV=INT -e USER=58 -e DURATION=10m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Community/BP002/Manual/Manual_DryRun_1023_1656_BP002_Web_Admin_Local.html
-//RUN STRESS TEST: ../../../k6 run BP002_Admin.js -e RUNBY=Manual -e ENV=INT -e NUMSTART=0 --out dashboard=export=../../../Report/Growin_Community/BP002/Manual/Manual_DryRun_2021_1128_BP002_Web_Admin_Local.html
+//RUN QA : ../../../k6 run BP002.js -e RUNBY=Manual -e ENV=QA -e USER=1 -e DURATION=1m -e NUMSTART=42 --out dashboard=export=../../../Report/Growin_Community/Web/BP002/Manual/Manual_DryRun_1111_1129_BP002_Web_Local.html
+//RUN INT: ../../../k6 run BP002.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=10m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Community/Web/BP002/Manual/Manual_DryRun_1124_1604_BP002_Web_Local.html
+//RUN STRESS TEST: ../../../k6 run BP002.js -e RUNBY=Manual -e ENV=INT -e NUMSTART=0 --out dashboard=export=../../../Report/Growin_Community/Web/BP002/Manual/Manual_DryRun_2021_1128_BP002_Web_Local.html
 // ITER - type of int, many iteration each vUser
 // USER - type of int, many of vUser
 // NUMSTART - set user starting number example : if 0 the user will be MOSTNG1@guysmail.com
 // ENV options [DEV,QA,IR,DRC,INT]
 
 // Define options for test execution
-// export const options = {
-//     scenarios: {
-//         contacts: {
-//             executor: 'constant-vus',
-//             vus: `${__ENV.USER}`,
-//             duration: `${__ENV.DURATION}`,
-//             gracefulStop: '30s',
-//         },
-//     },
-//     noConnectionReuse: false,
-//     setupTimeout: '120m',
-//     teardownTimeout: '120m',
-//     summaryTimeUnit: '120m',
-// };
-
 export const options = {
     scenarios: {
         contacts: {
-            executor: 'per-vu-iterations',
-            vus: 1,
-            iterations: 1,
-            maxDuration: '1h',
+            executor: 'constant-vus',
+            vus: `${__ENV.USER}`,
+            duration: `${__ENV.DURATION}`,
+            gracefulStop: '30s',
         },
     },
+    noConnectionReuse: false,
+    setupTimeout: '3600s',
+    teardownTimeout: '3600s',
+    summaryTimeUnit: '3600s',
 };
+
+// export const options = {
+//     scenarios: {
+//         contacts: {
+//             executor: 'per-vu-iterations',
+//             vus: 1,
+//             iterations: 1,
+//             maxDuration: '1h',
+//         },
+//     },
+// };
 
 // /socialinvesting/api/v1/channel/joined-by-user
 // https://chat.stream-io-api.com/channels/messaging/f3dbab75-573d-49d2-a573-78b244d39b8a/read?user_id=32622d27-8d7c-4a96-b2de-9eccefcce9ce&connection_id=68f6f874-0a0b-21f1-0200-0000008adca4&api_key=nnp9r257yfpq
@@ -309,7 +309,7 @@ export function handleSummary(data) {
         console.log(`[${dateStr}_${timeStr}] Starting report generation...`);
         
         if(`${__ENV.RUNBY}`=='Manual'){
-            const htmlPath = `../../../Report/Growin_Community/BP002/Manual/${__ENV.RUNBY}_Detail_BP002_Web_Admin_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_Community/Web/BP002/Manual/${__ENV.RUNBY}_Detail_BP002_Web_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -317,7 +317,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if(`${__ENV.RUNBY}`=='Regression'){
-            const htmlPath = `../../../Report/Growin_Community/BP002/Regression/${__ENV.RUNBY}_Detail_BP002_Web_Admin_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_Community/Web/BP002/Regression/${__ENV.RUNBY}_Detail_BP002_Web_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -325,7 +325,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if(`${__ENV.RUNBY}`=='LoadTest'){
-            const htmlPath = `../../../Report/Growin_Community/BP002/LoadTest/${__ENV.RUNBY}_Detail_BP002_Web_Admin_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_Community/Web/BP002/LoadTest/${__ENV.RUNBY}_Detail_BP002_Web_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {

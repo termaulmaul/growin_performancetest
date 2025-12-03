@@ -8,66 +8,42 @@ import { SharedArray } from 'k6/data';
 
 // ##READ ME
 //BP003 - Stock Pick
-//RUN QA : ../../../k6 run BP003_User.js -e RUNBY=Manual -e ENV=QA -e USER=1 -e DURATION=1m -e NUMSTART=75 --out dashboard=export=../../../Report/Growin_Community/BP003/Manual/Manual_DryRun_1103_1639_BP003_Web_User_Local.html
-//RUN INT: ../../../k6 run BP003_User.js -e RUNBY=Manual -e ENV=INT -e USER=58 -e DURATION=10m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Community/BP003/Manual/Manual_DryRun_1023_1656_BP003_Web_User_Local.html
-//RUN STRESS TEST: ../../../k6 run BP003_User.js -e RUNBY=Manual -e ENV=INT -e NUMSTART=0 --out dashboard=export=../../../Report/Growin_Community/BP003/Manual/Manual_DryRun_2021_1128_BP003_Web_User_Local.html
+//RUN QA : ../../../k6 run BP003.js -e RUNBY=Manual -e ENV=QA -e USER=1 -e DURATION=1m -e NUMSTART=75 --out dashboard=export=../../../Report/Growin_Community/Web/BP003/Manual/Manual_DryRun_1110_1048_BP003_Web_Local.html
+//RUN INT: ../../../k6 run BP003.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=15m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Community/Web/BP003/Manual/Manual_DryRun_1125_1024_BP003_Web_Local.html
+//RUN STRESS TEST: ../../../k6 run BP003.js -e RUNBY=Manual -e ENV=INT -e NUMSTART=0 --out dashboard=export=../../../Report/Growin_Community/Web/BP003/Manual/Manual_DryRun_2021_1128_BP003_Web_Local.html
 // ITER - type of int, many iteration each vUser
 // USER - type of int, many of vUser
 // NUMSTART - set user starting number example : if 0 the user will be MOSTNG1@guysmail.com
 // ENV options [DEV,QA,IR,DRC,INT]
 
 // Define options for test execution
-// export const options = {
-//     scenarios: {
-//         contacts: {
-//             executor: 'constant-vus',
-//             vus: `${__ENV.USER}`,
-//             duration: `${__ENV.DURATION}`,
-//             gracefulStop: '30s',
-//         },
-//     },
-//     noConnectionReuse: false,
-//     setupTimeout: '120m',
-//     teardownTimeout: '120m',
-//     summaryTimeUnit: '120m',
-// };
-
 export const options = {
     scenarios: {
         contacts: {
-            executor: 'per-vu-iterations',
-            vus: 1,
-            iterations: 1,
-            maxDuration: '1h',
+            executor: 'constant-vus',
+            vus: `${__ENV.USER}`,
+            duration: `${__ENV.DURATION}`,
+            gracefulStop: '30s',
         },
     },
+    noConnectionReuse: false,
+    setupTimeout: '3600s',
+    teardownTimeout: '3600s',
+    summaryTimeUnit: '3600s',
 };
 
-// /socialinvesting/api/v1/stock-pick?channel_id=f3dbab75-573d-49d2-a573-78b244d39b8a&page=1&limit=10
-// /search/query-social-investing
+// export const options = {
+//     scenarios: {
+//         contacts: {
+//             executor: 'per-vu-iterations',
+//             vus: 1,
+//             iterations: 1,
+//             maxDuration: '1h',
+//         },
+//     },
+// };
 
-// Socialinvesting_StockPick
-// Search_QuerySocialInvesting
 
-// Define custom metrics
-const StockPick = {
-    Socialinvesting_StockPick: {
-        errorCount: new Counter("error_count_003_01_01_Socialinvesting_StockPick"),
-        errorRate: new Rate("error_rate_0003_01_01_Socialinvesting_StockPick"),
-        httpDuration: new Trend("duration_0003_01_01_Socialinvesting_StockPick"),
-        httpWaiting: new Trend("waiting_0003_01_01_Socialinvesting_StockPick"),
-        requestRate: new Counter("rps_0003_01_01_Socialinvesting_StockPick"),
-        http_reqs: new Counter("sample_0003_01_01_Socialinvesting_StockPick"),
-    },
-    Search_QuerySocialInvesting: {
-        errorCount: new Counter("error_count_003_01_02_Search_QuerySocialInvesting"),
-        errorRate: new Rate("error_rate_0003_01_02_Search_QuerySocialInvesting"),
-        httpDuration: new Trend("duration_0003_01_02_Search_QuerySocialInvesting"),
-        httpWaiting: new Trend("waiting_0003_01_02_Search_QuerySocialInvesting"),
-        requestRate: new Counter("rps_0003_01_02_Search_QuerySocialInvesting"),
-        http_reqs: new Counter("sample_0003_01_02_Search_QuerySocialInvesting"),
-    },
-};
 
 // SETUP FUNCTION - Runs once before test starts
 export function setup() {
@@ -75,7 +51,6 @@ export function setup() {
     const totalUsers = parseInt(`${__ENV.USER}`) || 1;
     const startNum = parseInt(`${__ENV.NUMSTART}`) || 0;
     
-    // Determine base_url
     if(`${__ENV.ENV}`=='DEV'){
         base_url = 'https://dev-api.growin.id';
     } else if ((`${__ENV.ENV}`=='QA')) {
@@ -87,11 +62,10 @@ export function setup() {
     }
 
     const tokens = {};
-    const channelIds = {};  // ✅ Store channel_id for each user
+    const channelIds = {}
     
-    console.log(`Starting login for ${totalUsers} users...`);
+    console.log(`Starting login and PIN login for ${totalUsers} users...`);
     
-    // Login untuk semua user sekaligus di setup phase
     for (let i = 1; i <= totalUsers; i++) {
         let email = '';
         let formattedNum = '';
@@ -107,28 +81,51 @@ export function setup() {
             email = 'TESTMON' + formattedNum + '@guysmail.com';
         }
 
-        const payload = JSON.stringify({
+        const loginPayload = JSON.stringify({
             password: 'M@nsek.123',
             email: email,
             recaptcha: '',
         });
 
         const headers = {
+            // 'Content-Type': 'application/json',
+            
             'Content-Type': 'application/json',
             'Accept-Language':'en',
             'Connection':'keep-alive',
             'Accept-Encoding':'gzip, deflate, br',
             'Accept':'*/*',
-            'User-Agent':'PostmanRuntime/7.43.0'
         };
 
-        const res = http.post(base_url + '/auth/api/v1/login', payload, { headers: headers });
+        let res = http.post(base_url + '/auth/api/v1/login', loginPayload, { headers: headers });
+
+        let token = null;
+        let pin_token = null;
+        let channelId = null;
 
         if (res.status === 200) {
-            const token = res.json().data.token;
-            tokens[i] = { email: email, token: token };
+            token = res.json().data.token;
             console.log(`User ${i}/${totalUsers} - ${email} Login Success`);
-            
+
+            const pinPayload = JSON.stringify({ value: "123456" });
+            const pinHeaders = { 
+                'Cookie': `ACCESS_TOKEN=${token}`,
+                'Content-Type': 'application/json',
+                'Accept-Language':'en',
+                'Connection':'keep-alive',
+                'Accept-Encoding':'gzip, deflate, br',
+                'Accept':'*/*',
+            };
+
+            res = http.post(base_url + '/auth/api/v1/protected/pin-login', pinPayload, { headers: pinHeaders });
+
+            if (res.status === 200) {
+                pin_token = res.json().data.pin_token;
+                console.log(`User ${i}/${totalUsers} - ${email} PIN Login Success`);
+            } else {
+                console.error(`User ${i}/${totalUsers} - ${email} PIN Login Failed - Status: ${res.status}`);
+            }
+
             // ✅ GET channel_id after successful login
             const channelHeaders = {
                 'Cookie': `ACCESS_TOKEN=${token}`,
@@ -145,54 +142,58 @@ export function setup() {
             );
             
             if (channelRes.status === 200) {
+                // console.log(`channelRes: ${channelRes.body}`)
                 try {
                     const channelData = channelRes.json();
                     if (channelData.data && channelData.data.length > 0) {
-                        const channelId = channelData.data[0].channel_id;
-                        channelIds[i] = channelId;
+                        channelId = channelData.data[0].channel_id;
                         console.log(`User ${i}/${totalUsers} - ${email} Channel ID: ${channelId}`);
                     } else {
                         console.warn(`User ${i}/${totalUsers} - ${email} No channels found`);
-                        channelIds[i] = null;
                     }
                 } catch (e) {
                     console.error(`User ${i}/${totalUsers} - ${email} Failed to parse channel data: ${e.message}`);
-                    channelIds[i] = null;
                 }
             } else {
                 console.error(`User ${i}/${totalUsers} - ${email} Failed to get channel - Status: ${channelRes.status}`);
-                channelIds[i] = null;
             }
-            
         } else {
             console.error(`User ${i}/${totalUsers} - ${email} Login Failed - Status: ${res.status}`);
-            tokens[i] = { email: email, token: null };
-            channelIds[i] = null;
         }
+
+        // ✅ Store user data in the tokens object
+        tokens[i] = { 
+            email: email, 
+            token: token,
+            pin_token: pin_token
+        };
+        
+        // ✅ Store channel ID separately
+        channelIds[i] = channelId;
     }
     
-    console.log(`Login phase completed for ${totalUsers} users`);
+    console.log(`Login and PIN login phase completed for ${totalUsers} users`);
     
+    // ✅ Return after the loop completes
     return { 
         base_url: base_url, 
         tokens: tokens,
-        channelIds: channelIds  // ✅ Return channel IDs
+        channelIds: channelIds
     };
 }
 
-// MAIN TEST FUNCTION
 export default function (data) {
-    // Get token and channel_id for this VU
     const vuId = exec.vu.idInTest;
     const userToken = data.tokens[vuId];
     const channelId = data.channelIds[vuId];
     
-    if (!userToken || !userToken.token) {
-        console.error(`VU${vuId} - No valid token available, skipping iteration`);
+    if (!userToken || !userToken.token || !userToken.pin_token) {
+        console.error(`VU${vuId} - No valid token or pin_token available, skipping iteration`);
         return;
     }
     
     const token = userToken.token;
+    const pin_token = userToken.pin_token;
     const email = userToken.email;
     const base_url = data.base_url;
 
@@ -250,13 +251,13 @@ export default function (data) {
         });
     }
     
-    // Batch 4
+    // Batch 2
     if (token) {
         const urls = [
-            base_url + `/search/query-social-investing`,
+            base_url + `/search/query-social-investing?keywords=BMRI`,
         ];
 
-        const stepFourHeaders = {
+        const stepTwoHeaders = {
             // 'Cookie': `ACCESS_TOKEN=${token}`,
             // 'Content-Type': 'application/json',
 
@@ -269,7 +270,7 @@ export default function (data) {
         };
 
         const requests = [
-            ['GET', urls[0], null, { headers: stepFourHeaders }],
+            ['GET', urls[0], null, { headers: stepTwoHeaders }],
         ];
         const responses = http.batch(requests);
 
@@ -324,7 +325,7 @@ export function handleSummary(data) {
         console.log(`[${dateStr}_${timeStr}] Starting report generation...`);
         
         if(`${__ENV.RUNBY}`=='Manual'){
-            const htmlPath = `../../../Report/Growin_Community/BP003/Manual/${__ENV.RUNBY}_Detail_BP003_Web_User_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_Community/Web/BP003/Manual/${__ENV.RUNBY}_Detail_BP003_Web_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -332,7 +333,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if(`${__ENV.RUNBY}`=='Regression'){
-            const htmlPath = `../../../Report/Growin_Community/BP003/Regression/${__ENV.RUNBY}_Detail_BP003_Web_User_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_Community/Web/BP003/Regression/${__ENV.RUNBY}_Detail_BP003_Web_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -340,7 +341,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if(`${__ENV.RUNBY}`=='LoadTest'){
-            const htmlPath = `../../../Report/Growin_Community/BP003/LoadTest/${__ENV.RUNBY}_Detail_BP003_Web_User_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_Community/Web/BP003/LoadTest/${__ENV.RUNBY}_Detail_BP003_Web_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {

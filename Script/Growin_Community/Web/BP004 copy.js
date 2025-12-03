@@ -7,110 +7,96 @@ import { textSummary } from "../../../Helper/textSummary.js";
 import { SharedArray } from 'k6/data';
 
 // ##READ ME
-//BP004 - Community Detail
-//RUN QA : ../../../k6 run BP004_User.js -e RUNBY=Manual -e ENV=QA -e USER=1 -e DURATION=1m -e NUMSTART=98 --out dashboard=export=../../../Report/Growin_Community/BP004/Manual/Manual_DryRun_1104_1542_BP004_Web_User_Local.html
-//RUN INT: ../../../k6 run BP004_User.js -e RUNBY=Manual -e ENV=INT -e USER=58 -e DURATION=10m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Community/BP004/Manual/Manual_DryRun_1023_1656_BP004_Web_User_Local.html
-//RUN STRESS TEST: ../../../k6 run BP004_User.js -e RUNBY=Manual -e ENV=INT -e NUMSTART=0 --out dashboard=export=../../../Report/Growin_Community/BP004/Manual/Manual_DryRun_2021_1128_BP004_Web_User_Local.html
+//BP004 - Stock Pick Suhu
+//RUN QA : ../../../k6 run BP004.js -e RUNBY=Manual -e ENV=QA -e USER=1 -e DURATION=1m -e NUMSTART=2051 --out dashboard=export=../../../Report/Growin_Community/Web/BP004/Manual/Manual_DryRun_1111_1029_BP004_Web_Local.html
+//RUN INT: ../../../k6 run BP004.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=2051 --out dashboard=export=../../../Report/Growin_Community/Web/BP004/Manual/Manual_DryRun_1124_1605_BP004_Web_Local.html
+//RUN STRESS TEST: ../../../k6 run BP004.js -e RUNBY=Manual -e ENV=INT -e NUMSTART=0 --out dashboard=export=../../../Report/Growin_Community/Web/BP004/Manual/Manual_DryRun_2021_1128_BP004_Web_Local.html
 // ITER - type of int, many iteration each vUser
 // USER - type of int, many of vUser
 // NUMSTART - set user starting number example : if 0 the user will be MOSTNG1@guysmail.com
 // ENV options [DEV,QA,IR,DRC,INT]
 
-// Define options for test execution
-// export const options = {
-//     scenarios: {
-//         contacts: {
-//             executor: 'constant-vus',
-//             vus: `${__ENV.USER}`,
-//             duration: `${__ENV.DURATION}`,
-//             gracefulStop: '30s',
-//         },
-//     },
-//     noConnectionReuse: false,
-//     setupTimeout: '120m',
-//     teardownTimeout: '120m',
-//     summaryTimeUnit: '120m',
-// };
-
+// // Define options for test execution
 export const options = {
     scenarios: {
         contacts: {
-            executor: 'per-vu-iterations',
-            vus: 1,
-            iterations: 1,
-            maxDuration: '1h',
+            executor: 'constant-vus',
+            vus: `${__ENV.USER}`,
+            duration: `${__ENV.DURATION}`,
+            gracefulStop: '30s',
         },
     },
+    noConnectionReuse: false,
+    setupTimeout: '3600s',
+    teardownTimeout: '3600s',
+    summaryTimeUnit: '3600s',
 };
 
-// /socialinvesting/api/v1/channel/get-profile?channel_id={channel_id}
-// /socialinvesting/api/v1/community-profile/get-profile
-// /socialinvesting/api/v1/channel/joined-by-user
-// /socialinvesting/api/v1/social/switch
-// /socialinvesting/api/v1/social/join
-// /socialinvesting/api/v1/social/leave
+// export const options = {
+//     scenarios: {
+//         contacts: {
+//             executor: 'per-vu-iterations',
+//             vus: 1,
+//             iterations: 1,
+//             maxDuration: '1h',
+//         },
+//     },
+// };
 
-// Socialinvesting_Channel_GetProfile
-// Socialinvesting_CommunityProfile_GetProfile
-// Socialinvesting_Channel_JoinedByUser
-// Socialinvesting_Social_Switch
-// Socialinvesting_Social_Join
-// Socialinvesting_Social_Leave
+// /socialinvesting/api/v1/stock-pick?channel_id=f3dbab75-573d-49d2-a573-78b244d39b8a&page=1&limit=10
+// /socialinvesting/api/v1/create-stock-pick
+// /socialinvesting/api/v1/stock-pick?id={id}
+// /search/query-social-investing
+
+// Socialinvesting_StockPick
+// Socialinvesting_CreateStockPick
+// Socialinvesting_StockPickID
+// Search_QuerySocialInvesting
 
 // Define custom metrics
-const CommunityDetail = {
-    Socialinvesting_Channel_GetProfile: {
-        errorCount: new Counter("error_count_004_01_01_Socialinvesting_Channel_GetProfile"),
-        errorRate: new Rate("error_rate_004_01_01_Socialinvesting_Channel_GetProfile"),
-        httpDuration: new Trend("duration_004_01_01_Socialinvesting_Channel_GetProfile"),
-        httpWaiting: new Trend("waiting_004_01_01_Socialinvesting_Channel_GetProfile"),
-        requestRate: new Counter("rps_004_01_01_Socialinvesting_Channel_GetProfile"),
-        http_reqs: new Counter("sample_004_01_01_Socialinvesting_Channel_GetProfile"),
+const StockPick = {
+    Socialinvesting_StockPick: {
+        errorCount: new Counter("error_count_004_01_01_Socialinvesting_StockPick"),
+        errorRate: new Rate("error_rate_004_01_01_Socialinvesting_StockPick"),
+        httpDuration: new Trend("duration_004_01_01_Socialinvesting_StockPick"),
+        httpWaiting: new Trend("waiting_004_01_01_Socialinvesting_StockPick"),
+        requestRate: new Counter("rps_004_01_01_Socialinvesting_StockPick"),
+        http_reqs: new Counter("sample_004_01_01_Socialinvesting_StockPick"),
     },
-    Socialinvesting_CommunityProfile_GetProfile: {
-        errorCount: new Counter("error_count_004_01_02_Socialinvesting_CommunityProfile_GetProfile"),
-        errorRate: new Rate("error_rate_004_01_02_Socialinvesting_CommunityProfile_GetProfile"),
-        httpDuration: new Trend("duration_004_01_02_Socialinvesting_CommunityProfile_GetProfile"),
-        httpWaiting: new Trend("waiting_004_01_02_Socialinvesting_CommunityProfile_GetProfile"),
-        requestRate: new Counter("rps_004_01_02_Socialinvesting_CommunityProfile_GetProfile"),
-        http_reqs: new Counter("sample_004_01_02_Socialinvesting_CommunityProfile_GetProfile"),
+    Socialinvesting_CreateStockPick: {
+        errorCount: new Counter("error_count_004_01_02_Socialinvesting_CreateStockPick"),
+        errorRate: new Rate("error_rate_004_01_02_Socialinvesting_CreateStockPick"),
+        httpDuration: new Trend("duration_004_01_02_Socialinvesting_CreateStockPick"),
+        httpWaiting: new Trend("waiting_004_01_02_Socialinvesting_CreateStockPick"),
+        requestRate: new Counter("rps_004_01_02_Socialinvesting_CreateStockPick"),
+        http_reqs: new Counter("sample_004_01_02_Socialinvesting_CreateStockPick"),
     },
-    Socialinvesting_Channel_JoinedByUser: {
-        errorCount: new Counter("error_count_004_01_03_Socialinvesting_Channel_JoinedByUser"),
-        errorRate: new Rate("error_rate_004_01_03_Socialinvesting_Channel_JoinedByUser"),
-        httpDuration: new Trend("duration_004_01_03_Socialinvesting_Channel_JoinedByUser"),
-        httpWaiting: new Trend("waiting_004_01_03_Socialinvesting_Channel_JoinedByUser"),
-        requestRate: new Counter("rps_004_01_03_Socialinvesting_Channel_JoinedByUser"),
-        http_reqs: new Counter("sample_004_01_03_Socialinvesting_Channel_JoinedByUser"),
+    Socialinvesting_StockPickID: {
+        errorCount: new Counter("error_count_004_01_03_Socialinvesting_StockPickID"),
+        errorRate: new Rate("error_rate_004_01_03_Socialinvesting_StockPickID"),
+        httpDuration: new Trend("duration_004_01_03_Socialinvesting_StockPickID"),
+        httpWaiting: new Trend("waiting_004_01_03_Socialinvesting_StockPickID"),
+        requestRate: new Counter("rps_004_01_03_Socialinvesting_StockPickID"),
+        http_reqs: new Counter("sample_004_01_03_Socialinvesting_StockPickID"),
     },
-    Socialinvesting_Social_Switch: {
-        errorCount: new Counter("error_count_004_01_04_Socialinvesting_Social_Switch"),
-        errorRate: new Rate("error_rate_004_01_04_Socialinvesting_Social_Switch"),
-        httpDuration: new Trend("duration_004_01_04_Socialinvesting_Social_Switch"),
-        httpWaiting: new Trend("waiting_004_01_04_Socialinvesting_Social_Switch"),
-        requestRate: new Counter("rps_004_01_04_Socialinvesting_Social_Switch"),
-        http_reqs: new Counter("sample_004_01_04_Socialinvesting_Social_Switch"),
-    },
-    Socialinvesting_Social_Join: {
-        errorCount: new Counter("error_count_004_01_05_Socialinvesting_Social_Join"),
-        errorRate: new Rate("error_rate_004_01_05_Socialinvesting_Social_Join"),
-        httpDuration: new Trend("duration_004_01_05_Socialinvesting_Social_Join"),
-        httpWaiting: new Trend("waiting_004_01_05_Socialinvesting_Social_Join"),
-        requestRate: new Counter("rps_004_01_05_Socialinvesting_Social_Join"),
-        http_reqs: new Counter("sample_004_01_05_Socialinvesting_Social_Join"),
-    },
-    Socialinvesting_Social_Leave: {
-        errorCount: new Counter("error_count_004_01_06_Socialinvesting_Social_Leave"),
-        errorRate: new Rate("error_rate_004_01_06_Socialinvesting_Social_Leave"),
-        httpDuration: new Trend("duration_004_01_06_Socialinvesting_Social_Leave"),
-        httpWaiting: new Trend("waiting_004_01_06_Socialinvesting_Social_Leave"),
-        requestRate: new Counter("rps_004_01_06_Socialinvesting_Social_Leave"),
-        http_reqs: new Counter("sample_004_01_06_Socialinvesting_Social_Leave"),
+    Search_QuerySocialInvesting: {
+        errorCount: new Counter("error_count_004_01_04_Search_QuerySocialInvesting"),
+        errorRate: new Rate("error_rate_004_01_04_Search_QuerySocialInvesting"),
+        httpDuration: new Trend("duration_004_01_04_Search_QuerySocialInvesting"),
+        httpWaiting: new Trend("waiting_004_01_04_Search_QuerySocialInvesting"),
+        requestRate: new Counter("rps_004_01_04_Search_QuerySocialInvesting"),
+        http_reqs: new Counter("sample_004_01_04_Search_QuerySocialInvesting"),
     },
 };
 
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 // SETUP FUNCTION - Runs once before test starts
-// SETUP FUNCTION
 export function setup() {
     let base_url = '';
     const totalUsers = parseInt(`${__ENV.USER}`) || 1;
@@ -237,14 +223,19 @@ export default function (data) {
     const email = userToken.email;
     const base_url = data.base_url;
 
+    const currentDate = new Date();
+    const futureDate = new Date(currentDate);
+    futureDate.setDate(futureDate.getDate() + 7);
+
+    const start_date = currentDate.toISOString();
+    const end_date = futureDate.toISOString();
+
     // Batch 1
-    let newChannelId;
+    let id;
     if (token) {
         const urls = [
-            base_url + `/socialinvesting/api/v1/channel/get-profile?channel_id=${channelId}`,
-            base_url + `/socialinvesting/api/v1/community-profile/get-profile`,
-            base_url + `/socialinvesting/api/v1/channel/joined-by-user`,
-        ];
+            base_url + `/socialinvesting/api/v1/stock-pick?channel_id=${channelId}&page=1&limit=10`,
+        ]
 
         const stepOneHeaders = {
             // 'Cookie': `ACCESS_TOKEN=${token}`,
@@ -260,16 +251,12 @@ export default function (data) {
 
         const requests = [
             ['GET', urls[0], null, { headers: stepOneHeaders }],
-            ['GET', urls[1], null, { headers: stepOneHeaders }],
-            ['GET', urls[2], null, { headers: stepOneHeaders }],
         ];
         const responses = http.batch(requests);
 
         responses.forEach((response, index) => {
             const metrics = [
-                CommunityDetail.Socialinvesting_Channel_GetProfile,
-                CommunityDetail.Socialinvesting_CommunityProfile_GetProfile,
-                CommunityDetail.Socialinvesting_Channel_JoinedByUser,
+                StockPick.Socialinvesting_StockPick,
             ];
 
             const metric = metrics[index];
@@ -280,22 +267,16 @@ export default function (data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
 
-                if (index === 0) {
-                    try {
-                        const ChannelGetProfile = response.json();
-                        if (ChannelGetProfile && ChannelGetProfile.data && ChannelGetProfile.data.length > 0) {
-                            // ✅ CORRECTED: id is a string, not an array
-                            newChannelId = ChannelGetProfile.data.channel_id;  // Remove [0]
-                            
-                            if (`${__ENV.ENV}` != 'INT') {
-                                console.log(`Got New Channel ID: ${channel_id}`);
-                            }
-                        } else {
-                            console.error(`No Channel ID available`);
-                        }
-                    } catch (e) {
-                        console.error(`Failed to parse Channel ID: ${e.message}`);
+                const socialinvestingStockPick = response.json();
+                if (socialinvestingStockPick && socialinvestingStockPick.data && socialinvestingStockPick.data.length > 0) {
+                    // ✅ CORRECTED: id is a string, not an array
+                    id = socialinvestingStockPick.data[0].id;
+                    
+                    if (`${__ENV.ENV}` != 'INT') {
+                        console.log(`Got Channel ID: ${id}`);
                     }
+                } else {
+                    console.error(`No Channel ID available`);
                 }
 
                 if (`${__ENV.ENV}` != 'INT') {
@@ -318,14 +299,26 @@ export default function (data) {
     }
 
     // Batch 2
+    console.log(`channelId : ${channelId}`)
     if (token) {
         const urls = [
-            base_url + `/socialinvesting/api/v1/social/switch`,
+            base_url + `/socialinvesting/api/v1/create-stock-pick`,
         ];
 
-        const Socialinvesting_Social_Switch_Payload = JSON.stringify({
-            new_channel_id: newChannelId
-        });
+        const Socialinvesting_CreateStockPick_Payload = JSON.stringify({
+            stock_code:"BBCA",
+            entry_price_min: 5700,
+            entry_price_max: 6100,
+            take_profit:[
+                {start:5800, end:4900},
+                {start:6000, end:6100}
+            ],
+            stop_loss:5000,
+            stock_pick_type:"DT",
+            start_date:start_date,
+            end_date:end_date,
+            channel_id:channelId
+        })
 
         const stepTwoHeaders = {
             // 'Cookie': `ACCESS_TOKEN=${token}`,
@@ -340,13 +333,13 @@ export default function (data) {
         };
 
         const requests = [
-            ['POST', urls[0], Socialinvesting_Social_Switch_Payload, { headers: stepTwoHeaders }],
+            ['POST', urls[0], Socialinvesting_CreateStockPick_Payload, { headers: stepTwoHeaders }],
         ];
         const responses = http.batch(requests);
 
         responses.forEach((response, index) => {
             const metrics = [
-                CommunityDetail.Socialinvesting_Social_Switch,
+                StockPick.Socialinvesting_CreateStockPick,
             ];
 
             const metric = metrics[index];
@@ -369,22 +362,17 @@ export default function (data) {
                 });
                 if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
-                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Request Body: ${requestBody} || Response Body: ${response.body}`);
                 }
             }
         });
     }
-
+    
     // Batch 3
     if (token) {
         const urls = [
-            base_url + `/socialinvesting/api/v1/social/join`,
+            base_url + `/socialinvesting/api/v1/stock-pick?id=${id}`,
         ];
-
-        const Socialinvesting_Social_Join_Payload = JSON.stringify({
-            channel_id: newChannelId, 
-            is_join_community_consent: true
-        });
 
         const stepThreeHeaders = {
             // 'Cookie': `ACCESS_TOKEN=${token}`,
@@ -399,13 +387,13 @@ export default function (data) {
         };
 
         const requests = [
-            ['POST', urls[0], Socialinvesting_Social_Join_Payload, { headers: stepThreeHeaders }],
+            ['DELETE', urls[0], null, { headers: stepThreeHeaders }],
         ];
         const responses = http.batch(requests);
 
         responses.forEach((response, index) => {
             const metrics = [
-                CommunityDetail.Socialinvesting_Social_Join,
+                StockPick.Socialinvesting_StockPickID,
             ];
 
             const metric = metrics[index];
@@ -433,18 +421,14 @@ export default function (data) {
             }
         });
     }
-
+    
     // Batch 4
     if (token) {
         const urls = [
-            base_url + `/socialinvesting/api/v1/social/leave`,
+            base_url + `/search/query-social-investing`,
         ];
 
-        const Socialinvesting_Social_Leave_Payload = JSON.stringify({
-            channel_id: channelId
-        });
-
-        const stepOneHeaders = {
+        const stepFourHeaders = {
             // 'Cookie': `ACCESS_TOKEN=${token}`,
             // 'Content-Type': 'application/json',
 
@@ -457,14 +441,13 @@ export default function (data) {
         };
 
         const requests = [
-            ['POST', urls[0], Socialinvesting_Social_Leave_Payload, { headers: stepOneHeaders }],
+            ['GET', urls[0], null, { headers: stepFourHeaders }],
         ];
         const responses = http.batch(requests);
 
         responses.forEach((response, index) => {
             const metrics = [
-                CommunityDetail.Socialinvesting_Social_Leave,
-                CommunityDetail.Social_GetKickRequest,
+                StockPick.Search_QuerySocialInvesting,
             ];
 
             const metric = metrics[index];
@@ -513,7 +496,7 @@ export function handleSummary(data) {
         console.log(`[${dateStr}_${timeStr}] Starting report generation...`);
         
         if(`${__ENV.RUNBY}`=='Manual'){
-            const htmlPath = `../../../Report/Growin_Community/BP004/Manual/${__ENV.RUNBY}_Detail_BP004_Web_User_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_Community/Web/BP004/Manual/${__ENV.RUNBY}_Detail_BP004_Web_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -521,7 +504,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if(`${__ENV.RUNBY}`=='Regression'){
-            const htmlPath = `../../../Report/Growin_Community/BP004/Regression/${__ENV.RUNBY}_Detail_BP004_Web_User_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_Community/Web/BP004/Regression/${__ENV.RUNBY}_Detail_BP004_Web_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -529,7 +512,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if(`${__ENV.RUNBY}`=='LoadTest'){
-            const htmlPath = `../../../Report/Growin_Community/BP004/LoadTest/${__ENV.RUNBY}_Detail_BP004_Web_User_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_Community/Web/BP004/LoadTest/${__ENV.RUNBY}_Detail_BP004_Web_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {

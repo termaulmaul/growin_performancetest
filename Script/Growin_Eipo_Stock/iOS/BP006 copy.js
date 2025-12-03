@@ -7,55 +7,65 @@ import { textSummary } from "../../../Helper/textSummary.js";
 import { SharedArray } from 'k6/data';
 
 // ##READ ME
-//BP005 - Chat Room History
-//RUN QA : ../../../k6 run BP005_Suhu.js -e RUNBY=Manual -e ENV=QA -e USER=1 -e DURATION=1m -e NUMSTART=98 --out dashboard=export=../../../Report/Growin_Community/BP005/Manual/Manual_DryRun_1103_1518_BP005_Web_Suhu_Local.html
-//RUN INT: ../../../k6 run BP005_Suhu.js -e RUNBY=Manual -e ENV=INT -e USER=58 -e DURATION=10m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Community/BP005/Manual/Manual_DryRun_1023_1656_BP005_Web_Suhu_Local.html
-//RUN STRESS TEST: ../../../k6 run BP005_Suhu.js -e RUNBY=Manual -e ENV=INT -e NUMSTART=0 --out dashboard=export=../../../Report/Growin_Community/BP005/Manual/Manual_DryRun_2021_1128_BP005_Web_Suhu_Local.html
+//BP006 - e-IPO Order Detail Screen
+//RUN QA : ../../../k6 run BP006.js -e RUNBY=Manual -e ENV=QA -e USER=10 -e DURATION=1m -e NUMSTART=98 --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/BP006/Manual/Manual_DryRun_1029_1343_BP006.html
+//RUN INT: ../../../k6 run BP006.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=10m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/BP006/Manual/Manual_DryRun_1031_1547_BP006.html
+//RUN STRESS TEST: ../../k6 run BP006.js -e RUNBY=Manual -e ENV=INT -e NUMSTART=0 --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/BP006/Manual/Manual_DryRun_2021_1128_BP006.html
 // ITER - type of int, many iteration each vUser
 // USER - type of int, many of vUser
 // NUMSTART - set user starting number example : if 0 the user will be MOSTNG1@guysmail.com
 // ENV options [DEV,QA,IR,DRC,INT]
 
 // Define options for test execution
-// export const options = {
-//     scenarios: {
-//         contacts: {
-//             executor: 'constant-vus',
-//             vus: `${__ENV.USER}`,
-//             duration: `${__ENV.DURATION}`,
-//             gracefulStop: '30s',
-//         },
-//     },
-//     noConnectionReuse: false,
-//     setupTimeout: '120m',
-//     teardownTimeout: '120m',
-//     summaryTimeUnit: '120m',
-// };
-
 export const options = {
     scenarios: {
         contacts: {
-            executor: 'per-vu-iterations',
-            vus: 1,
-            iterations: 1,
-            maxDuration: '1h',
+            executor: 'constant-vus',
+            vus: `${__ENV.USER}`,
+            duration: `${__ENV.DURATION}`,
+            gracefulStop: '30s',
         },
     },
+    noConnectionReuse: false,
+    setupTimeout: '3600s',
+    teardownTimeout: '3600s',
+    summaryTimeUnit: '3600s',
 };
 
-// /social/messages-history
+// export const options = {
+//     scenarios: {
+//         contacts: {
+//             executor: 'per-vu-iterations',
+//             vus: 1,
+//             iterations: 1,
+//             maxDuration: '1h',
+//         },
+//     },
+// };
 
-// Social_MessagesHistory
+// /eipo/api/v1/cash-limit
+// /eipo/pipeline/EMSM
+
+// Eipo_CashLimit
+// Eipo_Pipeline_EMSM
 
 // Define custom metrics
-const ChatRoomHistory = {
-    Social_MessagesHistory: {
-        errorCount: new Counter("error_count_005_01_01_Social_MessagesHistory"),
-        errorRate: new Rate("error_rate_005_01_01_Social_MessagesHistory"),
-        httpDuration: new Trend("duration_005_01_01_Social_MessagesHistory"),
-        httpWaiting: new Trend("waiting_005_01_01_Social_MessagesHistory"),
-        requestRate: new Counter("rps_005_01_01_Social_MessagesHistory"),
-        http_reqs: new Counter("sample_005_01_01_Social_MessagesHistory"),
+const OrderDetailScreen = {
+    Eipo_CashLimit: {
+        errorCount: new Counter("error_count_006_01_01_Eipo_CashLimit"),
+        errorRate: new Rate("error_rate_006_01_01_Eipo_CashLimit"),
+        httpDuration: new Trend("duration_006_01_01_Eipo_CashLimit"),
+        httpWaiting: new Trend("waiting_006_01_01_Eipo_CashLimit"),
+        requestRate: new Counter("rps_006_01_01_Eipo_CashLimit"),
+        http_reqs: new Counter("sample_006_01_01_Eipo_CashLimit"),
+    },
+    Eipo_Pipeline_EMSM: {
+        errorCount: new Counter("error_count_006_01_02_Eipo_Pipeline_EMSM"),
+        errorRate: new Rate("error_rate_006_01_02_Eipo_Pipeline_EMSM"),
+        httpDuration: new Trend("duration_006_01_02_Eipo_Pipeline_EMSM"),
+        httpWaiting: new Trend("waiting_006_01_02_Eipo_Pipeline_EMSM"),
+        requestRate: new Counter("rps_006_01_02_Eipo_Pipeline_EMSM"),
+        http_reqs: new Counter("sample_006_01_02_Eipo_Pipeline_EMSM"),
     },
 };
 
@@ -65,7 +75,6 @@ export function setup() {
     const totalUsers = parseInt(`${__ENV.USER}`) || 1;
     const startNum = parseInt(`${__ENV.NUMSTART}`) || 0;
     
-    // Determine base_url
     if(`${__ENV.ENV}`=='DEV'){
         base_url = 'https://dev-api.growin.id';
     } else if ((`${__ENV.ENV}`=='QA')) {
@@ -78,9 +87,8 @@ export function setup() {
 
     const tokens = {};
     
-    console.log(`Starting login for ${totalUsers} users...`);
+    console.log(`Starting login and PIN login for ${totalUsers} users...`);
     
-    // Login untuk semua user sekaligus di setup phase
     for (let i = 1; i <= totalUsers; i++) {
         let email = '';
         let formattedNum = '';
@@ -96,7 +104,7 @@ export function setup() {
             email = 'TESTMON' + formattedNum + '@guysmail.com';
         }
 
-        const payload = JSON.stringify({
+        const loginPayload = JSON.stringify({
             password: 'M@nsek.123',
             email: email,
             recaptcha: '',
@@ -104,57 +112,82 @@ export function setup() {
 
         const headers = {
             // 'Content-Type': 'application/json',
-
+            
             'Content-Type': 'application/json',
             'Accept-Language':'en',
             'Connection':'keep-alive',
             'Accept-Encoding':'gzip, deflate, br',
             'Accept':'*/*',
-            'User-Agent':'PostmanRuntime/7.43.0'
         };
 
-        const res = http.post(base_url + '/auth/api/v1/login', payload, { headers: headers });
+        let res = http.post(base_url + '/auth/api/v1/login', loginPayload, { headers: headers });
+
+        let token = null;
+        let pin_token = null;
 
         if (res.status === 200) {
-            const token = res.json().data.token;
-            tokens[i] = { email: email, token: token };
+            token = res.json().data.token;
             console.log(`User ${i}/${totalUsers} - ${email} Login Success`);
+
+            const pinPayload = JSON.stringify({ value: "123456" });
+            const pinHeaders = { 
+                // 'Cookie': `ACCESS_TOKEN=${token}`
+                // 'Content-Type': 'application/json', 
+
+                'Cookie': `ACCESS_TOKEN=${token}` ,
+                'Content-Type': 'application/json',
+                'Accept-Language':'en',
+                'Connection':'keep-alive',
+                'Accept-Encoding':'gzip, deflate, br',
+                'Accept':'*/*',
+            };
+
+            res = http.post(base_url + '/auth/api/v1/protected/pin-login', pinPayload, { headers: pinHeaders });
+
+            if (res.status === 200) {
+                pin_token = res.json().data.pin_token;
+                console.log(`User ${i}/${totalUsers} - ${email} PIN Login Success`);
+            } else {
+                console.error(`User ${i}/${totalUsers} - ${email} PIN Login Failed - Status: ${res.status}`);
+            }
         } else {
             console.error(`User ${i}/${totalUsers} - ${email} Login Failed - Status: ${res.status}`);
-            tokens[i] = { email: email, token: null };
         }
+
+        tokens[i] = { 
+            email: email, 
+            token: token,
+            pin_token: pin_token
+        };
     }
     
-    console.log(`Login phase completed for ${totalUsers} users`);
+    console.log(`Login and PIN login phase completed for ${totalUsers} users`);
     
     return { base_url: base_url, tokens: tokens };
 }
 
-// MAIN TEST FUNCTION - Runs for each iteration
 export default function (data) {
-    // Get token for this VU
     const vuId = exec.vu.idInTest;
     const userToken = data.tokens[vuId];
     
-    if (!userToken || !userToken.token) {
-        console.error(`VU${vuId} - No valid token available, skipping iteration`);
+    if (!userToken || !userToken.token || !userToken.pin_token) {
+        console.error(`VU${vuId} - No valid token or pin_token available, skipping iteration`);
         return;
     }
     
     const token = userToken.token;
+    const pin_token = userToken.pin_token;
     const email = userToken.email;
     const base_url = data.base_url;
 
     // Batch 1
     if (token) {
         const urls = [
-            base_url + `/social/messages-history`,
+            base_url + `/eipo/api/v1/cash-limit`,
+            base_url + `/eipo/pipeline/EMSM`,
         ];
 
         const stepOneHeaders = {
-            // 'Cookie': `ACCESS_TOKEN=${token}`,
-            // 'Content-Type': 'application/json',
-
             'Cookie': `ACCESS_TOKEN=${token}`,
             'Content-Type': 'application/json',
             'Accept-Language':'en',
@@ -165,12 +198,14 @@ export default function (data) {
 
         const requests = [
             ['GET', urls[0], null, { headers: stepOneHeaders }],
+            ['GET', urls[1], null, { headers: stepOneHeaders }],
         ];
         const responses = http.batch(requests);
 
         responses.forEach((response, index) => {
             const metrics = [
-                ChatRoomHistory.Social_MessagesHistory
+                OrderDetailScreen.Eipo_CashLimit,
+                OrderDetailScreen.Eipo_Pipeline_EMSM
             ];
 
             const metric = metrics[index];
@@ -219,7 +254,7 @@ export function handleSummary(data) {
         console.log(`[${dateStr}_${timeStr}] Starting report generation...`);
         
         if(`${__ENV.RUNBY}`=='Manual'){
-            const htmlPath = `../../../Report/Growin_Community/BP005/Manual/${__ENV.RUNBY}_Detail_BP005_Web_Suhu_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_Eipo_Stock/iOS/BP006/Manual/${__ENV.RUNBY}_Detail_BP006_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -227,7 +262,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if(`${__ENV.RUNBY}`=='Regression'){
-            const htmlPath = `../../../Report/Growin_Community/BP005/Regression/${__ENV.RUNBY}_Detail_BP005_Web_Suhu_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_Eipo_Stock/iOS/BP006/Regression/${__ENV.RUNBY}_Detail_BP006_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -235,7 +270,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if(`${__ENV.RUNBY}`=='LoadTest'){
-            const htmlPath = `../../../Report/Growin_Community/BP005/LoadTest/${__ENV.RUNBY}_Detail_BP005_Web_Suhu_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_Eipo_Stock/iOS/BP006/LoadTest/${__ENV.RUNBY}_Detail_BP006_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {

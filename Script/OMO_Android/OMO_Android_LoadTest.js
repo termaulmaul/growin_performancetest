@@ -1,6 +1,6 @@
 // Command
 // Run Multiple BP
-// ../../k6 run OMO_Android_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=280 -e DURATION=30s -e NUMSTART=101 --out dashboard=export=../../Report/OMO_Android/LoadTest/Manual_LoadTest_1107_2310.html
+// ../../k6 run OMO_Android_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=280 -e DURATION=2h -e NUMSTART=101 --out dashboard=export=../../Report/OMO_Android/LoadTest/Manual_LoadTest_1120_2003.html
 
 // Run Single BP
 // ../../k6 run OMO_Android_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=316 -e DURATION=30s -e NUMSTART=101 --out dashboard=export=../../Report/OMO_Android/BP001/Manual/Manual_LoadTest_1107_1731.html
@@ -99,7 +99,11 @@ selectedBPs.forEach(bp => {
 
 export const options = {
     scenarios: scenarios,
+    noConnectionReuse: false,
     setupTimeout: '2h', // ✅ Increased for large user counts
+    teardownTimeout: '2h',
+    summaryTimeUnit: '2h',
+    timeout: '5m',
 }
 
 function getBaseUrl() {

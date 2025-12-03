@@ -191,11 +191,11 @@ export default function (data) {
 
         responses.forEach((response, index) => {
             if (response.status === 200) {
-                if (`${__ENV.ENV}` != 'TEST') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
-                if (`${__ENV.ENV}` != 'TEST') {
+                if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
                     console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
                 }
@@ -220,16 +220,16 @@ export default function (data) {
                 stock_code = selectedStock.stock_code;
                 last_price = selectedStock.last_price;
                 
-                if (`${__ENV.ENV}` != 'TEST') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`VU${vuId} Selected Stock - portfolio_id: ${portfolio_id}, stock_code: ${stock_code}`);
                 }
             } else {
-                if (`${__ENV.ENV}` != 'TEST') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.error(`VU${vuId} ${email} No stock found with share >= 100`);
                 }
             }
         } else {
-            if (`${__ENV.ENV}` != 'TEST') {
+            if (`${__ENV.ENV}` != 'INT') {
                 console.error(`VU${vuId} ${email} Failed to get eligible asset || Status: ${res.status}`);
             }
         }
@@ -278,7 +278,7 @@ export default function (data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                if (`${__ENV.ENV}` != 'TEST') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`VU${vuId} ${email} SUCCESS ${urls[index]}`);
                 }
             } else {
@@ -289,7 +289,7 @@ export default function (data) {
                 check(response, {
                     [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
                 });
-                if (`${__ENV.ENV}` != 'TEST') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.error(`VU${vuId} ${email} ERROR ${urls[index]} || Status: ${response.status}`);
                 }
             }

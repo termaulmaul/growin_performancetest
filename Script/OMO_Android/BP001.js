@@ -2,7 +2,7 @@ import { check, sleep } from "k6";
 import { Trend, Counter, Rate } from "k6/metrics";
 import http from "k6/http";
 import exec from 'k6/execution';
-a
+
 // Define custom metrics
 const MorePage = {
     Oaofinance_Quota_Status_Margin_1: {
