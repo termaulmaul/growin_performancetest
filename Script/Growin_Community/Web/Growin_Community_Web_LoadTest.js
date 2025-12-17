@@ -3,18 +3,18 @@
 // ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=2h -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Community/Web/LoadTest/Manual_LoadTest_1120_2220.html
 
 // Run Single BP
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP001 --out dashboard=export=../../../Report/Growin_Community/Web/BP001/Manual/Manual_DryRun_1203_2000_BP001_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP002 --out dashboard=export=../../../Report/Growin_Community/Web/BP002/Manual/Manual_DryRun_1203_2001_BP002_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP003 --out dashboard=export=../../../Report/Growin_Community/Web/BP003/Manual/Manual_DryRun_1203_2002_BP003_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=25 -e DURATION=5m -e NUMSTART=2051 -e SCENARIO=BP004 --out dashboard=export=../../../Report/Growin_Community/Web/BP004/Manual/Manual_DryRun_1203_2003_BP004_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP005 --out dashboard=export=../../../Report/Growin_Community/Web/BP005/Manual/Manual_DryRun_1203_1953_BP005_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP006 --out dashboard=export=../../../Report/Growin_Community/Web/BP006/Manual/Manual_DryRun_1203_1526_BP006_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP007 --out dashboard=export=../../../Report/Growin_Community/Web/BP007/Manual/Manual_DryRun_1203_2009_BP007_Local.html
+// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP001 --out dashboard=export=../../../Report/Growin_Community/Web/BP001/Manual/Manual_DryRun_1217_1401_BP001_Local.html
+// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP002 --out dashboard=export=../../../Report/Growin_Community/Web/BP002/Manual/Manual_DryRun_1204_2029_BP002_Local.html
+// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP003 --out dashboard=export=../../../Report/Growin_Community/Web/BP003/Manual/Manual_DryRun_1210_1352_BP003_Local.html
+// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=25 -e DURATION=5m -e NUMSTART=2051 -e SCENARIO=BP004 --out dashboard=export=../../../Report/Growin_Community/Web/BP004/Manual/Manual_DryRun_1216_1420_BP004_Local.html
+// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP005 --out dashboard=export=../../../Report/Growin_Community/Web/BP005/Manual/Manual_DryRun_1216_1433_BP005_Local.html
+// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP006 --out dashboard=export=../../../Report/Growin_Community/Web/BP006/Manual/Manual_DryRun_1217_1608_BP006_Local.html
+// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP007 --out dashboard=export=../../../Report/Growin_Community/Web/BP007/Manual/Manual_DryRun_1217_1020_BP007_Local.html
 // ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=25 -e DURATION=5m -e NUMSTART=2051 -e SCENARIO=BP008 --out dashboard=export=../../../Report/Growin_Community/Web/BP008/Manual/Manual_DryRun_1203_2010_BP008_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP009 --out dashboard=export=../../../Report/Growin_Community/Web/BP009/Manual/Manual_DryRun_1203_2015_BP009_Local.html
+// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP009 --out dashboard=export=../../../Report/Growin_Community/Web/BP009/Manual/Manual_DryRun_1204_1642_BP009_Local.html
 // ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP010 --out dashboard=export=../../../Report/Growin_Community/Web/BP010/Manual/Manual_DryRun_1203_2017_BP010_Local.html
 // ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=50 -e DURATION=5m -e NUMSTART=2001 -e SCENARIO=BP011 --out dashboard=export=../../../Report/Growin_Community/Web/BP011/Manual/Manual_DryRun_1203_2018_BP011_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP012 --out dashboard=export=../../../Report/Growin_Community/Web/BP012/Manual/Manual_DryRun_1203_2018_BP012_Local.html
+// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP012 --out dashboard=export=../../../Report/Growin_Community/Web/BP012/Manual/Manual_DryRun_1216_1147_BP012_Local.html
 // ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=25 -e DURATION=5m -e NUMSTART=2051 -e SCENARIO=BP013 --out dashboard=export=../../../Report/Growin_Community/Web/BP013/Manual/Manual_DryRun_1203_2019_BP013_Local.html
 // ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=50 -e DURATION=5m -e NUMSTART=2001 -e SCENARIO=BP014 --out dashboard=export=../../../Report/Growin_Community/Web/BP014/Manual/Manual_DryRun_1203_2020_BP014_Local.html
 
@@ -36,6 +36,7 @@ import { BP013 } from "./BP013.js";
 import { BP014 } from "./BP014.js";
 import http from "k6/http";
 import { sleep } from "k6";
+import { Rate } from "k6/metrics";
 
 export { BP001, BP002, BP003, BP004, BP005, BP006, BP007, BP008, BP009, BP010, BP011, BP012, BP013, BP014 }
 
@@ -114,7 +115,7 @@ selectedBPs.forEach(bp => {
         gracefulStop: '30s',
 
         // executor: 'per-vu-iterations',
-        // vus: 1,
+        // vus: 2000,
         // iterations: 1,
         // maxDuration: '1h',
 
@@ -163,7 +164,7 @@ function getUserCredentials(userNum, bpOffset = 0) {
     return { email: email, password: 'M@nsek.123' };
 }
 
-// ✅ SETUP FUNCTION - SEMUA BP mendapat PIN dan UUID
+// ✅ SETUP FUNCTION - SEMUA BP mendapat PIN
 export function setup() {
     const base_url = getBaseUrl();
     const tokens = {};
@@ -287,85 +288,6 @@ export function setup() {
             if (batchNum < numBatches - 1) {
                 sleep(BATCH_DELAY);
             }
-        }
-        
-        // ✅ FETCH CHANNEL_ID untuk BP ini
-        console.log(`\n🔍 Fetching channel_id for ${bp}...`);
-
-        // Cari token yang valid untuk BP ini
-        let validToken = null;
-        for (let i = 1; i <= usersForThisBP; i++) {
-            const userKey = globalUserOffset + i;
-            if (tokens[userKey] && tokens[userKey].token) {
-                validToken = tokens[userKey].token;
-                break;
-            }
-        }
-
-        if (validToken) {
-            const channelListHeaders = {
-                'Cookie': `ACCESS_TOKEN=${validToken}`,
-                'Content-Type': 'application/json',
-                'Accept-Language': 'en',
-                'Connection': 'keep-alive',
-                'Accept-Encoding': 'gzip, deflate, br',
-                'Accept': '*/*',
-            };
-
-            // ✅ Step 1: Coba ambil dari joined-by-user dengan filter JOINED
-            let channelListRes = http.get(base_url + '/socialinvesting/api/v1/channel/joined-by-user', { headers: channelListHeaders });
-            
-            let foundChannelId = null;
-            
-            if (channelListRes.status === 200) {
-                try {
-                    const channelData = channelListRes.json();
-                    if (channelData.data && channelData.data.length > 0) {
-                        // Filter channel dengan join_status = "JOINED"
-                        const joinedChannels = channelData.data.filter(ch => ch.join_status === "JOINED");
-                        
-                        if (joinedChannels.length > 0) {
-                            foundChannelId = joinedChannels[0].channel_id;
-                            console.log(`   ✅ ${bp} found JOINED channel: ${foundChannelId}`);
-                        } else {
-                            console.log(`   ⚠️  ${bp} - No JOINED channels found in joined-by-user, trying get-list...`);
-                        }
-                    } else {
-                        console.log(`   ⚠️  ${bp} - Empty response from joined-by-user, trying get-list...`);
-                    }
-                } catch (e) {
-                    console.error(`   ❌ ${bp} - Failed to parse joined-by-user: ${e.message}`);
-                }
-            } else {
-                console.error(`   ❌ ${bp} - joined-by-user failed (${channelListRes.status}), trying get-list...`);
-            }
-            
-            // ✅ Step 2: Fallback ke get-list jika tidak dapat channel dari joined-by-user
-            if (!foundChannelId) {
-                let getListRes = http.get(base_url + '/socialinvesting/api/v1/channel/get-list', { headers: channelListHeaders });
-                
-                if (getListRes.status === 200) {
-                    try {
-                        const listData = getListRes.json();
-                        if (listData.data && listData.data.length > 0) {
-                            foundChannelId = listData.data[0].channel_id;
-                            console.log(`   ✅ ${bp} fallback channel from get-list: ${foundChannelId}`);
-                        } else {
-                            console.error(`   ❌ ${bp} - Empty response from get-list`);
-                        }
-                    } catch (e) {
-                        console.error(`   ❌ ${bp} - Failed to parse get-list: ${e.message}`);
-                    }
-                } else {
-                    console.error(`   ❌ ${bp} - get-list failed (${getListRes.status})`);
-                }
-            }
-            
-            channelIds[bp] = foundChannelId;
-            
-        } else {
-            console.error(`   ❌ ${bp} - No valid token available to fetch channel_id`);
-            channelIds[bp] = null;
         }
         
         globalUserOffset += usersForThisBP;

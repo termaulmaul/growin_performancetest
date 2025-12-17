@@ -218,6 +218,5 @@ export function BP005(data) {
             }
         });
     }
-    
-    sleep(0.25);
+    // sleep(0.25);
 }

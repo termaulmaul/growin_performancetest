@@ -2,6 +2,7 @@ import { check, sleep } from "k6";
 import { Trend, Counter, Rate } from "k6/metrics";
 import http from "k6/http";
 import exec from 'k6/execution';
+import { getChannelId, getChannelIdWithOptions, ChannelMetrics } from './channelIDHelper.js';
 
 // /socialinvesting/api/v2/community-profile/login
 // /socialinvesting/api/v1/channel/joined-by-user
@@ -94,12 +95,12 @@ export function BP001(data) {
     const bp = mapping.bp;
 
     // ✅ Ambil channel_id untuk BP ini dari data yang sudah di-fetch di setup()
-    const channel_id = data.channelIds ? data.channelIds[bp] : null;
+    // const channel_id = data.channelIds ? data.channelIds[bp] : null;
     
-    if (!channel_id) {
-        console.error(`❌ ${email} (${bp}) - No channel_id available, skipping iteration`);
-        return;
-    }
+    // if (!channel_id) {
+    //     // console.error(`❌ ${email} (${bp}) - No channel_id available, skipping iteration`);
+    //     return;
+    // }
 
     // Batch 1
     if (token) {
@@ -223,5 +224,5 @@ export function BP001(data) {
             }
         });
     }
-    sleep(0.25);
+    sleep(0.5);
 }

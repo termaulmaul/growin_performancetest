@@ -1,15 +1,15 @@
 // Command
 // Run Multiple BP
-// ../../../k6 run Growin_Eipo_Stock_iOS_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=2h -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/LoadTest/Manual_LoadTest_1120_2220.html
+// ../../../k6 run Growin_Eipo_Stock_iOS_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=2h -e NUMSTART=1001 --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/LoadTest/Manual_LoadTest_1208_1413.html
 
 // Run Single BP
-// ../../../k6 run Growin_Eipo_Stock_iOS_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=63 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP001 --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/BP001/Manual/Manual_DryRun_1117_2059_BP001_Local.html
+// ../../../k6 run Growin_Eipo_Stock_iOS_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=63 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP001 --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/BP001/Manual/Manual_DryRun_1217_1401_BP001_Local.html
 // ../../../k6 run Growin_Eipo_Stock_iOS_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=31 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP002 --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/BP002/Manual/Manual_DryRun_1113_1708_BP002_Local.html
-// ../../../k6 run Growin_Eipo_Stock_iOS_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=94 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP003 --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/BP003/Manual/Manual_DryRun_1120_1341_BP003_Local.html
+// ../../../k6 run Growin_Eipo_Stock_iOS_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=94 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP003 --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/BP003/Manual/Manual_DryRun_1209_1343_BP003_Local.html
 // ../../../k6 run Growin_Eipo_Stock_iOS_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=31 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP004 --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/BP004/Manual/Manual_DryRun_1113_1708_BP004_Local.html
 // ../../../k6 run Growin_Eipo_Stock_iOS_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=63 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP005 --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/BP005/Manual/Manual_DryRun_1113_1708_BP005_Local.html
-// ../../../k6 run Growin_Eipo_Stock_iOS_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=15 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP006 --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/BP006/Manual/Manual_DryRun_1113_1708_BP006_Local.html
-// ../../../k6 run Growin_Eipo_Stock_iOS_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=6 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP007 --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/BP007/Manual/Manual_DryRun_1119_1059_BP007_Local.html
+// ../../../k6 run Growin_Eipo_Stock_iOS_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=15 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP006 --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/BP006/Manual/Manual_DryRun_1209_1406_BP006_Local.html
+// ../../../k6 run Growin_Eipo_Stock_iOS_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP007 --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/BP007/Manual/Manual_DryRun_1208_1048_BP007_Local.html
 // ../../../k6 run Growin_Eipo_Stock_iOS_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP008 --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/BP007/Manual/Manual_DryRun_1119_1127_BP008_Local.html
 // ../../../k6 run Growin_Eipo_Stock_iOS_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP009 --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/BP009/Manual/Manual_DryRun_1120_1347_BP009_Local.html
 
@@ -30,16 +30,28 @@ import { sleep } from "k6";
 export { BP001, BP002, BP003, BP004, BP005, BP006, BP007, BP008, BP009 }
 
 // ✅ DEFINISI PERSENTASE USER PER BP
-const BP_USER_PERCENTAGE = {
-    BP001: 20,
-    BP002: 10,
-    BP003: 30,
-    BP004: 10,
-    BP005: 20,
-    BP006: 5,
-    BP007: 2,
-    BP008: 0.5,
-    BP009: 2.5,
+// const BP_USER_PERCENTAGE = {
+//     BP001: 20.5,
+//     BP002: 10.5,
+//     BP003: 30.5,
+//     BP004: 10.5,
+//     BP005: 20.5,
+//     BP006: 5.5,
+//     BP007: 0.5,
+//     BP008: 1.0,
+//     BP009: 0.5,
+// };
+
+const BP_CONFIG = {
+    BP001: { percentage: 20.5, executor: 'constant-vus' },
+    BP002: { percentage: 10.5, executor: 'constant-vus' },
+    BP003: { percentage: 30.5, executor: 'constant-vus' },
+    BP004: { percentage: 10.5, executor: 'constant-vus' },
+    BP005: { percentage: 20.5, executor: 'constant-arrival-rate', rate: 5 },
+    BP006: { percentage: 5.5, executor: 'constant-vus' },
+    BP007: { percentage: 0.5, executor: 'constant-arrival-rate', rate: 5 },
+    BP008: { percentage: 1.0, executor: 'constant-vus' },
+    BP009: { percentage: 0.5, executor: 'constant-arrival-rate', rate: 5 },
 };
 
 // ✅ Function untuk calculate user distribution
@@ -48,7 +60,7 @@ function calculateUserDistribution(totalUsers, selectedBPs) {
     let totalPercentage = 0;
     
     selectedBPs.forEach(bp => {
-        totalPercentage += BP_USER_PERCENTAGE[bp] || 0;
+        totalPercentage += BP_CONFIG[bp]?.percentage || 0;  // ✅ Access .percentage property
     });
     
     if (totalPercentage === 0) {
@@ -58,7 +70,7 @@ function calculateUserDistribution(totalUsers, selectedBPs) {
     
     let allocatedUsers = 0;
     selectedBPs.forEach((bp, index) => {
-        const percentage = BP_USER_PERCENTAGE[bp];
+        const percentage = BP_CONFIG[bp].percentage;  // ✅ Get the percentage value
         
         if (index === selectedBPs.length - 1) {
             distribution[bp] = totalUsers - allocatedUsers;
@@ -79,35 +91,55 @@ let selectedBPs = [];
 if (SCENARIO) {
     selectedBPs = SCENARIO.split(',').map(s => s.trim());
 } else {
-    selectedBPs = Object.keys(BP_USER_PERCENTAGE);
+    selectedBPs = Object.keys(BP_CONFIG);
 }
 
 const userDistribution = calculateUserDistribution(TOTAL_USER, selectedBPs);
 
 console.log('📊 User Distribution:');
 Object.keys(userDistribution).forEach(bp => {
-    console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
+    console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_CONFIG[bp].percentage}%)`);  // ✅ Fixed
 });
 console.log(`   TOTAL: ${TOTAL_USER} users`);
 
 const scenarios = {};
 selectedBPs.forEach(bp => {
-    scenarios[bp] = {
-        executor: 'constant-vus',
-        vus: userDistribution[bp] || 1,
-        duration: `${__ENV.DURATION}`,
-        gracefulStop: '30s',
-        exec: bp,
-    };
+    const config = BP_CONFIG[bp];
+    const userCount = userDistribution[bp] || 1;
+    
+    if (config.executor === 'constant-arrival-rate') {
+        // ✅ CRITICAL FIX: Ensure maxVUs is ALWAYS greater than preAllocatedVUs
+        const preAllocated = Math.max(2, Math.ceil(userCount * 0.3));  // Minimum 2 VUs
+        const maxVUs = Math.max(preAllocated + 5, userCount);  // At least 5 more than preAllocated
+        
+        scenarios[bp] = {
+            executor: 'constant-arrival-rate',
+            rate: config.rate,
+            timeUnit: '1s',
+            duration: `${__ENV.DURATION}`,
+            preAllocatedVUs: preAllocated,
+            maxVUs: maxVUs,
+            exec: bp,
+        };
+        
+        console.log(`   🔧 ${bp}: preAllocated=${preAllocated}, maxVUs=${maxVUs}, rate=${config.rate}/s`);
+    } else {
+        scenarios[bp] = {
+            executor: 'constant-vus',
+            vus: userCount,
+            duration: `${__ENV.DURATION}`,
+            gracefulStop: '30s',
+            exec: bp,
+        };
+    }
 });
 
 export const options = {
     scenarios: scenarios,
     noConnectionReuse: false,
-    setupTimeout: '2h', // ✅ Increased for large user counts
-    teardownTimeout: '2h',
-    summaryTimeUnit: '2h',
-    timeout: '5m',
+    setupTimeout: '3600s', // ✅ Increased for large user counts
+    teardownTimeout: '3600s',
+    summaryTimeUnit: '3600s',
 }
 
 function getBaseUrl() {

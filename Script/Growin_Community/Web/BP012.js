@@ -2,6 +2,7 @@ import { check, sleep } from "k6";
 import { Trend, Counter, Rate } from "k6/metrics";
 import http from "k6/http";
 import exec from 'k6/execution';
+import { getChannelId, getChannelIdWithOptions, ChannelMetrics } from './channelIDHelper.js';
 
 // /socialinvesting/api/v1/portfolio-sharing/share-to-community?portfolio_id=string&template_type=bear-metal&channel_id=string&channel_type=string
 
@@ -42,14 +43,7 @@ export function BP012(data) {
     const pin_token = userToken.pin_token;
     const email = userToken.email;
     const bp = mapping.bp;
-
-    // ✅ Ambil channel_id untuk BP ini dari data yang sudah di-fetch di setup()
-    const channel_id = data.channelIds ? data.channelIds[bp] : null;
-    
-    if (!channel_id) {
-        console.error(`❌ ${email} (${bp}) - No channel_id available, skipping iteration`);
-        return;
-    }
+    const isIntEnv = `${__ENV.ENV}` === 'INT';
 
     // Portfolio ID
     let portfolio_id;
@@ -70,8 +64,19 @@ export function BP012(data) {
     if (resUserPortfolioStock.status === 200) {
         const UserPortfolioStock = resUserPortfolioStock.json();
         portfolio_id = UserPortfolioStock.data[0].PortfolioId;
+        
+        // console.log(UserPortfolioStock);
     } else {
         console.error(`${email} UserPortfolioStock Failed - Status: ${resUserPortfolioStock.status} - Body: ${resUserPortfolioStock.body}`);
+    }
+
+    const channel_id = getChannelId(base_url, token, bp, isIntEnv);
+
+    // Final safety check sebelum melanjutkan ke API calls
+    if (!channel_id) {
+        console.error(`   ❌ ${email} - Still no channel_id after all fallbacks, aborting iteration`);
+        // SystemMetrics.noChannelFound.add(1);
+        return;
     }
 
     // Batch 1
@@ -119,7 +124,7 @@ export function BP012(data) {
                 metric.requestRate.add(false);
                 metric.http_reqs.add(1);
                 check(response, {
-                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                    [`${email} ERROR ${urls[index]} || Email : ${email} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
                 });
                 if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
@@ -129,5 +134,5 @@ export function BP012(data) {
         });
     }
     
-    sleep(0.25);
+    sleep(0.5);
 }

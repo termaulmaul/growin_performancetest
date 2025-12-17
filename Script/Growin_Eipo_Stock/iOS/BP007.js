@@ -6,12 +6,12 @@ import exec from 'k6/execution';
 // Define custom metrics
 const EditOrderScreen = {
     Eipo_Order: {
-        errorCount: new Counter("error_count_007_01_01_Eipo_Order"),
-        errorRate: new Rate("error_rate_007_01_01_Eipo_Order"),
-        httpDuration: new Trend("duration_007_01_01_Eipo_Order"),
-        httpWaiting: new Trend("waiting_007_01_01_Eipo_Order"),
-        requestRate: new Counter("rps_007_01_01_Eipo_Order"),
-        http_reqs: new Counter("sample_007_01_01_Eipo_Order"),
+        errorCount: new Counter("error_count_007_01_01_Amend_Amend_Eipo_Order"),
+        errorRate: new Rate("error_rate_007_01_01_Amend_Eipo_Order"),
+        httpDuration: new Trend("duration_007_01_01_Amend_Eipo_Order"),
+        httpWaiting: new Trend("waiting_007_01_01_Amend_Eipo_Order"),
+        requestRate: new Counter("rps_007_01_01_Amend_Eipo_Order"),
+        http_reqs: new Counter("sample_007_01_01_Amend_Eipo_Order"),
     },
 };
 
@@ -72,7 +72,7 @@ export function BP007(data) {
             console.error(`User ${email} Order Failed - Status: ${res.status} || Body: ${res.body}`);
         }
     }
-    sleep(0.25);
+    // sleep(0.25);
 
     // Batch 1
     if (token && orderID) {
@@ -106,7 +106,7 @@ export function BP007(data) {
 
             const metric = metrics[index];
             metric.httpDuration.add(response.timings.duration);
-            if (response.status === 200) {
+            if (response.status === 202) {
                 metric.errorRate.add(false);
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
@@ -120,7 +120,7 @@ export function BP007(data) {
                 metric.requestRate.add(false);
                 metric.http_reqs.add(1);
                 check(response, {
-                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 202
                 });
                 if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
@@ -129,6 +129,5 @@ export function BP007(data) {
             }
         });
     }
-    
-    sleep(0.25);
+    // sleep(0.25);
 }

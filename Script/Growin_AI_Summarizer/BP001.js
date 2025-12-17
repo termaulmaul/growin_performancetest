@@ -117,7 +117,7 @@ export function BP008(data) {
     const channel_id = data.channelIds ? data.channelIds[bp] : null;
     
     if (!channel_id) {
-        console.error(`❌ ${email} (${bp}) - No channel_id available, skipping iteration`);
+        // console.error(`❌ ${email} (${bp}) - No channel_id available, skipping iteration`);
         return;
     }
 

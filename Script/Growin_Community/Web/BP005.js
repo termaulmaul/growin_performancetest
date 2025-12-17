@@ -2,6 +2,7 @@ import { check, sleep } from "k6";
 import { Trend, Counter, Rate } from "k6/metrics";
 import http from "k6/http";
 import exec from 'k6/execution';
+import { getChannelId, getChannelIdWithOptions, ChannelMetrics } from './channelIDHelper.js';
 
 // /socialinvesting/api/v1/channel/get-list
 // /socialinvesting/api/v1/channel/get-profile?channel_id={channel_id}
@@ -82,12 +83,14 @@ export function BP005(data) {
     const pin_token = userToken.pin_token;
     const email = userToken.email;
     const bp = mapping.bp;
+    const isIntEnv = `${__ENV.ENV}` === 'INT';
 
-    // ✅ Ambil channel_id untuk BP ini dari data yang sudah di-fetch di setup()
-    const channel_id = data.channelIds ? data.channelIds[bp] : null;
-    
+    const channel_id = getChannelId(base_url, token, bp, isIntEnv);
+
+    // Final safety check sebelum melanjutkan ke API calls
     if (!channel_id) {
-        console.error(`❌ ${email} (${bp}) - No channel_id available, skipping iteration`);
+        console.error(`   ❌ ${email} - Still no channel_id after all fallbacks, aborting iteration`);
+        // SystemMetrics.noChannelFound.add(1);
         return;
     }
 
@@ -128,31 +131,31 @@ export function BP005(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
 
-                // Parse response dan ambil channel_id yang berbeda
-                try {
-                    const responseData = JSON.parse(response.body);
+                // // Parse response dan ambil channel_id yang berbeda
+                // try {
+                //     const responseData = JSON.parse(response.body);
                     
-                    if (responseData.data && Array.isArray(responseData.data)) {
-                        // Filter channel yang channel_id-nya TIDAK sama dengan channel_id yang sudah dimiliki
-                        const differentChannels = responseData.data.filter(
-                            channel => channel.channel_id !== channel_id // channel_id adalah variable yang lu punya sebelumnya
-                        );
+                //     if (responseData.data && Array.isArray(responseData.data)) {
+                //         // Filter channel yang channel_id-nya TIDAK sama dengan channel_id yang sudah dimiliki
+                //         const differentChannels = responseData.data.filter(
+                //             channel => channel.channel_id !== channel_id // channel_id adalah variable yang lu punya sebelumnya
+                //         );
                         
-                        // Ambil channel_id yang pertama dari hasil filter
-                        if (differentChannels.length > 0) {
-                            switchChannelID = differentChannels[0].channel_id;
-                            // console.log(`[BATCH 1] switchChannelID SET TO: ${switchChannelID}`);
-                            // console.log(`[BATCH 1] Type: ${typeof switchChannelID}`);
-                        } else {
-                            console.error(`${email} Tidak ada channel lain selain ${channel_id}`);
-                            switchChannelID = null;
-                            // console.log(`[BATCH 1] switchChannelID SET TO NULL`);
-                        }
-                    }
-                } catch (parseError) {
-                    console.error(`${email} Error parsing response: ${parseError}`);
-                    switchChannelID = null;
-                }
+                //         // Ambil channel_id yang pertama dari hasil filter
+                //         if (differentChannels.length > 0) {
+                //             switchChannelID = differentChannels[0].channel_id;
+                //             // console.log(`[BATCH 1] switchChannelID SET TO: ${switchChannelID}`);
+                //             // console.log(`[BATCH 1] Type: ${typeof switchChannelID}`);
+                //         } else {
+                //             console.error(`${email} Tidak ada channel lain selain ${channel_id}`);
+                //             switchChannelID = null;
+                //             // console.log(`[BATCH 1] switchChannelID SET TO NULL`);
+                //         }
+                //     }
+                // } catch (parseError) {
+                //     console.error(`${email} Error parsing response: ${parseError}`);
+                //     switchChannelID = null;
+                // }
 
                 if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
@@ -209,6 +212,29 @@ export function BP005(data) {
                 CommunityDetailUserTrialSwitch.Socialinvesting_Channel_JoinedByUser,
             ];
 
+            if (index === 2) { // index 2 = joined-by-user endpoint
+                try {
+                    const joinedChannels = response.json();
+                    if (joinedChannels && joinedChannels.data && joinedChannels.data.length > 0) {
+                        // Cari channel pertama dengan join_status === "LEFT"
+                        const leftChannel = joinedChannels.data.find(ch => ch.join_status === "LEFT");
+
+                        if (leftChannel) {
+                            switchChannelID = leftChannel.channel_id;
+                            if (`${__ENV.ENV}` != 'INT') {
+                                console.log(`Got LEFT Channel ID: ${switchChannelID}`);
+                            }
+                        } else {
+                            if (`${__ENV.ENV}` != 'INT') {
+                                console.log(`No channel with LEFT status found`);
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error(`Failed to parse LEFT Channel ID: ${e.message}`);
+                }
+            }
+
             const metric = metrics[index];
             metric.httpDuration.add(response.timings.duration);
             if (response.status === 200) {
@@ -247,6 +273,7 @@ export function BP005(data) {
         // console.log(`[BATCH 3 START] switchChannelID: ${switchChannelID}`);
         const Socialinvesting_Social_Switch_Payload = JSON.stringify({
             new_channel_id: switchChannelID,
+            // new_channel_id: leftChannel,
         });
         
         // console.log(`[BATCH 3] Payload: ${Socialinvesting_Social_Switch_Payload}`);
@@ -280,24 +307,24 @@ export function BP005(data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body} || UUID : ${switchChannelID}`);
                 }
             } else {
                 metric.errorRate.add(true);
                 metric.errorCount.add(1);
                 metric.requestRate.add(false);
                 metric.http_reqs.add(1);
+                // console.log(`${email} to Channel ID : ${switchChannelID}`)
                 check(response, {
-                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                    [`${email} ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body} || UUID : ${switchChannelID}`]: (r) => r.status === 200
                 });
                 if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
-                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody} || UUID : ${switchChannelID}`);
                 }
             }
         });
     }
-    sleep(0.25);
+    sleep(0.5);
 }

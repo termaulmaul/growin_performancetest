@@ -14,12 +14,12 @@ const WithdrawOrderScreen = {
         http_reqs: new Counter("sample_009_01_01_Delete_Eipo_Order"),
     },
     Eipo_Order: {
-        errorCount: new Counter("error_count_009_01_02_Eipo_Order"),
-        errorRate: new Rate("error_rate_009_01_02_Eipo_Order"),
-        httpDuration: new Trend("duration_009_01_02_Eipo_Order"),
-        httpWaiting: new Trend("waiting_009_01_02_Eipo_Order"),
-        requestRate: new Counter("rps_009_01_02_Eipo_Order"),
-        http_reqs: new Counter("sample_009_01_02_Eipo_Order"),
+        errorCount: new Counter("error_count_009_01_02_Eipo_Order_List"),
+        errorRate: new Rate("error_rate_009_01_02_Eipo_Order_List"),
+        httpDuration: new Trend("duration_009_01_02_Eipo_Order_List"),
+        httpWaiting: new Trend("waiting_009_01_02_Eipo_Order_List"),
+        requestRate: new Counter("rps_009_01_02_Eipo_Order_List"),
+        http_reqs: new Counter("sample_009_01_02_Eipo_Order_List"),
     },
 };
 
@@ -79,7 +79,7 @@ export function BP009(data) {
             console.error(`User ${email} Order Failed - Status: ${res.status} || Body: ${res.body}`);
         }
     }
-    sleep(0.25);
+    // sleep(0.25);
 
     // Batch 1 - Delete Order
     if (token && orderID) {
@@ -102,7 +102,7 @@ export function BP009(data) {
             const metric = WithdrawOrderScreen.Delete_Eipo_Order;
 
             metric.httpDuration.add(response.timings.duration);
-            if (response.status === 200) {
+            if (response.status === 202) {
                 metric.errorRate.add(false);
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
@@ -116,7 +116,7 @@ export function BP009(data) {
                 metric.requestRate.add(false);
                 metric.http_reqs.add(1);
                 check(response, {
-                    [`ERROR Delete Order || Status: ${response.status}`]: (r) => r.status === 200
+                    [`ERROR Delete Order || Status: ${response.status}`]: (r) => r.status === 202
                 });
                 if (`${__ENV.ENV}` != 'INT') {
                     console.error(`${email} ERROR Delete Order || Status: ${response.status} || Response Body: ${response.body}`);
@@ -168,6 +168,5 @@ export function BP009(data) {
             }
         });
     }
-    
-    sleep(0.25);
+    // sleep(0.25);
 }

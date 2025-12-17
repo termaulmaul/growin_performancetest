@@ -13,10 +13,10 @@ NUMSTARTADMIN=2001
 NUMSTARTSUHU=2051
 RUNBY="Regression"
 RUNTYPE="DryRun"
-SLEEP=60
+SLEEP=300
 
 pwd
-# cd /home/qa/mostng_performancetest_api/Script/Growin_Community/Web || exit 1
+cd /home/qa/mostng_performancetest_api/Script/Growin_Community/Web || exit 1
 pwd
 
 #BP001
@@ -225,3 +225,4 @@ echo "Current Scenario : BP014"
 
 # Run k6 commands using the captured date and time
 ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY="$RUNBY" -e ENV="$ENV" -e USER="$USERADMIN" -e DURATION="$DURATION" -e NUMSTART="$NUMSTARTADMIN" -e SCENARIO=BP014 --out dashboard=export=../../../Report/Growin_Community/Web/BP014/Regression/"$RUNBY"_"$RUNTYPE"_${dateStr}_${timeStr}_BP014_72.html
+

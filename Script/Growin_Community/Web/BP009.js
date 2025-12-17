@@ -2,6 +2,7 @@ import { check, sleep } from "k6";
 import { Trend, Counter, Rate } from "k6/metrics";
 import http from "k6/http";
 import exec from 'k6/execution';
+import { getChannelId, getChannelIdWithOptions, ChannelMetrics } from './channelIDHelper.js';
 
 // Define custom metrics
 const ChatRoomHistory = {
@@ -38,12 +39,14 @@ export function BP009(data) {
     const pin_token = userToken.pin_token;
     const email = userToken.email;
     const bp = mapping.bp;
+    const isIntEnv = `${__ENV.ENV}` === 'INT';
 
-    // ✅ Ambil channel_id untuk BP ini dari data yang sudah di-fetch di setup()
-    const channel_id = data.channelIds ? data.channelIds[bp] : null;
-    
+    const channel_id = getChannelId(base_url, token, bp, isIntEnv);
+
+    // Final safety check sebelum melanjutkan ke API calls
     if (!channel_id) {
-        console.error(`❌ ${email} (${bp}) - No channel_id available, skipping iteration`);
+        console.error(`   ❌ ${email} - Still no channel_id after all fallbacks, aborting iteration`);
+        // SystemMetrics.noChannelFound.add(1);
         return;
     }
 
@@ -102,5 +105,5 @@ export function BP009(data) {
         });
     }
     
-    sleep(0.25);
+    sleep(0.5);
 }

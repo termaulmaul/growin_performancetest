@@ -2,6 +2,7 @@ import { check, sleep } from "k6";
 import { Trend, Counter, Rate } from "k6/metrics";
 import http from "k6/http";
 import exec from 'k6/execution';
+import { getChannelId, getChannelIdWithOptions, ChannelMetrics } from './channelIDHelper.js';
 
 // /socialinvesting/api/v1/stock-pick?channel_id=f3dbab75-573d-49d2-a573-78b244d39b8a&page=1&limit=10
 // /socialinvesting/api/v1/create-stock-pick
@@ -32,12 +33,12 @@ const StockPick = {
         http_reqs: new Counter("sample_004_01_02_Socialinvesting_CreateStockPick"),
     },
     Socialinvesting_StockPickID: {
-        errorCount: new Counter("error_count_004_01_03_Socialinvesting_StockPickID"),
-        errorRate: new Rate("error_rate_004_01_03_Socialinvesting_StockPickID"),
-        httpDuration: new Trend("duration_004_01_03_Socialinvesting_StockPickID"),
-        httpWaiting: new Trend("waiting_004_01_03_Socialinvesting_StockPickID"),
-        requestRate: new Counter("rps_004_01_03_Socialinvesting_StockPickID"),
-        http_reqs: new Counter("sample_004_01_03_Socialinvesting_StockPickID"),
+        errorCount: new Counter("error_count_004_01_03_Socialinvesting_Delete_StockPickID"),
+        errorRate: new Rate("error_rate_004_01_03_Socialinvesting_Delete_StockPickID"),
+        httpDuration: new Trend("duration_004_01_03_Socialinvesting_Delete_StockPickID"),
+        httpWaiting: new Trend("waiting_004_01_03_Socialinvesting_Delete_StockPickID"),
+        requestRate: new Counter("rps_004_01_03_Socialinvesting_Delete_StockPickID"),
+        http_reqs: new Counter("sample_004_01_03_Socialinvesting_Delete_StockPickID"),
     },
     Search_QuerySocialInvesting: {
         errorCount: new Counter("error_count_004_01_04_Search_QuerySocialInvesting"),
@@ -79,12 +80,14 @@ export function BP004(data) {
     const pin_token = userToken.pin_token;
     const email = userToken.email;
     const bp = mapping.bp;
+    const isIntEnv = `${__ENV.ENV}` === 'INT';
 
-    // ✅ Ambil channel_id untuk BP ini dari data yang sudah di-fetch di setup()
-    const channel_id = data.channelIds ? data.channelIds[bp] : null;
-    
+    const channel_id = getChannelId(base_url, token, bp, isIntEnv);
+
+    // Final safety check sebelum melanjutkan ke API calls
     if (!channel_id) {
-        console.error(`❌ ${email} (${bp}) - No channel_id available, skipping iteration`);
+        console.error(`   ❌ ${email} - Still no channel_id after all fallbacks, aborting iteration`);
+        // SystemMetrics.noChannelFound.add(1);
         return;
     }
 
@@ -95,76 +98,7 @@ export function BP004(data) {
     const start_date = currentDate.toISOString();
     const end_date = futureDate.toISOString();
 
-    // Batch 1
-    let id;
-    if (token) {
-        const urls = [
-            base_url + `/socialinvesting/api/v1/stock-pick?channel_id=${channel_id}&page=1&limit=10`,
-        ]
-
-        const stepOneHeaders = {
-            // 'Cookie': `ACCESS_TOKEN=${token}`,
-            // 'Content-Type': 'application/json',
-
-            'Cookie': `ACCESS_TOKEN=${token}`,
-            'Content-Type': 'application/json',
-            'Accept-Language':'en',
-            'Connection':'keep-alive',
-            'Accept-Encoding':'gzip, deflate, br',
-            'Accept':'*/*',
-        };
-
-        const requests = [
-            ['GET', urls[0], null, { headers: stepOneHeaders }],
-        ];
-        const responses = http.batch(requests);
-
-        responses.forEach((response, index) => {
-            const metrics = [
-                StockPick.Socialinvesting_StockPick,
-            ];
-
-            const metric = metrics[index];
-            metric.httpDuration.add(response.timings.duration);
-            if (response.status === 200) {
-                metric.errorRate.add(false);
-                metric.errorCount.add(0);
-                metric.requestRate.add(true);
-                metric.http_reqs.add(1);
-
-                const socialinvestingStockPick = response.json();
-                if (socialinvestingStockPick && socialinvestingStockPick.data && socialinvestingStockPick.data.length > 0) {
-                    // ✅ CORRECTED: id is a string, not an array
-                    id = socialinvestingStockPick.data[0].id;
-                    
-                    if (`${__ENV.ENV}` != 'INT') {
-                        console.log(`Got Channel ID: ${id}`);
-                    }
-                } else {
-                    console.error(`No Channel ID available`);
-                }
-
-                if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-                }
-            } else {
-                metric.errorRate.add(true);
-                metric.errorCount.add(1);
-                metric.requestRate.add(false);
-                metric.http_reqs.add(1);
-                check(response, {
-                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-                });
-                if (`${__ENV.ENV}` != 'INT') {
-                    const requestBody = requests[index][2];
-                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-                }
-            }
-        });
-    }
-
-    // Batch 2
-    // console.log(`channelId : ${channel_id}`)
+    // Batch 2 - CREATE stock pick
     if (token) {
         const urls = [
             base_url + `/socialinvesting/api/v1/create-stock-pick`,
@@ -186,9 +120,6 @@ export function BP004(data) {
         })
 
         const stepTwoHeaders = {
-            // 'Cookie': `ACCESS_TOKEN=${token}`,
-            // 'Content-Type': 'application/json',
-
             'Cookie': `ACCESS_TOKEN=${token}`,
             'Content-Type': 'application/json',
             'Accept-Language':'en',
@@ -203,17 +134,15 @@ export function BP004(data) {
         const responses = http.batch(requests);
 
         responses.forEach((response, index) => {
-            const metrics = [
-                StockPick.Socialinvesting_CreateStockPick,
-            ];
-
-            const metric = metrics[index];
+            const metric = StockPick.Socialinvesting_CreateStockPick;
             metric.httpDuration.add(response.timings.duration);
+            
             if (response.status === 200) {
                 metric.errorRate.add(false);
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
+                // console.log(`${email} channel_id create stock pick : ${channel_id}`)
                 if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
@@ -229,6 +158,78 @@ export function BP004(data) {
                     const requestBody = requests[index][2];
                     console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Request Body: ${requestBody} || Response Body: ${response.body}`);
                 }
+            }
+        });
+    }
+
+    // ✅ ADD SMALL DELAY - biar CREATE selesai processing di backend
+    // sleep(0.5);
+
+    // Batch 1 - GET stock pick list
+    let id;
+    if (token) {
+        const urls = [
+            base_url + `/socialinvesting/api/v1/stock-pick?channel_id=${channel_id}&page=1&limit=10`,
+        ]
+
+        const stepOneHeaders = {
+            'Cookie': `ACCESS_TOKEN=${token}`,
+            'Content-Type': 'application/json',
+            'Accept-Language':'en',
+            'Connection':'keep-alive',
+            'Accept-Encoding':'gzip, deflate, br',
+            'Accept':'*/*',
+        };
+
+        const requests = [
+            ['GET', urls[0], null, { headers: stepOneHeaders }],
+        ];
+        const responses = http.batch(requests);
+
+        // ✅ EXTRACT ID FIRST
+        const response = responses[0];
+        if (response.status === 200) {
+            try {
+                const socialinvestingStockPick = response.json();
+                if (socialinvestingStockPick?.data?.length > 0) {
+                    const allIds = socialinvestingStockPick.data.map(item => item.id);
+                    // console.log(`${email} ✅ All IDs (${allIds.length}):`, allIds);
+
+                    id = socialinvestingStockPick.data[0].id;
+                    // console.log(`${email} ✅ Got ID Stock Pick: ${id}`);
+                } else {
+                    console.error(`${email} ❌ No stock picks in response - data array is empty`);
+                }
+            } catch (e) {
+                console.error(`${email} ❌ Failed to parse response: ${e.message}`);
+            }
+        } else {
+            console.error(`${email} ❌ Request failed with status: ${response.status} || Body: ${response.body}`);
+        }
+
+        // Process metrics
+        responses.forEach((response, index) => {
+            const metric = StockPick.Socialinvesting_StockPick;
+            metric.httpDuration.add(response.timings.duration);
+            
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                // console.log(`${email} channel_id stock pick : ${channel_id}`)
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status}`]: (r) => r.status === 200
+                });
             }
         });
     }
@@ -340,6 +341,5 @@ export function BP004(data) {
             }
         });
     }
-    
-    sleep(0.25);
+    sleep(0.5);
 }
