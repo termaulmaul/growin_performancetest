@@ -224,5 +224,5 @@ export function BP001(data) {
             }
         });
     }
-    sleep(0.5);
+    sleep(0.25);
 }

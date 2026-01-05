@@ -95,7 +95,7 @@ export function BP005(data) {
     }
 
     // Batch 1
-    let switchChannelID;
+    let switchChannelIDGetList;
     if (token) {
         const urls = [
             base_url + `/socialinvesting/api/v1/channel/get-list`,
@@ -131,31 +131,32 @@ export function BP005(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
 
-                // // Parse response dan ambil channel_id yang berbeda
-                // try {
-                //     const responseData = JSON.parse(response.body);
+                // Parse response dan ambil channel_id yang berbeda
+                try {
+                    const responseData = JSON.parse(response.body);
                     
-                //     if (responseData.data && Array.isArray(responseData.data)) {
-                //         // Filter channel yang channel_id-nya TIDAK sama dengan channel_id yang sudah dimiliki
-                //         const differentChannels = responseData.data.filter(
-                //             channel => channel.channel_id !== channel_id // channel_id adalah variable yang lu punya sebelumnya
-                //         );
+                    if (responseData.data && Array.isArray(responseData.data)) {
+                        // Filter channel yang channel_id-nya TIDAK sama dengan channel_id yang sudah dimiliki
+                        const differentChannels = responseData.data.filter(
+                            channel => channel.channel_id !== channel_id // channel_id adalah variable yang lu punya sebelumnya
+                        );
                         
-                //         // Ambil channel_id yang pertama dari hasil filter
-                //         if (differentChannels.length > 0) {
-                //             switchChannelID = differentChannels[0].channel_id;
-                //             // console.log(`[BATCH 1] switchChannelID SET TO: ${switchChannelID}`);
-                //             // console.log(`[BATCH 1] Type: ${typeof switchChannelID}`);
-                //         } else {
-                //             console.error(`${email} Tidak ada channel lain selain ${channel_id}`);
-                //             switchChannelID = null;
-                //             // console.log(`[BATCH 1] switchChannelID SET TO NULL`);
-                //         }
-                //     }
-                // } catch (parseError) {
-                //     console.error(`${email} Error parsing response: ${parseError}`);
-                //     switchChannelID = null;
-                // }
+                        // Ambil channel_id yang pertama dari hasil filter
+                        if (differentChannels.length > 0) {
+                            switchChannelIDGetList = differentChannels[0].channel_id;
+                            // console.log(`[BATCH 1] switchChannelID SET TO: ${switchChannelID}`);
+                            // console.log(`[BATCH 1] Type: ${typeof switchChannelID}`);
+                        } 
+                        // else {
+                        //     console.error(`${email} Tidak ada channel lain selain ${channel_id}`);
+                        //     switchChannelID = null;
+                        //     // console.log(`[BATCH 1] switchChannelID SET TO NULL`);
+                        // }
+                    }
+                } catch (parseError) {
+                    console.error(`${email} Error parsing response: ${parseError}`);
+                    switchChannelID = null;
+                }
 
                 if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
@@ -177,8 +178,10 @@ export function BP005(data) {
             
         });
     }
+    // console.log(`switchChannelIDGetList : ${switchChannelIDGetList}`)
 
     // Batch 2
+    let switchChannelID;
     if (token) {
         const urls = [
             base_url + `/socialinvesting/api/v1/channel/get-profile?channel_id=${channel_id}`,
@@ -263,8 +266,12 @@ export function BP005(data) {
     }
 
     // Batch 3
-    // console.log(`[BEFORE BATCH 3] switchChannelID: ${switchChannelID}`);
-    // console.log(`[BEFORE BATCH 3] Type: ${typeof switchChannelID}`);
+    // console.log(`[BEFORE CHANGE BATCH 3] switchChannelID: ${switchChannelID}`);
+    if (switchChannelID == null) {
+        switchChannelID = switchChannelIDGetList
+    }
+    // console.log(`[AFTER CHANGE BATCH 3] switchChannelID: ${switchChannelID}`);
+
     if (token) {
         const urls = [
             base_url + `/socialinvesting/api/v1/social/switch`,
@@ -326,5 +333,5 @@ export function BP005(data) {
             }
         });
     }
-    sleep(0.5);
+    sleep(0.25);
 }

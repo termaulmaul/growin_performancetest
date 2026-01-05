@@ -4,13 +4,15 @@
 # ./Growin_Eipo_Stock_Regression.sh
 # Declare variables
 ENV="INT"
-USER=205
+USER=300
 USERADMIN=50
 USERSUHU=25
+USERADMINSUHU=75
 DURATION="15m"
 NUMSTART=101
 NUMSTARTADMIN=2001
 NUMSTARTSUHU=2051
+NUMSTARTADMINSUHU=2001
 RUNBY="Regression"
 RUNTYPE="DryRun"
 SLEEP=300
@@ -134,7 +136,7 @@ echo "Captured Time    : $timeStr"
 echo "Current Scenario : BP008"
 
 # Run k6 commands using the captured date and time
-../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY="$RUNBY" -e ENV="$ENV" -e USER="$USERSUHU" -e DURATION="$DURATION" -e NUMSTART="$NUMSTARTSUHU" -e SCENARIO=BP008 --out dashboard=export=../../../Report/Growin_Community/Web/BP008/Regression/"$RUNBY"_"$RUNTYPE"_${dateStr}_${timeStr}_BP008_72.html
+../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY="$RUNBY" -e ENV="$ENV" -e USER="$USERADMINSUHU" -e DURATION="$DURATION" -e NUMSTART="$NUMSTARTADMINSUHU" -e SCENARIO=BP008 --out dashboard=export=../../../Report/Growin_Community/Web/BP008/Regression/"$RUNBY"_"$RUNTYPE"_${dateStr}_${timeStr}_BP008_72.html
 
 sleep "$SLEEP"
 

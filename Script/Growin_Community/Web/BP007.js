@@ -134,6 +134,5 @@ export function BP007(data) {
             }
         });
     }
-    
     sleep(0.5);
 }

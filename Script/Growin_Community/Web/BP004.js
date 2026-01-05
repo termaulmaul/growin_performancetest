@@ -162,9 +162,6 @@ export function BP004(data) {
         });
     }
 
-    // ✅ ADD SMALL DELAY - biar CREATE selesai processing di backend
-    // sleep(0.5);
-
     // Batch 1 - GET stock pick list
     let id;
     if (token) {

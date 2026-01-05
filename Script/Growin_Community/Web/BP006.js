@@ -325,7 +325,7 @@ export function BP006(data) {
             }
         });
     }
-    sleep(0.5);
+    sleep(0.25);
 
     // Batch 4
     if (token) {
@@ -521,5 +521,5 @@ export function BP006(data) {
             }
         });
     }
-    sleep(0.5);
+    sleep(0.25);
 }
