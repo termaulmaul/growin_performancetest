@@ -3,24 +3,22 @@
 // ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=2h -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_2FA/Web/LoadTest/Manual_LoadTest_1120_2220.html
 
 // Run Single BP
-// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP001 --out dashboard=export=../../../Report/Growin_2FA/Web/BP001/Manual/Manual_DryRun_0105_1545_BP001_Local.html
-// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP002 --out dashboard=export=../../../Report/Growin_2FA/Web/BP002/Manual/Manual_DryRun_0105_1726_BP002_Local.html
-// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP003 --out dashboard=export=../../../Report/Growin_2FA/Web/BP003/Manual/Manual_DryRun_0105_1730_BP003_Local.html
+// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP001 --out dashboard=export=../../../Report/Growin_2FA/Web/BP001/Manual/Manual_DryRun_0106_1545_BP001_Local.html
+// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=2000 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP002 --out dashboard=export=../../../Report/Growin_2FA/Web/BP002/Manual/Manual_DryRun_0107_1231_BP002_Local.html
+// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP003 --out dashboard=export=../../../Report/Growin_2FA/Web/BP003/Manual/Manual_DryRun_0107_1616_BP003_Local.html
 
 import { textSummary } from "../../../Helper/textSummary.js";
 import { htmlReport } from '../../../Helper/bundle.js';
-import { BP001 } from "./BP001.js";
 import { BP002 } from "./BP002.js";
 import { BP003 } from "./BP003.js";
 import http from "k6/http";
 import { sleep } from "k6";
 import { Rate } from "k6/metrics";
 
-export { BP001, BP002, BP003 }
+export { BP002, BP003 }
 
 // ✅ DEFINISI PERSENTASE USER PER BP
 const BP_USER_PERCENTAGE = {
-    BP001: 100,
     BP002: 100,
     BP003: 100,
 };
@@ -76,15 +74,15 @@ console.log(`   TOTAL: ${TOTAL_USER} users`);
 const scenarios = {};
 selectedBPs.forEach(bp => {
     scenarios[bp] = {
-        // executor: 'constant-vus',
-        // vus: userDistribution[bp] || 1,
-        // duration: `${__ENV.DURATION}`,
-        // gracefulStop: '30s',
+        executor: 'constant-vus',
+        vus: userDistribution[bp] || 1,
+        duration: `${__ENV.DURATION}`,
+        gracefulStop: '30s',
 
-        executor: 'per-vu-iterations',
-        vus: 1,
-        iterations: 1,
-        maxDuration: '1h',
+        // executor: 'per-vu-iterations',
+        // vus: 10,
+        // iterations: 10,
+        // maxDuration: '1h',
 
         exec: bp,
     };
@@ -138,33 +136,19 @@ export function setup() {
     const tokens = {};
     const vuMapping = {};
     
-    const BATCH_SIZE = 500;
-    const BATCH_DELAY = 0;
-    
     console.log(`🔐 Starting setup for ${TOTAL_USER} users distributed across ${selectedBPs.length} BPs...`);
-    console.log(`📦 Batch processing: ${BATCH_SIZE} users per batch, ${BATCH_DELAY}s delay`);
-    console.log(`⚠️  BP001 will SKIP login/PIN - email only`);
-    console.log(`🔑 Other BPs will get token + PIN`);
+    console.log(`⚠️  ALL BPs will SKIP login/PIN - email only mode`);
     
     let globalUserOffset = 0;
     let globalVuOffset = 1;
-    
-    let totalLoginSuccess = 0;
-    let totalLoginFailed = 0;
-    let totalPinSuccess = 0;
-    let totalPinFailed = 0;
-    let totalSkipped = 0;
     
     const channelIds = {};
     
     selectedBPs.forEach((bp, bpIndex) => {
         const usersForThisBP = userDistribution[bp];
-        const skipAuth = (bp === 'BP001'); // ✅ Flag khusus BP001
         
         console.log(`\n📦 Processing ${bp} - ${usersForThisBP} users (VU ${globalVuOffset} to ${globalVuOffset + usersForThisBP - 1})...`);
-        if (skipAuth) {
-            console.log(`   ⏭️  SKIPPING authentication for BP001 - email only mode`);
-        }
+        console.log(`   ⏭️  SKIPPING authentication - email only mode`);
         
         // Create VU mapping
         for (let localUserIndex = 1; localUserIndex <= usersForThisBP; localUserIndex++) {
@@ -173,140 +157,31 @@ export function setup() {
                 bp: bp,
                 userKey: globalUserOffset + localUserIndex
             };
-        }
-        
-        const numBatches = Math.ceil(usersForThisBP / BATCH_SIZE);
-        
-        for (let batchNum = 0; batchNum < numBatches; batchNum++) {
-            const batchStart = batchNum * BATCH_SIZE + 1;
-            const batchEnd = Math.min((batchNum + 1) * BATCH_SIZE, usersForThisBP);
             
-            console.log(`   📦 Batch ${batchNum + 1}/${numBatches}: Users ${batchStart}-${batchEnd}`);
+            const credentials = getUserCredentials(localUserIndex, globalUserOffset);
+            const userKey = globalUserOffset + localUserIndex;
             
-            for (let i = batchStart; i <= batchEnd; i++) {
-                const credentials = getUserCredentials(i, globalUserOffset);
-                const userKey = globalUserOffset + i;
-                const vuId = globalVuOffset + i - 1;
-                
-                // ✅ BP001: Hanya simpan email, skip login/PIN
-                if (skipAuth) {
-                    tokens[userKey] = { 
-                        email: credentials.email, 
-                        token: null,
-                        pin_token: null,
-                        bp: bp
-                    };
-                    totalSkipped++;
-                    continue; // Skip ke user berikutnya
-                }
-                
-                // ✅ BP lain: Login + PIN normal
-                const loginPayload = JSON.stringify({
-                    password: credentials.password,
-                    email: credentials.email,
-                    recaptcha: '',
-                });
-
-                const loginHeaders = {
-                    'Content-Type': 'application/json',
-                    'Accept-Language': 'en',
-                    'Connection': 'keep-alive',
-                    'Accept-Encoding': 'gzip, deflate, br',
-                    'Accept': '*/*',
-                    'User-Agent': 'PostmanRuntime/7.43.0'
-                };
-
-                const loginRes = http.post(base_url + '/auth/api/v1/login', loginPayload, { headers: loginHeaders });
-                
-                if (loginRes.status === 200) {
-                    totalLoginSuccess++;
-                    const token = loginRes.json().data.token;
-                    
-                    tokens[userKey] = { 
-                        email: credentials.email, 
-                        token: token,
-                        pin_token: null,
-                        bp: bp
-                    };
-                    
-                    // PIN Login
-                    const pinPayload = JSON.stringify({ value: "123456" });
-                    const pinHeaders = {
-                        'Cookie': `ACCESS_TOKEN=${token}`,
-                        'Content-Type': 'application/json',
-                        'Accept-Language': 'en',
-                        'Connection': 'keep-alive',
-                        'Accept-Encoding': 'gzip, deflate, br',
-                        'Accept': '*/*',
-                    };
-
-                    const pinRes = http.post(base_url + '/auth/api/v1/protected/pin-login', pinPayload, { headers: pinHeaders });
-
-                    if (pinRes.status === 200) {
-                        totalPinSuccess++;
-                        tokens[userKey].pin_token = pinRes.json().data.pin_token;
-                    } else {
-                        totalPinFailed++;
-                        if (i === batchStart || totalPinFailed <= 5) {
-                            console.error(`   ❌ User ${userKey} (VU${vuId}) PIN FAILED - Status: ${pinRes.status}`);
-                        }
-                        tokens[userKey].pin_token = null;
-                    }
-                    
-                } else {
-                    totalLoginFailed++;
-                    if (i === batchStart || totalLoginFailed <= 5) {
-                        console.error(`   ❌ User ${userKey} (VU${vuId}) LOGIN FAILED - Status: ${loginRes.status}`);
-                    }
-                    tokens[userKey] = { 
-                        email: credentials.email, 
-                        token: null,
-                        pin_token: null,
-                        bp: bp
-                    };
-                }
-            }
-            
-            console.log(`   ✅ Batch ${batchNum + 1}/${numBatches} completed`);
-            
-            if (batchNum < numBatches - 1) {
-                sleep(BATCH_DELAY);
-            }
+            // Simpan hanya email, token null
+            tokens[userKey] = { 
+                email: credentials.email, 
+                token: null,
+                pin_token: null,
+                bp: bp
+            };
         }
         
         globalUserOffset += usersForThisBP;
         globalVuOffset += usersForThisBP;
     });
     
-    
-    // ✅ Summary
     console.log(`\n📊 Setup Summary:`);
-    if (totalSkipped > 0) {
-        console.log(`   ⏭️  Skipped (BP001): ${totalSkipped}/${TOTAL_USER} users (email only)`);
-    }
-    
-    const loginTarget = TOTAL_USER - totalSkipped;
-    if (loginTarget > 0) {
-        console.log(`   ✅ Login: ${totalLoginSuccess}/${loginTarget} success (${((totalLoginSuccess/loginTarget)*100).toFixed(1)}%)`);
-        if (totalLoginFailed > 0) console.error(`   ❌ Login Failed: ${totalLoginFailed}`);
-        
-        console.log(`   ✅ PIN: ${totalPinSuccess}/${loginTarget} success (${((totalPinSuccess/loginTarget)*100).toFixed(1)}%)`);
-        if (totalPinFailed > 0) console.error(`   ❌ PIN Failed: ${totalPinFailed}`);
-    }
+    console.log(`   ⏭️  Total users with email only: ${TOTAL_USER}/${TOTAL_USER}`);
     
     console.log(`\n📋 Per-BP Summary:`);
     selectedBPs.forEach(bp => {
         const bpTokens = Object.values(tokens).filter(t => t.bp === bp);
-        const logins = bpTokens.filter(t => t.token !== null).length;
-        const pins = bpTokens.filter(t => t.pin_token !== null).length;
-        const emailOnly = bpTokens.filter(t => t.token === null && t.pin_token === null).length;
         const channelId = channelIds[bp] || 'N/A';
-        
-        if (bp === 'BP001') {
-            console.log(`   ${bp}: ${emailOnly}/${bpTokens.length} email-only users (no auth), channel_id: ${channelId}`);
-        } else {
-            console.log(`   ${bp}: ${logins}/${bpTokens.length} logins, ${pins}/${bpTokens.length} PINs, channel_id: ${channelId}`);
-        }
+        console.log(`   ${bp}: ${bpTokens.length} email-only users (no auth), channel_id: ${channelId}`);
     });
     
     console.log(`\n🎉 Setup completed!`);

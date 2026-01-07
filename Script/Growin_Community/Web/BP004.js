@@ -338,5 +338,5 @@ export function BP004(data) {
             }
         });
     }
-    sleep(0.5);
+    sleep(0.25);
 }

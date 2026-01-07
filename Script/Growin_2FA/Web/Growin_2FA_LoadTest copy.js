@@ -1,61 +1,28 @@
 // Command
 // Run Multiple BP
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Community/Web/LoadTest/Manual_LoadTest_0107_1459.html
+// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=2h -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_2FA/Web/LoadTest/Manual_LoadTest_1120_2220.html
 
 // Run Single BP
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=2m -e NUMSTART=101 -e SCENARIO=BP001 --out dashboard=export=../../../Report/Growin_Community/Web/BP001/Manual/Manual_DryRun_0107_1511_BP001_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP002 --out dashboard=export=../../../Report/Growin_Community/Web/BP002/Manual/Manual_DryRun_1217_1433_BP002_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP003 --out dashboard=export=../../../Report/Growin_Community/Web/BP003/Manual/Manual_DryRun_1217_1440_BP003_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=25 -e DURATION=5m -e NUMSTART=2051 -e SCENARIO=BP004 --out dashboard=export=../../../Report/Growin_Community/Web/BP004/Manual/Manual_DryRun_1219_1442_BP004_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP005 --out dashboard=export=../../../Report/Growin_Community/Web/BP005/Manual/Manual_DryRun_0107_1623_BP005_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP006 --out dashboard=export=../../../Report/Growin_Community/Web/BP006/Manual/Manual_DryRun_1223_1654_BP006_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP007 --out dashboard=export=../../../Report/Growin_Community/Web/BP007/Manual/Manual_DryRun_1218_2016_BP007_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=75 -e DURATION=5m -e NUMSTART=2001 -e SCENARIO=BP008 --out dashboard=export=../../../Report/Growin_Community/Web/BP008/Manual/Manual_DryRun_1203_2010_BP008_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP009 --out dashboard=export=../../../Report/Growin_Community/Web/BP009/Manual/Manual_DryRun_1217_1455_BP009_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP010 --out dashboard=export=../../../Report/Growin_Community/Web/BP010/Manual/Manual_DryRun_1217_1501_BP010_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=50 -e DURATION=5m -e NUMSTART=2001 -e SCENARIO=BP011 --out dashboard=export=../../../Report/Growin_Community/Web/BP011/Manual/Manual_DryRun_1203_2018_BP011_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP012 --out dashboard=export=../../../Report/Growin_Community/Web/BP012/Manual/Manual_DryRun_1217_1507_BP012_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=25 -e DURATION=5m -e NUMSTART=2051 -e SCENARIO=BP013 --out dashboard=export=../../../Report/Growin_Community/Web/BP013/Manual/Manual_DryRun_1203_2019_BP013_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=50 -e DURATION=5m -e NUMSTART=2001 -e SCENARIO=BP014 --out dashboard=export=../../../Report/Growin_Community/Web/BP014/Manual/Manual_DryRun_1203_2020_BP014_Local.html
+// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP001 --out dashboard=export=../../../Report/Growin_2FA/Web/BP001/Manual/Manual_DryRun_0106_1545_BP001_Local.html
+// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP002 --out dashboard=export=../../../Report/Growin_2FA/Web/BP002/Manual/Manual_DryRun_0107_1048_BP002_Local.html
+// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP003 --out dashboard=export=../../../Report/Growin_2FA/Web/BP003/Manual/Manual_DryRun_0107_1050_BP003_Local.html
 
 import { textSummary } from "../../../Helper/textSummary.js";
 import { htmlReport } from '../../../Helper/bundle.js';
 import { BP001 } from "./BP001.js";
 import { BP002 } from "./BP002.js";
 import { BP003 } from "./BP003.js";
-import { BP004 } from "./BP004.js";
-import { BP005 } from "./BP005.js";
-import { BP006 } from "./BP006.js";
-import { BP007 } from "./BP007.js";
-import { BP008 } from "./BP008.js";
-import { BP009 } from "./BP009.js";
-import { BP010 } from "./BP010.js";
-import { BP011 } from "./BP011.js";
-import { BP012 } from "./BP012.js";
-import { BP013 } from "./BP013.js";
-import { BP014 } from "./BP014.js";
 import http from "k6/http";
 import { sleep } from "k6";
 import { Rate } from "k6/metrics";
 
-export { BP001, BP002, BP003, BP004, BP005, BP006, BP007, BP008, BP009, BP010, BP011, BP012, BP013, BP014 }
+export { BP001, BP002, BP003 }
 
 // ✅ DEFINISI PERSENTASE USER PER BP
 const BP_USER_PERCENTAGE = {
-    BP001: 40,
-    BP002: 10,
-    BP003: 10,
-    BP004: 0.25,
-    BP005: 5,
-    BP006: 5,
-    BP007: 5,
-    BP008: 0.25,
-    BP009: 9.5,
-    BP010: 10,
-    BP011: 1,
-    BP012: 2,
-    BP013: 1,
-    BP014: 1,
+    BP001: 100,
+    BP002: 100,
+    BP003: 100,
 };
 
 // ✅ Function untuk calculate user distribution
@@ -114,95 +81,10 @@ selectedBPs.forEach(bp => {
         // duration: `${__ENV.DURATION}`,
         // gracefulStop: '30s',
 
-        executor: 'ramping-vus',
-            startVUs: 0,
-            stages: [
-                { duration: '5m', target: 100 },
-                { duration: '10m', target: 100 },
-                { duration: '5m', target: 150 },
-                { duration: '10m', target: 100 },
-                { duration: '5m', target: 200 },
-                { duration: '10m', target: 200 },
-                { duration: '5m', target: 250 },
-                { duration: '10m', target: 250 },
-                { duration: '5m', target: 300 },
-                { duration: '10m', target: 300 },
-                { duration: '5m', target: 350 },
-                { duration: '10m', target: 350 },
-                { duration: '5m', target: 400 },
-                { duration: '10m', target: 400 },
-                { duration: '5m', target: 450 },
-                { duration: '10m', target: 450 },
-                { duration: '5m', target: 500 },
-                { duration: '10m', target: 500 },
-                { duration: '5m', target: 550 },
-                { duration: '10m', target: 550 },
-                { duration: '5m', target: 600 },
-                { duration: '10m', target: 600 },
-                { duration: '5m', target: 650 },
-                { duration: '10m', target: 650 },
-                { duration: '5m', target: 700 },
-                { duration: '10m', target: 700 },
-                { duration: '5m', target: 750 },
-                { duration: '10m', target: 750 },
-                { duration: '5m', target: 800 },
-                { duration: '10m', target: 800 },
-                { duration: '5m', target: 850 },
-                { duration: '10m', target: 850 },
-                { duration: '5m', target: 900 },
-                { duration: '10m', target: 900 },
-                { duration: '5m', target: 950 },
-                { duration: '10m', target: 950 },
-                { duration: '5m', target: 1000 },
-                { duration: '10m', target: 1000 },
-                { duration: '5m', target: 1050 },
-                { duration: '10m', target: 1050 },
-                { duration: '5m', target: 1100 },
-                { duration: '10m', target: 1100 },
-                { duration: '5m', target: 1150 },
-                { duration: '10m', target: 1150 },
-                { duration: '5m', target: 1200 },
-                { duration: '10m', target: 1200 },
-                { duration: '5m', target: 1250 },
-                { duration: '10m', target: 1250 },
-                { duration: '5m', target: 1300 },
-                { duration: '10m', target: 1300 },
-                { duration: '5m', target: 1350 },
-                { duration: '10m', target: 1350 },
-                { duration: '5m', target: 1400 },
-                { duration: '10m', target: 1400 },
-                { duration: '5m', target: 1450 },
-                { duration: '10m', target: 1450 },
-                { duration: '5m', target: 1500 },
-                { duration: '10m', target: 1500 },
-                { duration: '5m', target: 1550 },
-                { duration: '10m', target: 1550 },
-                { duration: '5m', target: 1600 },
-                { duration: '10m', target: 1600 },
-                { duration: '5m', target: 1650 },
-                { duration: '10m', target: 1650 },
-                { duration: '5m', target: 1700 },
-                { duration: '10m', target: 1700 },
-                { duration: '5m', target: 1750 },
-                { duration: '10m', target: 1750 },
-                { duration: '5m', target: 1800 },
-                { duration: '10m', target: 1800 },
-                { duration: '5m', target: 1850 },
-                { duration: '10m', target: 1850 },
-                { duration: '5m', target: 1900 },
-                { duration: '10m', target: 1900 },
-                { duration: '5m', target: 1950 },
-                { duration: '10m', target: 1950 },
-                { duration: '5m', target: 2000 },
-                { duration: '10m', target: 2000 },
-                { duration: '5m', target: 0 },      // ramp down
-            ],
-            gracefulStop: '30s',
-
-        // executor: 'per-vu-iterations',
-        // vus: 1,
-        // iterations: 1,
-        // maxDuration: '1h',
+        executor: 'per-vu-iterations',
+        vus: 1,
+        iterations: 1,
+        maxDuration: '1h',
 
         exec: bp,
     };
@@ -229,7 +111,8 @@ function getBaseUrl() {
     return 'https://internal-api-pt.growin.id';
 }
 
-function getUserCredentials(userNum, bpOffset = 0) {
+// ✅ Export function agar bisa dipakai BP001
+export function getUserCredentials(userNum, bpOffset = 0) {
     const startNum = parseInt(`${__ENV.NUMSTART}`) || 0;
     const actualUserNum = userNum + bpOffset;
     let email = '';
@@ -249,18 +132,19 @@ function getUserCredentials(userNum, bpOffset = 0) {
     return { email: email, password: 'M@nsek.123' };
 }
 
-// ✅ SETUP FUNCTION - SEMUA BP mendapat PIN
+// ✅ SETUP FUNCTION - BP001 hanya simpan email, BP lain dapat token + PIN
 export function setup() {
     const base_url = getBaseUrl();
     const tokens = {};
     const vuMapping = {};
     
-    const BATCH_SIZE = 500; // Process 50 users at a time
-    const BATCH_DELAY = 2; // 3 seconds between batches
+    const BATCH_SIZE = 100;
+    const BATCH_DELAY = 0;
     
-    console.log(`🔐 Starting login for ${TOTAL_USER} users distributed across ${selectedBPs.length} BPs...`);
+    console.log(`🔐 Starting setup for ${TOTAL_USER} users distributed across ${selectedBPs.length} BPs...`);
     console.log(`📦 Batch processing: ${BATCH_SIZE} users per batch, ${BATCH_DELAY}s delay`);
-    console.log(`🔑 ALL users will get PIN token`);
+    console.log(`⚠️  BP001 will SKIP login/PIN - email only`);
+    console.log(`🔑 Other BPs will get token + PIN`);
     
     let globalUserOffset = 0;
     let globalVuOffset = 1;
@@ -269,14 +153,18 @@ export function setup() {
     let totalLoginFailed = 0;
     let totalPinSuccess = 0;
     let totalPinFailed = 0;
+    let totalSkipped = 0;
     
-    // ✅ Object untuk menyimpan channel_id per BP
     const channelIds = {};
     
     selectedBPs.forEach((bp, bpIndex) => {
         const usersForThisBP = userDistribution[bp];
+        const skipAuth = (bp === 'BP001'); // ✅ Flag khusus BP001
         
         console.log(`\n📦 Processing ${bp} - ${usersForThisBP} users (VU ${globalVuOffset} to ${globalVuOffset + usersForThisBP - 1})...`);
+        if (skipAuth) {
+            console.log(`   ⏭️  SKIPPING authentication for BP001 - email only mode`);
+        }
         
         // Create VU mapping
         for (let localUserIndex = 1; localUserIndex <= usersForThisBP; localUserIndex++) {
@@ -287,7 +175,6 @@ export function setup() {
             };
         }
         
-        // ✅ Process in batches
         const numBatches = Math.ceil(usersForThisBP / BATCH_SIZE);
         
         for (let batchNum = 0; batchNum < numBatches; batchNum++) {
@@ -301,7 +188,19 @@ export function setup() {
                 const userKey = globalUserOffset + i;
                 const vuId = globalVuOffset + i - 1;
                 
-                // ✅ Step 1: Regular Login
+                // ✅ BP001: Hanya simpan email, skip login/PIN
+                if (skipAuth) {
+                    tokens[userKey] = { 
+                        email: credentials.email, 
+                        token: null,
+                        pin_token: null,
+                        bp: bp
+                    };
+                    totalSkipped++;
+                    continue; // Skip ke user berikutnya
+                }
+                
+                // ✅ BP lain: Login + PIN normal
                 const loginPayload = JSON.stringify({
                     password: credentials.password,
                     email: credentials.email,
@@ -314,11 +213,20 @@ export function setup() {
                     'Connection': 'keep-alive',
                     'Accept-Encoding': 'gzip, deflate, br',
                     'Accept': '*/*',
-                    'User-Agent': 'PostmanRuntime/7.43.0'
+                    'User-Agent': 'PostmanRuntime/7.43.0',
+
+                    'Accept-Language': 'en',
+                    'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+                    'X-App-Name': 'web',
+                    'X-App-Version': '1.4.1',
+                    'X-Device-Info': 'iPhone 11',
+                    'X-Device-Id': 'TEST3',
                 };
 
                 const loginRes = http.post(base_url + '/auth/api/v1/login', loginPayload, { headers: loginHeaders });
                 
+                console.log(`   ❌ User ${userKey} (VU${vuId}) LOGIN FAILED - Status: ${loginRes.body}`);
+
                 if (loginRes.status === 200) {
                     totalLoginSuccess++;
                     const token = loginRes.json().data.token;
@@ -330,7 +238,7 @@ export function setup() {
                         bp: bp
                     };
                     
-                    // ✅ Step 2: PIN Login (UNTUK SEMUA USER)
+                    // PIN Login
                     const pinPayload = JSON.stringify({ value: "123456" });
                     const pinHeaders = {
                         'Cookie': `ACCESS_TOKEN=${token}`,
@@ -349,7 +257,7 @@ export function setup() {
                     } else {
                         totalPinFailed++;
                         if (i === batchStart || totalPinFailed <= 5) {
-                            console.error(`   ❌ User ${userKey} ${email} (VU${vuId}) PIN FAILED - Status: ${pinRes.status}`);
+                            console.error(`   ❌ User ${userKey} (VU${vuId}) PIN FAILED - Status: ${pinRes.status}`);
                         }
                         tokens[userKey].pin_token = null;
                     }
@@ -382,20 +290,32 @@ export function setup() {
     
     // ✅ Summary
     console.log(`\n📊 Setup Summary:`);
-    console.log(`   ✅ Login: ${totalLoginSuccess}/${TOTAL_USER} success (${((totalLoginSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
-    if (totalLoginFailed > 0) console.error(`   ❌ Login Failed: ${totalLoginFailed}`);
+    if (totalSkipped > 0) {
+        console.log(`   ⏭️  Skipped (BP001): ${totalSkipped}/${TOTAL_USER} users (email only)`);
+    }
     
-    console.log(`   ✅ PIN: ${totalPinSuccess}/${TOTAL_USER} success (${((totalPinSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
-    if (totalPinFailed > 0) console.error(`   ❌ PIN Failed: ${totalPinFailed}`);
+    const loginTarget = TOTAL_USER - totalSkipped;
+    if (loginTarget > 0) {
+        console.log(`   ✅ Login: ${totalLoginSuccess}/${loginTarget} success (${((totalLoginSuccess/loginTarget)*100).toFixed(1)}%)`);
+        if (totalLoginFailed > 0) console.error(`   ❌ Login Failed: ${totalLoginFailed}`);
+        
+        console.log(`   ✅ PIN: ${totalPinSuccess}/${loginTarget} success (${((totalPinSuccess/loginTarget)*100).toFixed(1)}%)`);
+        if (totalPinFailed > 0) console.error(`   ❌ PIN Failed: ${totalPinFailed}`);
+    }
     
     console.log(`\n📋 Per-BP Summary:`);
     selectedBPs.forEach(bp => {
         const bpTokens = Object.values(tokens).filter(t => t.bp === bp);
         const logins = bpTokens.filter(t => t.token !== null).length;
         const pins = bpTokens.filter(t => t.pin_token !== null).length;
+        const emailOnly = bpTokens.filter(t => t.token === null && t.pin_token === null).length;
         const channelId = channelIds[bp] || 'N/A';
         
-        console.log(`   ${bp}: ${logins}/${bpTokens.length} logins, ${pins}/${bpTokens.length} PINs, channel_id: ${channelId}`);
+        if (bp === 'BP001') {
+            console.log(`   ${bp}: ${emailOnly}/${bpTokens.length} email-only users (no auth), channel_id: ${channelId}`);
+        } else {
+            console.log(`   ${bp}: ${logins}/${bpTokens.length} logins, ${pins}/${bpTokens.length} PINs, channel_id: ${channelId}`);
+        }
     });
     
     console.log(`\n🎉 Setup completed!`);
@@ -404,7 +324,7 @@ export function setup() {
         base_url: base_url, 
         tokens: tokens,
         vuMapping: vuMapping,
-        channelIds: channelIds  // ✅ Pass channelIds object ke semua BP functions
+        channelIds: channelIds
     };
 }
 
@@ -441,7 +361,7 @@ export function handleSummary(data) {
         console.log(`[${dateStr}_${timeStr}] Starting report generation for ${bp_name}...`);
         
         if(`${__ENV.RUNBY}`=='Manual'){
-            const htmlPath = `../../../Report/Growin_Community/Web/${SCENARIO}/Manual/${__ENV.RUNBY}_Detail_${SCENARIO}_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_2FA/Web/${SCENARIO}/Manual/${__ENV.RUNBY}_Detail_${SCENARIO}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -449,7 +369,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if(`${__ENV.RUNBY}`=='Regression'){
-            const htmlPath = `../../../Report/Growin_Community/Web/${SCENARIO}/Regression/${__ENV.RUNBY}_Detail_${SCENARIO}_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_2FA/Web/${SCENARIO}/Regression/${__ENV.RUNBY}_Detail_${SCENARIO}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -457,7 +377,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if(`${__ENV.RUNBY}`=='LoadTest'){
-            const htmlPath = `../../../Report/Growin_Community/Web/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_2FA/Web/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
