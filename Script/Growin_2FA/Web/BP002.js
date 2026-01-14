@@ -56,7 +56,7 @@ export function BP002(data) {
     const iterationId = exec.scenario.iterationInTest;
     const runTimestamp = Date.now();
     
-    const deviceId = `TEST${runTimestamp}_${vuId}_${iterationId}`;
+    const deviceId = `TEST_${runTimestamp}_${vuId}_${iterationId}`;
     
     const mapping = data.vuMapping[vuId];
     if (!mapping) {
@@ -68,10 +68,11 @@ export function BP002(data) {
     const userToken = data.tokens[userKey];
     
     // ✅ Get token dari setup atau lakukan fresh login
-    let token = userToken?.token || null;
+    // let token = userToken?.token || null;
+    let token = null;
     
     // ✅ Jika tidak ada token, lakukan login
-    if (!token) {
+    // if (!token) {
         const urls = [
             base_url + `/auth/api/v1/login`,
         ];
@@ -95,7 +96,8 @@ export function BP002(data) {
             'X-App-Name': 'web',
             'X-App-Version': '1.4.1',
             'X-Device-Info': 'iPhone 11',
-            'X-Device-Id': 'TEST3',
+            // 'X-Device-Id': 'TEST3',
+            'X-Device-Id': deviceId,
         };
 
         // console.log(`X-Device-Id: ${deviceId}`)
@@ -116,7 +118,7 @@ export function BP002(data) {
 
                 try {
                     token = response.json().data.token;
-                    // console.log(`✅ ${credentials.email} login successful. Body Token Status: ${loginRes.body}`);
+                    // console.log(`✅ ${credentials.email} login successful. Body Token Status: ${response.body}`);
                 } catch (e) {
                     console.error(`❌ ${credentials.email} failed to parse login response: ${e}`);
                     return; // ✅ Exit jika parsing gagal
@@ -143,7 +145,7 @@ export function BP002(data) {
                 }
             }
         });
-    }
+    // }
 
     // Batch 1
     if (token) {
@@ -159,12 +161,14 @@ export function BP002(data) {
             'Accept': '*/*',
             'User-Agent': 'PostmanRuntime/7.43.0',
 
+            'Cookie': `ACCESS_TOKEN=${token};`,
             'Accept-Language': 'en',
             'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
             'X-App-Name': 'web',
             'X-App-Version': '1.4.1',
             'X-Device-Info': 'iPhone 11',
-            'X-Device-Id': 'TEST3',
+            // 'X-Device-Id': 'TEST3',
+            'X-Device-Id': deviceId,
         };
 
         const requests = [
@@ -222,7 +226,8 @@ export function BP002(data) {
             'X-App-Name': 'web',
             'X-App-Version': '1.4.1',
             'X-Device-Info': 'iPhone 11',
-            'X-Device-Id': 'TEST3',
+            // 'X-Device-Id': 'TEST3',
+            'X-Device-Id': deviceId,
         };
 
         const requests = [
@@ -284,7 +289,8 @@ export function BP002(data) {
             'X-App-Name': 'web',
             'X-App-Version': '1.4.1',
             'X-Device-Info': 'iPhone 11',
-            'X-Device-Id': 'TEST3',
+            // 'X-Device-Id': 'TEST3',
+            'X-Device-Id': deviceId,
         };
 
         const requests = [

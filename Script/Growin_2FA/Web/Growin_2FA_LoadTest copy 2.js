@@ -1,11 +1,11 @@
 // Command
 // Run Multiple BP
-// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=2h -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_2FA/Web/LoadTest/Manual_LoadTest_0111_1402.html
+// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=2h -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_2FA/Web/LoadTest/Manual_LoadTest_1120_2220.html
 
 // Run Single BP
-// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=101 -e SCENARIO=BP001 --out dashboard=export=../../../Report/Growin_2FA/Web/BP001/Manual/Manual_DryRun_0111_1058_BP001_Local.html
-// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP002 --out dashboard=export=../../../Report/Growin_2FA/Web/BP002/Manual/Manual_DryRun_0114_1422_BP002_Local.html
-// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP003 --out dashboard=export=../../../Report/Growin_2FA/Web/BP003/Manual/Manual_DryRun_0113_1425_BP003_Local.html
+// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP001 --out dashboard=export=../../../Report/Growin_2FA/Web/BP001/Manual/Manual_DryRun_0106_1545_BP001_Local.html
+// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP002 --out dashboard=export=../../../Report/Growin_2FA/Web/BP002/Manual/Manual_DryRun_0108_1554_BP002_Local.html
+// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP003 --out dashboard=export=../../../Report/Growin_2FA/Web/BP003/Manual/Manual_DryRun_0108_1104_BP003_Local.html
 
 import { textSummary } from "../../../Helper/textSummary.js";
 import { htmlReport } from '../../../Helper/bundle.js';
@@ -19,8 +19,8 @@ export { BP002, BP003 }
 
 // ✅ DEFINISI PERSENTASE USER PER BP
 const BP_USER_PERCENTAGE = {
-    BP002: 80,
-    BP003: 20,
+    BP002: 100,
+    BP003: 100,
 };
 
 // ✅ Function untuk calculate user distribution
@@ -74,12 +74,15 @@ console.log(`   TOTAL: ${TOTAL_USER} users`);
 const scenarios = {};
 selectedBPs.forEach(bp => {
     scenarios[bp] = {
-        executor: 'constant-vus',
-        vus: userDistribution[bp] || 1,
-        duration: `${__ENV.DURATION}`,
-        gracefulStop: '30s',
+        // executor: 'constant-vus',
+        // vus: userDistribution[bp] || 1,
+        // duration: `${__ENV.DURATION}`,
+        // gracefulStop: '30s',
 
-        // executor: 'per-vgith',
+        executor: 'per-vu-iterations',
+        vus: 1,
+        iterations: 1,
+        maxDuration: '1h',
 
         exec: bp,
     };
@@ -201,7 +204,7 @@ export function setup() {
 
                 const loginRes = http.post(base_url + '/auth/api/v1/login', loginPayload, { headers: loginHeaders });
                 
-                // console.log(`loginRes: ${loginRes.body}`)
+                console.log(`loginRes: ${loginRes.body}`)
 
                 if (loginRes.status === 200) {
                     totalLoginSuccess++;
@@ -228,13 +231,12 @@ export function setup() {
                         'X-App-Name': 'web',
                         'X-App-Version': '1.4.1',
                         'X-Device-Info': 'iPhone 11',
-                        // 'X-Device-Id': `SETUP_VU${vuId}`,
-                        'X-Device-Id': `TEST3`,
+                        'X-Device-Id': `SETUP_VU${vuId}`,
                     };
 
                     const pinRes = http.post(base_url + '/auth/api/v1/protected/pin-login', pinPayload, { headers: pinHeaders });
 
-                    // console.log(`pinRes: ${pinRes.body}`)
+                    console.log(`pinRes: ${pinRes.body}`)
 
                     if (pinRes.status === 200) {
                         totalPinSuccess++;
@@ -242,7 +244,7 @@ export function setup() {
                     } else {
                         totalPinFailed++;
                         if (i === batchStart || totalPinFailed <= 5) {
-                            console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) PIN FAILED - Status: ${pinRes.status} - Body: ${pinRes.body}`);
+                            console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) PIN FAILED - Status: ${pinRes.status}`);
                         }
                         tokens[userKey].pin_token = null;
                     }
@@ -250,7 +252,7 @@ export function setup() {
                 } else {
                     totalLoginFailed++;
                     if (i === batchStart || totalLoginFailed <= 5) {
-                        console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) LOGIN FAILED - Status: ${loginRes.status} - Body: ${loginRes.body}`);
+                        console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) LOGIN FAILED - Status: ${loginRes.status}`);
                     }
                     // Store with null tokens
                     tokens[userKey] = { 
@@ -351,7 +353,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if(`${__ENV.RUNBY}`=='LoadTest'){
-            const htmlPath = `../../../Report/Growin_2FA/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_2FA/Web/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
