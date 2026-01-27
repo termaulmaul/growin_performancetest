@@ -26,4 +26,4 @@ echo "Captured Time    : $timeStr"
 echo "Current Scenario : Load Test All BP"
 
 # Run k6 commands using the captured date and time
-../../../k6 run Growin_2FA_LoadTest.js -e RUNBY="$RUNBY" -e ENV="$ENV" -e USER="$USER" -e DURATION="$DURATION" -e NUMSTART="$NUMSTART" --out dashboard=export=../../Report/Growin_2FA/LoadTest/"$RUNBY"_"$RUNTYPE"_${dateStr}_${timeStr}_72.html
+../../../k6 run Growin_2FA_LoadTest.js -e RUNBY="$RUNBY" -e ENV="$ENV" -e USER="$USER" -e DURATION="$DURATION" -e NUMSTART="$NUMSTART" -e SCENARIO=BP004 --out dashboard=export=../../../Report/Growin_2FA/LoadTest/"$RUNBY"_"$RUNTYPE"_${dateStr}_${timeStr}_72.html

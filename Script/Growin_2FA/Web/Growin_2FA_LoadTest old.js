@@ -1,11 +1,11 @@
 // Command
 // Run Multiple BP
-// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=2h -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_2FA/Web/LoadTest/Manual_LoadTest_1120_2220.html
+// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=2h -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_2FA/Web/LoadTest/Manual_LoadTest_0111_1402.html
 
 // Run Single BP
-// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP001 --out dashboard=export=../../../Report/Growin_2FA/Web/BP001/Manual/Manual_DryRun_0106_1545_BP001_Local.html
-// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP002 --out dashboard=export=../../../Report/Growin_2FA/Web/BP002/Manual/Manual_DryRun_0108_1554_BP002_Local.html
-// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP003 --out dashboard=export=../../../Report/Growin_2FA/Web/BP003/Manual/Manual_DryRun_0108_1104_BP003_Local.html
+// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=101 -e SCENARIO=BP001 --out dashboard=export=../../../Report/Growin_2FA/Web/BP001/Manual/Manual_DryRun_0111_1058_BP001_Local.html
+// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=500 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP002 --out dashboard=export=../../../Report/Growin_2FA/Web/BP002/Manual/Manual_DryRun_0120_0951_BP002_Local.html
+// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP003 --out dashboard=export=../../../Report/Growin_2FA/Web/BP003/Manual/Manual_DryRun_0120_0935_BP003_Local.html
 
 import { textSummary } from "../../../Helper/textSummary.js";
 import { htmlReport } from '../../../Helper/bundle.js';
@@ -19,8 +19,8 @@ export { BP002, BP003 }
 
 // ✅ DEFINISI PERSENTASE USER PER BP
 const BP_USER_PERCENTAGE = {
-    BP002: 100,
-    BP003: 100,
+    BP002: 80,
+    BP003: 20,
 };
 
 // ✅ Function untuk calculate user distribution
@@ -80,7 +80,7 @@ selectedBPs.forEach(bp => {
         // gracefulStop: '30s',
 
         executor: 'per-vu-iterations',
-        vus: 1,
+        vus: 5000,
         iterations: 1,
         maxDuration: '1h',
 
@@ -190,21 +190,20 @@ export function setup() {
 
                 const loginHeaders = {
                     'Content-Type': 'application/json',
+                    'Accept': '*/*',
                     'Accept-Language': 'en',
                     'Connection': 'keep-alive',
                     'Accept-Encoding': 'gzip, deflate, br',
-                    'Accept': '*/*',
                     'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
                     'X-App-Name': 'web',
                     'X-App-Version': '1.4.1',
                     'X-Device-Info': 'iPhone 11',
-                    // 'X-Device-Id': `SETUP_VU${vuId}`,
-                    'X-Device-Id': `TEST3`,
+                    'X-Device-Id': 'TEST3'
                 };
 
                 const loginRes = http.post(base_url + '/auth/api/v1/login', loginPayload, { headers: loginHeaders });
                 
-                console.log(`loginRes: ${loginRes.body}`)
+                // console.log(`loginRes: ${loginRes.body}`)
 
                 if (loginRes.status === 200) {
                     totalLoginSuccess++;
@@ -223,20 +222,21 @@ export function setup() {
                     const pinHeaders = {
                         'Cookie': `ACCESS_TOKEN=${token}`,
                         'Content-Type': 'application/json',
+                        'Accept': '*/*',
                         'Accept-Language': 'en',
                         'Connection': 'keep-alive',
                         'Accept-Encoding': 'gzip, deflate, br',
-                        'Accept': '*/*',
+                        'Cookie': `ACCESS_TOKEN=${token};`,
                         'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
                         'X-App-Name': 'web',
                         'X-App-Version': '1.4.1',
                         'X-Device-Info': 'iPhone 11',
-                        'X-Device-Id': `SETUP_VU${vuId}`,
+                        'X-Device-Id': 'TEST3'
                     };
 
                     const pinRes = http.post(base_url + '/auth/api/v1/protected/pin-login', pinPayload, { headers: pinHeaders });
 
-                    console.log(`pinRes: ${pinRes.body}`)
+                    // console.log(`pinRes: ${pinRes.body}`)
 
                     if (pinRes.status === 200) {
                         totalPinSuccess++;
@@ -244,7 +244,7 @@ export function setup() {
                     } else {
                         totalPinFailed++;
                         if (i === batchStart || totalPinFailed <= 5) {
-                            console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) PIN FAILED - Status: ${pinRes.status}`);
+                            console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) PIN FAILED - Status: ${pinRes.status} - Body: ${pinRes.body}`);
                         }
                         tokens[userKey].pin_token = null;
                     }
@@ -252,7 +252,7 @@ export function setup() {
                 } else {
                     totalLoginFailed++;
                     if (i === batchStart || totalLoginFailed <= 5) {
-                        console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) LOGIN FAILED - Status: ${loginRes.status}`);
+                        console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) LOGIN FAILED - Status: ${loginRes.status} - Body: ${loginRes.body}`);
                     }
                     // Store with null tokens
                     tokens[userKey] = { 
@@ -353,7 +353,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if(`${__ENV.RUNBY}`=='LoadTest'){
-            const htmlPath = `../../../Report/Growin_2FA/Web/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../../Report/Growin_2FA/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {

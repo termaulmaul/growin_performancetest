@@ -49,8 +49,27 @@ const VerifyPage = {
     },
 };
 
+const DeviceManagement = {
+    Auth_Protected_VerifiedDevice_List: {
+        errorCount: new Counter("error_count_003_01_01_Auth_Protected_VerifiedDevice_List"),
+        errorRate: new Rate("error_rate_003_01_01_Auth_Protected_VerifiedDevice_List"),
+        httpDuration: new Trend("duration_003_01_01_Auth_Protected_VerifiedDevice_List"),
+        httpWaiting: new Trend("waiting_003_01_01_Auth_Protected_VerifiedDevice_List"),
+        requestRate: new Counter("rps_003_01_01_Auth_Protected_VerifiedDevice_List"),
+        http_reqs: new Counter("sample_003_01_01_Auth_Protected_VerifiedDevice_List"),
+    },
+    Auth_Protected_VerifiedDevice: {
+        errorCount: new Counter("error_count_003_01_02_Auth_Protected_VerifiedDevice_Delete"),
+        errorRate: new Rate("error_rate_003_01_02_Auth_Protected_VerifiedDevice_Delete"),
+        httpDuration: new Trend("duration_003_01_02_Auth_Protected_VerifiedDevice_Delete"),
+        httpWaiting: new Trend("waiting_003_01_02_Auth_Protected_VerifiedDevice_Delete"),
+        requestRate: new Counter("rps_003_01_02_Auth_Protected_VerifiedDevice_Delete"),
+        http_reqs: new Counter("sample_003_01_02_Auth_Protected_VerifiedDevice_Delete"),
+    },
+};
+
 // ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
-export function BP002(data) {
+export function BP004(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;
     const iterationId = exec.scenario.iterationInTest;
@@ -59,17 +78,22 @@ export function BP002(data) {
     const deviceId = `TEST_${runTimestamp}_${vuId}_${iterationId}`;
     
     const mapping = data.vuMapping[vuId];
-    if (!mapping) {
-        // console.error(`❌ VU${vuId} - No mapping found, skipping iteration`);
-        return;
-    }
+    
     const userKey = mapping.userKey;
     const credentials = getUserCredentials(userKey, 0);
     const userToken = data.tokens[userKey];
     
+    // ✅ CRITICAL: Ambil token langsung dari setup - TIDAK perlu login ulang
+    const userTokenData = data.tokens[userKey];
+    
+    const email = userTokenData.email;
+    
+    let deviceIdToDelete = null;
+    
     // ✅ Get token dari setup atau lakukan fresh login
     // let token = userToken?.token || null;
-    let token = null;
+    let token;
+    let pinToken;
     
     // ✅ Jika tidak ada token, lakukan login
     // if (!token) {
@@ -277,6 +301,7 @@ export function BP002(data) {
     }   
 
     // Batch 3
+    let batch3;
     if (batch2 == 200) {
         const urls = [
             base_url + `/auth/api/v1/protected/otp/validate`,
@@ -317,6 +342,7 @@ export function BP002(data) {
             const metric = metrics[index];
             metric.httpDuration.add(response.timings.duration);
             if (response.status === 200) {
+                batch3 = response.status;
                 metric.errorRate.add(false);
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
@@ -341,5 +367,221 @@ export function BP002(data) {
             }
         });
     }   
-    sleep(0.25);
+    sleep(0.5);
+
+    // if (!token) {
+        // Login with TEST3 device to get pin_token for device management operations
+        const loginUrl = base_url + `/auth/api/v1/login`;
+
+        const loginPayloadTest3 = JSON.stringify({
+            password: credentials.password,
+            email: credentials.email,
+            recaptcha: '',
+        });
+
+        const loginHeadersTest3 = {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3',
+        };
+
+        const loginRequestTest3 = [
+            ['POST', loginUrl, loginPayloadTest3, { headers: loginHeadersTest3 }],
+        ];
+
+        const loginResponseTest3 = http.batch(loginRequestTest3);
+        const loginRes = loginResponseTest3[0];
+
+        let test3Token = null;
+        let test3PinToken = null;
+
+        if (loginRes.status === 200) {
+            try {
+                test3Token = loginRes.json().data.token;
+                // console.log(`Body: ${loginRes.body}`)
+                
+                // Get PIN token
+                const pinPayload = JSON.stringify({ value: "123456" });
+                const pinHeaders = {
+                    'Cookie': `ACCESS_TOKEN=${test3Token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': '*/*',
+                    'Accept-Language': 'en',
+                    'Connection': 'keep-alive',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+                    'X-App-Name': 'web',
+                    'X-App-Version': '1.4.1',
+                    'X-Device-Info': 'iPhone 11',
+                    'X-Device-Id': 'TEST3'
+                };
+
+                const pinRes = http.post(base_url + '/auth/api/v1/protected/pin-login', pinPayload, { headers: pinHeaders });
+
+                if (pinRes.status === 200) {
+                    test3PinToken = pinRes.json().data.pin_token;
+                    // console.log(`test3PinToken: ${test3PinToken}`)
+                } else {
+                    console.error(`${email} ❌ PIN login failed for TEST3 device - Status: ${pinRes.status} - Body: ${pinRes.body}`);
+                }
+                
+            } catch (e) {
+                console.error(`${email} ❌ Failed to parse TEST3 login response: ${e}`);
+            }
+        } else {
+            console.error(`${email} ❌ Login failed for TEST3 device - Status: ${loginRes.status} - Body: ${loginRes.body}`);
+        }
+
+        // Only proceed with device management if we have both tokens
+        if (!test3Token || !test3PinToken) {
+            console.error(`${email} ❌ Cannot proceed with device management - missing tokens`);
+            return;
+        }
+    // }
+
+    // Batch 1 - Get device list
+    if (test3Token) {
+        const urls = [
+            base_url + `/auth/api/v1/protected/verified-device/list`,
+        ];
+
+        const stepOnePointTwoHeaders = {
+            'Cookie': `ACCESS_TOKEN=${test3Token}; PIN_ACCESS_TOKEN=${test3PinToken}`,
+            'Content-Type': 'application/json',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept': '*/*',
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3',
+            // 'X-Device-Id': deviceId,
+        };
+
+        const requests = [
+            ['GET', urls[0], null, { headers: stepOnePointTwoHeaders }],
+        ];
+        const responses = http.batch(requests);
+
+        responses.forEach((response, index) => {
+            const metrics = [
+                DeviceManagement.Auth_Protected_VerifiedDevice_List,
+            ];
+
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            
+            if (response.status === 200) {
+                try {
+                    const responseData = response.json();
+                    
+                    if (responseData?.data?.data && Array.isArray(responseData.data.data) && responseData.data.data.length > 0) {
+                        const allDevices = responseData.data.data;
+                        const allIds = allDevices.map(item => item.id);
+                        
+                        // deviceIdToDelete = allIds[1] || allIds[0]; // Fallback to first if only one device
+                        deviceIdToDelete = allIds[4]; // Fallback to first if only one device
+                    }
+                } catch (e) {
+                    console.error(`${email} ❌ Failed to parse device list: ${e.message}`);
+                }
+
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Response: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body} || Email : ${credentials.email} || Device ID : ${deviceId}`]: (r) => r.status === 200
+                    // [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    // console.error(`${credentials.email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
+
+    // Batch 2 - Delete device (only if we have a device ID)
+    if (deviceIdToDelete) {
+        const deleteUrls = [
+            base_url + `/auth/api/v1/protected/verified-device/${deviceIdToDelete}`,
+        ];
+
+        const stepTwoPointTwoHeaders = {
+            'Cookie': `ACCESS_TOKEN=${test3Token}; PIN_ACCESS_TOKEN=${test3PinToken}`,
+            'Content-Type': 'application/json',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept': '*/*',
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3',
+            // 'X-Device-Id': deviceId,
+        };
+
+        const deleteRequests = [
+            ['DELETE', deleteUrls[0], null, { headers: stepTwoPointTwoHeaders }],
+        ];
+        const deleteResponses = http.batch(deleteRequests);
+
+        deleteResponses.forEach((response, index) => {
+            const metrics = [
+                DeviceManagement.Auth_Protected_VerifiedDevice,
+            ];
+
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${deleteUrls[index]} || Status: ${response.status} || Response: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                
+                check(response, {
+                    // [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body} || Email : ${credentials.email} || Device ID : ${deviceId}`]: (r) => r.status === 200
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    // console.error(`${credentials.email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
+    sleep(0.5);
 }

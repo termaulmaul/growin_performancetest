@@ -14,12 +14,12 @@ const DeviceManagement = {
         http_reqs: new Counter("sample_003_01_01_Auth_Protected_VerifiedDevice_List"),
     },
     Auth_Protected_VerifiedDevice: {
-        errorCount: new Counter("error_count_003_01_02_Auth_Protected_VerifiedDevice"),
-        errorRate: new Rate("error_rate_003_01_02_Auth_Protected_VerifiedDevice"),
-        httpDuration: new Trend("duration_003_01_02_Auth_Protected_VerifiedDevice"),
-        httpWaiting: new Trend("waiting_003_01_02_Auth_Protected_VerifiedDevice"),
-        requestRate: new Counter("rps_003_01_02_Auth_Protected_VerifiedDevice"),
-        http_reqs: new Counter("sample_003_01_02_Auth_Protected_VerifiedDevice"),
+        errorCount: new Counter("error_count_003_01_02_Auth_Protected_VerifiedDevice_Delete"),
+        errorRate: new Rate("error_rate_003_01_02_Auth_Protected_VerifiedDevice_Delete"),
+        httpDuration: new Trend("duration_003_01_02_Auth_Protected_VerifiedDevice_Delete"),
+        httpWaiting: new Trend("waiting_003_01_02_Auth_Protected_VerifiedDevice_Delete"),
+        requestRate: new Counter("rps_003_01_02_Auth_Protected_VerifiedDevice_Delete"),
+        http_reqs: new Counter("sample_003_01_02_Auth_Protected_VerifiedDevice_Delete"),
     },
 };
 
@@ -34,7 +34,7 @@ export function BP003(data) {
     // ✅ Get mapping from setup
     const mapping = data.vuMapping[vuId];
     if (!mapping) {
-        console.error(`❌ VU${vuId} - No mapping found, skipping iteration`);
+        // console.error(`❌ VU${vuId} - No mapping found, skipping iteration`);
         return;
     }
     
@@ -44,7 +44,7 @@ export function BP003(data) {
     const userTokenData = data.tokens[userKey];
     
     if (!userTokenData || !userTokenData.token || !userTokenData.pin_token) {
-        console.error(`❌ VU${vuId} (${userTokenData?.email}) - No valid tokens from setup, skipping iteration`);
+        // console.error(`❌ VU${vuId} (${userTokenData?.email}) - No valid tokens from setup, skipping iteration`);
         return;
     }
     
@@ -70,8 +70,8 @@ export function BP003(data) {
         'X-App-Name': 'web',
         'X-App-Version': '1.4.1',
         'X-Device-Info': 'iPhone 11',
-        // 'X-Device-Id': 'TEST3',
-        'X-Device-Id': deviceId,
+        'X-Device-Id': 'TEST3',
+        // 'X-Device-Id': deviceId,
     };
 
     const requests = [
@@ -90,13 +90,14 @@ export function BP003(data) {
         if (response.status === 200) {
             try {
                 const responseData = response.json();
+                console.log(`Response : Response: ${response.body}`)
                 
                 if (responseData?.data?.data && Array.isArray(responseData.data.data) && responseData.data.data.length > 0) {
                     const allDevices = responseData.data.data;
                     const allIds = allDevices.map(item => item.id);
                     
                     // deviceIdToDelete = allIds[1] || allIds[0]; // Fallback to first if only one device
-                    deviceIdToDelete = allIds[1]; // Fallback to first if only one device
+                    deviceIdToDelete = allIds[4]; // Fallback to first if only one device
                 }
             } catch (e) {
                 console.error(`${email} ❌ Failed to parse device list: ${e.message}`);
@@ -125,7 +126,6 @@ export function BP003(data) {
             }
         }
     });
-    sleep(0.25);
 
     // Batch 2 - Delete device (only if we have a device ID)
     if (deviceIdToDelete) {
@@ -144,8 +144,8 @@ export function BP003(data) {
             'X-App-Name': 'web',
             'X-App-Version': '1.4.1',
             'X-Device-Info': 'iPhone 11',
-            // 'X-Device-Id': 'TEST3',
-            'X-Device-Id': deviceId,
+            'X-Device-Id': 'TEST3',
+            // 'X-Device-Id': deviceId,
         };
 
         const deleteRequests = [

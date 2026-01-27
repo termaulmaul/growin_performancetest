@@ -4,23 +4,26 @@
 
 // Run Single BP
 // ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=101 -e SCENARIO=BP001 --out dashboard=export=../../../Report/Growin_2FA/Web/BP001/Manual/Manual_DryRun_0111_1058_BP001_Local.html
-// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP002 --out dashboard=export=../../../Report/Growin_2FA/Web/BP002/Manual/Manual_DryRun_0114_1422_BP002_Local.html
-// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP003 --out dashboard=export=../../../Report/Growin_2FA/Web/BP003/Manual/Manual_DryRun_0113_1425_BP003_Local.html
+// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=5000 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP002 --out dashboard=export=../../../Report/Growin_2FA/Web/BP002/Manual/Manual_DryRun_0127_1031_BP002_Local.html
+// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=400 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP003 --out dashboard=export=../../../Report/Growin_2FA/Web/BP003/Manual/Manual_DryRun_0123_1609_BP003_Local.html
+// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=400 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP004 --out dashboard=export=../../../Report/Growin_2FA/Web/BP004/Manual/Manual_DryRun_0126_1157_BP004_Local.html
 
 import { textSummary } from "../../../Helper/textSummary.js";
 import { htmlReport } from '../../../Helper/bundle.js';
 import { BP002 } from "./BP002.js";
 import { BP003 } from "./BP003.js";
+import { BP004 } from "./BP004.js";
 import http from "k6/http";
 import { sleep } from "k6";
 import { Rate } from "k6/metrics";
 
-export { BP002, BP003 }
+export { BP002, BP003, BP004 }
 
 // ✅ DEFINISI PERSENTASE USER PER BP
 const BP_USER_PERCENTAGE = {
     BP002: 80,
     BP003: 20,
+    BP004: 100,
 };
 
 // ✅ Function untuk calculate user distribution
@@ -79,7 +82,10 @@ selectedBPs.forEach(bp => {
         duration: `${__ENV.DURATION}`,
         gracefulStop: '30s',
 
-        // executor: 'per-vgith',
+        // executor: 'per-vu-iterations',
+        // vus: 5000,
+        // iterations: 1,
+        // maxDuration: '1h',
 
         exec: bp,
     };
@@ -187,16 +193,15 @@ export function setup() {
 
                 const loginHeaders = {
                     'Content-Type': 'application/json',
+                    'Accept': '*/*',
                     'Accept-Language': 'en',
                     'Connection': 'keep-alive',
                     'Accept-Encoding': 'gzip, deflate, br',
-                    'Accept': '*/*',
                     'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
                     'X-App-Name': 'web',
                     'X-App-Version': '1.4.1',
                     'X-Device-Info': 'iPhone 11',
-                    // 'X-Device-Id': `SETUP_VU${vuId}`,
-                    'X-Device-Id': `TEST3`,
+                    'X-Device-Id': 'TEST3'
                 };
 
                 const loginRes = http.post(base_url + '/auth/api/v1/login', loginPayload, { headers: loginHeaders });
@@ -220,16 +225,16 @@ export function setup() {
                     const pinHeaders = {
                         'Cookie': `ACCESS_TOKEN=${token}`,
                         'Content-Type': 'application/json',
+                        'Accept': '*/*',
                         'Accept-Language': 'en',
                         'Connection': 'keep-alive',
                         'Accept-Encoding': 'gzip, deflate, br',
-                        'Accept': '*/*',
+                        'Cookie': `ACCESS_TOKEN=${token};`,
                         'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
                         'X-App-Name': 'web',
                         'X-App-Version': '1.4.1',
                         'X-Device-Info': 'iPhone 11',
-                        // 'X-Device-Id': `SETUP_VU${vuId}`,
-                        'X-Device-Id': `TEST3`,
+                        'X-Device-Id': 'TEST3'
                     };
 
                     const pinRes = http.post(base_url + '/auth/api/v1/protected/pin-login', pinPayload, { headers: pinHeaders });
