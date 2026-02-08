@@ -61,73 +61,84 @@ const CommunityDetailUserTrialJoinLeave = {
         http_reqs: new Counter("sample_006_01_05_Socialinvesting_Social_Leave"),
     },
     Socialinvesting_Channel_GetList_2: {
-        errorCount: new Counter("error_count_006_01_06_Socialinvesting_Channel_GetList"),
-        errorRate: new Rate("error_rate_006_01_06_Socialinvesting_Channel_GetList"),
-        httpDuration: new Trend("duration_006_01_06_Socialinvesting_Channel_GetList"),
-        httpWaiting: new Trend("waiting_006_01_06_Socialinvesting_Channel_GetList"),
-        requestRate: new Counter("rps_006_01_06_Socialinvesting_Channel_GetList"),
-        http_reqs: new Counter("sample_006_01_06_Socialinvesting_Channel_GetList"),
+        errorCount: new Counter("error_count_006_02_06_Socialinvesting_Channel_GetList"),
+        errorRate: new Rate("error_rate_006_02_06_Socialinvesting_Channel_GetList"),
+        httpDuration: new Trend("duration_006_02_06_Socialinvesting_Channel_GetList"),
+        httpWaiting: new Trend("waiting_006_02_06_Socialinvesting_Channel_GetList"),
+        requestRate: new Counter("rps_006_02_06_Socialinvesting_Channel_GetList"),
+        http_reqs: new Counter("sample_006_02_06_Socialinvesting_Channel_GetList"),
     },
     Socialinvesting_Channel_GetProfile_2: {
-        errorCount: new Counter("error_count_006_01_07_Socialinvesting_Channel_GetProfile"),
-        errorRate: new Rate("error_rate_006_01_07_Socialinvesting_Channel_GetProfile"),
-        httpDuration: new Trend("duration_006_01_07_Socialinvesting_Channel_GetProfile"),
-        httpWaiting: new Trend("waiting_006_01_07_Socialinvesting_Channel_GetProfile"),
-        requestRate: new Counter("rps_006_01_07_Socialinvesting_Channel_GetProfile"),
-        http_reqs: new Counter("sample_006_01_07_Socialinvesting_Channel_GetProfile"),
+        errorCount: new Counter("error_count_006_02_07_Socialinvesting_Channel_GetProfile"),
+        errorRate: new Rate("error_rate_006_02_07_Socialinvesting_Channel_GetProfile"),
+        httpDuration: new Trend("duration_006_02_07_Socialinvesting_Channel_GetProfile"),
+        httpWaiting: new Trend("waiting_006_02_07_Socialinvesting_Channel_GetProfile"),
+        requestRate: new Counter("rps_006_02_07_Socialinvesting_Channel_GetProfile"),
+        http_reqs: new Counter("sample_006_02_07_Socialinvesting_Channel_GetProfile"),
     },
     Socialinvesting_CommunityProfile_GetProfile_2: {
-        errorCount: new Counter("error_count_006_01_08_Socialinvesting_CommunityProfile_GetProfile"),
-        errorRate: new Rate("error_rate_006_01_08_Socialinvesting_CommunityProfile_GetProfile"),
-        httpDuration: new Trend("duration_006_01_08_Socialinvesting_CommunityProfile_GetProfile"),
-        httpWaiting: new Trend("waiting_006_01_08_Socialinvesting_CommunityProfile_GetProfile"),
-        requestRate: new Counter("rps_006_01_08_Socialinvesting_CommunityProfile_GetProfile"),
-        http_reqs: new Counter("sample_006_01_08_Socialinvesting_CommunityProfile_GetProfile"),
+        errorCount: new Counter("error_count_006_02_08_Socialinvesting_CommunityProfile_GetProfile"),
+        errorRate: new Rate("error_rate_006_02_08_Socialinvesting_CommunityProfile_GetProfile"),
+        httpDuration: new Trend("duration_006_02_08_Socialinvesting_CommunityProfile_GetProfile"),
+        httpWaiting: new Trend("waiting_006_02_08_Socialinvesting_CommunityProfile_GetProfile"),
+        requestRate: new Counter("rps_006_02_08_Socialinvesting_CommunityProfile_GetProfile"),
+        http_reqs: new Counter("sample_006_02_08_Socialinvesting_CommunityProfile_GetProfile"),
     },
     Socialinvesting_Channel_JoinedByUser_2: {
-        errorCount: new Counter("error_count_006_01_09_Socialinvesting_Channel_JoinedByUser"),
-        errorRate: new Rate("error_rate_006_01_09_Socialinvesting_Channel_JoinedByUser"),
-        httpDuration: new Trend("duration_006_01_09_Socialinvesting_Channel_JoinedByUser"),
-        httpWaiting: new Trend("waiting_006_01_09_Socialinvesting_Channel_JoinedByUser"),
-        requestRate: new Counter("rps_006_01_09_Socialinvesting_Channel_JoinedByUser"),
-        http_reqs: new Counter("sample_006_01_09_Socialinvesting_Channel_JoinedByUser"),
+        errorCount: new Counter("error_count_006_02_09_Socialinvesting_Channel_JoinedByUser"),
+        errorRate: new Rate("error_rate_006_02_09_Socialinvesting_Channel_JoinedByUser"),
+        httpDuration: new Trend("duration_006_02_09_Socialinvesting_Channel_JoinedByUser"),
+        httpWaiting: new Trend("waiting_006_02_09_Socialinvesting_Channel_JoinedByUser"),
+        requestRate: new Counter("rps_006_02_09_Socialinvesting_Channel_JoinedByUser"),
+        http_reqs: new Counter("sample_006_02_09_Socialinvesting_Channel_JoinedByUser"),
     },
     Socialinvesting_Social_Join: {
-        errorCount: new Counter("error_count_006_01_10_Socialinvesting_Social_Join"),
-        errorRate: new Rate("error_rate_006_01_10_Socialinvesting_Social_Join"),
-        httpDuration: new Trend("duration_006_01_10_Socialinvesting_Social_Join"),
-        httpWaiting: new Trend("waiting_006_01_10_Socialinvesting_Social_Join"),
-        requestRate: new Counter("rps_006_01_10_Socialinvesting_Social_Join"),
-        http_reqs: new Counter("sample_006_01_10_Socialinvesting_Social_Join"),
+        errorCount: new Counter("error_count_006_02_10_Socialinvesting_Social_Join"),
+        errorRate: new Rate("error_rate_006_02_10_Socialinvesting_Social_Join"),
+        httpDuration: new Trend("duration_006_02_10_Socialinvesting_Social_Join"),
+        httpWaiting: new Trend("waiting_006_02_10_Socialinvesting_Social_Join"),
+        requestRate: new Counter("rps_006_02_10_Socialinvesting_Social_Join"),
+        http_reqs: new Counter("sample_006_02_10_Socialinvesting_Social_Join"),
     },
 };
 
 // ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
 export function BP006(data) {
-    const vuId = exec.vu.idInTest;
+    const scenarioName = 'BP006';
     const base_url = data.base_url;
+    const isIntEnv = `${__ENV.ENV}` === 'INT';
     
-    const mapping = data.vuMapping[vuId];
-    if (!mapping) {
-        console.error(`❌ VU${vuId} - No mapping found, skipping iteration`);
+    // ✅ GET CORRECT TOKEN FROM BP-SPECIFIC ARRAY
+    const bp006Tokens = data.bpTokens[scenarioName];
+    if (!bp006Tokens || bp006Tokens.length === 0) {
+        console.error(`❌ ${scenarioName} - No tokens available!`);
         return;
     }
     
-    const userKey = mapping.userKey;
-    const userToken = data.tokens[userKey];
+    // ✅ USE ITERATION INDEX TO GET CORRECT USER
+    const iterationIndex = exec.scenario.iterationInInstance;
+    const tokenIndex = iterationIndex % bp006Tokens.length; // Wrap around if iterations > tokens
     
-    if (!userToken || !userToken.token || !userToken.pin_token) {
-        console.error(`❌ VU${vuId} (User ${userKey}) - No valid token or pin_token available, skipping iteration`);
+    const userToken = bp006Tokens[tokenIndex];
+    if (!userToken || !userToken.token) {
+        console.error(`❌ ${scenarioName} Iteration ${iterationIndex} - No valid token at index ${tokenIndex}!`);
         return;
     }
+    
+    // ✅ CRITICAL VALIDATION - ENSURE CORRECT POOL
+    if (userToken.pool !== 'REGULAR') {
+        console.error(`❌ CRITICAL: ${scenarioName} using ${userToken.pool} user (${userToken.email}) instead of REGULAR! ABORTING.`);
+        return;
+    }
+    
+    // // ✅ DEBUG LOG - Confirm correct mapping
+    // console.log(`🔍 ${scenarioName} K6-VU${__VU} Iter${iterationIndex} → Setup-VU${userToken.vuId} → User${userToken.userNum} (${userToken.email}) | Pool: ${userToken.pool} ✅`);
     
     const token = userToken.token;
     const pin_token = userToken.pin_token;
     const email = userToken.email;
-    const bp = mapping.bp;
-    const isIntEnv = `${__ENV.ENV}` === 'INT';
 
-    const channel_id = getChannelId(base_url, token, bp, isIntEnv);
+    const channel_id = getChannelId(base_url, token, scenarioName, isIntEnv);
 
     // Final safety check sebelum melanjutkan ke API calls
     if (!channel_id) {
@@ -470,7 +481,8 @@ export function BP006(data) {
         ];
 
         const Socialinvesting_Social_Join_Payload = JSON.stringify({
-            channel_id: leftedChannelID, 
+            // channel_id: leftedChannelID, 
+            channel_id: channel_id,
             is_join_community_consent: true
         });
 

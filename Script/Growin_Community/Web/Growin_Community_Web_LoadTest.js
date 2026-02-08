@@ -3,20 +3,20 @@
 // ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Community/Web/LoadTest/Manual_LoadTest_0107_1459.html
 
 // Run Single BP
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=2m -e NUMSTART=101 -e SCENARIO=BP001 --out dashboard=export=../../../Report/Growin_Community/Web/BP001/Manual/Manual_DryRun_0107_1511_BP001_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP002 --out dashboard=export=../../../Report/Growin_Community/Web/BP002/Manual/Manual_DryRun_1217_1433_BP002_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP003 --out dashboard=export=../../../Report/Growin_Community/Web/BP003/Manual/Manual_DryRun_1217_1440_BP003_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=25 -e DURATION=5m -e NUMSTART=2051 -e SCENARIO=BP004 --out dashboard=export=../../../Report/Growin_Community/Web/BP004/Manual/Manual_DryRun_1219_1442_BP004_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP005 --out dashboard=export=../../../Report/Growin_Community/Web/BP005/Manual/Manual_DryRun_0107_1623_BP005_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP006 --out dashboard=export=../../../Report/Growin_Community/Web/BP006/Manual/Manual_DryRun_1223_1654_BP006_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP007 --out dashboard=export=../../../Report/Growin_Community/Web/BP007/Manual/Manual_DryRun_1218_2016_BP007_Local.html
+// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=250 -e DURATION=2m -e NUMSTART=101 -e SCENARIO=BP001 --out dashboard=export=../../../Report/Growin_Community/Web/BP001/Manual/Manual_DryRun_0123_0936_BP001_Local.html
+// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=250 -e DURATION=2m -e NUMSTART=101 -e SCENARIO=BP002 --out dashboard=export=../../../Report/Growin_Community/Web/BP002/Manual/Manual_DryRun_0123_0939_BP002_Local.html
+// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=250 -e DURATION=15m -e NUMSTART=101 -e SCENARIO=BP003 --out dashboard=export=../../../Report/Growin_Community/Web/BP003/Manual/Manual_DryRun_0202_1056_BP003_Local.html
+// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=2051 -e SCENARIO=BP004 --out dashboard=export=../../../Report/Growin_Community/Web/BP004/Manual/Manual_DryRun_1219_1442_BP004_Local.html
+// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=250 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP005 --out dashboard=export=../../../Report/Growin_Community/Web/BP005/Manual/Manual_DryRun_0127_2214_BP005_Local.html
+// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=250 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP006 --out dashboard=export=../../../Report/Growin_Community/Web/BP006/Manual/Manual_DryRun_0202_1513_BP006_Local.html
+// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=250 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP007 --out dashboard=export=../../../Report/Growin_Community/Web/BP007/Manual/Manual_DryRun_1218_2016_BP007_Local.html
 // ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=75 -e DURATION=5m -e NUMSTART=2001 -e SCENARIO=BP008 --out dashboard=export=../../../Report/Growin_Community/Web/BP008/Manual/Manual_DryRun_1203_2010_BP008_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP009 --out dashboard=export=../../../Report/Growin_Community/Web/BP009/Manual/Manual_DryRun_1217_1455_BP009_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP010 --out dashboard=export=../../../Report/Growin_Community/Web/BP010/Manual/Manual_DryRun_1217_1501_BP010_Local.html
+// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=250 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP009 --out dashboard=export=../../../Report/Growin_Community/Web/BP009/Manual/Manual_DryRun_1217_1455_BP009_Local.html
+// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=250 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP010 --out dashboard=export=../../../Report/Growin_Community/Web/BP010/Manual/Manual_DryRun_1217_1501_BP010_Local.html
 // ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=50 -e DURATION=5m -e NUMSTART=2001 -e SCENARIO=BP011 --out dashboard=export=../../../Report/Growin_Community/Web/BP011/Manual/Manual_DryRun_1203_2018_BP011_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP012 --out dashboard=export=../../../Report/Growin_Community/Web/BP012/Manual/Manual_DryRun_1217_1507_BP012_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=25 -e DURATION=5m -e NUMSTART=2051 -e SCENARIO=BP013 --out dashboard=export=../../../Report/Growin_Community/Web/BP013/Manual/Manual_DryRun_1203_2019_BP013_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=50 -e DURATION=5m -e NUMSTART=2001 -e SCENARIO=BP014 --out dashboard=export=../../../Report/Growin_Community/Web/BP014/Manual/Manual_DryRun_1203_2020_BP014_Local.html
+// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=250 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP012 --out dashboard=export=../../../Report/Growin_Community/Web/BP012/Manual/Manual_DryRun_1227_1615_BP012_Local.html
+// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=25 -e DURATION=1m -e NUMSTART=2051 -e SCENARIO=BP013 --out dashboard=export=../../../Report/Growin_Community/Web/BP013/Manual/Manual_DryRun_1227_1807_BP013_Local.html
+// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=50 -e DURATION=5m -e NUMSTART=2001 -e SCENARIO=BP014 --out dashboard=export=../../../Report/Growin_Community/Web/BP014/Manual/Manual_DryRun_1227_1627_BP014_Local.html
 
 import { textSummary } from "../../../Helper/textSummary.js";
 import { htmlReport } from '../../../Helper/bundle.js';
@@ -109,101 +109,66 @@ console.log(`   TOTAL: ${TOTAL_USER} users`);
 const scenarios = {};
 selectedBPs.forEach(bp => {
     scenarios[bp] = {
-        // executor: 'constant-vus',
-        // vus: userDistribution[bp] || 1,
-        // duration: `${__ENV.DURATION}`,
-        // gracefulStop: '30s',
-
-        executor: 'ramping-vus',
-            startVUs: 0,
-            stages: [
-                { duration: '5m', target: 100 },
-                { duration: '10m', target: 100 },
-                { duration: '5m', target: 150 },
-                { duration: '10m', target: 100 },
-                { duration: '5m', target: 200 },
-                { duration: '10m', target: 200 },
-                { duration: '5m', target: 250 },
-                { duration: '10m', target: 250 },
-                { duration: '5m', target: 300 },
-                { duration: '10m', target: 300 },
-                { duration: '5m', target: 350 },
-                { duration: '10m', target: 350 },
-                { duration: '5m', target: 400 },
-                { duration: '10m', target: 400 },
-                { duration: '5m', target: 450 },
-                { duration: '10m', target: 450 },
-                { duration: '5m', target: 500 },
-                { duration: '10m', target: 500 },
-                { duration: '5m', target: 550 },
-                { duration: '10m', target: 550 },
-                { duration: '5m', target: 600 },
-                { duration: '10m', target: 600 },
-                { duration: '5m', target: 650 },
-                { duration: '10m', target: 650 },
-                { duration: '5m', target: 700 },
-                { duration: '10m', target: 700 },
-                { duration: '5m', target: 750 },
-                { duration: '10m', target: 750 },
-                { duration: '5m', target: 800 },
-                { duration: '10m', target: 800 },
-                { duration: '5m', target: 850 },
-                { duration: '10m', target: 850 },
-                { duration: '5m', target: 900 },
-                { duration: '10m', target: 900 },
-                { duration: '5m', target: 950 },
-                { duration: '10m', target: 950 },
-                { duration: '5m', target: 1000 },
-                { duration: '10m', target: 1000 },
-                { duration: '5m', target: 1050 },
-                { duration: '10m', target: 1050 },
-                { duration: '5m', target: 1100 },
-                { duration: '10m', target: 1100 },
-                { duration: '5m', target: 1150 },
-                { duration: '10m', target: 1150 },
-                { duration: '5m', target: 1200 },
-                { duration: '10m', target: 1200 },
-                { duration: '5m', target: 1250 },
-                { duration: '10m', target: 1250 },
-                { duration: '5m', target: 1300 },
-                { duration: '10m', target: 1300 },
-                { duration: '5m', target: 1350 },
-                { duration: '10m', target: 1350 },
-                { duration: '5m', target: 1400 },
-                { duration: '10m', target: 1400 },
-                { duration: '5m', target: 1450 },
-                { duration: '10m', target: 1450 },
-                { duration: '5m', target: 1500 },
-                { duration: '10m', target: 1500 },
-                { duration: '5m', target: 1550 },
-                { duration: '10m', target: 1550 },
-                { duration: '5m', target: 1600 },
-                { duration: '10m', target: 1600 },
-                { duration: '5m', target: 1650 },
-                { duration: '10m', target: 1650 },
-                { duration: '5m', target: 1700 },
-                { duration: '10m', target: 1700 },
-                { duration: '5m', target: 1750 },
-                { duration: '10m', target: 1750 },
-                { duration: '5m', target: 1800 },
-                { duration: '10m', target: 1800 },
-                { duration: '5m', target: 1850 },
-                { duration: '10m', target: 1850 },
-                { duration: '5m', target: 1900 },
-                { duration: '10m', target: 1900 },
-                { duration: '5m', target: 1950 },
-                { duration: '10m', target: 1950 },
-                { duration: '5m', target: 2000 },
-                { duration: '10m', target: 2000 },
-                { duration: '5m', target: 0 },      // ramp down
-            ],
-            gracefulStop: '30s',
-
         // executor: 'per-vu-iterations',
-        // vus: 1,
+        // vus: 400,
         // iterations: 1,
         // maxDuration: '1h',
 
+        // executor: 'ramping-vus',
+        // startVUs: 0,
+        // stages: [
+        //     { duration: '5m', target: 100 },
+        //     { duration: '5m', target: 100 },
+        //     { duration: '5m', target: 200 },
+        //     { duration: '5m', target: 200 },
+        //     { duration: '5m', target: 300 },
+        //     { duration: '5m', target: 300 },
+        //     { duration: '5m', target: 400 },
+        //     { duration: '5m', target: 400 },
+
+        //     { duration: '5m', target: 500 },
+        //     { duration: '5m', target: 500 },
+        //     { duration: '5m', target: 600 },
+        //     { duration: '5m', target: 600 },
+        //     { duration: '5m', target: 700 },
+        //     { duration: '5m', target: 700 },
+        //     { duration: '5m', target: 800 },
+        //     { duration: '5m', target: 800 },
+
+        //     { duration: '5m', target: 900 },
+        //     { duration: '5m', target: 900 },
+        //     { duration: '5m', target: 1000 },
+        //     { duration: '5m', target: 1000 },
+        //     { duration: '5m', target: 1100 },
+        //     { duration: '5m', target: 1100 },
+        //     { duration: '5m', target: 1200 },
+        //     { duration: '5m', target: 1200 },
+
+        //     { duration: '5m', target: 1300 },
+        //     { duration: '5m', target: 1300 },
+        //     { duration: '5m', target: 1400 },
+        //     { duration: '5m', target: 1400 },
+        //     { duration: '5m', target: 1500 },
+        //     { duration: '5m', target: 1500 },
+        //     { duration: '5m', target: 1600 },
+        //     { duration: '5m', target: 1600 },
+
+        //     // { duration: '5m', target: 1700 },
+        //     // { duration: '5m', target: 1700 },
+        //     // { duration: '5m', target: 1800 },
+        //     // { duration: '5m', target: 1800 },
+        //     // { duration: '5m', target: 1900 },
+        //     // { duration: '5m', target: 1900 },
+        //     // { duration: '5m', target: 2000 },
+        //     // { duration: '5m', target: 2000 },
+        //     { duration: '5m', target: 0 },      // ramp down
+        // ],
+
+        executor: 'constant-vus',
+        vus: userDistribution[bp] || 1,
+        duration: `${__ENV.DURATION}`,
+
+        gracefulStop: '30s',
         exec: bp,
     };
 });
@@ -310,11 +275,15 @@ export function setup() {
 
                 const loginHeaders = {
                     'Content-Type': 'application/json',
+                    'Accept': '*/*',
                     'Accept-Language': 'en',
                     'Connection': 'keep-alive',
                     'Accept-Encoding': 'gzip, deflate, br',
-                    'Accept': '*/*',
-                    'User-Agent': 'PostmanRuntime/7.43.0'
+                    'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+                    'X-App-Name': 'web',
+                    'X-App-Version': '1.4.1',
+                    'X-Device-Info': 'iPhone 11',
+                    'X-Device-Id': 'TEST3'
                 };
 
                 const loginRes = http.post(base_url + '/auth/api/v1/login', loginPayload, { headers: loginHeaders });
@@ -333,12 +302,17 @@ export function setup() {
                     // ✅ Step 2: PIN Login (UNTUK SEMUA USER)
                     const pinPayload = JSON.stringify({ value: "123456" });
                     const pinHeaders = {
-                        'Cookie': `ACCESS_TOKEN=${token}`,
                         'Content-Type': 'application/json',
+                        'Accept': '*/*',
                         'Accept-Language': 'en',
                         'Connection': 'keep-alive',
                         'Accept-Encoding': 'gzip, deflate, br',
-                        'Accept': '*/*',
+                        'Cookie': `ACCESS_TOKEN=${token};`,
+                        'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+                        'X-App-Name': 'web',
+                        'X-App-Version': '1.4.1',
+                        'X-Device-Info': 'iPhone 11',
+                        'X-Device-Id': 'TEST3'
                     };
 
                     const pinRes = http.post(base_url + '/auth/api/v1/protected/pin-login', pinPayload, { headers: pinHeaders });
@@ -349,7 +323,7 @@ export function setup() {
                     } else {
                         totalPinFailed++;
                         if (i === batchStart || totalPinFailed <= 5) {
-                            console.error(`   ❌ User ${userKey} ${email} (VU${vuId}) PIN FAILED - Status: ${pinRes.status}`);
+                            console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) PIN FAILED - Status: ${pinRes.status}`);
                         }
                         tokens[userKey].pin_token = null;
                     }

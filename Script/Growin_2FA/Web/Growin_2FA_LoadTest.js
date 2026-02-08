@@ -4,9 +4,9 @@
 
 // Run Single BP
 // ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=101 -e SCENARIO=BP001 --out dashboard=export=../../../Report/Growin_2FA/Web/BP001/Manual/Manual_DryRun_0111_1058_BP001_Local.html
-// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=5000 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP002 --out dashboard=export=../../../Report/Growin_2FA/Web/BP002/Manual/Manual_DryRun_0127_1031_BP002_Local.html
+// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=2500 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP002 --out dashboard=export=../../../Report/Growin_2FA/Web/BP002/Manual/Manual_DryRun_0202_1424_BP002_Local.html
 // ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=400 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP003 --out dashboard=export=../../../Report/Growin_2FA/Web/BP003/Manual/Manual_DryRun_0123_1609_BP003_Local.html
-// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=400 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP004 --out dashboard=export=../../../Report/Growin_2FA/Web/BP004/Manual/Manual_DryRun_0126_1157_BP004_Local.html
+// G
 
 import { textSummary } from "../../../Helper/textSummary.js";
 import { htmlReport } from '../../../Helper/bundle.js';
@@ -84,7 +84,7 @@ selectedBPs.forEach(bp => {
 
         // executor: 'per-vu-iterations',
         // vus: 5000,
-        // iterations: 1,
+        // iterations: 20,
         // maxDuration: '1h',
 
         exec: bp,

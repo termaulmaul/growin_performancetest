@@ -14,48 +14,59 @@ import { getChannelId, getChannelIdWithOptions, ChannelMetrics } from './channel
 const StockPick = {
     Socialinvesting_StockPick: {
         errorCount: new Counter("error_count_003_01_01_Socialinvesting_StockPick"),
-        errorRate: new Rate("error_rate_0003_01_01_Socialinvesting_StockPick"),
-        httpDuration: new Trend("duration_0003_01_01_Socialinvesting_StockPick"),
-        httpWaiting: new Trend("waiting_0003_01_01_Socialinvesting_StockPick"),
-        requestRate: new Counter("rps_0003_01_01_Socialinvesting_StockPick"),
-        http_reqs: new Counter("sample_0003_01_01_Socialinvesting_StockPick"),
+        errorRate: new Rate("error_rate_003_01_01_Socialinvesting_StockPick"),
+        httpDuration: new Trend("duration_003_01_01_Socialinvesting_StockPick"),
+        httpWaiting: new Trend("waiting_003_01_01_Socialinvesting_StockPick"),
+        requestRate: new Counter("rps_003_01_01_Socialinvesting_StockPick"),
+        http_reqs: new Counter("sample_003_01_01_Socialinvesting_StockPick"),
     },
     Search_QuerySocialInvesting: {
         errorCount: new Counter("error_count_003_01_02_Search_QuerySocialInvesting"),
-        errorRate: new Rate("error_rate_0003_01_02_Search_QuerySocialInvesting"),
-        httpDuration: new Trend("duration_0003_01_02_Search_QuerySocialInvesting"),
-        httpWaiting: new Trend("waiting_0003_01_02_Search_QuerySocialInvesting"),
-        requestRate: new Counter("rps_0003_01_02_Search_QuerySocialInvesting"),
-        http_reqs: new Counter("sample_0003_01_02_Search_QuerySocialInvesting"),
+        errorRate: new Rate("error_rate_003_01_02_Search_QuerySocialInvesting"),
+        httpDuration: new Trend("duration_003_01_02_Search_QuerySocialInvesting"),
+        httpWaiting: new Trend("waiting_003_01_02_Search_QuerySocialInvesting"),
+        requestRate: new Counter("rps_003_01_02_Search_QuerySocialInvesting"),
+        http_reqs: new Counter("sample_003_01_02_Search_QuerySocialInvesting"),
     },
 };
 
 // ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
 export function BP003(data) {
-    const vuId = exec.vu.idInTest;
+    const scenarioName = 'BP003';
     const base_url = data.base_url;
+    const isIntEnv = `${__ENV.ENV}` === 'INT';
     
-    const mapping = data.vuMapping[vuId];
-    if (!mapping) {
-        console.error(`❌ VU${vuId} - No mapping found, skipping iteration`);
+    // ✅ GET CORRECT TOKEN FROM BP-SPECIFIC ARRAY
+    const bp003Tokens = data.bpTokens[scenarioName];
+    if (!bp003Tokens || bp003Tokens.length === 0) {
+        console.error(`❌ ${scenarioName} - No tokens available!`);
         return;
     }
     
-    const userKey = mapping.userKey;
-    const userToken = data.tokens[userKey];
+    // ✅ USE ITERATION INDEX TO GET CORRECT USER
+    const iterationIndex = exec.scenario.iterationInInstance;
+    const tokenIndex = iterationIndex % bp003Tokens.length; // Wrap around if iterations > tokens
     
-    if (!userToken || !userToken.token || !userToken.pin_token) {
-        console.error(`❌ VU${vuId} (User ${userKey}) - No valid token or pin_token available, skipping iteration`);
+    const userToken = bp003Tokens[tokenIndex];
+    if (!userToken || !userToken.token) {
+        console.error(`❌ ${scenarioName} Iteration ${iterationIndex} - No valid token at index ${tokenIndex}!`);
         return;
     }
+    
+    // ✅ CRITICAL VALIDATION - ENSURE CORRECT POOL
+    if (userToken.pool !== 'REGULAR') {
+        console.error(`❌ CRITICAL: ${scenarioName} using ${userToken.pool} user (${userToken.email}) instead of REGULAR! ABORTING.`);
+        return;
+    }
+    
+    // // ✅ DEBUG LOG - Confirm correct mapping
+    // console.log(`🔍 ${scenarioName} K6-VU${__VU} Iter${iterationIndex} → Setup-VU${userToken.vuId} → User${userToken.userNum} (${userToken.email}) | Pool: ${userToken.pool} ✅`);
     
     const token = userToken.token;
     const pin_token = userToken.pin_token;
     const email = userToken.email;
-    const bp = mapping.bp;
-    const isIntEnv = `${__ENV.ENV}` === 'INT';
 
-    const channel_id = getChannelId(base_url, token, bp, isIntEnv);
+    const channel_id = getChannelId(base_url, token, scenarioName, isIntEnv);
 
     // Final safety check sebelum melanjutkan ke API calls
     if (!channel_id) {
@@ -71,15 +82,17 @@ export function BP003(data) {
         ]
 
         const stepOneHeaders = {
-            // 'Cookie': `ACCESS_TOKEN=${token}`,
-            // 'Content-Type': 'application/json',
-
-            'Cookie': `ACCESS_TOKEN=${token}`,
             'Content-Type': 'application/json',
-            'Accept-Language':'en',
-            'Connection':'keep-alive',
-            'Accept-Encoding':'gzip, deflate, br',
-            'Accept':'*/*',
+            'Accept': '*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cookie': `ACCESS_TOKEN=${token};`,
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3'
         };
 
         const requests = [
@@ -125,15 +138,17 @@ export function BP003(data) {
         ];
 
         const stepTwoHeaders = {
-            // 'Cookie': `ACCESS_TOKEN=${token}`,
-            // 'Content-Type': 'application/json',
-
-            'Cookie': `ACCESS_TOKEN=${token}`,
             'Content-Type': 'application/json',
-            'Accept-Language':'en',
-            'Connection':'keep-alive',
-            'Accept-Encoding':'gzip, deflate, br',
-            'Accept':'*/*',
+            'Accept': '*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cookie': `ACCESS_TOKEN=${token};`,
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3'
         };
 
         const requests = [

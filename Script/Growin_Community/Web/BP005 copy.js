@@ -235,15 +235,17 @@ export default function (data) {
         ];
 
         const stepOneHeaders = {
-            // 'Cookie': `ACCESS_TOKEN=${token}`,
-            // 'Content-Type': 'application/json',
-
-            'Cookie': `ACCESS_TOKEN=${token}`,
             'Content-Type': 'application/json',
-            'Accept-Language':'en',
-            'Connection':'keep-alive',
-            'Accept-Encoding':'gzip, deflate, br',
-            'Accept':'*/*',
+            'Accept': '*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cookie': `ACCESS_TOKEN=${token};`,
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3'
         };
 
         const requests = [
@@ -308,15 +310,17 @@ export default function (data) {
         ];
 
         const stepTwoHeaders = {
-            // 'Cookie': `ACCESS_TOKEN=${token}`,
-            // 'Content-Type': 'application/json',
-
-            'Cookie': `ACCESS_TOKEN=${token}`,
             'Content-Type': 'application/json',
-            'Accept-Language':'en',
-            'Connection':'keep-alive',
-            'Accept-Encoding':'gzip, deflate, br',
-            'Accept':'*/*',
+            'Accept': '*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cookie': `ACCESS_TOKEN=${token};`,
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3'
         };
 
         const requests = [
@@ -389,15 +393,17 @@ export default function (data) {
         
 
         const stepThreeHeaders = {
-            // 'Cookie': `ACCESS_TOKEN=${token}`,
-            // 'Content-Type': 'application/json',
-
-            'Cookie': `ACCESS_TOKEN=${token}`,
             'Content-Type': 'application/json',
-            'Accept-Language':'en',
-            'Connection':'keep-alive',
-            'Accept-Encoding':'gzip, deflate, br',
-            'Accept':'*/*',
+            'Accept': '*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cookie': `ACCESS_TOKEN=${token};`,
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3'
         };
 
         const requests = [

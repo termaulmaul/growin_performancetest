@@ -72,35 +72,48 @@ const YourCommunities = {
 
 // ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
 export function BP001(data) {
-    const vuId = exec.vu.idInTest;
+    const scenarioName = 'BP001';
     const base_url = data.base_url;
+    const isIntEnv = `${__ENV.ENV}` === 'INT';
     
-    const mapping = data.vuMapping[vuId];
-    if (!mapping) {
-        console.error(`❌ VU${vuId} - No mapping found, skipping iteration`);
+    // ✅ GET CORRECT TOKEN FROM BP-SPECIFIC ARRAY
+    const bp001Tokens = data.bpTokens[scenarioName];
+    if (!bp001Tokens || bp001Tokens.length === 0) {
+        console.error(`❌ ${scenarioName} - No tokens available!`);
         return;
     }
     
-    const userKey = mapping.userKey;
-    const userToken = data.tokens[userKey];
+    // ✅ USE ITERATION INDEX TO GET CORRECT USER
+    const iterationIndex = exec.scenario.iterationInInstance;
+    const tokenIndex = iterationIndex % bp001Tokens.length; // Wrap around if iterations > tokens
     
-    if (!userToken || !userToken.token || !userToken.pin_token) {
-        console.error(`❌ VU${vuId} (User ${userKey}) - No valid token or pin_token available, skipping iteration`);
+    const userToken = bp001Tokens[tokenIndex];
+    if (!userToken || !userToken.token) {
+        console.error(`❌ ${scenarioName} Iteration ${iterationIndex} - No valid token at index ${tokenIndex}!`);
         return;
     }
+    
+    // ✅ CRITICAL VALIDATION - ENSURE CORRECT POOL
+    if (userToken.pool !== 'REGULAR') {
+        console.error(`❌ CRITICAL: ${scenarioName} using ${userToken.pool} user (${userToken.email}) instead of REGULAR! ABORTING.`);
+        return;
+    }
+    
+    // // ✅ DEBUG LOG - Confirm correct mapping
+    // console.log(`🔍 ${scenarioName} K6-VU${__VU} Iter${iterationIndex} → Setup-VU${userToken.vuId} → User${userToken.userNum} (${userToken.email}) | Pool: ${userToken.pool} ✅`);
     
     const token = userToken.token;
     const pin_token = userToken.pin_token;
     const email = userToken.email;
-    const bp = mapping.bp;
 
-    // ✅ Ambil channel_id untuk BP ini dari data yang sudah di-fetch di setup()
-    // const channel_id = data.channelIds ? data.channelIds[bp] : null;
-    
-    // if (!channel_id) {
-    //     // console.error(`❌ ${email} (${bp}) - No channel_id available, skipping iteration`);
-    //     return;
-    // }
+    const channel_id = getChannelId(base_url, token, scenarioName, isIntEnv);
+
+    // Final safety check sebelum melanjutkan ke API calls
+    if (!channel_id) {
+        console.error(`   ❌ ${email} - Still no channel_id after all fallbacks, aborting iteration`);
+        // SystemMetrics.noChannelFound.add(1);
+        return;
+    }
 
     // Batch 1
     if (token) {
@@ -109,15 +122,17 @@ export function BP001(data) {
         ];
 
         const stepOneHeaders = {
-            // 'Cookie': `ACCESS_TOKEN=${token}`,
-            // 'Content-Type': 'application/json',
-
             'Cookie': `ACCESS_TOKEN=${token}`,
             'Content-Type': 'application/json',
-            'Accept-Language':'en',
-            'Connection':'keep-alive',
-            'Accept-Encoding':'gzip, deflate, br',
-            'Accept':'*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept': '*/*',
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3',
         };
 
         const requests = [
@@ -168,15 +183,17 @@ export function BP001(data) {
         ];
 
         const stepTwoHeaders = {
-            // 'Cookie': `ACCESS_TOKEN=${token}`,
-            // 'Content-Type': 'application/json',
-
             'Cookie': `ACCESS_TOKEN=${token}`,
             'Content-Type': 'application/json',
-            'Accept-Language':'en',
-            'Connection':'keep-alive',
-            'Accept-Encoding':'gzip, deflate, br',
-            'Accept':'*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept': '*/*',
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3',
         };
 
         const requests = [
@@ -224,5 +241,5 @@ export function BP001(data) {
             }
         });
     }
-    sleep(0.25);
+    sleep(0.5);
 }

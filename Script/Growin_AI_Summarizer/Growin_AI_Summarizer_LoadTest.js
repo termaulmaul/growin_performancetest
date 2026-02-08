@@ -1,57 +1,42 @@
 // Command
 // Run Multiple BP
-// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=2h -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_AI_Summarizer/LoadTest/Manual_LoadTest_1120_2220.html
+// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Community/Web/LoadTest/Manual_LoadTest_0107_1459.html
 
-// Run Single BP
-// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP001 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP001/Manual/Manual_DryRun_1201_1104_BP001_Local.html
-// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP002 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP002/Manual/Manual_DryRun_1126_2201_BP002_Local.html
-// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP003 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP003/Manual/Manual_DryRun_1126_2201_BP003_Local.html
-// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP004 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP004/Manual/Manual_DryRun_1126_2202_BP004_Local.html
-// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP005 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP005/Manual/Manual_DryRun_1128_1506_BP005_Local.html
-// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP006 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP006/Manual/Manual_DryRun_1128_1530_BP006_Local.html
-// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP007 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP007/Manual/Manual_DryRun_1126_2208_BP007_Local.html
-// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP008 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP008/Manual/Manual_DryRun_1126_2146_BP008_Local.html
-// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP009 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP009/Manual/Manual_DryRun_1128_1539_BP009_Local.html
-// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP010 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP010/Manual/Manual_DryRun_1126_2150_BP010_Local.html
-// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP011 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP011/Manual/Manual_DryRun_1126_2151_BP011_Local.html
-// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP012 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP012/Manual/Manual_DryRun_1126_2153_BP012_Local.html
-// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP013 --out dashboard=export=../../../Report/Growin_AI_Summarizer/BP013/Manual/Manual_DryRun_1126_2156_BP013_Local.html
+// Run Single BP Web
+// ../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=500 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP001/Manual/Manual_DryRun_0205_1112_BP001_Local.html
 
-import { textSummary } from "../../../Helper/textSummary.js";
-import { htmlReport } from '../../../Helper/bundle.js';
-import { BP001 } from "./BP001.js";
-import { BP002 } from "./BP002.js";
-import { BP003 } from "./BP003.js";
-import { BP004 } from "./BP004.js";
-import { BP005 } from "./BP005.js";
-import { BP006 } from "./BP006.js";
-import { BP007 } from "./BP007.js";
-import { BP008 } from "./BP008.js";
-import { BP009 } from "./BP009.js";
-import { BP010 } from "./BP010.js";
-import { BP011 } from "./BP011.js";
-import { BP012 } from "./BP012.js";
-import { BP013 } from "./BP013.js";
+import { textSummary } from "../../Helper/textSummary.js";
+import { htmlReport } from '../../Helper/bundle.js';
+import { BP001 as BP001_Web } from "./Web/BP001.js";
+
 import http from "k6/http";
 import { sleep } from "k6";
+import { Rate } from "k6/metrics";
 
-export { BP001, BP002, BP003, BP004, BP005, BP006, BP007, BP008, BP009, BP010, BP011, BP012, BP013 }
+function getPlatform() {
+    const { PLATFORM } = __ENV;
+    
+    if (PLATFORM && ['Android', 'iOS', 'Web'].includes(PLATFORM)) {
+        return PLATFORM;
+    }
+    
+    console.error('❌ PLATFORM must be specified: Android, iOS or Web');
+    console.error('   Example: -e PLATFORM=Android, -e PLATFORM=iOS, -e PLATFORM=Web');
+    return 'Web'; // default fallback
+}
 
-// ✅ DEFINISI PERSENTASE USER PER BP
+const platform = getPlatform();
+
+// Export BP yang tepat berdasarkan platform
+export const BP001 = platform === 'Android' ? BP001_Android : BP001_Web;
+
+// ✅ RETRY CONFIGURATION
+const MAX_RETRY_ATTEMPTS = 10;
+const RETRY_DELAY = 1; // seconds between retry attempts
+
 const BP_USER_PERCENTAGE = {
-    BP001: 7.7,
-    BP002: 7.7,
-    BP003: 7.7,
-    BP004: 7.7,
-    BP005: 7.7,
-    BP006: 7.7,
-    BP007: 7.7,
-    BP008: 7.7,
-    BP009: 7.7,
-    BP010: 7.7,
-    BP011: 7.7,
-    BP012: 7.7,
-    BP013: 7.7,
+    BP001: 50,
+    BP002: 50,
 };
 
 // ✅ Function untuk calculate user distribution
@@ -89,8 +74,10 @@ const TOTAL_USER = parseInt(__ENV.TOTAL_USER) || parseInt(__ENV.USER) || 100;
 
 let selectedBPs = [];
 if (SCENARIO) {
+    // User bisa input: BP001 atau BP001,BP002
     selectedBPs = SCENARIO.split(',').map(s => s.trim());
 } else {
+    // Default: jalankan semua BP
     selectedBPs = Object.keys(BP_USER_PERCENTAGE);
 }
 
@@ -101,28 +88,79 @@ Object.keys(userDistribution).forEach(bp => {
     console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
 });
 console.log(`   TOTAL: ${TOTAL_USER} users`);
+console.log(`   PLATFORM: ${platform}`);
 
 const scenarios = {};
 selectedBPs.forEach(bp => {
     scenarios[bp] = {
-        executor: 'constant-vus',
-        vus: userDistribution[bp] || 1,
-        duration: `${__ENV.DURATION}`,
+        executor: 'per-vu-iterations',
+        vus: 1,
+        iterations: 1,
+        maxDuration: '1h',
+
+        // executor: 'ramping-vus',
+        // startVUs: 0,
+        // stages: [
+        //     { duration: '5m', target: 100 },
+        //     { duration: '10m', target: 100 },
+        //     { duration: '5m', target: 200 },
+        //     { duration: '10m', target: 200 },
+        //     { duration: '5m', target: 300 },
+        //     { duration: '10m', target: 300 },
+        //     { duration: '5m', target: 400 },
+        //     { duration: '10m', target: 400 },
+
+        //     { duration: '5m', target: 500 },
+        //     { duration: '10m', target: 500 },
+        //     { duration: '5m', target: 600 },
+        //     { duration: '10m', target: 600 },
+        //     { duration: '5m', target: 700 },
+        //     { duration: '10m', target: 700 },
+        //     { duration: '5m', target: 800 },
+        //     { duration: '10m', target: 800 },
+
+        //     { duration: '5m', target: 900 },
+        //     { duration: '10m', target: 900 },
+        //     { duration: '5m', target: 1000 },
+        //     { duration: '10m', target: 1000 },
+        //     { duration: '5m', target: 1100 },
+        //     { duration: '10m', target: 1100 },
+        //     { duration: '5m', target: 1200 },
+        //     { duration: '10m', target: 1200 },
+
+        //     { duration: '5m', target: 1300 },
+        //     { duration: '10m', target: 1300 },
+        //     { duration: '5m', target: 1400 },
+        //     { duration: '10m', target: 1400 },
+        //     { duration: '5m', target: 1500 },
+        //     { duration: '10m', target: 1500 },
+        //     { duration: '5m', target: 1600 },
+        //     { duration: '10m', target: 1600 },
+
+        //     { duration: '5m', target: 1700 },
+        //     { duration: '10m', target: 1700 },
+        //     { duration: '5m', target: 1800 },
+        //     { duration: '10m', target: 1800 },
+        //     { duration: '5m', target: 1900 },
+        //     { duration: '10m', target: 1900 },
+        //     { duration: '5m', target: 2000 },
+        //     { duration: '10m', target: 2000 },
+        //     { duration: '5m', target: 0 },
+        // ],
+
+        // executor: 'constant-vus',
+        // vus: userDistribution[bp] || 1,
+        // duration: `${__ENV.DURATION}`,
+
         gracefulStop: '30s',
-
-        // executor: 'per-vu-iterations',
-        // vus: 1,
-        // iterations: 1,
-        // maxDuration: '1h',
-
-        exec: bp,
+        exec: bp, // akan memanggil BP001() atau BP002() sesuai export di atas
     };
 });
 
 export const options = {
     scenarios: scenarios,
     noConnectionReuse: false,
-    setupTimeout: '3600s',
+    setupTimeout: '3600s', // ✅ Increased for large user counts
     teardownTimeout: '3600s',
     summaryTimeUnit: '3600s',
 }
@@ -160,18 +198,69 @@ function getUserCredentials(userNum, bpOffset = 0) {
     return { email: email, password: 'M@nsek.123' };
 }
 
-// ✅ SETUP FUNCTION - SEMUA BP mendapat PIN dan UUID
+// ✅ LOGIN WITH RETRY - Max 10 attempts
+function loginWithRetry(base_url, credentials, userKey, vuId) {
+    const loginPayload = JSON.stringify({
+        password: credentials.password,
+        email: credentials.email,
+        recaptcha: '',
+    });
+
+    const loginHeaders = {
+        'Content-Type': 'application/json',
+        'Accept': '*/*',
+        'Accept-Language': 'en',
+        'Connection': 'keep-alive',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+        'X-App-Name': 'web',
+        'X-App-Version': '1.4.1',
+        'X-Device-Info': 'iPhone 11',
+        'X-Device-Id': 'TEST3'
+    };
+
+    for (let attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
+        const loginRes = http.post(base_url + '/auth/api/v1/login', loginPayload, { headers: loginHeaders });
+        
+        if (loginRes.status === 200) {
+            if (attempt > 1) {
+                console.log(`   ✅ User ${userKey} (${credentials.email}, VU${vuId}) LOGIN SUCCESS on attempt ${attempt}`);
+            }
+            return {
+                success: true,
+                token: loginRes.json().data.token,
+                attempts: attempt
+            };
+        }
+        
+        if (attempt < MAX_RETRY_ATTEMPTS) {
+            console.warn(`   ⚠️  User ${userKey} (${credentials.email}, VU${vuId}) LOGIN attempt ${attempt}/${MAX_RETRY_ATTEMPTS} FAILED - Status: ${loginRes.status}, retrying...`);
+            sleep(RETRY_DELAY);
+        } else {
+            console.error(`   ❌ User ${userKey} (${credentials.email}, VU${vuId}) LOGIN FAILED after ${MAX_RETRY_ATTEMPTS} attempts - Status: ${loginRes.status}`);
+        }
+    }
+    
+    return {
+        success: false,
+        token: null,
+        attempts: MAX_RETRY_ATTEMPTS
+    };
+}
+
 export function setup() {
     const base_url = getBaseUrl();
     const tokens = {};
     const vuMapping = {};
     
-    const BATCH_SIZE = 500; // Process 50 users at a time
-    const BATCH_DELAY = 0; // 3 seconds between batches
+    const BATCH_SIZE = 500; // Process 500 users at a time
+    const BATCH_DELAY = 2; // 2 seconds between batches
     
     console.log(`🔐 Starting login for ${TOTAL_USER} users distributed across ${selectedBPs.length} BPs...`);
     console.log(`📦 Batch processing: ${BATCH_SIZE} users per batch, ${BATCH_DELAY}s delay`);
+    console.log(`🔁 Retry enabled: Max ${MAX_RETRY_ATTEMPTS} attempts per login`);
     console.log(`🔑 ALL users will get PIN token`);
+    console.log(`📱 Platform: ${platform}`);
     
     let globalUserOffset = 0;
     let globalVuOffset = 1;
@@ -180,6 +269,9 @@ export function setup() {
     let totalLoginFailed = 0;
     let totalPinSuccess = 0;
     let totalPinFailed = 0;
+    let totalUserIdSuccess = 0;
+    let totalUserIdFailed = 0;
+    let totalLoginRetries = 0;
     
     // ✅ Object untuk menyimpan channel_id per BP
     const channelIds = {};
@@ -187,7 +279,7 @@ export function setup() {
     selectedBPs.forEach((bp, bpIndex) => {
         const usersForThisBP = userDistribution[bp];
         
-        console.log(`\n📦 Processing ${bp} - ${usersForThisBP} users (VU ${globalVuOffset} to ${globalVuOffset + usersForThisBP - 1})...`);
+        console.log(`\n📦 Processing ${bp} on ${platform} - ${usersForThisBP} users (VU ${globalVuOffset} to ${globalVuOffset + usersForThisBP - 1})...`);
         
         // Create VU mapping
         for (let localUserIndex = 1; localUserIndex <= usersForThisBP; localUserIndex++) {
@@ -198,7 +290,7 @@ export function setup() {
             };
         }
         
-        // ✅ Process in batches
+        // ✅ Process in batches with retry
         const numBatches = Math.ceil(usersForThisBP / BATCH_SIZE);
         
         for (let batchNum = 0; batchNum < numBatches; batchNum++) {
@@ -212,31 +304,18 @@ export function setup() {
                 const userKey = globalUserOffset + i;
                 const vuId = globalVuOffset + i - 1;
                 
-                // ✅ Step 1: Regular Login
-                const loginPayload = JSON.stringify({
-                    password: credentials.password,
-                    email: credentials.email,
-                    recaptcha: '',
-                });
-
-                const loginHeaders = {
-                    'Content-Type': 'application/json',
-                    'Accept-Language': 'en',
-                    'Connection': 'keep-alive',
-                    'Accept-Encoding': 'gzip, deflate, br',
-                    'Accept': '*/*',
-                    'User-Agent': 'PostmanRuntime/7.43.0'
-                };
-
-                const loginRes = http.post(base_url + '/auth/api/v1/login', loginPayload, { headers: loginHeaders });
+                // ✅ Step 1: Login with retry
+                const loginResult = loginWithRetry(base_url, credentials, userKey, vuId);
                 
-                if (loginRes.status === 200) {
+                if (loginResult.success) {
                     totalLoginSuccess++;
-                    const token = loginRes.json().data.token;
+                    if (loginResult.attempts > 1) {
+                        totalLoginRetries += (loginResult.attempts - 1);
+                    }
                     
                     tokens[userKey] = { 
                         email: credentials.email, 
-                        token: token,
+                        token: loginResult.token,
                         pin_token: null,
                         bp: bp
                     };
@@ -244,12 +323,17 @@ export function setup() {
                     // ✅ Step 2: PIN Login (UNTUK SEMUA USER)
                     const pinPayload = JSON.stringify({ value: "123456" });
                     const pinHeaders = {
-                        'Cookie': `ACCESS_TOKEN=${token}`,
                         'Content-Type': 'application/json',
+                        'Accept': '*/*',
                         'Accept-Language': 'en',
                         'Connection': 'keep-alive',
                         'Accept-Encoding': 'gzip, deflate, br',
-                        'Accept': '*/*',
+                        'Cookie': `ACCESS_TOKEN=${loginResult.token};`,
+                        'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+                        'X-App-Name': 'web',
+                        'X-App-Version': '1.4.1',
+                        'X-Device-Info': 'iPhone 11',
+                        'X-Device-Id': 'TEST3'
                     };
 
                     const pinRes = http.post(base_url + '/auth/api/v1/protected/pin-login', pinPayload, { headers: pinHeaders });
@@ -257,19 +341,44 @@ export function setup() {
                     if (pinRes.status === 200) {
                         totalPinSuccess++;
                         tokens[userKey].pin_token = pinRes.json().data.pin_token;
+
+                        // ✅ Step 3: Get userID (UNTUK SEMUA USER yang berhasil PIN)
+                        const profileHeaders = {
+                            'Content-Type': 'application/json',
+                            'Accept': '*/*',
+                            'Accept-Language': 'en',
+                            'Connection': 'keep-alive',
+                            'Accept-Encoding': 'gzip, deflate, br',
+                            'Cookie': `ACCESS_TOKEN=${loginResult.token}; PIN_TOKEN=${pinRes.json().data.pin_token};`,
+                            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+                            'X-App-Name': 'web',
+                            'X-App-Version': '1.4.1',
+                            'X-Device-Info': 'iPhone 11',
+                            'X-Device-Id': 'TEST3'
+                        };
+                        
+                        const profileRes = http.get(base_url + '/user/api/v1/profile/trading', { headers: profileHeaders });
+                        
+                        if (profileRes.status === 200) {
+                            totalUserIdSuccess++;
+                            tokens[userKey].user_id = profileRes.json().data.user_id;
+                        } else {
+                            totalUserIdFailed++;
+                            if (i === batchStart || totalUserIdFailed <= 5) {
+                                console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) GET userID FAILED - Status: ${profileRes.status}`);
+                            }
+                            tokens[userKey].user_id = null;
+                        }
                     } else {
                         totalPinFailed++;
                         if (i === batchStart || totalPinFailed <= 5) {
-                            console.error(`   ❌ User ${userKey} (VU${vuId}) PIN FAILED - Status: ${pinRes.status}`);
+                            console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) PIN FAILED - Status: ${pinRes.status}`);
                         }
                         tokens[userKey].pin_token = null;
                     }
-                    
                 } else {
                     totalLoginFailed++;
-                    if (i === batchStart || totalLoginFailed <= 5) {
-                        console.error(`   ❌ User ${userKey} (VU${vuId}) LOGIN FAILED - Status: ${loginRes.status}`);
-                    }
+                    totalLoginRetries += (loginResult.attempts - 1);
                     tokens[userKey] = { 
                         email: credentials.email, 
                         token: null,
@@ -286,54 +395,6 @@ export function setup() {
             }
         }
         
-        // ✅ FETCH CHANNEL_ID untuk BP ini
-        console.log(`\n🔍 Fetching channel_id for ${bp}...`);
-        
-        // Cari token yang valid untuk BP ini
-        let validToken = null;
-        for (let i = 1; i <= usersForThisBP; i++) {
-            const userKey = globalUserOffset + i;
-            if (tokens[userKey] && tokens[userKey].token) {
-                validToken = tokens[userKey].token;
-                break;
-            }
-        }
-        
-        if (validToken) {
-            const channelListHeaders = {
-                'Cookie': `ACCESS_TOKEN=${validToken}`,
-                'Content-Type': 'application/json',
-                'Accept-Language': 'en',
-                'Connection': 'keep-alive',
-                'Accept-Encoding': 'gzip, deflate, br',
-                'Accept': '*/*',
-            };
-
-            let channelListRes = http.get(base_url + '/socialinvesting/api/v1/channel/joined-by-user', null, { headers: channelListHeaders });
-            
-            if (channelListRes.status === 200) {
-                try {
-                    const channelData = channelListRes.json();
-                    if (channelData.data && channelData.data.length > 0) {
-                        channelIds[bp] = channelData.data[0].channel_id;
-                        console.log(`   ✅ ${bp} channel_id: ${channelIds[bp]}`);
-                    } else {
-                        console.error(`   ❌ ${bp} - No channels found in response`);
-                        channelIds[bp] = null;
-                    }
-                } catch (e) {
-                    console.error(`   ❌ ${bp} - Failed to parse channel list: ${e.message}`);
-                    channelIds[bp] = null;
-                }
-            } else {
-                console.error(`   ❌ ${bp} - Failed to get channel list. Status: ${channelListRes.status}`);
-                channelIds[bp] = null;
-            }
-        } else {
-            console.error(`   ❌ ${bp} - No valid token available to fetch channel_id`);
-            channelIds[bp] = null;
-        }
-        
         globalUserOffset += usersForThisBP;
         globalVuOffset += usersForThisBP;
     });
@@ -343,6 +404,7 @@ export function setup() {
     console.log(`\n📊 Setup Summary:`);
     console.log(`   ✅ Login: ${totalLoginSuccess}/${TOTAL_USER} success (${((totalLoginSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
     if (totalLoginFailed > 0) console.error(`   ❌ Login Failed: ${totalLoginFailed}`);
+    if (totalLoginRetries > 0) console.log(`   🔁 Login Retries: ${totalLoginRetries} total retry attempts`);
     
     console.log(`   ✅ PIN: ${totalPinSuccess}/${TOTAL_USER} success (${((totalPinSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
     if (totalPinFailed > 0) console.error(`   ❌ PIN Failed: ${totalPinFailed}`);
@@ -383,10 +445,15 @@ export function handleSummary(data) {
         const runby = __ENV.RUNBY || 'Manual';
         
         let bp_name = 'AllBP';
+        
         if (selectedBPs.length === 1) {
-            bp_name = selectedBPs[0];
+            bp_name = selectedBPs[0]; // langsung 'BP001', bukan 'BP001_A'
         } else if (selectedBPs.length > 1) {
-            const nums = selectedBPs.map(x => parseInt(x.replace('BP', '')))
+            // Sort dan ambil range
+            const sortedBPs = [...selectedBPs].sort();
+            
+            // Extract numbers dari BP name (BP001 -> 1, BP002 -> 2)
+            const nums = sortedBPs.map(x => parseInt(x.replace('BP', '')))
                 .filter(x => !isNaN(x))
                 .sort((a, b) => a - b);
             
@@ -397,26 +464,26 @@ export function handleSummary(data) {
             }
         }
         
-        console.log(`[${dateStr}_${timeStr}] Starting report generation for ${bp_name}...`);
+        console.log(`[${dateStr}_${timeStr}] Starting report generation for ${bp_name} on ${platform}...`);
         
-        if(`${__ENV.RUNBY}`=='Manual'){
-            const htmlPath = `../../../Report/Growin_AI_Summarizer/${SCENARIO}/Manual/${__ENV.RUNBY}_Detail_${SCENARIO}_${dateStr}_${timeStr}.html`;
+        if (runby === 'Manual') {
+            const htmlPath = `../../Report/Growin_AI_Summarizer/${platform}/${bp_name}/Manual/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
                 [htmlPath]: htmlReport(data),
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
-        } else if(`${__ENV.RUNBY}`=='Regression'){
-            const htmlPath = `../../../Report/Growin_AI_Summarizer/${SCENARIO}/Regression/${__ENV.RUNBY}_Detail_${SCENARIO}_${dateStr}_${timeStr}.html`;
+        } else if (runby === 'Regression') {
+            const htmlPath = `../../Report/Growin_AI_Summarizer/${platform}/${bp_name}/Regression/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
                 [htmlPath]: htmlReport(data),
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
-        } else if(`${__ENV.RUNBY}`=='LoadTest'){
-            const htmlPath = `../../../Report/Growin_AI_Summarizer/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
+        } else if (runby === 'LoadTest') {
+            const htmlPath = `../../Report/Growin_AI_Summarizer/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {

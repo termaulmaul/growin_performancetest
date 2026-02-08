@@ -5,6 +5,7 @@ import exec from 'k6/execution';
 import { getUserCredentials } from './Growin_2FA_LoadTest.js';  // ✅ Import function
 // import { getChannelId, getChannelIdWithOptions, ChannelMetrics } from './channelIDHelper.js';
 
+// /auth/api/v1/login
 // /auth/api/v1/protected/otp/status
 // /auth/api/v1/protected/otp/request?channel=email
 // /auth/api/v1/protected/otp/validate

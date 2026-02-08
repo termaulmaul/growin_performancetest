@@ -60,40 +60,28 @@ scp -r qa@10.82.15.72:/home/qa/Report/Growin_Community/Web/LoadTest/ /Users/andh
 
 # sleep "5"
 
-# scp -r qa@10.82.15.72:/home/qa/Report/Growin_Eipo_Stock/iOS/BP001/Regression/ /Users/andhybaskoro/Documents/Bitbucket/growin_performancetest/Report/Growin_Eipo_Stock/iOS/BP001/
+# scp -r qa@10.82.15.72:/home/qa/Report/Growin_2FA/Web/BP002/Regression/ /Users/andhybaskoro/Documents/Bitbucket/growin_performancetest/Report/Growin_2FA/Web/BP002/
 
 # sleep "5"
 
-# scp -r qa@10.82.15.72:/home/qa/Report/Growin_Eipo_Stock/iOS/BP002/Regression/ /Users/andhybaskoro/Documents/Bitbucket/growin_performancetest/Report/Growin_Eipo_Stock/iOS/BP002/
+# scp -r qa@10.82.15.72:/home/qa/Report/Growin_2FA/Web/BP003/Regression/ /Users/andhybaskoro/Documents/Bitbucket/growin_performancetest/Report/Growin_2FA/Web/BP003/
 
 # sleep "5"
 
-# scp -r qa@10.82.15.72:/home/qa/Report/Growin_Eipo_Stock/iOS/BP003/Regression/ /Users/andhybaskoro/Documents/Bitbucket/growin_performancetest/Report/Growin_Eipo_Stock/iOS/BP003/
+# scp -r qa@10.82.15.72:/home/qa/Report/Growin_2FA/Web/BP004W/c/ /Users/andhybaskoro/Documents/Bitbucket/growin_performancetest/Report/Growin_2FA/Web/BP004/
 
 # sleep "5"
 
-# scp -r qa@10.82.15.72:/home/qa/Report/Growin_Eipo_Stock/iOS/BP004/Regression/ /Users/andhybaskoro/Documents/Bitbucket/growin_performancetest/Report/Growin_Eipo_Stock/iOS/BP004/
+# scp -r qa@10.82.15.72:/home/qa/Report/Growin_2FA/LoadTest/ /Users/andhybaskoro/Documents/Bitbucket/growin_performancetest/Report/Growin_2FA/
 
-# sleep "5"
+sleep "5"
 
-# scp -r qa@10.82.15.72:/home/qa/Report/Growin_Eipo_Stock/iOS/BP005/Regression/ /Users/andhybaskoro/Documents/Bitbucket/growin_performancetest/Report/Growin_Eipo_Stock/iOS/BP005/
+scp -r qa@10.82.15.72:/home/qa/Report/Growin_Password_Expired/Android/BP001/Regression/ /Users/andhybaskoro/Documents/Bitbucket/growin_performancetest/Report/Growin_Password_Expired/Android/BP001/
 
-# sleep "5"
+sleep "5"
 
-# scp -r qa@10.82.15.72:/home/qa/Report/Growin_Eipo_Stock/iOS/BP006/Regression/ /Users/andhybaskoro/Documents/Bitbucket/growin_performancetest/Report/Growin_Eipo_Stock/iOS/BP006/
+scp -r qa@10.82.15.72:/home/qa/Report/Growin_Password_Expired/Android/BP002/Regression/ /Users/andhybaskoro/Documents/Bitbucket/growin_performancetest/Report/Growin_Password_Expired/Android/BP002/
 
-# sleep "5"
+sleep "5"
 
-# scp -r qa@10.82.15.72:/home/qa/Report/Growin_Eipo_Stock/iOS/BP007/Regression/ /Users/andhybaskoro/Documents/Bitbucket/growin_performancetest/Report/Growin_Eipo_Stock/iOS/BP007/
-
-# sleep "5"
-
-# scp -r qa@10.82.15.72:/home/qa/Report/Growin_Eipo_Stock/iOS/BP008/Regression/ /Users/andhybaskoro/Documents/Bitbucket/growin_performancetest/Report/Growin_Eipo_Stock/iOS/BP008/
-
-# sleep "5"
-
-# scp -r qa@10.82.15.72:/home/qa/Report/Growin_Eipo_Stock/iOS/BP009/Regression/ /Users/andhybaskoro/Documents/Bitbucket/growin_performancetest/Report/Growin_Eipo_Stock/iOS/BP009/
-
-# sleep "5"
-
-# scp -r qa@10.82.15.72:/home/qa/Report/Growin_Eipo_Stock/iOS/LoadTest/ /Users/andhybaskoro/Documents/Bitbucket/growin_performancetest/Report/Growin_Eipo_Stock/iOS/
+scp -r qa@10.82.15.72:/home/qa/Report/Growin_Password_Expired/Android/LoadTest/ /Users/andhybaskoro/Documents/Bitbucket/growin_performancetest/Report/Growin_Password_Expired/Android/
