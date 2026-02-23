@@ -128,11 +128,11 @@ export default function () {
     let token;
     if (res.status === 200) {
         token = res.json().data.token;
-        if (`${__ENV.ENV}`!='INT') {
+        if (`${__ENV.ENV}` != 'INT') {
             console.log(`VU${exec.vu.idInTest} - ${email} Login Success`);
         }
     } else {
-        if (`${__ENV.ENV}`!='INT') {
+        if (`${__ENV.ENV}` != 'INT') {
             console.error(`VU${exec.vu.idInTest} - ${email} Failed to Login || Status: ${res.status} || Status: ${res.body}`);
         }
         return;
@@ -173,17 +173,17 @@ export default function () {
                 last_price = selectedStock.last_price;
                 share = selectedStock.share;
                 
-                if (`${__ENV.ENV}`!='INT') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log('Selected Stock:', JSON.stringify(selectedStock));
                     console.log('portfolio_id:', portfolio_id, '| stock_code:', stock_code, '| last_price:', last_price, '| share:', share);
                 }
             } else {
-                if (`${__ENV.ENV}`!='INT') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.error(`${email} No stock found with share >= 100`);
                 }
             }
         } else {
-            if (`${__ENV.ENV}`!='INT') {
+            if (`${__ENV.ENV}` != 'INT') {
                 console.error(`${base_url}/oaofinance/api/v1/user/eligible-asset || ${email} Failed to get eligible asset! || Status: ${res.status} || Body: ${res.body}`);
             }
         }
@@ -241,7 +241,7 @@ export default function () {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                if (`${__ENV.ENV}`!='INT') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`200 ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);
                 }
             } else {
@@ -252,7 +252,7 @@ export default function () {
                 check(response, {
                     [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
                 });
-                if (`${__ENV.ENV}`!='INT') {
+                if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
                     console.error(`VU${exec.vu.idInTest} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
                 }

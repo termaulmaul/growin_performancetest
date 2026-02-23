@@ -3,72 +3,221 @@ import { Trend, Counter, Rate } from "k6/metrics";
 import http from "k6/http";
 import exec from 'k6/execution';
 
-// /marketdata/api/v1/marketinfo/corporate-actions-calendar-order/detail?selected_date=2026-02-06
-// /marketdata/api/v1/marketinfo/corporate-actions-calendar-detail?selected_date=2026-02-06&corporate_action_type=
+// GET	user/api/v2/profile/trading
+// GET	user/api/v1/profile/personal
+// GET	/auth/api/v1/protected/password-reminder
+// POST	/auth/api/v1/protected/password-remind-later
+// GET	user/api/v1/banner/promo
+// GET	protected/v1/portfolio/consolidated
+// GET	user/api/v1/watchlistgroup
+// GET	user/api/v2/watchlist/{watchlistGroupId}
+// GET	news/api/v2/
+// GET	news/api/v2/categories
+// GET	news/api/v2/categories
+// GET	oaofinance/api/v1/quota/status/margin
+// GET	oaofinance/api/v1/user-opening-progress-summary/monitoring/margin
+// GET	auth/api/v1/protected/account-center/switchables
+// GET	mutualfund/api/v1/user/risk-profile
+// GET	bond/api/v1/sbn/master/strapi/banner
+// GET	news/api/v2/?category=&is_sharia=0&items=5&page=1
+// GET	auth/api/v1/protected/get-config
+// GET	auth/api/v1/protected/client/selected
+// GET	/auth/api/v1/protected/password-reminder
+// GET	/marketdata/api/v1/marketinfo/corporate-actions-calendar-order/home
+// GET	/marketdata/api/v1/marketinfo/upcoming-corporate-actions
 
-// /marketdata/api/v1/marketinfo/corporate-actions-calendar-detail/my-events?selected_date=2026-02-06&corporate_action_type=
-// /marketdata/api/v1/marketinfo/corporate-actions-calendar-detail/my-events?selected_date=2026-02-06
-// /marketdata/api/v1/marketinfo/corporate-actions-calendar-dates/my-events?start_date=2026-02-01&end_date=2026-02-28
-// /marketdata/api/v1/marketinfo/corporate-actions-calendar-order/detail/my-events?selected_date=2026-02-18
-
-// CorporateActionsCalendarOrder_Detail_SelectedDate
-// CorporateActionsCalendarDetail_SelectedDate_CorporateActionType
-
-// CorporateActionsCalendarDetail_MyEvents_SelectedDate_CorporateActionType
-// CorporateActionsCalendarDetail_MyEvents_Selected_date
-// CorporateActionsCalendarDates_MyEvents_Start_date
-// CorporateActionsCalendarOrder_Detail_MyEvents_Selected_date
+// User_Profile_Trading
+// User_Profile_Personal
+// Auth_Protected_PasswordReminder
+// Auth_Protected_PasswordRemindLater
+// User_Banner_Promo
+// Protected_Portfolio_Consolidated
+// User_Watchlistgroup
+// User_WatchlistID
+// News
+// News_Categories
+// News_Categories_2
+// Oaofinance_Quota_Status_Margin
+// Oaofinance_UserOpeningProgressSummary_Monitoring_Margin
+// Auth_Protected_AccountCenter_Switchables
+// Mutualfund_User_RiskProfile
+// Bond_Sbn_Master_Strapi_Banner
+// News_Category
+// Auth_Protected_GetConfig
+// Auth_Protected_Client_Selected
+// Marketdata_Marketinfo_CorporateActionsCalendarOrder_Home
+// Marketdata_Marketinfo_UpcomingCorporateActions
 
 // Define custom metrics
-const CalendarDetail = {
-    CorporateActionsCalendarOrder_Detail_SelectedDate: {
-        errorCount: new Counter("error_count_001_01_01_CorporateActionsCalendarOrder_Detail_SelectedDate"),
-        errorRate: new Rate("error_rate_001_01_01_CorporateActionsCalendarOrder_Detail_SelectedDate"),
-        httpDuration: new Trend("duration_001_01_01_CorporateActionsCalendarOrder_Detail_SelectedDate"),
-        httpWaiting: new Trend("waiting_001_01_01_CorporateActionsCalendarOrder_Detail_SelectedDate"),
-        requestRate: new Counter("rps_001_01_01_CorporateActionsCalendarOrder_Detail_SelectedDate"),
-        http_reqs: new Counter("sample_001_01_01_CorporateActionsCalendarOrder_Detail_SelectedDate"),
+const Home = {
+    User_Profile_Trading: {
+        errorCount: new Counter("error_count_001_01_01_User_Profile_Trading"),
+        errorRate: new Rate("error_rate_001_01_01_User_Profile_Trading"),
+        httpDuration: new Trend("duration_001_01_01_User_Profile_Trading"),
+        httpWaiting: new Trend("waiting_001_01_01_User_Profile_Trading"),
+        requestRate: new Counter("rps_001_01_01_User_Profile_Trading"),
+        http_reqs: new Counter("sample_001_01_01_User_Profile_Trading"),
     },
-    CorporateActionsCalendarDetail_SelectedDate_CorporateActionType: {
-        errorCount: new Counter("error_count_001_01_02_CorporateActionsCalendarDetail_SelectedDate_CorporateActionType"),
-        errorRate: new Rate("error_rate_001_01_02_CorporateActionsCalendarDetail_SelectedDate_CorporateActionType"),
-        httpDuration: new Trend("duration_001_01_02_CorporateActionsCalendarDetail_SelectedDate_CorporateActionType"),
-        httpWaiting: new Trend("waiting_001_01_02_CorporateActionsCalendarDetail_SelectedDate_CorporateActionType"),
-        requestRate: new Counter("rps_001_01_02_CorporateActionsCalendarDetail_SelectedDate_CorporateActionType"),
-        http_reqs: new Counter("sample_001_01_02_CorporateActionsCalendarDetail_SelectedDate_CorporateActionType"),
+    User_Profile_Personal: {
+        errorCount: new Counter("error_count_001_01_02_User_Profile_Personal"),
+        errorRate: new Rate("error_rate_001_01_02_User_Profile_Personal"),
+        httpDuration: new Trend("duration_001_01_02_User_Profile_Personal"),
+        httpWaiting: new Trend("waiting_001_01_02_User_Profile_Personal"),
+        requestRate: new Counter("rps_001_01_02_User_Profile_Personal"),
+        http_reqs: new Counter("sample_001_01_02_User_Profile_Personal"),
     },
-    CorporateActionsCalendarDetail_MyEvents_SelectedDate_CorporateActionType: {
-        errorCount: new Counter("error_count_001_02_03_CorporateActionsCalendarDetail_MyEvents_SelectedDate_CorporateActionType"),
-        errorRate: new Rate("error_rate_001_02_03_CorporateActionsCalendarDetail_MyEvents_SelectedDate_CorporateActionType"),
-        httpDuration: new Trend("duration_001_02_03_CorporateActionsCalendarDetail_MyEvents_SelectedDate_CorporateActionType"),
-        httpWaiting: new Trend("waiting_001_02_03_CorporateActionsCalendarDetail_MyEvents_SelectedDate_CorporateActionType"),
-        requestRate: new Counter("rps_001_02_03_CorporateActionsCalendarDetail_MyEvents_SelectedDate_CorporateActionType"),
-        http_reqs: new Counter("sample_001_02_03_CorporateActionsCalendarDetail_MyEvents_SelectedDate_CorporateActionType"),
+    Auth_Protected_PasswordReminder: {
+        errorCount: new Counter("error_count_001_01_03_Auth_Protected_PasswordReminder"),
+        errorRate: new Rate("error_rate_001_01_03_Auth_Protected_PasswordReminder"),
+        httpDuration: new Trend("duration_001_01_03_Auth_Protected_PasswordReminder"),
+        httpWaiting: new Trend("waiting_001_01_03_Auth_Protected_PasswordReminder"),
+        requestRate: new Counter("rps_001_01_03_Auth_Protected_PasswordReminder"),
+        http_reqs: new Counter("sample_001_01_03_Auth_Protected_PasswordReminder"),
     },
-    CorporateActionsCalendarDetail_MyEvents_Selected_date: {
-        errorCount: new Counter("error_count_001_02_04_CorporateActionsCalendarDetail_MyEvents_Selected_date"),
-        errorRate: new Rate("error_rate_001_02_04_CorporateActionsCalendarDetail_MyEvents_Selected_date"),
-        httpDuration: new Trend("duration_001_02_04_CorporateActionsCalendarDetail_MyEvents_Selected_date"),
-        httpWaiting: new Trend("waiting_001_02_04_CorporateActionsCalendarDetail_MyEvents_Selected_date"),
-        requestRate: new Counter("rps_001_02_04_CorporateActionsCalendarDetail_MyEvents_Selected_date"),
-        http_reqs: new Counter("sample_001_02_04_CorporateActionsCalendarDetail_MyEvents_Selected_date"),
+    Auth_Protected_PasswordRemindLater: {
+        errorCount: new Counter("error_count_001_01_04_Auth_Protected_PasswordRemindLater"),
+        errorRate: new Rate("error_rate_001_01_04_Auth_Protected_PasswordRemindLater"),
+        httpDuration: new Trend("duration_001_01_04_Auth_Protected_PasswordRemindLater"),
+        httpWaiting: new Trend("waiting_001_01_04_Auth_Protected_PasswordRemindLater"),
+        requestRate: new Counter("rps_001_01_04_Auth_Protected_PasswordRemindLater"),
+        http_reqs: new Counter("sample_001_01_04_Auth_Protected_PasswordRemindLater"),
     },
-    CorporateActionsCalendarDates_MyEvents_Start_date: {
-        errorCount: new Counter("error_count_001_02_05_CorporateActionsCalendarDates_MyEvents_Start_date"),
-        errorRate: new Rate("error_rate_001_02_05_CorporateActionsCalendarDates_MyEvents_Start_date"),
-        httpDuration: new Trend("duration_001_02_05_CorporateActionsCalendarDates_MyEvents_Start_date"),
-        httpWaiting: new Trend("waiting_001_02_05_CorporateActionsCalendarDates_MyEvents_Start_date"),
-        requestRate: new Counter("rps_001_02_05_CorporateActionsCalendarDates_MyEvents_Start_date"),
-        http_reqs: new Counter("sample_001_02_05_CorporateActionsCalendarDates_MyEvents_Start_date"),
+    User_Banner_Promo: {
+        errorCount: new Counter("error_count_001_01_05_User_Banner_Promo"),
+        errorRate: new Rate("error_rate_001_01_05_User_Banner_Promo"),
+        httpDuration: new Trend("duration_001_01_05_User_Banner_Promo"),
+        httpWaiting: new Trend("waiting_001_01_05_User_Banner_Promo"),
+        requestRate: new Counter("rps_001_01_05_User_Banner_Promo"),
+        http_reqs: new Counter("sample_001_01_05_User_Banner_Promo"),
     },
-    CorporateActionsCalendarOrder_Detail_MyEvents_Selected_date: {
-        errorCount: new Counter("error_count_001_02_06_CorporateActionsCalendarOrder_Detail_MyEvents_Selected_date"),
-        errorRate: new Rate("error_rate_001_02_06_CorporateActionsCalendarOrder_Detail_MyEvents_Selected_date"),
-        httpDuration: new Trend("duration_001_02_06_CorporateActionsCalendarOrder_Detail_MyEvents_Selected_date"),
-        httpWaiting: new Trend("waiting_001_02_06_CorporateActionsCalendarOrder_Detail_MyEvents_Selected_date"),
-        requestRate: new Counter("rps_001_02_06_CorporateActionsCalendarOrder_Detail_MyEvents_Selected_date"),
-        http_reqs: new Counter("sample_001_02_06_CorporateActionsCalendarOrder_Detail_MyEvents_Selected_date"),
+    Protected_Portfolio_Consolidated: {
+        errorCount: new Counter("error_count_001_01_06_Protected_Portfolio_Consolidated"),
+        errorRate: new Rate("error_rate_001_01_06_Protected_Portfolio_Consolidated"),
+        httpDuration: new Trend("duration_001_01_06_Protected_Portfolio_Consolidated"),
+        httpWaiting: new Trend("waiting_001_01_06_Protected_Portfolio_Consolidated"),
+        requestRate: new Counter("rps_001_01_06_Protected_Portfolio_Consolidated"),
+        http_reqs: new Counter("sample_001_01_06_Protected_Portfolio_Consolidated"),
     },
+    User_Watchlistgroup: {
+        errorCount: new Counter("error_count_001_01_07_User_Watchlistgroup"),
+        errorRate: new Rate("error_rate_001_01_07_User_Watchlistgroup"),
+        httpDuration: new Trend("duration_001_01_07_User_Watchlistgroup"),
+        httpWaiting: new Trend("waiting_001_01_07_User_Watchlistgroup"),
+        requestRate: new Counter("rps_001_01_07_User_Watchlistgroup"),
+        http_reqs: new Counter("sample_001_01_07_User_Watchlistgroup"),
+    },
+    User_WatchlistID: {
+        errorCount: new Counter("error_count_001_01_08_User_WatchlistID"),
+        errorRate: new Rate("error_rate_001_01_08_User_WatchlistID"),
+        httpDuration: new Trend("duration_001_01_08_User_WatchlistID"),
+        httpWaiting: new Trend("waiting_001_01_08_User_WatchlistID"),
+        requestRate: new Counter("rps_001_01_08_User_WatchlistID"),
+        http_reqs: new Counter("sample_001_01_08_User_WatchlistID"),
+    },
+    News: {
+        errorCount: new Counter("error_count_001_01_09_News"),
+        errorRate: new Rate("error_rate_001_01_09_News"),
+        httpDuration: new Trend("duration_001_01_09_News"),
+        httpWaiting: new Trend("waiting_001_01_09_News"),
+        requestRate: new Counter("rps_001_01_09_News"),
+        http_reqs: new Counter("sample_001_01_09_News"),
+    },
+    News_Categories: {
+        errorCount: new Counter("error_count_001_01_10_News_Categories"),
+        errorRate: new Rate("error_rate_001_01_10_News_Categories"),
+        httpDuration: new Trend("duration_001_01_10_News_Categories"),
+        httpWaiting: new Trend("waiting_001_01_10_News_Categories"),
+        requestRate: new Counter("rps_001_01_10_News_Categories"),
+        http_reqs: new Counter("sample_001_01_10_News_Categories"),
+    },
+    News_Categories_2: {
+        errorCount: new Counter("error_count_001_01_11_News_Categories_2"),
+        errorRate: new Rate("error_rate_001_01_11_News_Categories_2"),
+        httpDuration: new Trend("duration_001_01_11_News_Categories_2"),
+        httpWaiting: new Trend("waiting_001_01_11_News_Categories_2"),
+        requestRate: new Counter("rps_001_01_11_News_Categories_2"),
+        http_reqs: new Counter("sample_001_01_11_News_Categories_2"),
+    },
+    Oaofinance_Quota_Status_Margin: {
+        errorCount: new Counter("error_count_001_01_12_Oaofinance_Quota_Status_Margin"),
+        errorRate: new Rate("error_rate_001_01_12_Oaofinance_Quota_Status_Margin"),
+        httpDuration: new Trend("duration_001_01_12_Oaofinance_Quota_Status_Margin"),
+        httpWaiting: new Trend("waiting_001_01_12_Oaofinance_Quota_Status_Margin"),
+        requestRate: new Counter("rps_001_01_12_Oaofinance_Quota_Status_Margin"),
+        http_reqs: new Counter("sample_001_01_12_Oaofinance_Quota_Status_Margin"),
+    },
+    Oaofinance_UserOpeningProgressSummary_Monitoring_Margin: {
+        errorCount: new Counter("error_count_001_01_13_Oaofinance_UserOpeningProgressSummary_Monitoring_Margin"),
+        errorRate: new Rate("error_rate_001_01_13_Oaofinance_UserOpeningProgressSummary_Monitoring_Margin"),
+        httpDuration: new Trend("duration_001_01_13_Oaofinance_UserOpeningProgressSummary_Monitoring_Margin"),
+        httpWaiting: new Trend("waiting_001_01_13_Oaofinance_UserOpeningProgressSummary_Monitoring_Margin"),
+        requestRate: new Counter("rps_001_01_13_Oaofinance_UserOpeningProgressSummary_Monitoring_Margin"),
+        http_reqs: new Counter("sample_001_01_13_Oaofinance_UserOpeningProgressSummary_Monitoring_Margin"),
+    },
+    Auth_Protected_AccountCenter_Switchables: {
+        errorCount: new Counter("error_count_001_01_14_Auth_Protected_AccountCenter_Switchables"),
+        errorRate: new Rate("error_rate_001_01_14_Auth_Protected_AccountCenter_Switchables"),
+        httpDuration: new Trend("duration_001_01_14_Auth_Protected_AccountCenter_Switchables"),
+        httpWaiting: new Trend("waiting_001_01_14_Auth_Protected_AccountCenter_Switchables"),
+        requestRate: new Counter("rps_001_01_14_Auth_Protected_AccountCenter_Switchables"),
+        http_reqs: new Counter("sample_001_01_14_Auth_Protected_AccountCenter_Switchables"),
+    },
+    Mutualfund_User_RiskProfile: {
+        errorCount: new Counter("error_count_001_01_15_Mutualfund_User_RiskProfile"),
+        errorRate: new Rate("error_rate_001_01_15_Mutualfund_User_RiskProfile"),
+        httpDuration: new Trend("duration_001_01_15_Mutualfund_User_RiskProfile"),
+        httpWaiting: new Trend("waiting_001_01_15_Mutualfund_User_RiskProfile"),
+        requestRate: new Counter("rps_001_01_15_Mutualfund_User_RiskProfile"),
+        http_reqs: new Counter("sample_001_01_15_Mutualfund_User_RiskProfile"),
+    },
+    Bond_Sbn_Master_Strapi_Banner: {
+        errorCount: new Counter("error_count_001_01_16_Bond_Sbn_Master_Strapi_Banner"),
+        errorRate: new Rate("error_rate_001_01_16_Bond_Sbn_Master_Strapi_Banner"),
+        httpDuration: new Trend("duration_001_01_16_Bond_Sbn_Master_Strapi_Banner"),
+        httpWaiting: new Trend("waiting_001_01_16_Bond_Sbn_Master_Strapi_Banner"),
+        requestRate: new Counter("rps_001_01_16_Bond_Sbn_Master_Strapi_Banner"),
+        http_reqs: new Counter("sample_001_01_16_Bond_Sbn_Master_Strapi_Banner"),
+    },
+    News_Category: {
+        errorCount: new Counter("error_count_001_01_17_News_Category"),
+        errorRate: new Rate("error_rate_001_01_17_News_Category"),
+        httpDuration: new Trend("duration_001_01_17_News_Category"),
+        httpWaiting: new Trend("waiting_001_01_17_News_Category"),
+        requestRate: new Counter("rps_001_01_17_News_Category"),
+        http_reqs: new Counter("sample_001_01_17_News_Category"),
+    },
+    Auth_Protected_GetConfig: {
+        errorCount: new Counter("error_count_001_01_18_Auth_Protected_GetConfig"),
+        errorRate: new Rate("error_rate_001_01_18_Auth_Protected_GetConfig"),
+        httpDuration: new Trend("duration_001_01_18_Auth_Protected_GetConfig"),
+        httpWaiting: new Trend("waiting_001_01_18_Auth_Protected_GetConfig"),
+        requestRate: new Counter("rps_001_01_18_Auth_Protected_GetConfig"),
+        http_reqs: new Counter("sample_001_01_18_Auth_Protected_GetConfig"),
+    },
+    Auth_Protected_Client_Selected: {
+        errorCount: new Counter("error_count_001_01_19_Auth_Protected_Client_Selected"),
+        errorRate: new Rate("error_rate_001_01_19_Auth_Protected_Client_Selected"),
+        httpDuration: new Trend("duration_001_01_19_Auth_Protected_Client_Selected"),
+        httpWaiting: new Trend("waiting_001_01_19_Auth_Protected_Client_Selected"),
+        requestRate: new Counter("rps_001_01_19_Auth_Protected_Client_Selected"),
+        http_reqs: new Counter("sample_001_01_19_Auth_Protected_Client_Selected"),
+    },
+    Marketdata_Marketinfo_CorporateActionsCalendarOrder_Home: {
+        errorCount: new Counter("error_count_001_01_20_Marketdata_Marketinfo_CorporateActionsCalendarOrder_Home"),
+        errorRate: new Rate("error_rate_001_01_20_Marketdata_Marketinfo_CorporateActionsCalendarOrder_Home"),
+        httpDuration: new Trend("duration_001_01_20_Marketdata_Marketinfo_CorporateActionsCalendarOrder_Home"),
+        httpWaiting: new Trend("waiting_001_01_20_Marketdata_Marketinfo_CorporateActionsCalendarOrder_Home"),
+        requestRate: new Counter("rps_001_01_20_Marketdata_Marketinfo_CorporateActionsCalendarOrder_Home"),
+        http_reqs: new Counter("sample_001_01_20_Marketdata_Marketinfo_CorporateActionsCalendarOrder_Home"),
+    },
+    Marketdata_Marketinfo_UpcomingCorporateActions: {
+        errorCount: new Counter("error_count_001_01_21_Marketdata_Marketinfo_UpcomingCorporateActions"),
+        errorRate: new Rate("error_rate_001_01_21_Marketdata_Marketinfo_UpcomingCorporateActions"),
+        httpDuration: new Trend("duration_001_01_21_Marketdata_Marketinfo_UpcomingCorporateActions"),
+        httpWaiting: new Trend("waiting_001_01_21_Marketdata_Marketinfo_UpcomingCorporateActions"),
+        requestRate: new Counter("rps_001_01_21_Marketdata_Marketinfo_UpcomingCorporateActions"),
+        http_reqs: new Counter("sample_001_01_21_Marketdata_Marketinfo_UpcomingCorporateActions"),
+    }
 };
 
 // ✅ EXPORTED FUNCTION
@@ -95,49 +244,6 @@ export function BP001(data) {
     const pin_token = userToken.pin_token;
     const email = userToken.email;
     const bp = mapping.bp;
-    
-    function formatDate(date) {
-        return date.toISOString().split('T')[0];
-    }
-
-    // Hari ini
-    const today = new Date();
-    const todayFormatted = formatDate(today);
-
-    // 1 minggu kedepan (7 hari)
-    const oneWeekLater = new Date(today);
-    oneWeekLater.setDate(today.getDate() + 7);
-    const oneWeekFormatted = formatDate(oneWeekLater);
-
-    // 2 minggu kedepan (14 hari)
-    const twoWeeksLater = new Date(today);
-    twoWeeksLater.setDate(today.getDate() + 14);
-    const twoWeeksFormatted = formatDate(twoWeeksLater);
-
-    console.log(todayFormatted);      // 2026-02-08
-    console.log(oneWeekFormatted);    // 2026-02-15
-    console.log(twoWeeksFormatted);   // 2026-02-22
-
-    // Fungsi untuk mendapatkan tanggal pertama dan terakhir bulan ini
-    function getMonthBoundaries(date = new Date()) {
-        const year = date.getFullYear();
-        const month = date.getMonth();
-        
-        // Tanggal pertama bulan ini
-        const firstDay = new Date(year, month, 1);
-        
-        // Tanggal terakhir bulan ini (hari ke-0 dari bulan berikutnya)
-        const lastDay = new Date(year, month + 1, 0);
-        
-        return {
-            first: firstDay.toISOString().split('T')[0],
-            last: lastDay.toISOString().split('T')[0]
-        };
-    }
-
-    const { first, last } = getMonthBoundaries();
-    console.log(first);  // 2026-02-01
-    console.log(last);   // 2026-02-28
 
     const headers = {
         'Cookie': `ACCESS_TOKEN=${token};`,
@@ -153,23 +259,806 @@ export function BP001(data) {
         'X-Device-Id': 'TEST3'
     };
 
-    // Batch 1
+    // // Batch 1
+    // if (token) {
+    //     const urls = [
+    //         base_url + `/user/api/v2/profile/trading`,
+    //         base_url + `/user/api/v1/profile/personal`,
+    //     ];
+
+    //     const requests = [
+    //         ['GET', urls[0], null, { headers: headers }],
+    //         ['GET', urls[1], null, { headers: headers }],
+    //     ];
+    //     const responses = http.batch(requests);
+
+    //     responses.forEach((response, index) => {
+    //         const metrics = [
+    //             Home.User_Profile_Trading,
+    //             Home.User_Profile_Personal,
+    //         ];
+
+    //         const metric = metrics[index];
+    //         metric.httpDuration.add(response.timings.duration);
+    //         if (response.status === 200) {
+    //             metric.errorRate.add(false);
+    //             metric.errorCount.add(0);
+    //             metric.requestRate.add(true);
+    //             metric.http_reqs.add(1);
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+    //             }
+    //         } else {
+    //             metric.errorRate.add(true);
+    //             metric.errorCount.add(1);
+    //             metric.requestRate.add(false);
+    //             metric.http_reqs.add(1);
+    //             check(response, {
+    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+    //             });
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 const requestBody = requests[index][2];
+    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+    //             }
+    //         }
+    //     });
+    // }
+
+    // // Batch 2
+    // if (token) {
+    //     const urls = [
+    //         base_url + `/auth/api/v1/protected/password-reminder`,
+    //     ];
+
+    //     const requests = [
+    //         ['GET', urls[0], null, { headers: headers }],
+    //     ];
+    //     const responses = http.batch(requests);
+
+    //     responses.forEach((response, index) => {
+    //         const metrics = [
+    //             Home.Auth_Protected_PasswordReminder,
+    //         ];
+
+    //         const metric = metrics[index];
+    //         metric.httpDuration.add(response.timings.duration);
+    //         if (response.status === 200) {
+    //             metric.errorRate.add(false);
+    //             metric.errorCount.add(0);
+    //             metric.requestRate.add(true);
+    //             metric.http_reqs.add(1);
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+    //             }
+    //         } else {
+    //             metric.errorRate.add(true);
+    //             metric.errorCount.add(1);
+    //             metric.requestRate.add(false);
+    //             metric.http_reqs.add(1);
+    //             check(response, {
+    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+    //             });
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 const requestBody = requests[index][2];
+    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+    //             }
+    //         }
+    //     });
+    // }
+
+    // // Batch 3
+    // if (token) {
+    //     const urls = [
+    //         base_url + `/auth/api/v1/protected/password-remind-later`,
+    //     ];
+
+    //     const Auth_Protected_PasswordRemindLater_Payload = JSON.stringify({ 
+    //         current_phase: 1 
+    //     });
+
+    //     const requests = [
+    //         ['POST', urls[0], Auth_Protected_PasswordRemindLater_Payload, { headers: headers }],
+    //     ];
+    //     const responses = http.batch(requests);
+
+    //     responses.forEach((response, index) => {
+    //         const metrics = [
+    //             Home.Auth_Protected_PasswordRemindLater,
+    //         ];
+
+    //         const metric = metrics[index];
+    //         metric.httpDuration.add(response.timings.duration);
+    //         if (response.status === 200) {
+    //             metric.errorRate.add(false);
+    //             metric.errorCount.add(0);
+    //             metric.requestRate.add(true);
+    //             metric.http_reqs.add(1);
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+    //             }
+    //         } else {
+    //             metric.errorRate.add(true);
+    //             metric.errorCount.add(1);
+    //             metric.requestRate.add(false);
+    //             metric.http_reqs.add(1);
+    //             check(response, {
+    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+    //             });
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 const requestBody = requests[index][2];
+    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+    //             }
+    //         }
+    //     });
+    // }
+
+    // // Batch 4
+    // if (token) {
+    //     const urls = [
+    //         base_url + `/user/api/v1/banner/promo`,
+    //     ];
+
+    //     const requests = [
+    //         ['GET', urls[0], null, { headers: headers }],
+    //     ];
+    //     const responses = http.batch(requests);
+
+    //     responses.forEach((response, index) => {
+    //         const metrics = [
+    //             Home.User_Banner_Promo,
+    //         ];
+
+    //         const metric = metrics[index];
+    //         metric.httpDuration.add(response.timings.duration);
+    //         if (response.status === 200) {
+    //             metric.errorRate.add(false);
+    //             metric.errorCount.add(0);
+    //             metric.requestRate.add(true);
+    //             metric.http_reqs.add(1);
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+    //             }
+    //         } else {
+    //             metric.errorRate.add(true);
+    //             metric.errorCount.add(1);
+    //             metric.requestRate.add(false);
+    //             metric.http_reqs.add(1);
+    //             check(response, {
+    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+    //             });
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 const requestBody = requests[index][2];
+    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+    //             }
+    //         }
+    //     });
+    // }
+
+    // // Batch 5
+    // if (token) {
+    //     const urls = [
+    //         base_url + `/user/api/protected/v1/portfolio/consolidated`,
+    //     ];
+
+    //     const requests = [
+    //         ['GET', urls[0], null, { headers: headers }],
+    //     ];
+    //     const responses = http.batch(requests);
+
+    //     responses.forEach((response, index) => {
+    //         const metrics = [
+    //             Home.Protected_Portfolio_Consolidated,
+    //         ];
+
+    //         const metric = metrics[index];
+    //         metric.httpDuration.add(response.timings.duration);
+    //         if (response.status === 200) {
+    //             metric.errorRate.add(false);
+    //             metric.errorCount.add(0);
+    //             metric.requestRate.add(true);
+    //             metric.http_reqs.add(1);
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+    //             }
+    //         } else {
+    //             metric.errorRate.add(true);
+    //             metric.errorCount.add(1);
+    //             metric.requestRate.add(false);
+    //             metric.http_reqs.add(1);
+    //             check(response, {
+    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+    //             });
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 const requestBody = requests[index][2];
+    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+    //             }
+    //         }
+    //     });
+    // }
+
+    // // Batch 6
+    // let watchlistGroupID;
+    // if (token) {
+    //     const urls = [
+    //         base_url + `/user/api/v1/watchlistgroup`,
+    //     ];
+
+    //     const requests = [
+    //         ['GET', urls[0], null, { headers: headers }],
+    //     ];
+    //     const responses = http.batch(requests);
+
+    //     responses.forEach((response, index) => {
+    //         const metrics = [
+    //             Home.User_Watchlistgroup,
+    //         ];
+
+    //         const metric = metrics[index];
+    //         metric.httpDuration.add(response.timings.duration);
+    //         if (response.status === 200) {
+
+    //             try {
+    //                 const watchlistData = JSON.parse(response.body);
+                    
+    //                 // Asumsi structure: { data: [{ id: "..." }, ...] }
+    //                 if (watchlistData && watchlistData.data && watchlistData.data.length > 0) {
+    //                     watchlistGroupID = watchlistData.data[0].id;
+                        
+    //                     if (`${__ENV.ENV}` != 'INT') {
+    //                         console.log(`${email} Got watchlistID: ${watchlistGroupID}`);
+    //                     }
+    //                 } else {
+    //                     if (`${__ENV.ENV}` != 'INT') {
+    //                         console.error(`${email} No watchlist data found in response`);
+    //                     }
+    //                 }
+    //             } catch (e) {
+    //                 if (`${__ENV.ENV}` != 'INT') {
+    //                     console.error(`${email} Failed to parse watchlistgroup response: ${e.message}`);
+    //                 }
+    //             }
+
+    //             metric.errorRate.add(false);
+    //             metric.errorCount.add(0);
+    //             metric.requestRate.add(true);
+    //             metric.http_reqs.add(1);
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+    //             }
+    //         } else {
+    //             metric.errorRate.add(true);
+    //             metric.errorCount.add(1);
+    //             metric.requestRate.add(false);
+    //             metric.http_reqs.add(1);
+    //             check(response, {
+    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+    //             });
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 const requestBody = requests[index][2];
+    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+    //             }
+    //         }
+    //     });
+    // }
+
+    // // Batch 7
+    // if (token) {
+    //     const urls = [
+    //         base_url + `/user/api/v2/watchlist/${watchlistGroupID}`,
+    //     ];
+
+    //     const requests = [
+    //         ['GET', urls[0], null, { headers: headers }],
+    //     ];
+    //     const responses = http.batch(requests);
+
+    //     responses.forEach((response, index) => {
+    //         const metrics = [
+    //             Home.User_WatchlistID,
+    //         ];
+
+    //         const metric = metrics[index];
+    //         metric.httpDuration.add(response.timings.duration);
+    //         if (response.status === 200) {
+    //             metric.errorRate.add(false);
+    //             metric.errorCount.add(0);
+    //             metric.requestRate.add(true);
+    //             metric.http_reqs.add(1);
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+    //             }
+    //         } else {
+    //             metric.errorRate.add(true);
+    //             metric.errorCount.add(1);
+    //             metric.requestRate.add(false);
+    //             metric.http_reqs.add(1);
+    //             check(response, {
+    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+    //             });
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 const requestBody = requests[index][2];
+    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+    //             }
+    //         }
+    //     });
+    // }
+
+    // // Batch 8
+    // if (token) {
+    //     const urls = [
+    //         base_url + `/news/api/v2/`,
+    //     ];
+
+    //     const requests = [
+    //         ['GET', urls[0], null, { headers: headers }],
+    //     ];
+    //     const responses = http.batch(requests);
+
+    //     responses.forEach((response, index) => {
+    //         const metrics = [
+    //             Home.News,
+    //         ];
+
+    //         const metric = metrics[index];
+    //         metric.httpDuration.add(response.timings.duration);
+    //         if (response.status === 200) {
+    //             metric.errorRate.add(false);
+    //             metric.errorCount.add(0);
+    //             metric.requestRate.add(true);
+    //             metric.http_reqs.add(1);
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+    //             }
+    //         } else {
+    //             metric.errorRate.add(true);
+    //             metric.errorCount.add(1);
+    //             metric.requestRate.add(false);
+    //             metric.http_reqs.add(1);
+    //             check(response, {
+    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+    //             });
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 const requestBody = requests[index][2];
+    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+    //             }
+    //         }
+    //     });
+    // }
+
+    // // Batch 9
+    // if (token) {
+    //     const urls = [
+    //         base_url + `/news/api/v2/categories`,
+    //     ];
+
+    //     const requests = [
+    //         ['GET', urls[0], null, { headers: headers }],
+    //     ];
+    //     const responses = http.batch(requests);
+
+    //     responses.forEach((response, index) => {
+    //         const metrics = [
+    //             Home.News_Categories,
+    //         ];
+
+    //         const metric = metrics[index];
+    //         metric.httpDuration.add(response.timings.duration);
+    //         if (response.status === 200) {
+    //             metric.errorRate.add(false);
+    //             metric.errorCount.add(0);
+    //             metric.requestRate.add(true);
+    //             metric.http_reqs.add(1);
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+    //             }
+    //         } else {
+    //             metric.errorRate.add(true);
+    //             metric.errorCount.add(1);
+    //             metric.requestRate.add(false);
+    //             metric.http_reqs.add(1);
+    //             check(response, {
+    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+    //             });
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 const requestBody = requests[index][2];
+    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+    //             }
+    //         }
+    //     });
+    // }
+
+    // // Batch 10
+    // if (token) {
+    //     const urls = [
+    //         base_url + `/news/api/v2/categories`,
+    //     ];
+
+    //     const requests = [
+    //         ['GET', urls[0], null, { headers: headers }],
+    //     ];
+    //     const responses = http.batch(requests);
+
+    //     responses.forEach((response, index) => {
+    //         const metrics = [
+    //             Home.News_Categories_2,
+    //         ];
+
+    //         const metric = metrics[index];
+    //         metric.httpDuration.add(response.timings.duration);
+    //         if (response.status === 200) {
+    //             metric.errorRate.add(false);
+    //             metric.errorCount.add(0);
+    //             metric.requestRate.add(true);
+    //             metric.http_reqs.add(1);
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+    //             }
+    //         } else {
+    //             metric.errorRate.add(true);
+    //             metric.errorCount.add(1);
+    //             metric.requestRate.add(false);
+    //             metric.http_reqs.add(1);
+    //             check(response, {
+    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+    //             });
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 const requestBody = requests[index][2];
+    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+    //             }
+    //         }
+    //     });
+    // }
+
+    // // Batch 11
+    // if (token) {
+    //     const urls = [
+    //         base_url + `/oaofinance/api/v1/quota/status/margin`,
+    //     ];
+
+    //     const requests = [
+    //         ['GET', urls[0], null, { headers: headers }],
+    //     ];
+    //     const responses = http.batch(requests);
+
+    //     responses.forEach((response, index) => {
+    //         const metrics = [
+    //             Home.Oaofinance_Quota_Status_Margin,
+    //         ];
+
+    //         const metric = metrics[index];
+    //         metric.httpDuration.add(response.timings.duration);
+    //         if (response.status === 200) {
+    //             metric.errorRate.add(false);
+    //             metric.errorCount.add(0);
+    //             metric.requestRate.add(true);
+    //             metric.http_reqs.add(1);
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+    //             }
+    //         } else {
+    //             metric.errorRate.add(true);
+    //             metric.errorCount.add(1);
+    //             metric.requestRate.add(false);
+    //             metric.http_reqs.add(1);
+    //             check(response, {
+    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+    //             });
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 const requestBody = requests[index][2];
+    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+    //             }
+    //         }
+    //     });
+    // }
+
+    // // Batch 12
+    // if (token) {
+    //     const urls = [
+    //         base_url + `/oaofinance/api/v1/user-opening-progress-summary/monitoring/margin`,
+    //     ];
+
+    //     const requests = [
+    //         ['GET', urls[0], null, { headers: headers }],
+    //     ];
+    //     const responses = http.batch(requests);
+
+    //     responses.forEach((response, index) => {
+    //         const metrics = [
+    //             Home.Oaofinance_UserOpeningProgressSummary_Monitoring_Margin,
+    //         ];
+
+    //         const metric = metrics[index];
+    //         metric.httpDuration.add(response.timings.duration);
+    //         if (response.status === 200) {
+    //             metric.errorRate.add(false);
+    //             metric.errorCount.add(0);
+    //             metric.requestRate.add(true);
+    //             metric.http_reqs.add(1);
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+    //             }
+    //         } else {
+    //             metric.errorRate.add(true);
+    //             metric.errorCount.add(1);
+    //             metric.requestRate.add(false);
+    //             metric.http_reqs.add(1);
+    //             check(response, {
+    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+    //             });
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 const requestBody = requests[index][2];
+    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+    //             }
+    //         }
+    //     });
+    // }
+
+    // // Batch 13
+    // if (token) {
+    //     const urls = [
+    //         base_url + `/auth/api/v1/protected/account-center/switchables`,
+    //     ];
+
+    //     const requests = [
+    //         ['GET', urls[0], null, { headers: headers }],
+    //     ];
+    //     const responses = http.batch(requests);
+
+    //     responses.forEach((response, index) => {
+    //         const metrics = [
+    //             Home.Auth_Protected_AccountCenter_Switchables,
+    //         ];
+
+    //         const metric = metrics[index];
+    //         metric.httpDuration.add(response.timings.duration);
+    //         if (response.status === 200) {
+    //             metric.errorRate.add(false);
+    //             metric.errorCount.add(0);
+    //             metric.requestRate.add(true);
+    //             metric.http_reqs.add(1);
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+    //             }
+    //         } else {
+    //             metric.errorRate.add(true);
+    //             metric.errorCount.add(1);
+    //             metric.requestRate.add(false);
+    //             metric.http_reqs.add(1);
+    //             check(response, {
+    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+    //             });
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 const requestBody = requests[index][2];
+    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+    //             }
+    //         }
+    //     });
+    // }
+
+    // // Batch 14
+    // if (token) {
+    //     const urls = [
+    //         base_url + `/mutualfund/api/v1/user/risk-profile`,
+    //     ];
+
+    //     const requests = [
+    //         ['GET', urls[0], null, { headers: headers }],
+    //     ];
+    //     const responses = http.batch(requests);
+
+    //     responses.forEach((response, index) => {
+    //         const metrics = [
+    //             Home.Mutualfund_User_RiskProfile,
+    //         ];
+
+    //         const metric = metrics[index];
+    //         metric.httpDuration.add(response.timings.duration);
+    //         if (response.status === 200) {
+    //             metric.errorRate.add(false);
+    //             metric.errorCount.add(0);
+    //             metric.requestRate.add(true);
+    //             metric.http_reqs.add(1);
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+    //             }
+    //         } else {
+    //             metric.errorRate.add(true);
+    //             metric.errorCount.add(1);
+    //             metric.requestRate.add(false);
+    //             metric.http_reqs.add(1);
+    //             check(response, {
+    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+    //             });
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 const requestBody = requests[index][2];
+    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+    //             }
+    //         }
+    //     });
+    // }
+
+    // // Batch 15
+    // if (token) {
+    //     const urls = [
+    //         base_url + `/bond/api/v1/sbn/master/strapi/banner`,
+    //     ];
+
+    //     const requests = [
+    //         ['GET', urls[0], null, { headers: headers }],
+    //     ];
+    //     const responses = http.batch(requests);
+
+    //     responses.forEach((response, index) => {
+    //         const metrics = [
+    //             Home.Bond_Sbn_Master_Strapi_Banner,
+    //         ];
+
+    //         const metric = metrics[index];
+    //         metric.httpDuration.add(response.timings.duration);
+    //         if (response.status === 200) {
+    //             metric.errorRate.add(false);
+    //             metric.errorCount.add(0);
+    //             metric.requestRate.add(true);
+    //             metric.http_reqs.add(1);
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+    //             }
+    //         } else {
+    //             metric.errorRate.add(true);
+    //             metric.errorCount.add(1);
+    //             metric.requestRate.add(false);
+    //             metric.http_reqs.add(1);
+    //             check(response, {
+    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+    //             });
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 const requestBody = requests[index][2];
+    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+    //             }
+    //         }
+    //     });
+    // }
+
+    // // Batch 16
+    // if (token) {
+    //     const urls = [
+    //         base_url + `/news/api/v2/?category=&is_sharia=0&items=5&page=1`,
+    //     ];
+
+    //     const requests = [
+    //         ['GET', urls[0], null, { headers: headers }],
+    //     ];
+    //     const responses = http.batch(requests);
+
+    //     responses.forEach((response, index) => {
+    //         const metrics = [
+    //             Home.News_Category,
+    //         ];
+
+    //         const metric = metrics[index];
+    //         metric.httpDuration.add(response.timings.duration);
+    //         if (response.status === 200) {
+    //             metric.errorRate.add(false);
+    //             metric.errorCount.add(0);
+    //             metric.requestRate.add(true);
+    //             metric.http_reqs.add(1);
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+    //             }
+    //         } else {
+    //             metric.errorRate.add(true);
+    //             metric.errorCount.add(1);
+    //             metric.requestRate.add(false);
+    //             metric.http_reqs.add(1);
+    //             check(response, {
+    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+    //             });
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 const requestBody = requests[index][2];
+    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+    //             }
+    //         }
+    //     });
+    // }
+
+    // // Batch 17
+    // if (token) {
+    //     const urls = [
+    //         base_url + `/auth/api/v1/protected/get-config`,
+    //     ];
+
+    //     const requests = [
+    //         ['GET', urls[0], null, { headers: headers }],
+    //     ];
+    //     const responses = http.batch(requests);
+
+    //     responses.forEach((response, index) => {
+    //         const metrics = [
+    //             Home.Auth_Protected_GetConfig,
+    //         ];
+
+    //         const metric = metrics[index];
+    //         metric.httpDuration.add(response.timings.duration);
+    //         if (response.status === 200) {
+    //             metric.errorRate.add(false);
+    //             metric.errorCount.add(0);
+    //             metric.requestRate.add(true);
+    //             metric.http_reqs.add(1);
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+    //             }
+    //         } else {
+    //             metric.errorRate.add(true);
+    //             metric.errorCount.add(1);
+    //             metric.requestRate.add(false);
+    //             metric.http_reqs.add(1);
+    //             check(response, {
+    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+    //             });
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 const requestBody = requests[index][2];
+    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+    //             }
+    //         }
+    //     });
+    // }
+
+    // // Batch 18
+    // if (token) {
+    //     const urls = [
+    //         base_url + `/auth/api/v1/protected/client/selected`,
+    //     ];
+
+    //     const requests = [
+    //         ['GET', urls[0], null, { headers: headers }],
+    //     ];
+    //     const responses = http.batch(requests);
+
+    //     responses.forEach((response, index) => {
+    //         const metrics = [
+    //             Home.Auth_Protected_Client_Selected,
+    //         ];
+
+    //         const metric = metrics[index];
+    //         metric.httpDuration.add(response.timings.duration);
+    //         if (response.status === 200) {
+    //             metric.errorRate.add(false);
+    //             metric.errorCount.add(0);
+    //             metric.requestRate.add(true);
+    //             metric.http_reqs.add(1);
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+    //             }
+    //         } else {
+    //             metric.errorRate.add(true);
+    //             metric.errorCount.add(1);
+    //             metric.requestRate.add(false);
+    //             metric.http_reqs.add(1);
+    //             check(response, {
+    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+    //             });
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 const requestBody = requests[index][2];
+    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+    //             }
+    //         }
+    //     });
+    // }
+    
+    // Batch 19
     if (token) {
         const urls = [
-            base_url + `/marketdata/api/v1/marketinfo/corporate-actions-calendar-order/detail?selected_date=${todayFormatted}`,
-            base_url + `/marketdata/api/v1/marketinfo/corporate-actions-calendar-detail?selected_date=${todayFormatted}&corporate_action_type=`,
+            base_url + `/marketdata/api/v1/marketinfo/corporate-actions-calendar-order/home`,
         ];
 
         const requests = [
             ['GET', urls[0], null, { headers: headers }],
-            ['GET', urls[1], null, { headers: headers }],
         ];
         const responses = http.batch(requests);
 
         responses.forEach((response, index) => {
             const metrics = [
-                CalendarDetail.CorporateActionsCalendarOrder_Detail_SelectedDate,
-                CalendarDetail.CorporateActionsCalendarDetail_SelectedDate_CorporateActionType,
+                Home.Marketdata_Marketinfo_CorporateActionsCalendarOrder_Home,
             ];
 
             const metric = metrics[index];
@@ -198,34 +1087,20 @@ export function BP001(data) {
         });
     }
 
-    // Batch 2
+    // Batch 20
     if (token) {
         const urls = [
-            base_url + `/marketdata/api/v1/marketinfo/corporate-actions-calendar-detail/my-events?selected_date=${todayFormatted}&corporate_action_type=`,
-            base_url + `/marketdata/api/v1/marketinfo/corporate-actions-calendar-detail/my-events?selected_date=${todayFormatted}`,
-            base_url + `/marketdata/api/v1/marketinfo/corporate-actions-calendar-dates/my-events?start_date=${first}&end_date=${last}`,
-            base_url + `/marketdata/api/v1/marketinfo/corporate-actions-calendar-order/detail/my-events?selected_date=${oneWeekFormatted}`,
+            base_url + `/marketdata/api/v1/marketinfo/upcoming-corporate-actions`,
         ];
 
         const requests = [
             ['GET', urls[0], null, { headers: headers }],
-            ['GET', urls[1], null, { headers: headers }],
-            ['GET', urls[2], null, { headers: headers }],
-            ['GET', urls[3], null, { headers: headers }],
         ];
         const responses = http.batch(requests);
 
         responses.forEach((response, index) => {
             const metrics = [
-                CalendarDetail.CorporateActionsCalendarDetail_MyEvents_SelectedDate_CorporateActionType,
-                CalendarDetail.CorporateActionsCalendarDetail_MyEvents_Selected_date,
-                CalendarDetail.CorporateActionsCalendarDates_MyEvents_Start_date,
-                CalendarDetail.CorporateActionsCalendarOrder_Detail_MyEvents_Selected_date,
-
-                
-
-
-
+                Home.Marketdata_Marketinfo_UpcomingCorporateActions,
             ];
 
             const metric = metrics[index];

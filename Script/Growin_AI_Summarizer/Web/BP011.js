@@ -3,24 +3,24 @@ import { Trend, Counter, Rate } from "k6/metrics";
 import http from "k6/http";
 import exec from 'k6/execution';
 
-// /marketdata/api/v1/marketinfo/financial-statements/
+// GET	/marketdata/api/v1/stock-daily-price
 
-// Marketdata_Marketinfo_FinancialStatements
+// Marketdata_StockDailyPrice
 
 // Define custom metrics
 const FinancialSummarizerBackendFinancialFeature = {
-    Marketdata_Marketinfo_FinancialStatements: {
-        errorCount: new Counter("error_count_007_01_01_FinancialSummarizerBackendFinancialFeature"),
-        errorRate: new Rate("error_rate_007_01_01_FinancialSummarizerBackendFinancialFeature"),
-        httpDuration: new Trend("duration_007_01_01_FinancialSummarizerBackendFinancialFeature"),
-        httpWaiting: new Trend("waiting_007_01_01_FinancialSummarizerBackendFinancialFeature"),
-        requestRate: new Counter("rps_007_01_01_FinancialSummarizerBackendFinancialFeature"),
-        http_reqs: new Counter("sample_007_01_01_FinancialSummarizerBackendFinancialFeature"),
+    Marketdata_StockDailyPrice: {
+        errorCount: new Counter("error_count_011_01_01_Marketdata_StockDailyPrice"),
+        errorRate: new Rate("error_rate_011_01_01_Marketdata_StockDailyPrice"),
+        httpDuration: new Trend("duration_011_01_01_Marketdata_StockDailyPrice"),
+        httpWaiting: new Trend("waiting_011_01_01_Marketdata_StockDailyPrice"),
+        requestRate: new Counter("rps_011_01_01_Marketdata_StockDailyPrice"),
+        http_reqs: new Counter("sample_011_01_01_Marketdata_StockDailyPrice"),
     }
 };
 
 // ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
-export function BP007(data) {
+export function BP011(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;
     
@@ -66,7 +66,7 @@ export function BP007(data) {
     // Batch 1
     if (token) {
         const urls = [
-            base_url + `/marketdata/api/v1/marketinfo/financial-statements/`,
+            base_url + `/marketdata/api/v1/stock-daily-price?symbol=BBCA&market=RG&start_date=10-01-2026&end_date=10-02-2026`,
         ];
 
         const requests = [
@@ -76,7 +76,7 @@ export function BP007(data) {
 
         responses.forEach((response, index) => {
             const metrics = [
-                FinancialSummarizerBackendFinancialFeature.Marketdata_Marketinfo_FinancialStatements,
+                FinancialSummarizerBackendFinancialFeature.Marketdata_StockDailyPrice,
             ];
 
             const metric = metrics[index];

@@ -1,18 +1,38 @@
 // Command
 // Run Multiple BP
-// ../../../k6 run Growin_Calendar_Web_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Community/Web/LoadTest/Manual_LoadTest_0107_1459.html
+// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Community/Web/LoadTest/Manual_LoadTest_0107_1459.html
 
 // Run Single BP Web
-// ../../k6 run Growin_Calendar_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP001/Manual/Manual_DryRun_0208_2238_BP001_Local.html
-
-// Run Single BP Android
-// ../../k6 run Growin_Calendar_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Community/iOS/BP001/Manual/Manual_DryRun_0113_1659_BP001_Local.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP001/Manual/Manual_DryRun_0205_1112_BP001_Local.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP002/Manual/Manual_DryRun_0209_1518_BP002_Local.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP003 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP003/Manual/Manual_DryRun_0209_1527_BP003_Local.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP004 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP004/Manual/Manual_DryRun_0210_1104_BP004_Local.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP005 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP005/Manual/Manual_DryRun_0210_1136_BP005_Local.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP006 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP006/Manual/Manual_DryRun_0210_1149_BP006_Local.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP007 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP007/Manual/Manual_DryRun_0210_1427_BP007_Local.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP008 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP008/Manual/Manual_DryRun_0210_1522_BP008_Local.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP009 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP009/Manual/Manual_DryRun_0210_1550_BP009_Local.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP010 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP010/Manual/Manual_DryRun_0210_1710_BP010_Local.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP011 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP011/Manual/Manual_DryRun_0211_0908_BP011_Local.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP012 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP012/Manual/Manual_DryRun_0211_0908_BP012_Local.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP013 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP013/Manual/Manual_DryRun_0211_0909_BP013_Local.html
 
 import { textSummary } from "../../Helper/textSummary.js";
 import { htmlReport } from '../../Helper/bundle.js';
 import { BP001 as BP001_Web } from "./Web/BP001.js";
-// import { BP001 as BP001_Android } from "./Android/BP001.js";
-import { BP001 as BP001_iOS } from "./iOS/BP001.js";
+import { BP002 as BP002_Web } from "./Web/BP002.js";
+import { BP003 as BP003_Web } from "./Web/BP003.js";
+import { BP004 as BP004_Web } from "./Web/BP004.js";
+import { BP005 as BP005_Web } from "./Web/BP005.js";
+import { BP006 as BP006_Web } from "./Web/BP006.js";
+import { BP007 as BP007_Web } from "./Web/BP007.js";
+import { BP008 as BP008_Web } from "./Web/BP008.js";
+import { BP009 as BP009_Web } from "./Web/BP009.js";
+import { BP010 as BP010_Web } from "./Web/BP010.js";
+import { BP011 as BP011_Web } from "./Web/BP011.js";
+import { BP012 as BP012_Web } from "./Web/BP012.js";
+import { BP013 as BP013_Web } from "./Web/BP013.js";
+
 import http from "k6/http";
 import { sleep } from "k6";
 import { Rate } from "k6/metrics";
@@ -20,19 +40,31 @@ import { Rate } from "k6/metrics";
 function getPlatform() {
     const { PLATFORM } = __ENV;
     
-    if (PLATFORM && ['Web', 'Android', 'iOS'].includes(PLATFORM)) {
+    if (PLATFORM && ['Android', 'iOS', 'Web'].includes(PLATFORM)) {
         return PLATFORM;
     }
     
-    console.error('❌ PLATFORM must be specified: Android or iOS');
-    console.error('   Example: -e PLATFORM=Android or -e PLATFORM=iOS');
+    console.error('❌ PLATFORM must be specified: Android, iOS or Web');
+    console.error('   Example: -e PLATFORM=Android, -e PLATFORM=iOS, -e PLATFORM=Web');
     return 'Web'; // default fallback
 }
 
 const platform = getPlatform();
 
 // Export BP yang tepat berdasarkan platform
-export const BP001 = platform === 'iOS' ? BP001_iOS : BP001_Web;
+export const BP001 = platform === 'Android' ? BP001_Android : BP001_Web;
+export const BP002 = platform === 'Android' ? BP002_Android : BP002_Web;
+export const BP003 = platform === 'Android' ? BP003_Android : BP003_Web;
+export const BP004 = platform === 'Android' ? BP004_Android : BP004_Web;
+export const BP005 = platform === 'Android' ? BP005_Android : BP005_Web;
+export const BP006 = platform === 'Android' ? BP006_Android : BP006_Web;
+export const BP007 = platform === 'Android' ? BP007_Android : BP007_Web;
+export const BP008 = platform === 'Android' ? BP008_Android : BP008_Web;
+export const BP009 = platform === 'Android' ? BP009_Android : BP009_Web;
+export const BP010 = platform === 'Android' ? BP010_Android : BP010_Web;
+export const BP011 = platform === 'Android' ? BP011_Android : BP011_Web;
+export const BP012 = platform === 'Android' ? BP012_Android : BP012_Web;
+export const BP013 = platform === 'Android' ? BP013_Android : BP013_Web;
 
 // ✅ RETRY CONFIGURATION
 const MAX_RETRY_ATTEMPTS = 10;
@@ -40,6 +72,18 @@ const RETRY_DELAY = 1; // seconds between retry attempts
 
 const BP_USER_PERCENTAGE = {
     BP001: 100,
+    BP002: 100,
+    BP003: 100,
+    BP004: 100,
+    BP005: 100,
+    BP006: 100,
+    BP007: 100,
+    BP008: 100,
+    BP009: 100,
+    BP010: 100,
+    BP011: 100,
+    BP012: 100,
+    BP013: 100,
 };
 
 // ✅ Function untuk calculate user distribution
@@ -96,10 +140,10 @@ console.log(`   PLATFORM: ${platform}`);
 const scenarios = {};
 selectedBPs.forEach(bp => {
     scenarios[bp] = {
-        // executor: 'per-vu-iterations',
-        // vus: 1,
-        // iterations: 1,
-        // maxDuration: '1h',
+        executor: 'per-vu-iterations',
+        vus: 1,
+        iterations: 1,
+        maxDuration: '1h',
 
         // executor: 'ramping-vus',
         // startVUs: 0,
@@ -151,9 +195,9 @@ selectedBPs.forEach(bp => {
         //     { duration: '5m', target: 0 },
         // ],
 
-        executor: 'constant-vus',
-        vus: userDistribution[bp] || 1,
-        duration: `${__ENV.DURATION}`,
+        // executor: 'constant-vus',
+        // vus: userDistribution[bp] || 1,
+        // duration: `${__ENV.DURATION}`,
 
         gracefulStop: '30s',
         exec: bp, // akan memanggil BP001() atau BP002() sesuai export di atas
@@ -272,6 +316,8 @@ export function setup() {
     let totalLoginFailed = 0;
     let totalPinSuccess = 0;
     let totalPinFailed = 0;
+    let totalUserIdSuccess = 0;
+    let totalUserIdFailed = 0;
     let totalLoginRetries = 0;
     
     // ✅ Object untuk menyimpan channel_id per BP
@@ -342,6 +388,42 @@ export function setup() {
                     if (pinRes.status === 200) {
                         totalPinSuccess++;
                         tokens[userKey].pin_token = pinRes.json().data.pin_token;
+
+                        // ✅ Step 3: Get userID (UNTUK SEMUA USER yang berhasil PIN)
+                        const profileHeaders = {
+                            'Content-Type': 'application/json',
+                            'Accept': '*/*',
+                            'Accept-Language': 'en',
+                            'Connection': 'keep-alive',
+                            'Accept-Encoding': 'gzip, deflate, br',
+                            'Cookie': `ACCESS_TOKEN=${loginResult.token}; PIN_TOKEN=${pinRes.json().data.pin_token};`,
+                            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+                            'X-App-Name': 'web',
+                            'X-App-Version': '1.4.1',
+                            'X-Device-Info': 'iPhone 11',
+                            'X-Device-Id': 'TEST3'
+                        };
+                        
+                        const profileRes = http.get(base_url + '/user/api/v1/profile/trading', { headers: profileHeaders });
+                        
+                        if (profileRes.status === 200) {
+                            totalUserIdSuccess++;
+                            tokens[userKey].user_id = profileRes.json().data.user_id;
+                            tokens[userKey].client_id = profileRes.json().data.client_id
+                            tokens[userKey].SID = profileRes.json().data.sid
+                            tokens[userKey].ksei_acc_no = profileRes.json().data.ksei_acc_no
+                            tokens[userKey].account_name = profileRes.json().data.account_name
+                        } else {
+                            totalUserIdFailed++;
+                            if (i === batchStart || totalUserIdFailed <= 5) {
+                                console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) GET userID FAILED - Status: ${profileRes.status}`);
+                            }
+                            tokens[userKey].user_id = null;
+                            tokens[userKey].client_id = null;
+                            tokens[userKey].SID = null;
+                            tokens[userKey].ksei_acc_no = null;
+                            tokens[userKey].account_name = null;
+                        }
                     } else {
                         totalPinFailed++;
                         if (i === batchStart || totalPinFailed <= 5) {
@@ -440,7 +522,7 @@ export function handleSummary(data) {
         console.log(`[${dateStr}_${timeStr}] Starting report generation for ${bp_name} on ${platform}...`);
         
         if (runby === 'Manual') {
-            const htmlPath = `../../Report/Growin_Calendar/${platform}/${bp_name}/Manual/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../Report/Growin_AI_Summarizer/${platform}/${bp_name}/Manual/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -448,7 +530,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if (runby === 'Regression') {
-            const htmlPath = `../../Report/Growin_Calendar/${platform}/${bp_name}/Regression/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../Report/Growin_AI_Summarizer/${platform}/${bp_name}/Regression/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -456,7 +538,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if (runby === 'LoadTest') {
-            const htmlPath = `../../Report/Growin_Calendar/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../Report/Growin_AI_Summarizer/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {

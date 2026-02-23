@@ -114,9 +114,9 @@ export function BP001(data) {
     twoWeeksLater.setDate(today.getDate() + 14);
     const twoWeeksFormatted = formatDate(twoWeeksLater);
 
-    console.log(todayFormatted);      // 2026-02-08
-    console.log(oneWeekFormatted);    // 2026-02-15
-    console.log(twoWeeksFormatted);   // 2026-02-22
+    // console.log(todayFormatted);      // 2026-02-08
+    // console.log(oneWeekFormatted);    // 2026-02-15
+    // console.log(twoWeeksFormatted);   // 2026-02-22
 
     // Fungsi untuk mendapatkan tanggal pertama dan terakhir bulan ini
     function getMonthBoundaries(date = new Date()) {
@@ -136,8 +136,8 @@ export function BP001(data) {
     }
 
     const { first, last } = getMonthBoundaries();
-    console.log(first);  // 2026-02-01
-    console.log(last);   // 2026-02-28
+    // console.log(first);  // 2026-02-01
+    // console.log(last);   // 2026-02-28
 
     const headers = {
         'Cookie': `ACCESS_TOKEN=${token};`,
@@ -197,7 +197,7 @@ export function BP001(data) {
             }
         });
     }
-    sleep(0.25);
+    // sleep(0.25);
 
     // Batch 2
     if (token) {
@@ -222,11 +222,6 @@ export function BP001(data) {
                 CalendarDetail.CorporateActionsCalendarDetail_MyEvents_Selected_date,
                 CalendarDetail.CorporateActionsCalendarDates_MyEvents_Start_date,
                 CalendarDetail.CorporateActionsCalendarOrder_Detail_MyEvents_Selected_date,
-
-                
-
-
-
             ];
 
             const metric = metrics[index];

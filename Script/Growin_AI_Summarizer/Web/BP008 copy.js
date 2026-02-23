@@ -241,11 +241,11 @@ export default function (data) {
     let userID;
     if (resProfileTrading.status === 200) {
         userID = resProfileTrading.json().data.user_id;
-        if (`${__ENV.ENV}`!='INT') {
+        if (`${__ENV.ENV}` != 'INT') {
             console.log(`VU${exec.vu.idInTest} - userID: ${userID}`);
         }
     } else {
-        if (`${__ENV.ENV}`!='INT') {
+        if (`${__ENV.ENV}` != 'INT') {
             console.error(`VU${exec.vu.idInTest} - Failed to get userID`);
         }
         return;
@@ -278,11 +278,11 @@ export default function (data) {
             metric.httpDuration.add(response.timings.duration);
             if (response.status === 200 || response.status === 201) {
                 title_id = response.json().data.title_id;
-                if (`${__ENV.ENV}`!='INT') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`200 ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);
                 }
             } else {
-                if (`${__ENV.ENV}`!='INT') {
+                if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
                     console.error(`VU${exec.vu.idInTest} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
                 }
@@ -327,7 +327,7 @@ export default function (data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                if (`${__ENV.ENV}`!='INT') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
@@ -398,7 +398,7 @@ export default function (data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                if (`${__ENV.ENV}`!='INT') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
@@ -464,7 +464,7 @@ export default function (data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                if (`${__ENV.ENV}`!='INT') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
@@ -528,7 +528,7 @@ export default function (data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                if (`${__ENV.ENV}`!='INT') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
@@ -589,7 +589,7 @@ export default function (data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 feedback_id = response.json().data.feedback_id;
-                if (`${__ENV.ENV}`!='INT') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
@@ -648,7 +648,7 @@ export default function (data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                if (`${__ENV.ENV}`!='INT') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
@@ -705,7 +705,7 @@ export default function (data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                if (`${__ENV.ENV}`!='INT') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {

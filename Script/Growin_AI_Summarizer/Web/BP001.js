@@ -86,11 +86,12 @@ const StockDetailKeystatTab = {
         httpWaiting: new Trend("waiting_001_01_08_Marketdata_Gpt_FeedbackUpdate"),
         requestRate: new Counter("rps_001_01_08_Marketdata_Gpt_FeedbackUpdate"),
         http_reqs: new Counter("sample_001_01_08_Marketdata_Gpt_FeedbackUpdate"),
-    },
+    }
 };
 
 // ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
-export function BP001(data) {const vuId = exec.vu.idInTest;
+export function BP001(data) {
+    const vuId = exec.vu.idInTest;
     const base_url = data.base_url;
     
     const mapping = data.vuMapping[vuId];
@@ -111,6 +112,10 @@ export function BP001(data) {const vuId = exec.vu.idInTest;
     const token = userToken.token;
     const pin_token = userToken.pin_token;
     const user_id = userToken.user_id;
+    const client_id = userToken.client_id;
+    const SID = userToken.sid;
+    const ksei_acc_no = userToken.ksei_acc_no;
+    const account_name = userToken.account_name;
     const email = userToken.email;
     const bp = mapping.bp;
 

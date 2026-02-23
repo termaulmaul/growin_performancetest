@@ -4,14 +4,13 @@ import http from "k6/http";
 import exec from 'k6/execution';
 
 // POST	marketdata/api/v1/gpt/financial_summarizer
-// POST	marketdata/api/v1/gpt/feedback?user_id={}&feature_name=NEWS&ticker={}
+// POST	marketdata/api/v1/gpt/feedback?user_id={}&feature_name=BROKER&ticker={}
 // POST	marketdata/api/v1/gpt/recommendation_question
 // POST	marketdata/api/v1/gpt/title_insert?title_name={}
 // POST	marketdata/api/v1/gpt/conversation_activity_insert
 // POST	marketdata/api/v1/gpt/conversation_activity_insert
 // POST	marketdata/api/v1/gpt/feedback_insert
 // PUT 	marketdata/api/v1/gpt/feedback_update
-// GET 	/news/api/v2
 
 // Marketdata_Gpt_FinancialSummarizer
 // Marketdata_Gpt_Feedback
@@ -21,86 +20,78 @@ import exec from 'k6/execution';
 // Marketdata_Gpt_ConversationActivityInsert_2
 // Marketdata_Gpt_FeedbackInsert
 // Marketdata_Gpt_FeedbackUpdate
-// News
 
 // Define custom metrics
-const StockDetailNewsTab = {
+const StockDetailBrokerActivityTab = {
+    
     Marketdata_Gpt_FinancialSummarizer: {
-        errorCount: new Counter("error_count_008_01_01_Marketdata_Gpt_FinancialSummarizer"),
-        errorRate: new Rate("error_rate_008_01_01_Marketdata_Gpt_FinancialSummarizer"),
-        httpDuration: new Trend("duration_008_01_01_Marketdata_Gpt_FinancialSummarizer"),
-        httpWaiting: new Trend("waiting_008_01_01_Marketdata_Gpt_FinancialSummarizer"),
-        requestRate: new Counter("rps_008_01_01_Marketdata_Gpt_FinancialSummarizer"),
-        http_reqs: new Counter("sample_008_01_01_Marketdata_Gpt_FinancialSummarizer"),
+        errorCount: new Counter("error_count_012_01_01_Marketdata_Gpt_FinancialSummarizer"),
+        errorRate: new Rate("error_rate_012_01_01_Marketdata_Gpt_FinancialSummarizer"),
+        httpDuration: new Trend("duration_012_01_01_Marketdata_Gpt_FinancialSummarizer"),
+        httpWaiting: new Trend("waiting_012_01_01_Marketdata_Gpt_FinancialSummarizer"),
+        requestRate: new Counter("rps_012_01_01_Marketdata_Gpt_FinancialSummarizer"),
+        http_reqs: new Counter("sample_012_01_01_Marketdata_Gpt_FinancialSummarizer"),
     },
     Marketdata_Gpt_Feedback: {
-        errorCount: new Counter("error_count_008_01_02_Marketdata_Gpt_Feedback"),
-        errorRate: new Rate("error_rate_008_01_02_Marketdata_Gpt_Feedback"),
-        httpDuration: new Trend("duration_008_01_02_Marketdata_Gpt_Feedback"),
-        httpWaiting: new Trend("waiting_008_01_02_Marketdata_Gpt_Feedback"),
-        requestRate: new Counter("rps_008_01_02_Marketdata_Gpt_Feedback"),
-        http_reqs: new Counter("sample_008_01_02_Marketdata_Gpt_Feedback"),
+        errorCount: new Counter("error_count_012_01_02_Marketdata_Gpt_Feedback"),
+        errorRate: new Rate("error_rate_012_01_02_Marketdata_Gpt_Feedback"),
+        httpDuration: new Trend("duration_012_01_02_Marketdata_Gpt_Feedback"),
+        httpWaiting: new Trend("waiting_012_01_02_Marketdata_Gpt_Feedback"),
+        requestRate: new Counter("rps_012_01_02_Marketdata_Gpt_Feedback"),
+        http_reqs: new Counter("sample_012_01_02_Marketdata_Gpt_Feedback"),
     },
     Marketdata_Gpt_RecommendationQuestion: {
-        errorCount: new Counter("error_count_008_01_03_Marketdata_Gpt_RecommendationQuestion"),
-        errorRate: new Rate("error_rate_008_01_03_Marketdata_Gpt_RecommendationQuestion"),
-        httpDuration: new Trend("duration_008_01_03_Marketdata_Gpt_RecommendationQuestion"),
-        httpWaiting: new Trend("waiting_008_01_03_Marketdata_Gpt_RecommendationQuestion"),
-        requestRate: new Counter("rps_008_01_03_Marketdata_Gpt_RecommendationQuestion"),
-        http_reqs: new Counter("sample_008_01_03_Marketdata_Gpt_RecommendationQuestion"),
+        errorCount: new Counter("error_count_012_01_03_Marketdata_Gpt_RecommendationQuestion"),
+        errorRate: new Rate("error_rate_012_01_03_Marketdata_Gpt_RecommendationQuestion"),
+        httpDuration: new Trend("duration_012_01_03_Marketdata_Gpt_RecommendationQuestion"),
+        httpWaiting: new Trend("waiting_012_01_03_Marketdata_Gpt_RecommendationQuestion"),
+        requestRate: new Counter("rps_012_01_03_Marketdata_Gpt_RecommendationQuestion"),
+        http_reqs: new Counter("sample_012_01_03_Marketdata_Gpt_RecommendationQuestion"),
     },
     Marketdata_Gpt_TitleInsert: {
-        errorCount: new Counter("error_count_008_01_04_Marketdata_Gpt_TitleInsert"),
-        errorRate: new Rate("error_rate_008_01_04_Marketdata_Gpt_TitleInsert"),
-        httpDuration: new Trend("duration_008_01_04_Marketdata_Gpt_TitleInsert"),
-        httpWaiting: new Trend("waiting_008_01_04_Marketdata_Gpt_TitleInsert"),
-        requestRate: new Counter("rps_008_01_04_Marketdata_Gpt_TitleInsert"),
-        http_reqs: new Counter("sample_008_01_04_Marketdata_Gpt_TitleInsert"),
+        errorCount: new Counter("error_count_012_01_04_Marketdata_Gpt_TitleInsert"),
+        errorRate: new Rate("error_rate_012_01_04_Marketdata_Gpt_TitleInsert"),
+        httpDuration: new Trend("duration_012_01_04_Marketdata_Gpt_TitleInsert"),
+        httpWaiting: new Trend("waiting_012_01_04_Marketdata_Gpt_TitleInsert"),
+        requestRate: new Counter("rps_012_01_04_Marketdata_Gpt_TitleInsert"),
+        http_reqs: new Counter("sample_012_01_04_Marketdata_Gpt_TitleInsert"),
     },
     Marketdata_Gpt_ConversationActivityInsert: {
-        errorCount: new Counter("error_count_008_01_05_Marketdata_Gpt_ConversationActivityInsert"),
-        errorRate: new Rate("error_rate_008_01_05_Marketdata_Gpt_ConversationActivityInsert"),
-        httpDuration: new Trend("duration_008_01_05_Marketdata_Gpt_ConversationActivityInsert"),
-        httpWaiting: new Trend("waiting_008_01_05_Marketdata_Gpt_ConversationActivityInsert"),
-        requestRate: new Counter("rps_008_01_05_Marketdata_Gpt_ConversationActivityInsert"),
-        http_reqs: new Counter("sample_008_01_05_Marketdata_Gpt_ConversationActivityInsert"),
+        errorCount: new Counter("error_count_012_01_05_Marketdata_Gpt_ConversationActivityInsert"),
+        errorRate: new Rate("error_rate_012_01_05_Marketdata_Gpt_ConversationActivityInsert"),
+        httpDuration: new Trend("duration_012_01_05_Marketdata_Gpt_ConversationActivityInsert"),
+        httpWaiting: new Trend("waiting_012_01_05_Marketdata_Gpt_ConversationActivityInsert"),
+        requestRate: new Counter("rps_012_01_05_Marketdata_Gpt_ConversationActivityInsert"),
+        http_reqs: new Counter("sample_012_01_05_Marketdata_Gpt_ConversationActivityInsert"),
     },
     Marketdata_Gpt_ConversationActivityInsert_2: {
-        errorCount: new Counter("error_count_008_01_06_Marketdata_Gpt_ConversationActivityInsert_2"),
-        errorRate: new Rate("error_rate_008_01_06_Marketdata_Gpt_ConversationActivityInsert_2"),
-        httpDuration: new Trend("duration_008_01_06_Marketdata_Gpt_ConversationActivityInsert_2"),
-        httpWaiting: new Trend("waiting_008_01_06_Marketdata_Gpt_ConversationActivityInsert_2"),
-        requestRate: new Counter("rps_008_01_06_Marketdata_Gpt_ConversationActivityInsert_2"),
-        http_reqs: new Counter("sample_008_01_06_Marketdata_Gpt_ConversationActivityInsert_2"),
+        errorCount: new Counter("error_count_012_01_06_Marketdata_Gpt_ConversationActivityInsert_2"),
+        errorRate: new Rate("error_rate_012_01_06_Marketdata_Gpt_ConversationActivityInsert_2"),
+        httpDuration: new Trend("duration_012_01_06_Marketdata_Gpt_ConversationActivityInsert_2"),
+        httpWaiting: new Trend("waiting_012_01_06_Marketdata_Gpt_ConversationActivityInsert_2"),
+        requestRate: new Counter("rps_012_01_06_Marketdata_Gpt_ConversationActivityInsert_2"),
+        http_reqs: new Counter("sample_012_01_06_Marketdata_Gpt_ConversationActivityInsert_2"),
     },
     Marketdata_Gpt_FeedbackInsert: {
-        errorCount: new Counter("error_count_008_01_07_Marketdata_Gpt_FeedbackInsert"),
-        errorRate: new Rate("error_rate_008_01_07_Marketdata_Gpt_FeedbackInsert"),
-        httpDuration: new Trend("duration_008_01_07_Marketdata_Gpt_FeedbackInsert"),
-        httpWaiting: new Trend("waiting_008_01_07_Marketdata_Gpt_FeedbackInsert"),
-        requestRate: new Counter("rps_008_01_07_Marketdata_Gpt_FeedbackInsert"),
-        http_reqs: new Counter("sample_008_01_07_Marketdata_Gpt_FeedbackInsert"),
+        errorCount: new Counter("error_count_012_01_07_Marketdata_Gpt_FeedbackInsert"),
+        errorRate: new Rate("error_rate_012_01_07_Marketdata_Gpt_FeedbackInsert"),
+        httpDuration: new Trend("duration_012_01_07_Marketdata_Gpt_FeedbackInsert"),
+        httpWaiting: new Trend("waiting_012_01_07_Marketdata_Gpt_FeedbackInsert"),
+        requestRate: new Counter("rps_012_01_07_Marketdata_Gpt_FeedbackInsert"),
+        http_reqs: new Counter("sample_012_01_07_Marketdata_Gpt_FeedbackInsert"),
     },
     Marketdata_Gpt_FeedbackUpdate: {
-        errorCount: new Counter("error_count_008_01_08_Marketdata_Gpt_FeedbackUpdate"),
-        errorRate: new Rate("error_rate_008_01_08_Marketdata_Gpt_FeedbackUpdate"),
-        httpDuration: new Trend("duration_008_01_08_Marketdata_Gpt_FeedbackUpdate"),
-        httpWaiting: new Trend("waiting_008_01_08_Marketdata_Gpt_FeedbackUpdate"),
-        requestRate: new Counter("rps_008_01_08_Marketdata_Gpt_FeedbackUpdate"),
-        http_reqs: new Counter("sample_008_01_08_Marketdata_Gpt_FeedbackUpdate"),
-    },
-    News: {
-        errorCount: new Counter("error_count_008_01_09_News"),
-        errorRate: new Rate("error_rate_008_01_09_News"),
-        httpDuration: new Trend("duration_008_01_09_News"),
-        httpWaiting: new Trend("waiting_008_01_09_News"),
-        requestRate: new Counter("rps_008_01_09_News"),
-        http_reqs: new Counter("sample_008_01_09_News"),
+        errorCount: new Counter("error_count_012_01_08_Marketdata_Gpt_FeedbackUpdate"),
+        errorRate: new Rate("error_rate_012_01_08_Marketdata_Gpt_FeedbackUpdate"),
+        httpDuration: new Trend("duration_012_01_08_Marketdata_Gpt_FeedbackUpdate"),
+        httpWaiting: new Trend("waiting_012_01_08_Marketdata_Gpt_FeedbackUpdate"),
+        requestRate: new Counter("rps_012_01_08_Marketdata_Gpt_FeedbackUpdate"),
+        http_reqs: new Counter("sample_012_01_08_Marketdata_Gpt_FeedbackUpdate"),
     },
 };
 
 // ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
-export function BP008(data) {
+export function BP012(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;
     
@@ -174,7 +165,7 @@ export function BP008(data) {
 
         const Marketdata_Gpt_FinancialSummarizer_Payload = JSON.stringify({
             message: "Performance Test",
-            feature: "KEYSTAT", 
+            feature: "BROKER", 
             ticker: "BBCA",
             user_id: user_id
         });
@@ -187,7 +178,7 @@ export function BP008(data) {
 
         responses.forEach((response, index) => {
             const metrics = [
-                StockDetailNewsTab.Marketdata_Gpt_FinancialSummarizer,
+                StockDetailBrokerActivityTab.Marketdata_Gpt_FinancialSummarizer,
             ];
 
             const metric = metrics[index];
@@ -219,27 +210,27 @@ export function BP008(data) {
     // Batch 2
     if (token) {
         const urls = [
-            base_url + `/marketdata/api/v1/gpt/feedback?user_id=${user_id}&feature_name=NEWS&ticker=BBCA`,
+            base_url + `/marketdata/api/v1/gpt/feedback?user_id=${user_id}&feature_name=BROKER&ticker=BBCA`,
             base_url + `/marketdata/api/v1/gpt/recommendation_question`,
             base_url + `/marketdata/api/v1/gpt/title_insert?title_name={}`,
         ];
 
         const Marketdata_Gpt_Feedback_Payload = JSON.stringify({
             user_id: user_id, 
-            feature_name: "NEWS", 
+            feature_name: "BROKER", 
             ticker: "BBCA"
         });
 
         const Marketdata_Gpt_RecommendationQuestion_Payload = JSON.stringify({
             message: "", 
-            feature: "NEWS", 
+            feature: "BROKER", 
             ticker: "BBCA", 
             user_id: user_id, 
             locale: "en"
         });
 
         const Marketdata_Gpt_TitleInsert_Payload = JSON.stringify({
-            feature: "NEWS", 
+            feature: "BROKER", 
             source: "WEB", 
             client_id: client_id, 
             ksei_account: ksei_acc_no
@@ -255,9 +246,9 @@ export function BP008(data) {
 
         responses.forEach((response, index) => {
             const metrics = [
-                StockDetailNewsTab.Marketdata_Gpt_Feedback,
-                StockDetailNewsTab.Marketdata_Gpt_RecommendationQuestion,
-                StockDetailNewsTab.Marketdata_Gpt_TitleInsert,
+                StockDetailBrokerActivityTab.Marketdata_Gpt_Feedback,
+                StockDetailBrokerActivityTab.Marketdata_Gpt_RecommendationQuestion,
+                StockDetailBrokerActivityTab.Marketdata_Gpt_TitleInsert,
             ];
 
             const metric = metrics[index];
@@ -301,7 +292,7 @@ export function BP008(data) {
             chat_type: "IN",
             is_spam: false,
             remarks: "Performance Test",
-            feature_name: ["KEYSTAT"],
+            feature_name: ["BROKER"],
             source_name: "WEB",
             product_id: "BBCA",
             recommendation_chat_id: 0
@@ -314,7 +305,7 @@ export function BP008(data) {
 
         responses.forEach((response, index) => {
             const metrics = [
-                StockDetailNewsTab.Marketdata_Gpt_ConversationActivityInsert,
+                StockDetailBrokerActivityTab.Marketdata_Gpt_ConversationActivityInsert,
             ];
 
             const metric = metrics[index];
@@ -358,7 +349,7 @@ export function BP008(data) {
             chat_type: "OUT",
             is_spam: false,
             remarks: "test",
-            feature_name: ["KEYSTAT"],
+            feature_name: ["BROKER"],
             source_name: "WEB",
             product_id: "BBCA",
             recommendation_chat_id: 0
@@ -372,7 +363,7 @@ export function BP008(data) {
 
         responses.forEach((response, index) => {
             const metrics = [
-                StockDetailNewsTab.Marketdata_Gpt_ConversationActivityInsert_2,
+                StockDetailBrokerActivityTab.Marketdata_Gpt_ConversationActivityInsert_2,
             ];
 
             const metric = metrics[index];
@@ -422,7 +413,7 @@ export function BP008(data) {
 
         responses.forEach((response, index) => {
             const metrics = [
-                StockDetailNewsTab.Marketdata_Gpt_FeedbackInsert,
+                StockDetailBrokerActivityTab.Marketdata_Gpt_FeedbackInsert,
             ];
 
             const metric = metrics[index];
@@ -473,50 +464,7 @@ export function BP008(data) {
 
         responses.forEach((response, index) => {
             const metrics = [
-                StockDetailNewsTab.Marketdata_Gpt_FeedbackUpdate,
-            ];
-
-            const metric = metrics[index];
-            metric.httpDuration.add(response.timings.duration);
-            if (response.status === 200) {
-                metric.errorRate.add(false);
-                metric.errorCount.add(0);
-                metric.requestRate.add(true);
-                metric.http_reqs.add(1);
-                if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-                }
-            } else {
-                metric.errorRate.add(true);
-                metric.errorCount.add(1);
-                metric.requestRate.add(false);
-                metric.http_reqs.add(1);
-                check(response, {
-                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-                });
-                if (`${__ENV.ENV}` != 'INT') {
-                    const requestBody = requests[index][2];
-                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-                }
-            }
-        });
-    }
-
-    // Batch 7
-    if (token) {
-        const urls = [
-            base_url + `/news/api/v2/?items=5&ticker=BBCA&page=1&category=0&is_sharia=0&is_shortsell=0`,
-        ];
-        
-
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
-
-        responses.forEach((response, index) => {
-            const metrics = [
-                StockDetailNewsTab.News,
+                StockDetailBrokerActivityTab.Marketdata_Gpt_FeedbackUpdate,
             ];
 
             const metric = metrics[index];

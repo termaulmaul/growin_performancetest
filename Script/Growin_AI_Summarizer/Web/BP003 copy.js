@@ -152,11 +152,11 @@ export default function (data) {
         SID = resProfileTrading.json().data.sid
         KseiAccNo = resProfileTrading.json().data.ksei_acc_no
         AccountName = resProfileTrading.json().data.account_name
-        if (`${__ENV.ENV}`!='INT') {
+        if (`${__ENV.ENV}` != 'INT') {
             console.log(`VU${exec.vu.idInTest} - userID: ${userID}`);
         }
     } else {
-        if (`${__ENV.ENV}`!='INT') {
+        if (`${__ENV.ENV}` != 'INT') {
             console.error(`VU${exec.vu.idInTest} - Failed to get userID`);
         }
         return;
@@ -212,7 +212,7 @@ export default function (data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                if (`${__ENV.ENV}`!='INT') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {

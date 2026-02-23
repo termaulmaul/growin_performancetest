@@ -4,7 +4,7 @@
 # ./Growin_2FA_Regression.sh
 # Declare variables
 ENV="INT"
-USER=400
+USER=500
 DURATION="2h"
 NUMSTART=1
 RUNBY="LoadTest"

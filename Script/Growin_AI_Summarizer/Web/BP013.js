@@ -3,44 +3,44 @@ import { Trend, Counter, Rate } from "k6/metrics";
 import http from "k6/http";
 import exec from 'k6/execution';
 
-// /marketdata/api/v1/emiten/price-performance/
-// /marketdata/api/v1/emiten/low-high-range/
-// /marketdata/api/v1/emiten/investor-chart-agg/
+// GET	/marketdata/api/v1/broker-activity?stock_symbol=BBCA&start_date=2026-02-09&end_date=2026-02-09&is_net=false&domicile=
+// GET	/marketdata/api/v1/brokers-map
+// GET	/marketdata/api/v1/stock-strength
 
-// Marketdata_Emiten_PricePerformance
-// Marketdata_Emiten_LowHighRange
-// Marketdata_Emiten_InvestorChartAgg
+// Marketdata_BrokerActivity
+// Marketdata_BrokersMap
+// Marketdata_StockStrength
 
 // Define custom metrics
-const FinancialSummarizerBackendAnalysisFeature = {
-    Marketdata_Emiten_PricePerformance: {
-        errorCount: new Counter("error_count_005_01_01_Marketdata_Emiten_PricePerformance"),
-        errorRate: new Rate("error_rate_005_01_01_Marketdata_Emiten_PricePerformance"),
-        httpDuration: new Trend("duration_005_01_01_Marketdata_Emiten_PricePerformance"),
-        httpWaiting: new Trend("waiting_005_01_01_Marketdata_Emiten_PricePerformance"),
-        requestRate: new Counter("rps_005_01_01_Marketdata_Emiten_PricePerformance"),
-        http_reqs: new Counter("sample_005_01_01_Marketdata_Emiten_PricePerformance"),
+const FinancialSummarizerBackendBrokerActivityTab = {
+    Marketdata_BrokerActivity: {
+        errorCount: new Counter("error_count_013_01_01_Marketdata_BrokerActivity"),
+        errorRate: new Rate("error_rate_013_01_01_Marketdata_BrokerActivity"),
+        httpDuration: new Trend("duration_013_01_01_Marketdata_BrokerActivity"),
+        httpWaiting: new Trend("waiting_013_01_01_Marketdata_BrokerActivity"),
+        requestRate: new Counter("rps_013_01_01_Marketdata_BrokerActivity"),
+        http_reqs: new Counter("sample_013_01_01_Marketdata_BrokerActivity"),
     },
-    Marketdata_Emiten_LowHighRange: {
-        errorCount: new Counter("error_count_005_01_02_Marketdata_Emiten_LowHighRange"),
-        errorRate: new Rate("error_rate_005_01_02_Marketdata_Emiten_LowHighRange"),
-        httpDuration: new Trend("duration_005_01_02_Marketdata_Emiten_LowHighRange"),
-        httpWaiting: new Trend("waiting_005_01_02_Marketdata_Emiten_LowHighRange"),
-        requestRate: new Counter("rps_005_01_02_Marketdata_Emiten_LowHighRange"),
-        http_reqs: new Counter("sample_005_01_02_Marketdata_Emiten_LowHighRange"),
+    Marketdata_BrokersMap: {
+        errorCount: new Counter("error_count_013_01_02_Marketdata_BrokersMap"),
+        errorRate: new Rate("error_rate_013_01_02_Marketdata_BrokersMap"),
+        httpDuration: new Trend("duration_013_01_02_Marketdata_BrokersMap"),
+        httpWaiting: new Trend("waiting_013_01_02_Marketdata_BrokersMap"),
+        requestRate: new Counter("rps_013_01_02_Marketdata_BrokersMap"),
+        http_reqs: new Counter("sample_013_01_02_Marketdata_BrokersMap"),
     },
-    Marketdata_Emiten_InvestorChartAgg: {
-        errorCount: new Counter("error_count_005_01_03_Marketdata_Emiten_InvestorChartAgg"),
-        errorRate: new Rate("error_rate_005_01_03_Marketdata_Emiten_InvestorChartAgg"),
-        httpDuration: new Trend("duration_005_01_03_Marketdata_Emiten_InvestorChartAgg"),
-        httpWaiting: new Trend("waiting_005_01_03_Marketdata_Emiten_InvestorChartAgg"),
-        requestRate: new Counter("rps_005_01_03_Marketdata_Emiten_InvestorChartAgg"),
-        http_reqs: new Counter("sample_005_01_03_Marketdata_Emiten_InvestorChartAgg"),
+    Marketdata_StockStrength: {
+        errorCount: new Counter("error_count_013_01_03_Marketdata_StockStrength"),
+        errorRate: new Rate("error_rate_013_01_03_Marketdata_StockStrength"),
+        httpDuration: new Trend("duration_013_01_03_Marketdata_StockStrength"),
+        httpWaiting: new Trend("waiting_013_01_03_Marketdata_StockStrength"),
+        requestRate: new Counter("rps_013_01_03_Marketdata_StockStrength"),
+        http_reqs: new Counter("sample_013_01_03_Marketdata_StockStrength"),
     }
 };
 
 // ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
-export function BP005(data) {
+export function BP013(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;
     
@@ -86,7 +86,7 @@ export function BP005(data) {
     // Batch 1
     if (token) {
         const urls = [
-            base_url + `/marketdata/api/v1/emiten/price-performance/`,
+            base_url + `/marketdata/api/v1/broker-activity?stock_symbol=BBCA&start_date=2026-02-09&end_date=2026-02-09&is_net=false&domicile=`,
         ];
 
         const requests = [
@@ -96,7 +96,7 @@ export function BP005(data) {
 
         responses.forEach((response, index) => {
             const metrics = [
-                FinancialSummarizerBackendAnalysisFeature.Marketdata_Emiten_PricePerformance,
+                FinancialSummarizerBackendBrokerActivityTab.Marketdata_BrokerActivity,
             ];
 
             const metric = metrics[index];
@@ -128,7 +128,7 @@ export function BP005(data) {
     // Batch 2
     if (token) {
         const urls = [
-            base_url + `/marketdata/api/v1/emiten/low-high-range/`,
+            base_url + `/marketdata/api/v1/brokers-map`,
         ];
 
         const requests = [
@@ -138,7 +138,7 @@ export function BP005(data) {
 
         responses.forEach((response, index) => {
             const metrics = [
-                FinancialSummarizerBackendAnalysisFeature.Marketdata_Emiten_LowHighRange,
+                FinancialSummarizerBackendBrokerActivityTab.Marketdata_BrokersMap,
             ];
 
             const metric = metrics[index];
@@ -170,7 +170,7 @@ export function BP005(data) {
     // Batch 3
     if (token) {
         const urls = [
-            base_url + `/marketdata/api/v1/emiten/investor-chart-agg/`,
+            base_url + `/marketdata/api/v1/stock-strength`,
         ];
 
         const requests = [
@@ -180,7 +180,7 @@ export function BP005(data) {
 
         responses.forEach((response, index) => {
             const metrics = [
-                FinancialSummarizerBackendAnalysisFeature.Marketdata_Emiten_InvestorChartAgg,
+                FinancialSummarizerBackendBrokerActivityTab.Marketdata_StockStrength,
             ];
 
             const metric = metrics[index];

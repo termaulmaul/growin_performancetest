@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# chmod +x Growin_Password_Expired_LoadTest.sh
-# ./Growin_Password_Expired_LoadTest.sh
+# chmod +x Growin_AI_Summarizer_LoadTest.sh
+# ./Growin_AI_Summarizer_LoadTest.sh
 # Declare variables
 ENV="INT"
 USER=400
@@ -12,7 +12,7 @@ RUNTYPE="LoadTest"
 SLEEP=300
 
 pwd
-cd /home/qa/mostng_performancetest_api/Script/Growin_Calendar || exit 1
+cd /home/qa/mostng_performancetest_api/Script/Growin_AI_Summarizer || exit 1
 pwd
 
 #BP001
@@ -26,5 +26,5 @@ echo "Captured Time    : $timeStr"
 echo "Current Scenario : Load Test All BP Web"
 
 # Run k6 commands using the captured date and time
-../../k6 run Growin_Calendar.js -e RUNBY="$RUNBY" -e ENV="$ENV" -e USER="$USER" -e DURATION="$DURATION" -e NUMSTART="$NUMSTART" -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/${RUNTYPE}/"$RUNBY"_"$RUNTYPE"_${dateStr}_${timeStr}_BP001_48.html
+../../k6 run Growin_AI_Summarizer.js -e RUNBY="$RUNBY" -e ENV="$ENV" -e USER="$USER" -e DURATION="$DURATION" -e NUMSTART="$NUMSTART" -e PLATFORM=Web --out dashboard=export=../../Report/Growin_AI_Summarizer/Web/${RUNTYPE}/"$RUNBY"_"$RUNTYPE"_${dateStr}_${timeStr}_48.html
 sleep "$SLEEP"

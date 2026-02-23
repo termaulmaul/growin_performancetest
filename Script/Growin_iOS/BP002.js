@@ -283,11 +283,11 @@ export default function () {
     let token;
     if (res.status === 200) {
         token = res.json().data.token;
-        if (`${__ENV.ENV}`!='INT') {
+        if (`${__ENV.ENV}` != 'INT') {
             console.log(`VU${exec.vu.idInTest} - ${email} Login Success`);
         }
     } else {
-        if (`${__ENV.ENV}`!='INT') {
+        if (`${__ENV.ENV}` != 'INT') {
             console.error(`VU${exec.vu.idInTest} - ${email} Failed to Login || Status: ${res.status} || Status: ${res.body}`);
         }
         return;
@@ -401,7 +401,7 @@ export default function () {
                 metric.errorRate.add(false);
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
-                metric.http_reqs.add(1);if (`${__ENV.ENV}`!='INT') {
+                metric.http_reqs.add(1);if (`${__ENV.ENV}` != 'INT') {
                     console.log(`200 ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);
                 }
             } else {
@@ -412,7 +412,7 @@ export default function () {
                 check(response, {
                     [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
                 });
-                if (`${__ENV.ENV}`!='INT') {
+                if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
                     console.error(`VU${exec.vu.idInTest} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
                 }
@@ -457,7 +457,7 @@ export default function () {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                if (`${__ENV.ENV}`!='INT') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`200 ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);
                 }
             } else {
@@ -468,7 +468,7 @@ export default function () {
                 check(response, {
                     [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
                 });
-                if (`${__ENV.ENV}`!='INT') {
+                if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
                     console.error(`VU${exec.vu.idInTest} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
                 }
@@ -504,7 +504,7 @@ export default function () {
     //             metric.errorCount.add(0);
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}`!='INT') {
+    //             if (`${__ENV.ENV}` != 'INT') {
     //                 console.log(`200 ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);
     //             }
     //         } else {
@@ -515,7 +515,7 @@ export default function () {
     //             check(response, {
     //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
     //             });
-    //             if (`${__ENV.ENV}`!='INT') {
+    //             if (`${__ENV.ENV}` != 'INT') {
     //                 const requestBody = requests[index][2];
     //                 console.error(`VU${exec.vu.idInTest} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
     //             }

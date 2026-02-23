@@ -194,7 +194,7 @@ export default function (data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                if (`${__ENV.ENV}`!='INT') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`VU${exec.vu.idInTest} SUCCESS ${urls[index]}`);
                 }
             } else {
@@ -205,7 +205,7 @@ export default function (data) {
                 check(response, {
                     [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200 || r.status === 201
                 });
-                if (`${__ENV.ENV}`!='INT') {
+                if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
                     console.error(`VU${exec.vu.idInTest} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
                 }
@@ -250,7 +250,7 @@ export default function (data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                if (`${__ENV.ENV}`!='INT') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`VU${exec.vu.idInTest} SUCCESS ${urls[index]}`);
                 }
             } else {
@@ -261,7 +261,7 @@ export default function (data) {
                 check(response, {
                     [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200 || r.status === 201
                 });
-                if (`${__ENV.ENV}`!='INT') {
+                if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
                     console.error(`VU${exec.vu.idInTest} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
                 }
@@ -306,7 +306,7 @@ export default function (data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                if (`${__ENV.ENV}`!='INT') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`VU${exec.vu.idInTest} SUCCESS ${urls[index]}`);
                 }
             } else {
@@ -317,7 +317,7 @@ export default function (data) {
                 check(response, {
                     [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200 || r.status === 201
                 });
-                if (`${__ENV.ENV}`!='INT') {
+                if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
                     console.error(`VU${exec.vu.idInTest} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
                 }

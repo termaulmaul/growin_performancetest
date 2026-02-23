@@ -1,0 +1,147 @@
+// Jenkinsfile — Growin Performance Test Pipeline
+// Triggered on every deployment build.
+// Converts YAML config to JSON, runs k6, reads exit code for pass/fail.
+
+pipeline {
+    agent any
+
+    parameters {
+        choice(name: 'ENV',       choices: ['INT', 'DEV', 'QA', 'DRC'], description: 'Target environment')
+        choice(name: 'PLATFORM',  choices: ['Web', 'Android', 'iOS'],   description: 'App platform')
+        string(name: 'SCENARIO',  defaultValue: 'BP001',                description: 'BP to run (comma-separated: BP001,BP002)')
+        string(name: 'USER',      defaultValue: '200',                  description: 'Number of virtual users')
+        string(name: 'NUMSTART',  defaultValue: '101',                  description: 'Starting user number')
+        string(name: 'DURATION',  defaultValue: '5m',                   description: 'Test duration')
+        string(name: 'RUNBY',     defaultValue: 'LoadTest',             description: 'Run type (Manual/Regression/LoadTest)')
+    }
+
+    environment {
+        K6_PATH    = '../../k6'
+        REPORT_DIR = '../../Report/Growin_PT_Dev'
+        CONFIG_DIR = './configs'
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+                echo "✅ Code checked out."
+            }
+        }
+
+        stage('Convert YAML Config to JSON') {
+            steps {
+                script {
+                    // For each selected scenario, convert its YAML to JSON.
+                    // This requires Python + PyYAML on the Jenkins agent.
+                    // Install once: pip install pyyaml
+                    def scenarios = params.SCENARIO.split(',').collect { it.trim() }
+
+                    scenarios.each { bp ->
+                        def yamlFile = "${CONFIG_DIR}/${bp}_config.yaml"
+                        def jsonFile = "${CONFIG_DIR}/${bp}_config.json"
+
+                        sh """
+                            python3 -c "
+import sys, yaml, json
+with open('${yamlFile}', 'r') as f:
+    data = yaml.safe_load(f)
+with open('${jsonFile}', 'w') as f:
+    json.dump(data, f)
+print('✅ Converted ${yamlFile} -> ${jsonFile}')
+"
+                        """
+                        echo "✅ ${bp} YAML converted to JSON"
+                    }
+                }
+            }
+        }
+
+        stage('Run Performance Test') {
+            steps {
+                script {
+                    def scenarios   = params.SCENARIO.split(',').collect { it.trim() }
+                    def overallPass = true
+
+                    scenarios.each { bp ->
+                        def jsonFile = "${CONFIG_DIR}/${bp}_config.json"
+                        def bpConfig = sh(
+                            script: "cat ${jsonFile}",
+                            returnStdout: true
+                        ).trim()
+
+                        // Escape single quotes in JSON for shell safety
+                        bpConfig = bpConfig.replace("'", "'\\''")
+
+                        def timestamp = sh(script: "date +%m%d_%H%M", returnStdout: true).trim()
+                        def htmlReport = "${REPORT_DIR}/${params.PLATFORM}/${bp}/LoadTest/${params.RUNBY}_${bp}_${timestamp}.html"
+
+                        echo "🚀 Running k6 for ${bp}..."
+
+                        // k6 exits with code 99 when thresholds fail (but abortOnFail=false keeps it running).
+                        // We capture the exit code instead of letting Jenkins abort the pipeline.
+                        def k6ExitCode = sh(
+                            script: """
+                                ${K6_PATH} run Growin_PT_Dev.js \\
+                                    -e RUNBY=${params.RUNBY} \\
+                                    -e ENV=${params.ENV} \\
+                                    -e USER=${params.USER} \\
+                                    -e DURATION=${params.DURATION} \\
+                                    -e NUMSTART=${params.NUMSTART} \\
+                                    -e SCENARIO=${bp} \\
+                                    -e PLATFORM=${params.PLATFORM} \\
+                                    -e BP_CONFIG='${bpConfig}' \\
+                                    --out dashboard=export=${htmlReport}
+                            """,
+                            returnStatus: true  // ← KEY: don't throw on non-zero exit
+                        )
+
+                        if (k6ExitCode == 0) {
+                            echo "✅ ${bp} - All thresholds PASSED (exit code 0)"
+                        } else if (k6ExitCode == 99) {
+                            // k6 exit code 99 = thresholds failed but test completed
+                            echo "⚠️  ${bp} - Some thresholds FAILED (exit code 99) - see report"
+                            overallPass = false
+                        } else {
+                            // Any other non-zero = runtime error
+                            error "❌ ${bp} - k6 crashed with exit code ${k6ExitCode}"
+                        }
+                    }
+
+                    // Mark build result based on threshold outcomes
+                    if (!overallPass) {
+                        // UNSTABLE = test ran to completion but had failures
+                        // Change to 'FAILURE' if you want Jenkins to hard-fail the build
+                        currentBuild.result = 'UNSTABLE'
+                        echo "⚠️  Build marked UNSTABLE - One or more BPs failed performance thresholds."
+                        echo "   Check HTML reports in ${REPORT_DIR} for details."
+                    } else {
+                        echo "✅ All BPs passed performance thresholds."
+                    }
+                }
+            }
+        }
+
+        stage('Archive Reports') {
+            steps {
+                archiveArtifacts artifacts: 'Report/**/*.html', allowEmptyArchive: true
+                echo "✅ Reports archived."
+            }
+        }
+
+    }
+
+    post {
+        always {
+            echo "Pipeline finished with result: ${currentBuild.result ?: 'SUCCESS'}"
+        }
+        unstable {
+            echo "⚠️  Performance test UNSTABLE — thresholds not met. Review reports."
+            // Optionally: send Slack/email notification here
+        }
+        failure {
+            echo "❌ Pipeline FAILED — k6 crashed or config error."
+        }
+    }
+}
