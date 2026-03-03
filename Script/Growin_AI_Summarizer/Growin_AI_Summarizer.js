@@ -3,7 +3,7 @@
 // ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Community/Web/LoadTest/Manual_LoadTest_0107_1459.html
 
 // Run Single BP Web
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP001/Manual/Manual_DryRun_0205_1112_BP001_Local.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=QA -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP001/Manual/Manual_DryRun_0303_1031_BP001_Local.html
 // ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP002/Manual/Manual_DryRun_0209_1518_BP002_Local.html
 // ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP003 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP003/Manual/Manual_DryRun_0209_1527_BP003_Local.html
 // ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP004 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP004/Manual/Manual_DryRun_0210_1104_BP004_Local.html
@@ -34,8 +34,13 @@ import { BP012 as BP012_Web } from "./Web/BP012.js";
 import { BP013 as BP013_Web } from "./Web/BP013.js";
 
 import http from "k6/http";
+http.setResponseCallback(http.expectedStatuses(200, 201, 400, 401, 403, 404, 500));
 import { sleep } from "k6";
 import { Rate } from "k6/metrics";
+
+const DEFAULT_PARAMS = {
+    timeout: '300s',
+};
 
 function getPlatform() {
     const { PLATFORM } = __ENV;
@@ -204,13 +209,21 @@ selectedBPs.forEach(bp => {
     };
 });
 
+// export const options = {
+//     scenarios: scenarios,
+//     noConnectionReuse: false,
+//     setupTimeout: '3600s', // ✅ Increased for large user counts
+//     teardownTimeout: '3600s',
+//     summaryTimeUnit: '3600s',
+// }
 export const options = {
     scenarios: scenarios,
     noConnectionReuse: false,
-    setupTimeout: '3600s', // ✅ Increased for large user counts
+    setupTimeout: '3600s',
     teardownTimeout: '3600s',
     summaryTimeUnit: '3600s',
-}
+    httpDebug: 'full', // optional, untuk debug
+};
 
 function getBaseUrl() {
     if(`${__ENV.ENV}`=='DEV'){

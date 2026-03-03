@@ -142,12 +142,12 @@ export function BP001(data) {
         const Marketdata_Gpt_FinancialSummarizer_Payload = JSON.stringify({
             message: "How the company solvency",
             feature: "KEYSTAT", 
-            ticker: "BMRI",
+            ticker: "BBCA",
             user_id: user_id
         });
 
         const requests = [
-            ['POST', urls[0], Marketdata_Gpt_FinancialSummarizer_Payload, { headers: headers }],
+            ['POST', urls[0], Marketdata_Gpt_FinancialSummarizer_Payload, { headers: headers, timeout: '300s' }],
         ];
         const responses = http.batch(requests);
 
@@ -183,9 +183,10 @@ export function BP001(data) {
     }
 
     // Batch 2
+    let title_id;
     if (token) {
         const urls = [
-            base_url + `/marketdata/api/v1/gpt/feedback?user_id=${user_id}&feature_name=KEYSTAT&ticker=BMRI`,
+            base_url + `/marketdata/api/v1/gpt/feedback?user_id=${user_id}&feature_name=KEYSTAT&ticker=BBCA`,
             base_url + `/marketdata/api/v1/gpt/recommendation_question`,
             base_url + `/marketdata/api/v1/gpt/title_insert?title_name=Test%20Title`,
         ];
@@ -193,15 +194,15 @@ export function BP001(data) {
         const Marketdata_Gpt_RecommendationQuestion_Payload = JSON.stringify({
             message: "How the company solvency",
             feature: "KEYSTAT",
-            ticker: "BMRI",
+            ticker: "BBCA",
             user_id: user_id,
             locale: "en"
         });
 
         const requests = [
-            ['POST', urls[0], null, { headers: headers }],
-            ['POST', urls[1], Marketdata_Gpt_RecommendationQuestion_Payload, { headers: headers }],
-            ['POST', urls[2], null, { headers: headers }],
+            ['POST', urls[0], null, { headers: headers, timeout: '300s' }],
+            ['POST', urls[1], Marketdata_Gpt_RecommendationQuestion_Payload, { headers: headers, timeout: '300s' }],
+            ['POST', urls[2], null, { headers: headers, timeout: '300s' }],
         ];
         const responses = http.batch(requests);
 
@@ -215,6 +216,9 @@ export function BP001(data) {
             const metric = metrics[index];
             metric.httpDuration.add(response.timings.duration);
             if (response.status === 200) {
+                if (index === 2) {
+                    title_id = response.json().data.title_id;
+                }
                 metric.errorRate.add(false);
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
@@ -255,12 +259,12 @@ export function BP001(data) {
             remarks: "test",
             feature_name: ["KEYSTAT"],
             source_name: "MOBILE-ANDROID",
-            product_id: "BMRI",
+            product_id: "BBCA",
             recommendation_chat_id: 0
         });
 
         const requests = [
-            ['POST', urls[0], Marketdata_Gpt_ConversationActivityInsert_1_Payload, { headers: headers }],
+            ['POST', urls[0], Marketdata_Gpt_ConversationActivityInsert_1_Payload, { headers: headers, timeout: '300s' }],
         ];
         const responses = http.batch(requests);
 
@@ -312,12 +316,12 @@ export function BP001(data) {
             remarks: "test",
             feature_name: ["KEYSTAT"],
             source_name: "MOBILE-ANDROID",
-            product_id: "BMRI",
+            product_id: "BBCA",
             recommendation_chat_id: 0
         });
 
         const requests = [
-            ['POST', urls[0], Marketdata_Gpt_ConversationActivityInsert_2_Payload, { headers: headers }],
+            ['POST', urls[0], Marketdata_Gpt_ConversationActivityInsert_2_Payload, { headers: headers, timeout: '300s' }],
         ];
         const responses = http.batch(requests);
 
@@ -366,7 +370,7 @@ export function BP001(data) {
         });
 
         const requests = [
-            ['POST', urls[0], Marketdata_Gpt_FeedbackInsert_Payload, { headers: headers }],
+            ['POST', urls[0], Marketdata_Gpt_FeedbackInsert_Payload, { headers: headers, timeout: '300s' }],
         ];
         const responses = http.batch(requests);
 
@@ -416,7 +420,7 @@ export function BP001(data) {
         });
 
         const requests = [
-            ['PUT', urls[0], Marketdata_Gpt_FeedbackUpdate_Payload, { headers: headers }],
+            ['PUT', urls[0], Marketdata_Gpt_FeedbackUpdate_Payload, { headers: headers, timeout: '300s' }],
         ];
         const responses = http.batch(requests);
 
