@@ -29,8 +29,8 @@ import exec from 'k6/execution';
 // GET (iOS Only)	mutualfund/api/v1/user/filter
 // GET (iOS Only)	user/api/v1/user_settings
 // GET (iOS Only)	order/api/v1/order-status-action-map
-GET	/marketdata/api/v1/marketinfo/corporate-actions-calendar-order/home
-GET	/marketdata/api/v1/marketinfo/upcoming-corporate-actions
+// GET	/marketdata/api/v1/marketinfo/corporate-actions-calendar-order/home
+// GET	/marketdata/api/v1/marketinfo/upcoming-corporate-actions
 
 // User_Profile_Trading
 // User_Profile_Personal

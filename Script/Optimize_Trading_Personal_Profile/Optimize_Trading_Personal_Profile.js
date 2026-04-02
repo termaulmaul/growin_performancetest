@@ -1,25 +1,26 @@
 // Command
 // Run Multiple BP
-// ../../../k6 run Growin_Calendar_Web_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Calendar/Web/LoadTest/Manual_LoadTest_0107_1459.html
+// ../../k6 run Optimize_Trading_Personal_Profile_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Optimize_Trading_Personal_Profile/Web/LoadTest/Manual_LoadTest_0303_0928.html
 
 // Run Single BP Web
-// ../../k6 run Growin_Calendar.js -e RUNBY=Manual -e ENV=INT -e USER=200 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Calendar/Web/BP001/Manual/Manual_DryRun_0219_1336_BP001_Local.html
+// ../../k6 run Optimize_Trading_Personal_Profile.js -e RUNBY=Manual -e ENV=INT -e USER=400 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Optimize_Trading_Personal_Profile/Web/BP001/Manual/Manual_DryRun_0306_1626_BP001.html
 
 // Run Single BP iOS
-// ../../k6 run Growin_Calendar.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Calendar/iOS/BP001/Manual/Manual_DryRun_0223_1412_BP001_Local.html
-// ../../k6 run Growin_Calendar.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Calendar/iOS/BP002/Manual/Manual_DryRun_0212_1024_BP002_Local.html
+// ../../k6 run Optimize_Trading_Personal_Profile.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS --out dashboard=export=../../Report/Optimize_Trading_Personal_Profile/iOS/BP001/Manual/Manual_DryRun_0223_1412_BP001_Local.html
+// ../../k6 run Optimize_Trading_Personal_Profile.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=iOS --out dashboard=export=../../Report/Optimize_Trading_Personal_Profile/iOS/BP002/Manual/Manual_DryRun_0212_1024_BP002_Local.html
 
 // Run Single BP Android
-// ../../k6 run Growin_Calendar.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Android --out dashboard=export=../../Report/Growin_Calendar/Android/BP001/Manual/Manual_DryRun_0212_1349_BP001_Local.html
-// ../../k6 run Growin_Calendar.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=Android --out dashboard=export=../../Report/Growin_Calendar/Android/BP002/Manual/Manual_DryRun_0212_1024_BP002_Local.html
+// ../../k6 run Optimize_Trading_Personal_Profile.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Android --out dashboard=export=../../Report/Optimize_Trading_Personal_Profile/Android/BP001/Manual/Manual_DryRun_0212_1349_BP001_Local.html
+// ../../k6 run Optimize_Trading_Personal_Profile.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=Android --out dashboard=export=../../Report/Optimize_Trading_Personal_Profile/Android/BP002/Manual/Manual_DryRun_0212_1024_BP002_Local.html
 
 import { textSummary } from "../../Helper/textSummary.js";
 import { htmlReport } from '../../Helper/bundle.js';
 import { BP001 as BP001_Web } from "./Web/BP001.js";
+// import { BP002 as BP002_Web } from "./Web/BP002.js";
 import { BP001 as BP001_iOS } from "./iOS/BP001.js";
-import { BP002 as BP002_iOS } from "./iOS/BP002.js";
+// import { BP002 as BP002_iOS } from "./iOS/BP002.js";
 import { BP001 as BP001_Android } from "./Android/BP001.js";
-import { BP002 as BP002_Android } from "./Android/BP002.js";
+// import { BP002 as BP002_Android } from "./Android/BP002.js";
 import http from "k6/http";
 import { sleep } from "k6";
 import { Rate } from "k6/metrics";
@@ -44,9 +45,9 @@ export const BP001 =
   platform === 'Android' ? BP001_Android :
   BP001_Web;
 
-export const BP002 = 
-  platform === 'iOS' ? BP002_iOS :
-  BP002_Android;
+// export const BP002 = 
+//   platform === 'iOS' ? BP002_iOS :
+//   BP002_Android;
 
 // ✅ RETRY CONFIGURATION
 const MAX_RETRY_ATTEMPTS = 10;
@@ -455,7 +456,7 @@ export function handleSummary(data) {
         console.log(`[${dateStr}_${timeStr}] Starting report generation for ${bp_name} on ${platform}...`);
         
         if (runby === 'Manual') {
-            const htmlPath = `../../Report/Growin_Calendar/${platform}/${bp_name}/Manual/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../Report/Optimize_Trading_Personal_Profile/${platform}/${bp_name}/Manual/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -463,7 +464,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if (runby === 'Regression') {
-            const htmlPath = `../../Report/Growin_Calendar/${platform}/${bp_name}/Regression/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../Report/Optimize_Trading_Personal_Profile/${platform}/${bp_name}/Regression/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -471,8 +472,8 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if (runby === 'LoadTest') {
-            // const htmlPath = `/home/qa/mostng_performancetest_api/Report/Growin_Calendar/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
-            const htmlPath = `../../Report/Growin_Calendar/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
+            // const htmlPath = `/home/qa/mostng_performancetest_api/Report/Optimize_Trading_Personal_Profile/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../Report/Optimize_Trading_Personal_Profile/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {

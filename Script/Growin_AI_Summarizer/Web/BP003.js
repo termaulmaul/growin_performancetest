@@ -43,7 +43,7 @@ export function BP003(data) {
     const pin_token = userToken.pin_token;
     const user_id = userToken.user_id;
     const client_id = userToken.client_id;
-    const SID = userToken.sid;
+    const SID = userToken.SID;
     const ksei_acc_no = userToken.ksei_acc_no;
     const account_name = userToken.account_name;
     const email = userToken.email;
@@ -63,6 +63,7 @@ export function BP003(data) {
         'X-Device-Id': 'TEST3'
     };
 
+    console.log(`SID = ${SID}`)
     // Batch 1
     if (token) {
         const urls = [
@@ -75,7 +76,7 @@ export function BP003(data) {
             "user_id": user_id,
             "sid": SID,
             "ksei_account": ksei_acc_no,
-            "device_id": "device123_test._-$_---",
+            "device_id": "TEST3",
             "user_name": account_name,
             "password": "M@nsek.123",
             "activity_type_name": "LOGIN",

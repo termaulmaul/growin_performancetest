@@ -108,4 +108,12 @@ scp -r qa@10.82.15.72:/home/qa/Report/Growin_Calendar/Web/BP001/Regression/ /Use
 
 sleep "5"
 
+scp -r qa@10.82.15.72:/home/qa/Report/Growin_Calendar/Android/LoadTest/ /Users/andhybaskoro/Documents/Bitbucket/growin_performancetest/Report/Growin_Calendar/Android/
+
+sleep "5"
+
+scp -r qa@10.82.15.72:/home/qa/Report/Growin_Calendar/iOS/LoadTest/ /Users/andhybaskoro/Documents/Bitbucket/growin_performancetest/Report/Growin_Calendar/iOS/
+
+sleep "5"
+
 scp -r qa@10.82.15.72:/home/qa/Report/Growin_Calendar/Web/LoadTest/ /Users/andhybaskoro/Documents/Bitbucket/growin_performancetest/Report/Growin_Calendar/Web/

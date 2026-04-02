@@ -4,7 +4,7 @@
 # ./Growin_AI_Summarizer_Regression.sh
 # Declare variables
 ENV="INT"
-USER=400
+USER=50
 DURATION="15m"
 NUMSTART=1
 RUNBY="Regression"

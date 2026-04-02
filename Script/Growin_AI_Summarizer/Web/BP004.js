@@ -113,7 +113,7 @@ export function BP004(data) {
     const pin_token = userToken.pin_token;
     const user_id = userToken.user_id;
     const client_id = userToken.client_id;
-    const SID = userToken.sid;
+    const SID = userToken.SID;
     const ksei_acc_no = userToken.ksei_acc_no;
     const account_name = userToken.account_name;
     const email = userToken.email;
@@ -164,7 +164,7 @@ export function BP004(data) {
 
         const Marketdata_Gpt_FinancialSummarizer_Payload = JSON.stringify({
             message: "Performance Test",
-            feature: "KEYSTAT", 
+            feature: "ANALYSIS", 
             ticker: "BBCA",
             user_id: user_id
         });
@@ -209,9 +209,9 @@ export function BP004(data) {
     // Batch 2
     if (token) {
         const urls = [
-            base_url + `/marketdata/api/v1/gpt/feedback?user_id=${user_id}&feature_name=ANALYSIS&ticker=BBCA`,
+            base_url + `/marketdata/api/v1/gpt/feedback?user_id=${user_id}&feature_name=ANALYSIS&ticker=BBCA`,  
             base_url + `/marketdata/api/v1/gpt/recommendation_question`,
-            base_url + `/marketdata/api/v1/gpt/title_insert?title_name={}`,
+            base_url + `/marketdata/api/v1/gpt/title_insert?title_name="Performance Test"`,
         ];
 
         const Marketdata_Gpt_Feedback_Payload = JSON.stringify({
@@ -283,7 +283,7 @@ export function BP004(data) {
         ];
 
         const Marketdata_Gpt_ConversationActivityInsert_Payload = JSON.stringify({
-            session_id: 1,
+            session_id: 16,
             title_id: title_id,
             user_id: user_id,
             agent_name: "AGENT",
@@ -291,7 +291,9 @@ export function BP004(data) {
             chat_type: "IN",
             is_spam: false,
             remarks: "Performance Test",
-            feature_name: ["KEYSTAT"],
+            feature_name: [
+                "ANALYSIS"
+            ],
             source_name: "WEB",
             product_id: "BBCA",
             recommendation_chat_id: 0
@@ -348,7 +350,9 @@ export function BP004(data) {
             chat_type: "OUT",
             is_spam: false,
             remarks: "test",
-            feature_name: ["KEYSTAT"],
+            feature_name: [
+                "ANALYSIS"
+            ],
             source_name: "WEB",
             product_id: "BBCA",
             recommendation_chat_id: 0

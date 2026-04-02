@@ -43,7 +43,7 @@ export function BP007(data) {
     const pin_token = userToken.pin_token;
     const user_id = userToken.user_id;
     const client_id = userToken.client_id;
-    const SID = userToken.sid;
+    const SID = userToken.SID;
     const ksei_acc_no = userToken.ksei_acc_no;
     const account_name = userToken.account_name;
     const email = userToken.email;

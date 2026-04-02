@@ -23,7 +23,6 @@ import exec from 'k6/execution';
 
 // Define custom metrics
 const StockDetailBrokerActivityTab = {
-    
     Marketdata_Gpt_FinancialSummarizer: {
         errorCount: new Counter("error_count_012_01_01_Marketdata_Gpt_FinancialSummarizer"),
         errorRate: new Rate("error_rate_012_01_01_Marketdata_Gpt_FinancialSummarizer"),
@@ -114,7 +113,7 @@ export function BP012(data) {
     const pin_token = userToken.pin_token;
     const user_id = userToken.user_id;
     const client_id = userToken.client_id;
-    const SID = userToken.sid;
+    const SID = userToken.SID;
     const ksei_acc_no = userToken.ksei_acc_no;
     const account_name = userToken.account_name;
     const email = userToken.email;
@@ -131,48 +130,34 @@ export function BP012(data) {
         'X-App-Name': 'web',
         'X-App-Version': '1.4.1',
         'X-Device-Info': 'iPhone 11',
-        'X-Device-Id': 'TEST3'
+        'X-Device-Id': 'TEST3',
+
+        // "origin": (referer or "https://invest-dev.growin.id").rstrip("/"),
+        // "referer": referer or "https://invest-dev.growin.id/",
+        "priority": "u=1, i",
+        "sec-ch-ua": '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": '"macOS"',
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-site",
     };
 
-    let title_id;
-    if (token && user_id) {
-        const urls = [base_url + `/marketdata/api/v1/gpt/title_insert?title_name=AutomationTest`];
-        const requests = [
-            ['POST', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
-
-        responses.forEach((response, index) => {
-            if (response.status === 200 || response.status === 201) {
-                title_id = response.json().data.title_id;
-                if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`200 ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);
-                }
-            } else {
-                if (`${__ENV.ENV}` != 'INT') {
-                    const requestBody = requests[index][2];
-                    console.error(`VU${exec.vu.idInTest} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-                }
-            }
-        });
-    }
-
-    // Batch 1
+    // Batch 3
     if (token) {
         const urls = [
             base_url + `/marketdata/api/v1/gpt/financial_summarizer`,
         ];
 
         const Marketdata_Gpt_FinancialSummarizer_Payload = JSON.stringify({
-            message: "Performance Test",
+            message: "How the company solvency",
             feature: "BROKER", 
             ticker: "BBCA",
             user_id: user_id
         });
-        
 
         const requests = [
-            ['POST', urls[0], Marketdata_Gpt_FinancialSummarizer_Payload, { headers: headers }],
+            ['POST', urls[0], Marketdata_Gpt_FinancialSummarizer_Payload, { headers: headers, timeout: '300s' }],
         ];
         const responses = http.batch(requests);
 
@@ -206,41 +191,32 @@ export function BP012(data) {
             }
         });
     }
-
-    // Batch 2
+    
+    // Batch 1
+    let title_id;
     if (token) {
         const urls = [
             base_url + `/marketdata/api/v1/gpt/feedback?user_id=${user_id}&feature_name=BROKER&ticker=BBCA`,
             base_url + `/marketdata/api/v1/gpt/recommendation_question`,
-            base_url + `/marketdata/api/v1/gpt/title_insert?title_name={}`,
+            base_url + `/marketdata/api/v1/gpt/title_insert`,
         ];
 
-        const Marketdata_Gpt_Feedback_Payload = JSON.stringify({
-            user_id: user_id, 
-            feature_name: "BROKER", 
-            ticker: "BBCA"
-        });
-
         const Marketdata_Gpt_RecommendationQuestion_Payload = JSON.stringify({
-            message: "", 
-            feature: "BROKER", 
-            ticker: "BBCA", 
-            user_id: user_id, 
+            message: "How the company solvency",
+            feature: "BROKER",
+            ticker: "BBCA",
+            user_id: user_id,
             locale: "en"
         });
-
-        const Marketdata_Gpt_TitleInsert_Payload = JSON.stringify({
-            feature: "BROKER", 
-            source: "WEB", 
-            client_id: client_id, 
-            ksei_account: ksei_acc_no
-        });
         
+        const Marketdata_Gpt_TitleInsert_Payload = JSON.stringify({
+            title_name: "Performance Test",
+        });
 
         const requests = [
-            ['POST', urls[0], Marketdata_Gpt_Feedback_Payload, { headers: headers }],
-            ['POST', urls[1], Marketdata_Gpt_RecommendationQuestion_Payload, { headers: headers }],
-            ['POST', urls[2], Marketdata_Gpt_TitleInsert_Payload, { headers: headers }],
+            ['POST', urls[0], null, { headers: headers, timeout: '300s' }],
+            ['POST', urls[1], Marketdata_Gpt_RecommendationQuestion_Payload, { headers: headers, timeout: '300s' }],
+            ['POST', urls[2], Marketdata_Gpt_TitleInsert_Payload, { headers: headers, timeout: '300s' }],
         ];
         const responses = http.batch(requests);
 
@@ -254,6 +230,9 @@ export function BP012(data) {
             const metric = metrics[index];
             metric.httpDuration.add(response.timings.duration);
             if (response.status === 200) {
+                if (index === 2) {
+                    title_id = response.json().data.title_id;
+                }
                 metric.errorRate.add(false);
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
@@ -277,29 +256,31 @@ export function BP012(data) {
         });
     }
 
-    // Batch 3
+    // Batch 2
+    let conversation_id;
     if (token) {
         const urls = [
             base_url + `/marketdata/api/v1/gpt/conversation_activity_insert`,
         ];
 
-        const Marketdata_Gpt_ConversationActivityInsert_Payload = JSON.stringify({
-            session_id: 1,
+        const Marketdata_Gpt_ConversationActivityInsert_1_Payload = JSON.stringify({
+            session_id: 16,
             title_id: title_id,
             user_id: user_id,
-            agent_name: "AGENT",
-            message: "Performance Test Message",
+            agent_name: "USER",
+            message: "KEYSTAT_WEB_M872BEBC_CC001575X00127",
             chat_type: "IN",
             is_spam: false,
             remarks: "Performance Test",
-            feature_name: ["BROKER"],
+            feature_name: [
+                "BROKER"
+            ],
             source_name: "WEB",
-            product_id: "BBCA",
-            recommendation_chat_id: 0
+            product_id: "BBCA"
         });
-        
+
         const requests = [
-            ['POST', urls[0], Marketdata_Gpt_ConversationActivityInsert_Payload, { headers: headers }],
+            ['POST', urls[0], Marketdata_Gpt_ConversationActivityInsert_1_Payload, { headers: headers, timeout: '300s' }],
         ];
         const responses = http.batch(requests);
 
@@ -315,6 +296,7 @@ export function BP012(data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
+                conversation_id = response.json().data.conversation_id;
                 if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
@@ -345,19 +327,18 @@ export function BP012(data) {
             title_id: title_id,
             user_id: user_id,
             agent_name: "AGENT",
-            message: "test response",
-            chat_type: "OUT",
+            message: "How the company solvency",
+            chat_type: "IN",
             is_spam: false,
             remarks: "test",
             feature_name: ["BROKER"],
-            source_name: "WEB",
+            source_name: "MOBILE-ANDROID",
             product_id: "BBCA",
             recommendation_chat_id: 0
         });
-        
 
         const requests = [
-            ['POST', urls[0], Marketdata_Gpt_ConversationActivityInsert_2_Payload, { headers: headers }],
+            ['POST', urls[0], Marketdata_Gpt_ConversationActivityInsert_2_Payload, { headers: headers, timeout: '300s' }],
         ];
         const responses = http.batch(requests);
 
@@ -401,13 +382,12 @@ export function BP012(data) {
 
         const Marketdata_Gpt_FeedbackInsert_Payload = JSON.stringify({
             feedback_name: "LIKE",
-            conversation_id: 0,
-            remarks: "Performance Test Feedback"
+            conversation_id: conversation_id,
+            remarks: "Performance Test Update!"
         });
-        
 
         const requests = [
-            ['POST', urls[0], Marketdata_Gpt_FeedbackInsert_Payload, { headers: headers }],
+            ['POST', urls[0], Marketdata_Gpt_FeedbackInsert_Payload, { headers: headers, timeout: '300s' }],
         ];
         const responses = http.batch(requests);
 
@@ -424,6 +404,7 @@ export function BP012(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 feedback_id = response.json().data.feedback_id;
+                conversation_id = response.json().data.conversation_id;
                 if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
@@ -449,16 +430,17 @@ export function BP012(data) {
             base_url + `/marketdata/api/v1/gpt/feedback_update`,
         ];
 
+        // console.log(`feedback_id = ${feedback_id}`)
+
         const Marketdata_Gpt_FeedbackUpdate_Payload = JSON.stringify({
             feedback_id: feedback_id,
             feedback_name: "LIKE",
-            conversation_id: "1",
-            remarks: "Performance Test Feedback Update"
+            conversation_id: conversation_id,
+            remarks: "Performance Test Update"
         });
-        
 
         const requests = [
-            ['PUT', urls[0], Marketdata_Gpt_FeedbackUpdate_Payload, { headers: headers }],
+            ['PUT', urls[0], Marketdata_Gpt_FeedbackUpdate_Payload, { headers: headers, timeout: '300s' }],
         ];
         const responses = http.batch(requests);
 

@@ -1,26 +1,26 @@
 import { check, sleep } from "k6";
 import { Trend, Counter, Rate } from "k6/metrics";
-import http from "k6/http";
+import http, { post } from "k6/http";
 import exec from 'k6/execution';
 
-// GET	/marketdata/api/v1/stock-daily-price
+// POST    /marketdata/api/v1/daily-trade
 
-// Marketdata_StockDailyPrice
+// Marketdata_DailyTrade
 
 // Define custom metrics
-const FinancialSummarizerBackendFinancialFeature = {
-    Marketdata_StockDailyPrice: {
-        errorCount: new Counter("error_count_011_01_01_Marketdata_StockDailyPrice"),
-        errorRate: new Rate("error_rate_011_01_01_Marketdata_StockDailyPrice"),
-        httpDuration: new Trend("duration_011_01_01_Marketdata_StockDailyPrice"),
-        httpWaiting: new Trend("waiting_011_01_01_Marketdata_StockDailyPrice"),
-        requestRate: new Counter("rps_011_01_01_Marketdata_StockDailyPrice"),
-        http_reqs: new Counter("sample_011_01_01_Marketdata_StockDailyPrice"),
-    }
+const DailyTradeData = {
+    Marketdata_DailyTrade: {
+        errorCount: new Counter("error_count_001_01_01_Marketdata_DailyTrade"),
+        errorRate: new Rate("error_rate_001_01_01_Marketdata_DailyTrade"),
+        httpDuration: new Trend("duration_001_01_01_Marketdata_DailyTrade"),
+        httpWaiting: new Trend("waiting_001_01_01_Marketdata_DailyTrade"),
+        requestRate: new Counter("rps_001_01_01_Marketdata_DailyTrade"),
+        http_reqs: new Counter("sample_001_01_01_Marketdata_DailyTrade"),
+    },
 };
 
-// ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
-export function BP011(data) {
+// ✅ EXPORTED FUNCTION
+export function BP001(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;
     
@@ -41,11 +41,6 @@ export function BP011(data) {
     
     const token = userToken.token;
     const pin_token = userToken.pin_token;
-    const user_id = userToken.user_id;
-    const client_id = userToken.client_id;
-    const SID = userToken.SID;
-    const ksei_acc_no = userToken.ksei_acc_no;
-    const account_name = userToken.account_name;
     const email = userToken.email;
     const bp = mapping.bp;
 
@@ -66,17 +61,22 @@ export function BP011(data) {
     // Batch 1
     if (token) {
         const urls = [
-            base_url + `/marketdata/api/v1/stock-daily-price?symbol=BBCA&market=RG&start_date=10-01-2026&end_date=10-02-2026`,
+            base_url + `/marketdata/api/v1/daily-trade`,
         ];
 
+        const Marketdata_DailyTrade_Payload = JSON.stringify({
+            limit: 20,
+            symbol: "",
+        });
+
         const requests = [
-            ['GET', urls[0], null, { headers: headers }],
+            ['POST', urls[0], Marketdata_DailyTrade_Payload, { headers: headers }],
         ];
         const responses = http.batch(requests);
 
         responses.forEach((response, index) => {
             const metrics = [
-                FinancialSummarizerBackendFinancialFeature.Marketdata_StockDailyPrice,
+                DailyTradeData.Marketdata_DailyTrade,
             ];
 
             const metric = metrics[index];

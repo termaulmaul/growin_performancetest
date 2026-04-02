@@ -3,44 +3,54 @@ import { Trend, Counter, Rate } from "k6/metrics";
 import http from "k6/http";
 import exec from 'k6/execution';
 
-// /marketdata/api/v1/emiten/price-performance/
-// /marketdata/api/v1/emiten/low-high-range/
-// /marketdata/api/v1/emiten/investor-chart-agg/
+// GET	/news/api/v2?items=6&is_shortsell=true 
+// GET	/news/api/v2?items=6&is_sharia=true
+// GET	/news/api/v2?items=6&is_margin=true
+// GET	/news/api/v2?items=6
 
-// Marketdata_Emiten_PricePerformance
-// Marketdata_Emiten_LowHighRange
-// Marketdata_Emiten_InvestorChartAgg
+// News_Shortsell
+// News_Sharia
+// News_Margin
+// News
 
 // Define custom metrics
-const FinancialSummarizerBackendAnalysisFeature = {
-    Marketdata_Emiten_PricePerformance: {
-        errorCount: new Counter("error_count_005_01_01_Marketdata_Emiten_PricePerformance"),
-        errorRate: new Rate("error_rate_005_01_01_Marketdata_Emiten_PricePerformance"),
-        httpDuration: new Trend("duration_005_01_01_Marketdata_Emiten_PricePerformance"),
-        httpWaiting: new Trend("waiting_005_01_01_Marketdata_Emiten_PricePerformance"),
-        requestRate: new Counter("rps_005_01_01_Marketdata_Emiten_PricePerformance"),
-        http_reqs: new Counter("sample_005_01_01_Marketdata_Emiten_PricePerformance"),
+const NewsFeedbyCategory = {
+    News_Shortsell: {
+        errorCount: new Counter("error_count_001_01_01_News_Shortsell"),
+        errorRate: new Rate("error_rate_001_01_01_News_Shortsell"),
+        httpDuration: new Trend("duration_001_01_01_News_Shortsell"),
+        httpWaiting: new Trend("waiting_001_01_01_News_Shortsell"),
+        requestRate: new Counter("rps_001_01_01_News_Shortsell"),
+        http_reqs: new Counter("sample_001_01_01_News_Shortsell"),
     },
-    Marketdata_Emiten_LowHighRange: {
-        errorCount: new Counter("error_count_005_01_02_Marketdata_Emiten_LowHighRange"),
-        errorRate: new Rate("error_rate_005_01_02_Marketdata_Emiten_LowHighRange"),
-        httpDuration: new Trend("duration_005_01_02_Marketdata_Emiten_LowHighRange"),
-        httpWaiting: new Trend("waiting_005_01_02_Marketdata_Emiten_LowHighRange"),
-        requestRate: new Counter("rps_005_01_02_Marketdata_Emiten_LowHighRange"),
-        http_reqs: new Counter("sample_005_01_02_Marketdata_Emiten_LowHighRange"),
+    News_Sharia: {
+        errorCount: new Counter("error_count_001_01_02_News_Sharia"),
+        errorRate: new Rate("error_rate_001_01_02_News_Sharia"),
+        httpDuration: new Trend("duration_001_01_02_News_Sharia"),
+        httpWaiting: new Trend("waiting_001_01_02_News_Sharia"),
+        requestRate: new Counter("rps_001_01_02_News_Sharia"),
+        http_reqs: new Counter("sample_001_01_02_News_Sharia"),
     },
-    Marketdata_Emiten_InvestorChartAgg: {
-        errorCount: new Counter("error_count_005_01_03_Marketdata_Emiten_InvestorChartAgg"),
-        errorRate: new Rate("error_rate_005_01_03_Marketdata_Emiten_InvestorChartAgg"),
-        httpDuration: new Trend("duration_005_01_03_Marketdata_Emiten_InvestorChartAgg"),
-        httpWaiting: new Trend("waiting_005_01_03_Marketdata_Emiten_InvestorChartAgg"),
-        requestRate: new Counter("rps_005_01_03_Marketdata_Emiten_InvestorChartAgg"),
-        http_reqs: new Counter("sample_005_01_03_Marketdata_Emiten_InvestorChartAgg"),
-    }
+    News_Margin: {
+        errorCount: new Counter("error_count_001_01_03_News_Margin"),
+        errorRate: new Rate("error_rate_001_01_03_News_Margin"),
+        httpDuration: new Trend("duration_001_01_03_News_Margin"),
+        httpWaiting: new Trend("waiting_001_01_03_News_Margin"),
+        requestRate: new Counter("rps_001_01_03_News_Margin"),
+        http_reqs: new Counter("sample_001_01_03_News_Margin"),
+    },
+    News: {
+        errorCount: new Counter("error_count_001_01_04_News"),
+        errorRate: new Rate("error_rate_001_01_04_News"),
+        httpDuration: new Trend("duration_001_01_04_News"),
+        httpWaiting: new Trend("waiting_001_01_04_News"),
+        requestRate: new Counter("rps_001_01_04_News"),
+        http_reqs: new Counter("sample_001_01_04_News"),
+    },
 };
 
-// ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
-export function BP005(data) {
+// ✅ EXPORTED FUNCTION
+export function BP001(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;
     
@@ -61,11 +71,6 @@ export function BP005(data) {
     
     const token = userToken.token;
     const pin_token = userToken.pin_token;
-    const user_id = userToken.user_id;
-    const client_id = userToken.client_id;
-    const SID = userToken.SID;
-    const ksei_acc_no = userToken.ksei_acc_no;
-    const account_name = userToken.account_name;
     const email = userToken.email;
     const bp = mapping.bp;
 
@@ -86,7 +91,7 @@ export function BP005(data) {
     // Batch 1
     if (token) {
         const urls = [
-            base_url + `/marketdata/api/v1/emiten/price-performance/`,
+            base_url + `/news/api/v2?items=6&is_shortsell=true`,
         ];
 
         const requests = [
@@ -96,7 +101,7 @@ export function BP005(data) {
 
         responses.forEach((response, index) => {
             const metrics = [
-                FinancialSummarizerBackendAnalysisFeature.Marketdata_Emiten_PricePerformance,
+                NewsFeedbyCategory.News_Shortsell,
             ];
 
             const metric = metrics[index];
@@ -128,7 +133,7 @@ export function BP005(data) {
     // Batch 2
     if (token) {
         const urls = [
-            base_url + `/marketdata/api/v1/emiten/low-high-range/`,
+            base_url + `/news/api/v2?items=6&is_sharia=true`,
         ];
 
         const requests = [
@@ -138,7 +143,7 @@ export function BP005(data) {
 
         responses.forEach((response, index) => {
             const metrics = [
-                FinancialSummarizerBackendAnalysisFeature.Marketdata_Emiten_LowHighRange,
+                NewsFeedbyCategory.News_Sharia,
             ];
 
             const metric = metrics[index];
@@ -170,7 +175,7 @@ export function BP005(data) {
     // Batch 3
     if (token) {
         const urls = [
-            base_url + `/marketdata/api/v1/emiten/investor-chart-agg/`,
+            base_url + `/news/api/v2?items=6&is_margin=true`,
         ];
 
         const requests = [
@@ -180,7 +185,49 @@ export function BP005(data) {
 
         responses.forEach((response, index) => {
             const metrics = [
-                FinancialSummarizerBackendAnalysisFeature.Marketdata_Emiten_InvestorChartAgg,
+                NewsFeedbyCategory.News_Margin,
+            ];
+
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
+
+    // Batch 3
+    if (token) {
+        const urls = [
+            base_url + `/news/api/v2?items=6`,
+        ];
+
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
+
+        responses.forEach((response, index) => {
+            const metrics = [
+                NewsFeedbyCategory.News,
             ];
 
             const metric = metrics[index];

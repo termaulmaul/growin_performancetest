@@ -30,7 +30,7 @@ const KeystatFeature = {
         http_reqs: new Counter("sample_002_01_01_Marketdata_KeyStatistic_Eps"),
     },
     Marketdata_KeyStatistic_Dividend: {
-        errorCount: new Counter("error_count_002_01_01_Marketdata_KeyStatistic_Eps"),
+        errorCount: new Counter("error_count_002_01_02_Marketdata_KeyStatistic_Dividend"),
         errorRate: new Rate("error_rate_002_01_02_Marketdata_KeyStatistic_Dividend"),
         httpDuration: new Trend("duration_002_01_02_Marketdata_KeyStatistic_Dividend"),
         httpWaiting: new Trend("waiting_002_01_02_Marketdata_KeyStatistic_Dividend"),
@@ -103,7 +103,7 @@ export function BP002(data) {
     const pin_token = userToken.pin_token;
     const user_id = userToken.user_id;
     const client_id = userToken.client_id;
-    const SID = userToken.sid;
+    const SID = userToken.SID;
     const ksei_acc_no = userToken.ksei_acc_no;
     const account_name = userToken.account_name;
     const email = userToken.email;

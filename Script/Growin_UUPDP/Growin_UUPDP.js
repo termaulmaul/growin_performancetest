@@ -1,52 +1,40 @@
 // Command
 // Run Multiple BP
-// ../../../k6 run Growin_Calendar_Web_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Calendar/Web/LoadTest/Manual_LoadTest_0107_1459.html
+// ../../../k6 run Growin_UUPDP_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_UUPDP/Web/LoadTest/Manual_LoadTest_0107_1459.html
 
 // Run Single BP Web
-// ../../k6 run Growin_Calendar.js -e RUNBY=Manual -e ENV=INT -e USER=200 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Calendar/Web/BP001/Manual/Manual_DryRun_0219_1336_BP001_Local.html
-
-// Run Single BP iOS
-// ../../k6 run Growin_Calendar.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Calendar/iOS/BP001/Manual/Manual_DryRun_0223_1412_BP001_Local.html
-// ../../k6 run Growin_Calendar.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Calendar/iOS/BP002/Manual/Manual_DryRun_0212_1024_BP002_Local.html
-
-// Run Single BP Android
-// ../../k6 run Growin_Calendar.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Android --out dashboard=export=../../Report/Growin_Calendar/Android/BP001/Manual/Manual_DryRun_0212_1349_BP001_Local.html
-// ../../k6 run Growin_Calendar.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=Android --out dashboard=export=../../Report/Growin_Calendar/Android/BP002/Manual/Manual_DryRun_0212_1024_BP002_Local.html
+// ../../k6 run Growin_UUPDP.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_UUPDP/Web/BP001/Manual/Manual_DryRun_0312_1539_BP001.html
 
 import { textSummary } from "../../Helper/textSummary.js";
 import { htmlReport } from '../../Helper/bundle.js';
 import { BP001 as BP001_Web } from "./Web/BP001.js";
-import { BP001 as BP001_iOS } from "./iOS/BP001.js";
-import { BP002 as BP002_iOS } from "./iOS/BP002.js";
-import { BP001 as BP001_Android } from "./Android/BP001.js";
-import { BP002 as BP002_Android } from "./Android/BP002.js";
+
 import http from "k6/http";
+http.setResponseCallback(http.expectedStatuses(200, 201, 400, 401, 403, 404, 500));
 import { sleep } from "k6";
 import { Rate } from "k6/metrics";
+
+const DEFAULT_PARAMS = {
+    timeout: '300s',
+};
 
 function getPlatform() {
     const { PLATFORM } = __ENV;
     
-    if (PLATFORM && ['Web', 'Android', 'iOS'].includes(PLATFORM)) {
+    if (PLATFORM && ['Android', 'iOS', 'Web'].includes(PLATFORM)) {
         return PLATFORM;
     }
     
-    console.error('❌ PLATFORM must be specified: Android or iOS');
-    console.error('   Example: -e PLATFORM=Android or -e PLATFORM=iOS');
+    console.error('❌ PLATFORM must be specified: Android, iOS or Web');
+    console.error('   Example: -e PLATFORM=Android, -e PLATFORM=iOS, -e PLATFORM=Web');
     return 'Web'; // default fallback
 }
 
 const platform = getPlatform();
 
 // Export BP yang tepat berdasarkan platform
-export const BP001 = 
-  platform === 'iOS' ? BP001_iOS :
-  platform === 'Android' ? BP001_Android :
-  BP001_Web;
-
-export const BP002 = 
-  platform === 'iOS' ? BP002_iOS :
-  BP002_Android;
+// export const BP001 = platform === 'Android' ? BP001_Android : BP001_Web;
+export const BP001 = BP001_Web;
 
 // ✅ RETRY CONFIGURATION
 const MAX_RETRY_ATTEMPTS = 10;
@@ -54,7 +42,6 @@ const RETRY_DELAY = 1; // seconds between retry attempts
 
 const BP_USER_PERCENTAGE = {
     BP001: 100,
-    BP002: 100,
 };
 
 // ✅ Function untuk calculate user distribution
@@ -175,13 +162,21 @@ selectedBPs.forEach(bp => {
     };
 });
 
+// export const options = {
+//     scenarios: scenarios,
+//     noConnectionReuse: false,
+//     setupTimeout: '3600s', // ✅ Increased for large user counts
+//     teardownTimeout: '3600s',
+//     summaryTimeUnit: '3600s',
+// }
 export const options = {
     scenarios: scenarios,
     noConnectionReuse: false,
-    setupTimeout: '3600s', // ✅ Increased for large user counts
+    setupTimeout: '3600s',
     teardownTimeout: '3600s',
     summaryTimeUnit: '3600s',
-}
+    // httpDebug: 'full', // optional, untuk debug
+};
 
 function getBaseUrl() {
     if(`${__ENV.ENV}`=='DEV'){
@@ -287,6 +282,8 @@ export function setup() {
     let totalLoginFailed = 0;
     let totalPinSuccess = 0;
     let totalPinFailed = 0;
+    let totalUserIdSuccess = 0;
+    let totalUserIdFailed = 0;
     let totalLoginRetries = 0;
     
     // ✅ Object untuk menyimpan channel_id per BP
@@ -335,6 +332,55 @@ export function setup() {
                         pin_token: null,
                         bp: bp
                     };
+
+                    // ✅ Step 3: Get userID (UNTUK SEMUA USER yang berhasil PIN)
+                    const profileHeaders = {
+
+                        'Cookie': `ACCESS_TOKEN=${loginResult.token};`,
+                        'Content-Type': 'application/json',
+                        'Accept': '*/*',
+                        'Accept-Language': 'en',
+                        'Connection': 'keep-alive',
+                        'Accept-Encoding': 'gzip, deflate, br',
+                        'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+                        'X-App-Name': 'web',
+                        'X-App-Version': '1.4.1',
+                        'X-Device-Info': 'iPhone 11',
+                        'X-Device-Id': 'TEST3'
+                    };
+
+                    const profileUrls = [
+                        base_url + `/user/api/v1/profile/trading`
+                        // `https://internal-api-pt.growin.id/user/api/v1/profile/trading`
+                    ];
+
+                    const profileRequests = [
+                        ['GET', profileUrls[0], null, { headers: profileHeaders }],
+                    ];
+
+                    const profileResponses = http.batch(profileRequests);
+
+                    // Handle profile/trading (index 0)
+                    // console.log(`LKJHGVHJBK ${profileResponses[0].status}`)
+                    if (profileResponses[0].status === 200) {
+                        totalUserIdSuccess++;
+                        const tradingData = profileResponses[0].json().data;
+                        tokens[userKey].user_id = tradingData.user_id;
+                        tokens[userKey].client_id = tradingData.client_id;
+                        tokens[userKey].SID = tradingData.sid;
+                        tokens[userKey].ksei_acc_no = tradingData.ksei_acc_no;
+                        tokens[userKey].account_name = tradingData.account_name;
+                    } else {
+                        totalUserIdFailed++;
+                        if (i === batchStart || totalUserIdFailed <= 5) {
+                            console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) GET trading profile FAILED - Status: ${profileResponses[0].status} || Body: ${profileResponses[0].body}`);
+                        }
+                        tokens[userKey].user_id = null;
+                        tokens[userKey].client_id = null;
+                        tokens[userKey].SID = null;
+                        tokens[userKey].ksei_acc_no = null;
+                        tokens[userKey].account_name = null;
+                    }
                     
                     // ✅ Step 2: PIN Login (UNTUK SEMUA USER)
                     const pinPayload = JSON.stringify({ value: "123456" });
@@ -353,7 +399,7 @@ export function setup() {
                     };
 
                     const pinRes = http.post(base_url + '/auth/api/v1/protected/pin-login', pinPayload, { headers: pinHeaders });
-
+                    // console.log(`DEBUG - token: '${loginResult.token}' | pin: '${pinRes.json().data.pin_token}'`);
                     if (pinRes.status === 200) {
                         totalPinSuccess++;
                         tokens[userKey].pin_token = pinRes.json().data.pin_token;
@@ -455,7 +501,7 @@ export function handleSummary(data) {
         console.log(`[${dateStr}_${timeStr}] Starting report generation for ${bp_name} on ${platform}...`);
         
         if (runby === 'Manual') {
-            const htmlPath = `../../Report/Growin_Calendar/${platform}/${bp_name}/Manual/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../Report/Growin_UUPDP/${platform}/${bp_name}/Manual/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -463,7 +509,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if (runby === 'Regression') {
-            const htmlPath = `../../Report/Growin_Calendar/${platform}/${bp_name}/Regression/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../Report/Growin_UUPDP/${platform}/${bp_name}/Regression/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -471,8 +517,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if (runby === 'LoadTest') {
-            // const htmlPath = `/home/qa/mostng_performancetest_api/Report/Growin_Calendar/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
-            const htmlPath = `../../Report/Growin_Calendar/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../Report/Growin_UUPDP/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {

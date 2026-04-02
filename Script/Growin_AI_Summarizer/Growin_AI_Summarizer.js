@@ -3,19 +3,19 @@
 // ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Community/Web/LoadTest/Manual_LoadTest_0107_1459.html
 
 // Run Single BP Web
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=QA -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP001/Manual/Manual_DryRun_0303_1031_BP001_Local.html
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP002/Manual/Manual_DryRun_0209_1518_BP002_Local.html
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP003 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP003/Manual/Manual_DryRun_0209_1527_BP003_Local.html
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP004 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP004/Manual/Manual_DryRun_0210_1104_BP004_Local.html
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP005 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP005/Manual/Manual_DryRun_0210_1136_BP005_Local.html
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP006 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP006/Manual/Manual_DryRun_0210_1149_BP006_Local.html
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP007 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP007/Manual/Manual_DryRun_0210_1427_BP007_Local.html
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP008 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP008/Manual/Manual_DryRun_0210_1522_BP008_Local.html
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP009 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP009/Manual/Manual_DryRun_0210_1550_BP009_Local.html
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP010 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP010/Manual/Manual_DryRun_0210_1710_BP010_Local.html
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP011 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP011/Manual/Manual_DryRun_0211_0908_BP011_Local.html
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP012 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP012/Manual/Manual_DryRun_0211_0908_BP012_Local.html
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP013 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP013/Manual/Manual_DryRun_0211_0909_BP013_Local.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=50 -e DURATION=3m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP001/Manual/Manual_DryRun_0401_1708_BP001.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP002/Manual/Manual_DryRun_0331_2259_BP002.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP003 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP003/Manual/Manual_DryRun_0310_1046_BP003.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP004 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP004/Manual/Manual_DryRun_0401_1043_BP004.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP005 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP005/Manual/Manual_DryRun_0312_1034_BP005.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP006 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP006/Manual/Manual_DryRun_0312_1035_BP006.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP007 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP007/Manual/Manual_DryRun_0312_1105_BP007.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP008 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP008/Manual/Manual_DryRun_0312_1132_BP008.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP009 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP009/Manual/Manual_DryRun_0312_1134_BP009.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP010 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP010/Manual/Manual_DryRun_0312_1153_BP010.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP011 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP011/Manual/Manual_DryRun_0312_1155_BP011.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP012 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP012/Manual/Manual_DryRun_0312_1158_BP012.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP013 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP013/Manual/Manual_DryRun_0312_1159_BP013.html
 
 import { textSummary } from "../../Helper/textSummary.js";
 import { htmlReport } from '../../Helper/bundle.js';
@@ -222,20 +222,22 @@ export const options = {
     setupTimeout: '3600s',
     teardownTimeout: '3600s',
     summaryTimeUnit: '3600s',
-    httpDebug: 'full', // optional, untuk debug
+    // httpDebug: 'full', // optional, untuk debug
 };
 
 function getBaseUrl() {
     if(`${__ENV.ENV}`=='DEV'){
-        return 'https://dev-api.growin.id';
+        return 'https://api-dev.growin.id';
     } else if ((`${__ENV.ENV}`=='QA')) {
         return 'https://api-qa.growin.id';
     } else if (`${__ENV.ENV}`=='DRC') {
         return 'https://drc-api.growin.id';
     } else if (`${__ENV.ENV}`=='INT') {
         return 'https://internal-api-pt.growin.id';
+        // return 'https://financialsummarizer-pt.growin.id';
     }
     return 'https://internal-api-pt.growin.id';
+    // return 'https://financialsummarizer-pt.growin.id';
 }
 
 function getUserCredentials(userNum, bpOffset = 0) {
@@ -281,7 +283,7 @@ function loginWithRetry(base_url, credentials, userKey, vuId) {
 
     for (let attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
         const loginRes = http.post(base_url + '/auth/api/v1/login', loginPayload, { headers: loginHeaders });
-        
+        // const loginRes = http.post('https://internal-api-pt.growin.id/auth/api/v1/login', loginPayload, { headers: loginHeaders });
         if (loginRes.status === 200) {
             if (attempt > 1) {
                 console.log(`   ✅ User ${userKey} (${credentials.email}, VU${vuId}) LOGIN SUCCESS on attempt ${attempt}`);
@@ -379,6 +381,65 @@ export function setup() {
                         pin_token: null,
                         bp: bp
                     };
+
+
+                    // ✅ Step 3: Get userID (UNTUK SEMUA USER yang berhasil PIN)
+                    const profileHeaders = {
+                        'Cookie': `ACCESS_TOKEN=${loginResult.token};`,
+                        'Content-Type': 'application/json',
+                        'Accept': '*/*',
+                        'Accept-Language': 'en',
+                        'Connection': 'keep-alive',
+                        'Accept-Encoding': 'gzip, deflate, br',
+                        'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+                        'X-App-Name': 'web',
+                        'X-App-Version': '1.4.1',
+                        'X-Device-Info': 'iPhone 11',
+                        'X-Device-Id': 'TEST3'
+                    };
+
+                    const profileUrls = [
+                        base_url + `/user/api/v1/profile/trading`
+                        // `https://internal-api-pt.growin.id/user/api/v1/profile/trading`
+                    ];
+
+                    const profileRequests = [
+                        ['GET', profileUrls[0], null, { headers: profileHeaders }],
+                    ];
+
+                    const profileResponses = http.batch(profileRequests);
+                    // console.log(profileResponses[0].body)
+
+                    // Handle profile/trading (index 0)
+                    // console.log(`LKJHGVHJBK ${profileResponses[0].status}`)
+                    if (profileResponses[0].status == 200) {
+                        totalUserIdSuccess++;
+                        const tradingData = profileResponses[0].json().data;
+                        
+                        // Pastikan object-nya ada dulu sebelum assign
+                        if (!tokens[userKey]) {
+                            tokens[userKey] = {};
+                        }
+                        
+                        tokens[userKey].user_id = tradingData.user_id;
+                        tokens[userKey].client_id = tradingData.client_id;
+                        tokens[userKey].SID = tradingData.sid;
+                        tokens[userKey].ksei_acc_no = tradingData.ksei_acc_no;
+                        tokens[userKey].account_name = tradingData.account_name;
+                        
+                        // Verifikasi langsung setelah assign
+                        console.log(`✅ Assigned - user_id: ${tokens[userKey].user_id}, client_id: ${tokens[userKey].client_id}`);
+                    } else {
+                        totalUserIdFailed++;
+                        if (i === batchStart || totalUserIdFailed <= 5) {
+                            console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) GET trading profile FAILED - Status: ${profileResponses[0].status} || Body: ${profileResponses[0].body}`);
+                        }
+                        tokens[userKey].user_id = null;
+                        tokens[userKey].client_id = null;
+                        tokens[userKey].SID = null;
+                        tokens[userKey].ksei_acc_no = null;
+                        tokens[userKey].account_name = null;
+                    }
                     
                     // ✅ Step 2: PIN Login (UNTUK SEMUA USER)
                     const pinPayload = JSON.stringify({ value: "123456" });
@@ -397,46 +458,11 @@ export function setup() {
                     };
 
                     const pinRes = http.post(base_url + '/auth/api/v1/protected/pin-login', pinPayload, { headers: pinHeaders });
-
+                    // const pinRes = http.post('https://internal-api-pt.growin.id/auth/api/v1/protected/pin-login', pinPayload, { headers: pinHeaders });
+                    // console.log(`DEBUG - token: '${loginResult.token}' | pin: '${pinRes.json().data.pin_token}'`);
                     if (pinRes.status === 200) {
                         totalPinSuccess++;
                         tokens[userKey].pin_token = pinRes.json().data.pin_token;
-
-                        // ✅ Step 3: Get userID (UNTUK SEMUA USER yang berhasil PIN)
-                        const profileHeaders = {
-                            'Content-Type': 'application/json',
-                            'Accept': '*/*',
-                            'Accept-Language': 'en',
-                            'Connection': 'keep-alive',
-                            'Accept-Encoding': 'gzip, deflate, br',
-                            'Cookie': `ACCESS_TOKEN=${loginResult.token}; PIN_TOKEN=${pinRes.json().data.pin_token};`,
-                            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-                            'X-App-Name': 'web',
-                            'X-App-Version': '1.4.1',
-                            'X-Device-Info': 'iPhone 11',
-                            'X-Device-Id': 'TEST3'
-                        };
-                        
-                        const profileRes = http.get(base_url + '/user/api/v1/profile/trading', { headers: profileHeaders });
-                        
-                        if (profileRes.status === 200) {
-                            totalUserIdSuccess++;
-                            tokens[userKey].user_id = profileRes.json().data.user_id;
-                            tokens[userKey].client_id = profileRes.json().data.client_id
-                            tokens[userKey].SID = profileRes.json().data.sid
-                            tokens[userKey].ksei_acc_no = profileRes.json().data.ksei_acc_no
-                            tokens[userKey].account_name = profileRes.json().data.account_name
-                        } else {
-                            totalUserIdFailed++;
-                            if (i === batchStart || totalUserIdFailed <= 5) {
-                                console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) GET userID FAILED - Status: ${profileRes.status}`);
-                            }
-                            tokens[userKey].user_id = null;
-                            tokens[userKey].client_id = null;
-                            tokens[userKey].SID = null;
-                            tokens[userKey].ksei_acc_no = null;
-                            tokens[userKey].account_name = null;
-                        }
                     } else {
                         totalPinFailed++;
                         if (i === batchStart || totalPinFailed <= 5) {

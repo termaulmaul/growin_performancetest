@@ -23,7 +23,7 @@ timeStr=$(date +%H%M%S)
 # Verify the captured date and time
 echo "Captured Date    : $dateStr"
 echo "Captured Time    : $timeStr"
-echo "Current Scenario : BP001"
+echo "Current Scenario : BP001"x
 
 # Run k6 commands using the captured date and time
 ../../../k6 run Growin_Eipo_Stock_iOS_LoadTest.js -e RUNBY="$RUNBY" -e ENV="$ENV" -e USER="$USER" -e DURATION="$DURATION" -e NUMSTART="$NUMSTART" -e SCENARIO=BP001 --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/BP001/Regression/"$RUNBY"_"$RUNTYPE"_${dateStr}_${timeStr}_BP001_72.html
