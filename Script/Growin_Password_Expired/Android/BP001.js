@@ -239,64 +239,64 @@ export function BP001(data) {
         'X-Device-Id': 'TEST3'
     };
 
-    // // Batch 1
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/user/api/v2/profile/trading`,
-    //         base_url + `/user/api/v1/profile/personal`,
-    //     ];
+    // Batch 1
+    if (token) {
+        const urls = [
+            base_url + `/user/api/v2/profile/trading`,
+            base_url + `/user/api/v1/profile/personal`,
+        ];
 
-    //     const stepOneHeaders = {
-    //         'Content-Type': 'application/json',
-    //         'Accept': '*/*',
-    //         'Accept-Language': 'en',
-    //         'Connection': 'keep-alive',
-    //         'Accept-Encoding': 'gzip, deflate, br',
-    //         'Cookie': `ACCESS_TOKEN=${token};`,
-    //         'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-    //         'X-App-Name': 'web',
-    //         'X-App-Version': '1.4.1',
-    //         'X-Device-Info': 'iPhone 11',
-    //         'X-Device-Id': 'TEST3'
-    //     };
+        const stepOneHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cookie': `ACCESS_TOKEN=${token};`,
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3'
+        };
 
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: stepOneHeaders }],
-    //         ['GET', urls[1], null, { headers: stepOneHeaders }],
-    //     ];
-    //     const responses = http.batch(requests);
+        const requests = [
+            ['GET', urls[0], null, { headers: stepOneHeaders }],
+            ['GET', urls[1], null, { headers: stepOneHeaders }],
+        ];
+        const responses = http.batch(requests);
 
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.User_Profile_Trading,
-    //             Home.User_Profile_Personal,
-    //         ];
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.User_Profile_Trading,
+                Home.User_Profile_Personal,
+            ];
 
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
 
     // Batch 2
     if (token) {
@@ -414,867 +414,867 @@ export function BP001(data) {
         });
     }
 
-    // // Batch 4
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/user/api/v1/banner/promo`,
-    //     ];
+    // Batch 4
+    if (token) {
+        const urls = [
+            base_url + `/user/api/v1/banner/promo`,
+        ];
 
-    //     const stepFourHeaders = {
-    //         'Content-Type': 'application/json',
-    //         'Accept': '*/*',
-    //         'Accept-Language': 'en',
-    //         'Connection': 'keep-alive',
-    //         'Accept-Encoding': 'gzip, deflate, br',
-    //         'Cookie': `ACCESS_TOKEN=${token};`,
-    //         'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-    //         'X-App-Name': 'web',
-    //         'X-App-Version': '1.4.1',
-    //         'X-Device-Info': 'iPhone 11',
-    //         'X-Device-Id': 'TEST3'
-    //     };
+        const stepFourHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cookie': `ACCESS_TOKEN=${token};`,
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3'
+        };
 
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: stepFourHeaders }],
-    //     ];
-    //     const responses = http.batch(requests);
+        const requests = [
+            ['GET', urls[0], null, { headers: stepFourHeaders }],
+        ];
+        const responses = http.batch(requests);
 
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.User_Banner_Promo,
-    //         ];
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.User_Banner_Promo,
+            ];
 
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
 
-    // // Batch 5
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/user/api/protected/v1/portfolio/consolidated`,
-    //     ];
+    // Batch 5
+    if (token) {
+        const urls = [
+            base_url + `/user/api/protected/v1/portfolio/consolidated`,
+        ];
 
-    //     const stepFiveHeaders = {
-    //         'Content-Type': 'application/json',
-    //         'Accept': '*/*',
-    //         'Accept-Language': 'en',
-    //         'Connection': 'keep-alive',
-    //         'Accept-Encoding': 'gzip, deflate, br',
-    //         'Cookie': `ACCESS_TOKEN=${token}; PIN_ACCESS_TOKEN=${pin_token};`,
-    //         'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-    //         'X-App-Name': 'web',
-    //         'X-App-Version': '1.4.1',
-    //         'X-Device-Info': 'iPhone 11',
-    //         'X-Device-Id': 'TEST3'
-    //     };
+        const stepFiveHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cookie': `ACCESS_TOKEN=${token}; PIN_ACCESS_TOKEN=${pin_token};`,
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3'
+        };
 
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: stepFiveHeaders }],
-    //     ];
-    //     const responses = http.batch(requests);
+        const requests = [
+            ['GET', urls[0], null, { headers: stepFiveHeaders }],
+        ];
+        const responses = http.batch(requests);
 
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.Protected_Portfolio_Consolidated,
-    //         ];
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.Protected_Portfolio_Consolidated,
+            ];
 
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
 
-    // // Batch 6
-    // let watchlistGroupID;
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/user/api/v1/watchlistgroup`,
-    //     ];
+    // Batch 6
+    let watchlistGroupID;
+    if (token) {
+        const urls = [
+            base_url + `/user/api/v1/watchlistgroup`,
+        ];
 
-    //     const stepSixHeaders = {
-    //         'Content-Type': 'application/json',
-    //         'Accept': '*/*',
-    //         'Accept-Language': 'en',
-    //         'Connection': 'keep-alive',
-    //         'Accept-Encoding': 'gzip, deflate, br',
-    //         'Cookie': `ACCESS_TOKEN=${token};`,
-    //         'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-    //         'X-App-Name': 'web',
-    //         'X-App-Version': '1.4.1',
-    //         'X-Device-Info': 'iPhone 11',
-    //         'X-Device-Id': 'TEST3'
-    //     };
+        const stepSixHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cookie': `ACCESS_TOKEN=${token};`,
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3'
+        };
 
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: stepSixHeaders }],
-    //     ];
-    //     const responses = http.batch(requests);
+        const requests = [
+            ['GET', urls[0], null, { headers: stepSixHeaders }],
+        ];
+        const responses = http.batch(requests);
 
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.User_Watchlistgroup,
-    //         ];
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.User_Watchlistgroup,
+            ];
 
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
 
-    //             try {
-    //                 const watchlistData = JSON.parse(response.body);
+                try {
+                    const watchlistData = JSON.parse(response.body);
                     
-    //                 // Asumsi structure: { data: [{ id: "..." }, ...] }
-    //                 if (watchlistData && watchlistData.data && watchlistData.data.length > 0) {
-    //                     watchlistGroupID = watchlistData.data[0].id;
+                    // Asumsi structure: { data: [{ id: "..." }, ...] }
+                    if (watchlistData && watchlistData.data && watchlistData.data.length > 0) {
+                        watchlistGroupID = watchlistData.data[0].id;
                         
-    //                     if (`${__ENV.ENV}` != 'INT') {
-    //                         console.log(`${email} Got watchlistID: ${watchlistGroupID}`);
-    //                     }
-    //                 } else {
-    //                     if (`${__ENV.ENV}` != 'INT') {
-    //                         console.error(`${email} No watchlist data found in response`);
-    //                     }
-    //                 }
-    //             } catch (e) {
-    //                 if (`${__ENV.ENV}` != 'INT') {
-    //                     console.error(`${email} Failed to parse watchlistgroup response: ${e.message}`);
-    //                 }
-    //             }
+                        if (`${__ENV.ENV}` != 'INT') {
+                            console.log(`${email} Got watchlistID: ${watchlistGroupID}`);
+                        }
+                    } else {
+                        if (`${__ENV.ENV}` != 'INT') {
+                            console.error(`${email} No watchlist data found in response`);
+                        }
+                    }
+                } catch (e) {
+                    if (`${__ENV.ENV}` != 'INT') {
+                        console.error(`${email} Failed to parse watchlistgroup response: ${e.message}`);
+                    }
+                }
 
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
 
-    // // Batch 7
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/user/api/v2/watchlist/${watchlistGroupID}`,
-    //     ];
+    // Batch 7
+    if (token) {
+        const urls = [
+            base_url + `/user/api/v2/watchlist/${watchlistGroupID}`,
+        ];
 
-    //     const stepSevenHeaders = {
-    //         'Content-Type': 'application/json',
-    //         'Accept': '*/*',
-    //         'Accept-Language': 'en',
-    //         'Connection': 'keep-alive',
-    //         'Accept-Encoding': 'gzip, deflate, br',
-    //         'Cookie': `ACCESS_TOKEN=${token};`,
-    //         'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-    //         'X-App-Name': 'web',
-    //         'X-App-Version': '1.4.1',
-    //         'X-Device-Info': 'iPhone 11',
-    //         'X-Device-Id': 'TEST3'
-    //     };
+        const stepSevenHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cookie': `ACCESS_TOKEN=${token};`,
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3'
+        };
 
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: stepSevenHeaders }],
-    //     ];
-    //     const responses = http.batch(requests);
+        const requests = [
+            ['GET', urls[0], null, { headers: stepSevenHeaders }],
+        ];
+        const responses = http.batch(requests);
 
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.User_WatchlistID,
-    //         ];
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.User_WatchlistID,
+            ];
 
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
 
-    // // Batch 8
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/news/api/v2/`,
-    //     ];
+    // Batch 8
+    if (token) {
+        const urls = [
+            base_url + `/news/api/v2/`,
+        ];
 
-    //     const stepEightHeaders = {
-    //         'Content-Type': 'application/json',
-    //         'Accept': '*/*',
-    //         'Accept-Language': 'en',
-    //         'Connection': 'keep-alive',
-    //         'Accept-Encoding': 'gzip, deflate, br',
-    //         'Cookie': `ACCESS_TOKEN=${token};`,
-    //         'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-    //         'X-App-Name': 'web',
-    //         'X-App-Version': '1.4.1',
-    //         'X-Device-Info': 'iPhone 11',
-    //         'X-Device-Id': 'TEST3'
-    //     };
+        const stepEightHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cookie': `ACCESS_TOKEN=${token};`,
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3'
+        };
 
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: stepEightHeaders }],
-    //     ];
-    //     const responses = http.batch(requests);
+        const requests = [
+            ['GET', urls[0], null, { headers: stepEightHeaders }],
+        ];
+        const responses = http.batch(requests);
 
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.News,
-    //         ];
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.News,
+            ];
 
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
 
-    // // Batch 9
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/news/api/v2/categories`,
-    //     ];
+    // Batch 9
+    if (token) {
+        const urls = [
+            base_url + `/news/api/v2/categories`,
+        ];
 
-    //     const stepEightHeaders = {
-    //         'Content-Type': 'application/json',
-    //         'Accept': '*/*',
-    //         'Accept-Language': 'en',
-    //         'Connection': 'keep-alive',
-    //         'Accept-Encoding': 'gzip, deflate, br',
-    //         'Cookie': `ACCESS_TOKEN=${token};`,
-    //         'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-    //         'X-App-Name': 'web',
-    //         'X-App-Version': '1.4.1',
-    //         'X-Device-Info': 'iPhone 11',
-    //         'X-Device-Id': 'TEST3'
-    //     };
+        const stepEightHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cookie': `ACCESS_TOKEN=${token};`,
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3'
+        };
 
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
 
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.News_Categories,
-    //         ];
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.News_Categories,
+            ];
 
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
 
-    // // Batch 10
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/news/api/v2/categories`,
-    //     ];
+    // Batch 10
+    if (token) {
+        const urls = [
+            base_url + `/news/api/v2/categories`,
+        ];
 
-    //     const stepEightHeaders = {
-    //         'Content-Type': 'application/json',
-    //         'Accept': '*/*',
-    //         'Accept-Language': 'en',
-    //         'Connection': 'keep-alive',
-    //         'Accept-Encoding': 'gzip, deflate, br',
-    //         'Cookie': `ACCESS_TOKEN=${token};`,
-    //         'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-    //         'X-App-Name': 'web',
-    //         'X-App-Version': '1.4.1',
-    //         'X-Device-Info': 'iPhone 11',
-    //         'X-Device-Id': 'TEST3'
-    //     };
+        const stepEightHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cookie': `ACCESS_TOKEN=${token};`,
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3'
+        };
 
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
 
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.News_Categories_2,
-    //         ];
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.News_Categories_2,
+            ];
 
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
 
-    // // Batch 11
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/oaofinance/api/v1/quota/status/margin`,
-    //     ];
+    // Batch 11
+    if (token) {
+        const urls = [
+            base_url + `/oaofinance/api/v1/quota/status/margin`,
+        ];
 
-    //     const stepEightHeaders = {
-    //         'Content-Type': 'application/json',
-    //         'Accept': '*/*',
-    //         'Accept-Language': 'en',
-    //         'Connection': 'keep-alive',
-    //         'Accept-Encoding': 'gzip, deflate, br',
-    //         'Cookie': `ACCESS_TOKEN=${token};`,
-    //         'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-    //         'X-App-Name': 'web',
-    //         'X-App-Version': '1.4.1',
-    //         'X-Device-Info': 'iPhone 11',
-    //         'X-Device-Id': 'TEST3'
-    //     };
+        const stepEightHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cookie': `ACCESS_TOKEN=${token};`,
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3'
+        };
 
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
 
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.Oaofinance_Quota_Status_Margin,
-    //         ];
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.Oaofinance_Quota_Status_Margin,
+            ];
 
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
 
-    // // Batch 12
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/oaofinance/api/v1/user-opening-progress-summary/monitoring/margin`,
-    //     ];
+    // Batch 12
+    if (token) {
+        const urls = [
+            base_url + `/oaofinance/api/v1/user-opening-progress-summary/monitoring/margin`,
+        ];
 
-    //     const stepEightHeaders = {
-    //         'Content-Type': 'application/json',
-    //         'Accept': '*/*',
-    //         'Accept-Language': 'en',
-    //         'Connection': 'keep-alive',
-    //         'Accept-Encoding': 'gzip, deflate, br',
-    //         'Cookie': `ACCESS_TOKEN=${token};`,
-    //         'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-    //         'X-App-Name': 'web',
-    //         'X-App-Version': '1.4.1',
-    //         'X-Device-Info': 'iPhone 11',
-    //         'X-Device-Id': 'TEST3'
-    //     };
+        const stepEightHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cookie': `ACCESS_TOKEN=${token};`,
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3'
+        };
 
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
 
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.Oaofinance_UserOpeningProgressSummary_Monitoring_Margin,
-    //         ];
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.Oaofinance_UserOpeningProgressSummary_Monitoring_Margin,
+            ];
 
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
 
-    // // Batch 13
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/auth/api/v1/protected/account-center/switchables`,
-    //     ];
+    // Batch 13
+    if (token) {
+        const urls = [
+            base_url + `/auth/api/v1/protected/account-center/switchables`,
+        ];
 
-    //     const stepEightHeaders = {
-    //         'Content-Type': 'application/json',
-    //         'Accept': '*/*',
-    //         'Accept-Language': 'en',
-    //         'Connection': 'keep-alive',
-    //         'Accept-Encoding': 'gzip, deflate, br',
-    //         'Cookie': `ACCESS_TOKEN=${token};`,
-    //         'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-    //         'X-App-Name': 'web',
-    //         'X-App-Version': '1.4.1',
-    //         'X-Device-Info': 'iPhone 11',
-    //         'X-Device-Id': 'TEST3'
-    //     };
+        const stepEightHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cookie': `ACCESS_TOKEN=${token};`,
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3'
+        };
 
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
 
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.Auth_Protected_AccountCenter_Switchables,
-    //         ];
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.Auth_Protected_AccountCenter_Switchables,
+            ];
 
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
 
-    // // Batch 14
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/mutualfund/api/v1/user/risk-profile`,
-    //     ];
+    // Batch 14
+    if (token) {
+        const urls = [
+            base_url + `/mutualfund/api/v1/user/risk-profile`,
+        ];
 
-    //     const stepEightHeaders = {
-    //         'Content-Type': 'application/json',
-    //         'Accept': '*/*',
-    //         'Accept-Language': 'en',
-    //         'Connection': 'keep-alive',
-    //         'Accept-Encoding': 'gzip, deflate, br',
-    //         'Cookie': `ACCESS_TOKEN=${token};`,
-    //         'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-    //         'X-App-Name': 'web',
-    //         'X-App-Version': '1.4.1',
-    //         'X-Device-Info': 'iPhone 11',
-    //         'X-Device-Id': 'TEST3'
-    //     };
+        const stepEightHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cookie': `ACCESS_TOKEN=${token};`,
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3'
+        };
 
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
 
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.Mutualfund_User_RiskProfile,
-    //         ];
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.Mutualfund_User_RiskProfile,
+            ];
 
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
 
-    // // Batch 15
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/bond/api/v1/sbn/master/strapi/banner`,
-    //     ];
+    // Batch 15
+    if (token) {
+        const urls = [
+            base_url + `/bond/api/v1/sbn/master/strapi/banner`,
+        ];
 
-    //     const stepEightHeaders = {
-    //         'Content-Type': 'application/json',
-    //         'Accept': '*/*',
-    //         'Accept-Language': 'en',
-    //         'Connection': 'keep-alive',
-    //         'Accept-Encoding': 'gzip, deflate, br',
-    //         'Cookie': `ACCESS_TOKEN=${token};`,
-    //         'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-    //         'X-App-Name': 'web',
-    //         'X-App-Version': '1.4.1',
-    //         'X-Device-Info': 'iPhone 11',
-    //         'X-Device-Id': 'TEST3'
-    //     };
+        const stepEightHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cookie': `ACCESS_TOKEN=${token};`,
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3'
+        };
 
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
 
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.Bond_Sbn_Master_Strapi_Banner,
-    //         ];
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.Bond_Sbn_Master_Strapi_Banner,
+            ];
 
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
 
-    // // Batch 16
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/news/api/v2/?category=&is_sharia=0&items=5&page=1`,
-    //     ];
+    // Batch 16
+    if (token) {
+        const urls = [
+            base_url + `/news/api/v2/?category=&is_sharia=0&items=5&page=1`,
+        ];
 
-    //     const stepEightHeaders = {
-    //         'Content-Type': 'application/json',
-    //         'Accept': '*/*',
-    //         'Accept-Language': 'en',
-    //         'Connection': 'keep-alive',
-    //         'Accept-Encoding': 'gzip, deflate, br',
-    //         'Cookie': `ACCESS_TOKEN=${token};`,
-    //         'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-    //         'X-App-Name': 'web',
-    //         'X-App-Version': '1.4.1',
-    //         'X-Device-Info': 'iPhone 11',
-    //         'X-Device-Id': 'TEST3'
-    //     };
+        const stepEightHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cookie': `ACCESS_TOKEN=${token};`,
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3'
+        };
 
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
 
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.News_Category,
-    //         ];
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.News_Category,
+            ];
 
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
 
-    // // Batch 17
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/auth/api/v1/protected/get-config`,
-    //     ];
+    // Batch 17
+    if (token) {
+        const urls = [
+            base_url + `/auth/api/v1/protected/get-config`,
+        ];
 
-    //     const stepEightHeaders = {
-    //         'Content-Type': 'application/json',
-    //         'Accept': '*/*',
-    //         'Accept-Language': 'en',
-    //         'Connection': 'keep-alive',
-    //         'Accept-Encoding': 'gzip, deflate, br',
-    //         'Cookie': `ACCESS_TOKEN=${token};`,
-    //         'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-    //         'X-App-Name': 'web',
-    //         'X-App-Version': '1.4.1',
-    //         'X-Device-Info': 'iPhone 11',
-    //         'X-Device-Id': 'TEST3'
-    //     };
+        const stepEightHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cookie': `ACCESS_TOKEN=${token};`,
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3'
+        };
 
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
 
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.Auth_Protected_GetConfig,
-    //         ];
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.Auth_Protected_GetConfig,
+            ];
 
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
 
-    // // Batch 18
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/auth/api/v1/protected/client/selected`,
-    //     ];
+    // Batch 18
+    if (token) {
+        const urls = [
+            base_url + `/auth/api/v1/protected/client/selected`,
+        ];
 
-    //     const stepEightHeaders = {
-    //         'Content-Type': 'application/json',
-    //         'Accept': '*/*',
-    //         'Accept-Language': 'en',
-    //         'Connection': 'keep-alive',
-    //         'Accept-Encoding': 'gzip, deflate, br',
-    //         'Cookie': `ACCESS_TOKEN=${token};`,
-    //         'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-    //         'X-App-Name': 'web',
-    //         'X-App-Version': '1.4.1',
-    //         'X-Device-Info': 'iPhone 11',
-    //         'X-Device-Id': 'TEST3'
-    //     };
+        const stepEightHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cookie': `ACCESS_TOKEN=${token};`,
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3'
+        };
 
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
 
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.Auth_Protected_Client_Selected,
-    //         ];
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.Auth_Protected_Client_Selected,
+            ];
 
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
     sleep(0.25);
 }

@@ -1,14 +1,14 @@
 // Command
 // Run Multiple BP
-// ../../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Community/Web/LoadTest/Manual_LoadTest_0107_1459.html
+// ../../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Password_Expired/Web/LoadTest/Manual_LoadTest_0107_1459.html
 
 // Run Single BP Android
-// ../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Android --out dashboard=export=../../Report/Growin_Community/Android/BP001/Manual/Manual_DryRun_0203_1640_BP001_Local.html
-// ../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=Android --out dashboard=export=../../Report/Growin_Community/Android/BP002/Manual/Manual_DryRun_0113_1554_BP002_Local.html
+// ../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Android --out dashboard=export=../../Report/Growin_Password_Expired/Android/BP001/Manual/Manual_DryRun_0406_1113_BP001_Local.html
+// ../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=Android --out dashboard=export=../../Report/Growin_Password_Expired/Android/BP002/Manual/Manual_DryRun_0113_1554_BP002_Local.html
 
 // Run Single BP iOS
-// ../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Community/iOS/BP001/Manual/Manual_DryRun_0113_1659_BP001_Local.html
-// ../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Community/iOS/BP002/Manual/Manual_DryRun_0113_1554_BP002_Local.html
+// ../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Password_Expired/iOS/BP001/Manual/Manual_DryRun_0113_1659_BP001_Local.html
+// ../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Password_Expired/iOS/BP002/Manual/Manual_DryRun_0113_1554_BP002_Local.html
 
 import { textSummary } from "../../Helper/textSummary.js";
 import { htmlReport } from '../../Helper/bundle.js';
@@ -182,9 +182,9 @@ function getBaseUrl() {
     } else if (`${__ENV.ENV}`=='DRC') {
         return 'https://drc-api.growin.id';
     } else if (`${__ENV.ENV}`=='INT') {
-        return 'https://internal-api-pt.growin.id';
+        return 'https://api-pt.growin.id';
     }
-    return 'https://internal-api-pt.growin.id';
+    return 'https://api-pt.growin.id';
 }
 
 function getUserCredentials(userNum, bpOffset = 0) {

@@ -3,7 +3,7 @@
 // ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Community/Web/LoadTest/Manual_LoadTest_0107_1459.html
 
 // Run Single BP Web
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=50 -e DURATION=3m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP001/Manual/Manual_DryRun_0401_1708_BP001.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=50 -e DURATION=3m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP001/Manual/Manual_DryRun_0406_1323_BP001.html
 // ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP002/Manual/Manual_DryRun_0331_2259_BP002.html
 // ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP003 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP003/Manual/Manual_DryRun_0310_1046_BP003.html
 // ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP004 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP004/Manual/Manual_DryRun_0401_1043_BP004.html
@@ -145,10 +145,10 @@ console.log(`   PLATFORM: ${platform}`);
 const scenarios = {};
 selectedBPs.forEach(bp => {
     scenarios[bp] = {
-        executor: 'per-vu-iterations',
-        vus: 1,
-        iterations: 1,
-        maxDuration: '1h',
+        // executor: 'per-vu-iterations',
+        // vus: 1,
+        // iterations: 1,
+        // maxDuration: '1h',
 
         // executor: 'ramping-vus',
         // startVUs: 0,
@@ -200,9 +200,9 @@ selectedBPs.forEach(bp => {
         //     { duration: '5m', target: 0 },
         // ],
 
-        // executor: 'constant-vus',
-        // vus: userDistribution[bp] || 1,
-        // duration: `${__ENV.DURATION}`,
+        executor: 'constant-vus',
+        vus: userDistribution[bp] || 1,
+        duration: `${__ENV.DURATION}`,
 
         gracefulStop: '30s',
         exec: bp, // akan memanggil BP001() atau BP002() sesuai export di atas

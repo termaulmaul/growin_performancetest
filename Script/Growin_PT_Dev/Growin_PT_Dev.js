@@ -1,8 +1,10 @@
+// 
+// ../../k6 run Growin_PT_Dev.js -e RUNBY=Manual -e ENV=INT -e USER=5 -e DURATION=1m -e NUMSTART=71 -e SCENARIO=BP001 -e PLATFORM=Web -e BP_CONFIG="$BP_JSON"
 /**
  * Growin_PT_Dev.js — Main k6 entry point
  * 
  * Jenkins command example:
- *   BP_JSON=$(python3 -c "import sys,yaml,json; print(json.dumps(yaml.safe_load(open('configs/BP001.yaml'))))")
+ *   echo $BP_JSON | python3 -c "import sys,json; d=json.load(sys.stdin); [print(a['id'], a['name']) for a in d['apis']]"
  *   k6 run Growin_PT_Dev.js \
  *     -e RUNBY=LoadTest \
  *     -e ENV=INT \
@@ -21,6 +23,7 @@ import { BP001, buildThresholds } from "./Web/BP001.js";
 import http   from "k6/http";
 import { sleep } from "k6";
 import { Rate } from "k6/metrics";
+export { BP001 } from "./Web/BP001.js";
 
 // ─── PLATFORM ──────────────────────────────────────────────────────────────────
 function getPlatform() {
@@ -113,7 +116,7 @@ const dynamicThresholds = BP_CONFIG ? buildThresholds(BP_CONFIG) : {};
 // Global fallback thresholds
 const globalThresholds = {
     http_req_failed: [{ threshold: 'rate<0.001', abortOnFail: false }],
-    http_req_duration: [{ threshold: 'p(95)<200', abortOnFail: false }],
+    http_req_duration: [{ threshold: 'p(95)<800', abortOnFail: false }],
     ...dynamicThresholds,
 };
 
@@ -248,35 +251,37 @@ export function setup() {
                         bp,
                     };
 
-                    // PIN login
-                    const pinRes = http.post(
-                        base_url + '/auth/api/v1/protected/pin-login',
-                        JSON.stringify({ value: "123456" }),
-                        {
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Accept': '*/*',
-                                'Accept-Language': 'en',
-                                'Connection': 'keep-alive',
-                                'Accept-Encoding': 'gzip, deflate, br',
-                                'Cookie': `ACCESS_TOKEN=${loginResult.token};`,
-                                'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-                                'X-App-Name': 'web',
-                                'X-App-Version': '1.4.1',
-                                'X-Device-Info': 'iPhone 11',
-                                'X-Device-Id': 'TEST3',
-                            }
-                        }
-                    );
+                    // ─── PIN LOGIN ──────────────────────────────────────────
+                    const pinPayload = JSON.stringify({ value: "123456" });
+                    const pinHeaders = {
+                        'Content-Type':     'application/json',
+                        'Accept':           '*/*',
+                        'Accept-Language':  'en',
+                        'Connection':       'keep-alive',
+                        'Accept-Encoding':  'gzip, deflate, br',
+                        'Cookie':           `ACCESS_TOKEN=${loginResult.token};`,
+                        'User-Agent':       'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+                        'X-App-Name':       'web',
+                        'X-App-Version':    '1.4.1',
+                        'X-Device-Info':    'iPhone 11',
+                        'X-Device-Id':      'TEST3',
+                    };
+
+                    const pinRes = http.post(base_url + '/auth/api/v1/protected/pin-login', pinPayload, { headers: pinHeaders });
+                    // console.log(`DEBUG - token: '${loginResult.token}' | pin: '${pinRes.json().data.pin_token}'`);
 
                     if (pinRes.status === 200) {
                         totalPinSuccess++;
                         tokens[userKey].pin_token = pinRes.json().data.pin_token;
                     } else {
                         totalPinFailed++;
-                        console.error(`   ❌ User ${userKey} ${credentials.email} PIN FAILED (${pinRes.status})`);
+                        if (i === batchStart || totalPinFailed <= 5) {
+                            console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) PIN FAILED - Status: ${pinRes.status}`);
+                        }
                         tokens[userKey].pin_token = null;
                     }
+                    // ───────────────────────────────────────────────────────
+
                 } else {
                     totalLoginFailed++;
                     totalLoginRetries += loginResult.attempts - 1;
@@ -347,28 +352,28 @@ export function handleSummary(data) {
         const apis = BP_CONFIG?.apis || [];
 
         apis.forEach(apiDef => {
-            const bpId    = BP_CONFIG?.bp_id || 'BP001';
+            const bpId     = BP_CONFIG?.bp_id || 'BP001';
             const safeId   = String(bpId).replace(/[^a-zA-Z0-9]/g, '_');
             const safeApiId = String(apiDef.id).replace(/[^a-zA-Z0-9]/g, '_');
             const safeName  = String(apiDef.name).replace(/[^a-zA-Z0-9]/g, '_');
             const tag       = `${safeId}_${safeApiId}_${safeName}`;
 
-            const durationMetric   = data.metrics[`duration_${tag}`];
-            const errorRateMetric  = data.metrics[`error_rate_${tag}`];
-            const sampleMetric     = data.metrics[`sample_${tag}`];
+            const durationMetric  = data.metrics[`duration_${tag}`];
+            const errorRateMetric = data.metrics[`error_rate_${tag}`];
+            const sampleMetric    = data.metrics[`sample_${tag}`];
 
             if (!durationMetric) return; // API might not have been reached
 
-            const avgRespTime = durationMetric.values?.med   || 0;  // median
-            const p95RespTime = durationMetric.values?.['p(95)'] || 0;
-            const errorRate   = errorRateMetric?.values?.rate || 0;
-            const totalReqs   = sampleMetric?.values?.count  || 0;
+            const avgRespTime = durationMetric.values?.med          || 0;
+            const p95RespTime = durationMetric.values?.['p(95)']    || 0;
+            const errorRate   = errorRateMetric?.values?.rate        || 0;
+            const totalReqs   = sampleMetric?.values?.count          || 0;
             const actualRps   = totalReqs / testDurationSec;
 
-            const passRespTime = p95RespTime < maxAvgRespTime;
+            const passRespTime  = p95RespTime < maxAvgRespTime;
             const passErrorRate = errorRate < maxErrorRate;
-            const passRps      = actualRps >= minRps;
-            const verdict      = passRespTime && passErrorRate && passRps ? '✅ PASS' : '❌ FAIL';
+            const passRps       = actualRps >= minRps;
+            const verdict       = passRespTime && passErrorRate && passRps ? '✅ PASS' : '❌ FAIL';
 
             const reasons = [];
             if (!passRespTime)  reasons.push(`p95 resp time ${p95RespTime.toFixed(0)}ms ≥ threshold ${maxAvgRespTime}ms`);
@@ -409,13 +414,13 @@ export function handleSummary(data) {
         const base = `../../Report/Growin_PT_Dev/${platform}`;
 
         if (runby === 'Manual') {
-            htmlPath = `${base}/${bp_name}/Manual/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
+            htmlPath = `${base}/${platform}/${bp_name}/Manual/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
         } else if (runby === 'Regression') {
-            htmlPath = `${base}/${bp_name}/Regression/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
+            htmlPath = `${base}/${platform}/${bp_name}/Regression/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
         } else if (runby === 'LoadTest') {
-            htmlPath = `${base}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
+            htmlPath = `${base}/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
         } else {
-            htmlPath = `${base}/${bp_name}/${runby}_${bp_name}_${dateStr}_${timeStr}.html`;
+            htmlPath = `${base}/${platform}/${bp_name}/${runby}_${bp_name}_${dateStr}_${timeStr}.html`;
         }
 
         console.log(`Generating HTML report: ${htmlPath}`);

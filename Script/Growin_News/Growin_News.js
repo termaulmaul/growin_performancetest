@@ -1,9 +1,9 @@
 // Command
 // Run Multiple BP
-// ../../k6 run Growin_News.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_News/Web/LoadTest/Manual_LoadTest_0230_1616.html
+// ../../k6 run Growin_News.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_News/Web/LoadTest/Manual_LoadTest_0406_1102.html
 
 // Run Single BP Web
-// ../../k6 run Growin_News.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_News/Web/BP001/Manual/Manual_DryRun_0331_1722_BP001.html
+// ../../k6 run Growin_News.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_News/Web/BP001/Manual/Manual_DryRun_0406_1102_BP001.html
 
 import { textSummary } from "../../Helper/textSummary.js";
 import { htmlReport } from '../../Helper/bundle.js';
