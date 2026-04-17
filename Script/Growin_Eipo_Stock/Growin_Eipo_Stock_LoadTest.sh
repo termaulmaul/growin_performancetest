@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # chmod +x Growin_Eipo_Stock_iOS_LoadTest.sh
-# ./Growin_Eipo_Stock_iOS_LoadTest.sh
+# ./Growin_Eipo_Stock_LoadTest.sh
 # Declare variables
 ENV="INT"
 USER=205
@@ -26,5 +26,5 @@ echo "Captured Time    : $timeStr"
 echo "Current Scenario : Load Test All BP"
 
 # Run k6 commands using the captured date and time
-../../../k6 run Growin_Eipo_Stock_iOS_LoadTest.js -e RUNBY="$RUNBY" -e ENV="$ENV" -e USER="$USER" -e DURATION="$DURATION" -e NUMSTART="$NUMSTART" --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/LoadTest/"$RUNBY"_"$RUNTYPE"_${dateStr}_${timeStr}_72.html
+../../../k6 run Growin_Eipo_Stock_LoadTest.js -e RUNBY="$RUNBY" -e ENV="$ENV" -e USER="$USER" -e DURATION="$DURATION" -e NUMSTART="$NUMSTART" --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/LoadTest/"$RUNBY"_"$RUNTYPE"_${dateStr}_${timeStr}_72.html
 

@@ -66,7 +66,7 @@ export function BP007(data) {
     // Batch 1
     if (token) {
         const urls = [
-            base_url + `/marketdata/api/v1/marketinfo/financial-statements/`,
+            base_url + `/marketdata/api/v1/marketinfo/financial-statements/BMRI/annually?sort=asc`,
         ];
 
         const requests = [

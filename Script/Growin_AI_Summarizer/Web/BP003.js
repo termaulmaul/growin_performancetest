@@ -63,7 +63,7 @@ export function BP003(data) {
         'X-Device-Id': 'TEST3'
     };
 
-    console.log(`SID = ${SID}`)
+    // console.log(`SID = ${SID}`)
     // Batch 1
     if (token) {
         const urls = [

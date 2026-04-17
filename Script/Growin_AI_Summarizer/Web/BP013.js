@@ -170,7 +170,7 @@ export function BP013(data) {
     // Batch 3
     if (token) {
         const urls = [
-            base_url + `/marketdata/api/v1/stock-strength`,
+            base_url + `/marketdata/api/v1/stock-strength?stockcode=BBCA&resolution=5`,
         ];
 
         const requests = [

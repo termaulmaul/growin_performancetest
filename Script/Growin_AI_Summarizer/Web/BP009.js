@@ -136,7 +136,7 @@ export function BP009(data) {
     // Batch 1
     if (token) {
         const urls = [
-            base_url + `/marketdata/api/v1/marketinfo/profile`,
+            base_url + `/marketdata/api/v1/marketinfo/profile?seccode=BBRI`,
         ];
 
         const requests = [

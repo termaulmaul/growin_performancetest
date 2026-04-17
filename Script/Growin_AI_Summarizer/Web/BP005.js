@@ -86,7 +86,7 @@ export function BP005(data) {
     // Batch 1
     if (token) {
         const urls = [
-            base_url + `/marketdata/api/v1/emiten/price-performance/`,
+            base_url + `/marketdata/api/v1/emiten/price-performance/BBCA`,
         ];
 
         const requests = [
@@ -128,7 +128,7 @@ export function BP005(data) {
     // Batch 2
     if (token) {
         const urls = [
-            base_url + `/marketdata/api/v1/emiten/low-high-range/`,
+            base_url + `/marketdata/api/v1/emiten/low-high-range/BBCA`,
         ];
 
         const requests = [
@@ -170,7 +170,7 @@ export function BP005(data) {
     // Batch 3
     if (token) {
         const urls = [
-            base_url + `/marketdata/api/v1/emiten/investor-chart-agg/`,
+            base_url + `/marketdata/api/v1/emiten/investor-chart-agg/BBCA`,
         ];
 
         const requests = [

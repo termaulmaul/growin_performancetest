@@ -97,8 +97,8 @@ export function BP002(data) {
             'X-App-Name': 'web',
             'X-App-Version': '1.4.1',
             'X-Device-Info': 'iPhone 11',
-            // 'X-Device-Id': 'TEST3',
-            'X-Device-Id': deviceId,
+            'X-Device-Id': 'TEST3',
+            // 'X-Device-Id': deviceId,
         };
 
         // console.log(`X-Device-Id: ${deviceId}`)
@@ -170,8 +170,8 @@ export function BP002(data) {
             'X-App-Name': 'web',
             'X-App-Version': '1.4.1',
             'X-Device-Info': 'iPhone 11',
-            // 'X-Device-Id': 'TEST3',
-            'X-Device-Id': deviceId,
+            'X-Device-Id': 'TEST3',
+            // 'X-Device-Id': deviceId,
         };
 
         const requests = [
@@ -234,8 +234,8 @@ export function BP002(data) {
             'X-App-Name': 'web',
             'X-App-Version': '1.4.1',
             'X-Device-Info': 'iPhone 11',
-            // 'X-Device-Id': 'TEST3',
-            'X-Device-Id': deviceId,
+            'X-Device-Id': 'TEST3',
+            // 'X-Device-Id': deviceId,
         };
 
         const requests = [
@@ -301,8 +301,8 @@ export function BP002(data) {
             'X-App-Name': 'web',
             'X-App-Version': '1.4.1',
             'X-Device-Info': 'iPhone 11',
-            // 'X-Device-Id': 'TEST3',
-            'X-Device-Id': deviceId,
+            'X-Device-Id': 'TEST3',
+            // 'X-Device-Id': deviceId,
         };
 
         const requests = [

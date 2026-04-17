@@ -284,7 +284,7 @@ export default function (data) {
 
         // PERBAIKAN: Kirim object, bukan array
         const Marketdata_Gpt_FinancialSummarizer_Payload = JSON.stringify({
-            message: "Performance Test",
+            message: "",
             feature: "KEYSTAT", 
             ticker: "BBCA",
             user_id: userID

@@ -1,9 +1,10 @@
 // Command
+// Gcloud compute ssh --project compute-dev-0108 --zone asia-southeast2-c "vm-dev-k6-0" --tunnel-through-iap -- -L 22:10.188.2.36:22
 // Run Multiple BP
 // ../../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Password_Expired/Web/LoadTest/Manual_LoadTest_0107_1459.html
 
 // Run Single BP Android
-// ../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Android --out dashboard=export=../../Report/Growin_Password_Expired/Android/BP001/Manual/Manual_DryRun_0406_1113_BP001_Local.html
+// ../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=Manual -e ENV=DEV -e USER=1 -e DURATION=30m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Android --out dashboard=export=../../Report/Growin_Password_Expired/Android/BP001/Manual/Manual_DryRun_0415_1407_BP001_Local.html
 // ../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=Android --out dashboard=export=../../Report/Growin_Password_Expired/Android/BP002/Manual/Manual_DryRun_0113_1554_BP002_Local.html
 
 // Run Single BP iOS
@@ -20,7 +21,7 @@ import { BP002 as BP002_iOS } from "./iOS/BP002.js";
 import http from "k6/http";
 import { sleep } from "k6";
 import { Rate } from "k6/metrics";
-
+// ../k6 run Growin_BurstOrder_V3.js -e ENV=INT -e USERNAME=TESTMON -e MAIL=guysmail.com -e PAD=2 -e NUMSTART=1000 -e USER=2 -e ITER=1 -e RUNTIME=60 -e INTERVAL=300
 function getPlatform() {
     const { PLATFORM } = __ENV;
     
@@ -102,10 +103,10 @@ console.log(`   PLATFORM: ${platform}`);
 const scenarios = {};
 selectedBPs.forEach(bp => {
     scenarios[bp] = {
-        // executor: 'per-vu-iterations',
-        // vus: 1,
-        // iterations: 1,
-        // maxDuration: '1h',
+        executor: 'per-vu-iterations',
+        vus: 1,
+        iterations: 1,
+        maxDuration: '1h',
 
         // executor: 'ramping-vus',
         // startVUs: 0,
@@ -157,9 +158,9 @@ selectedBPs.forEach(bp => {
         //     { duration: '5m', target: 0 },
         // ],
 
-        executor: 'constant-vus',
-        vus: userDistribution[bp] || 1,
-        duration: `${__ENV.DURATION}`,
+        // executor: 'constant-vus',
+        // vus: userDistribution[bp] || 1,
+        // duration: `${__ENV.DURATION}`,
 
         gracefulStop: '30s',
         exec: bp, // akan memanggil BP001() atau BP002() sesuai export di atas
@@ -176,15 +177,15 @@ export const options = {
 
 function getBaseUrl() {
     if(`${__ENV.ENV}`=='DEV'){
-        return 'https://dev-api.growin.id';
+        return 'https://internal-api-dev.growin.id';
     } else if ((`${__ENV.ENV}`=='QA')) {
         return 'https://api-qa.growin.id';
     } else if (`${__ENV.ENV}`=='DRC') {
         return 'https://drc-api.growin.id';
     } else if (`${__ENV.ENV}`=='INT') {
-        return 'https://api-pt.growin.id';
+        return 'https://internal-api-pt.growin.id';
     }
-    return 'https://api-pt.growin.id';
+    return 'https://internal-api-pt.growin.id';
 }
 
 function getUserCredentials(userNum, bpOffset = 0) {
@@ -230,6 +231,7 @@ function loginWithRetry(base_url, credentials, userKey, vuId) {
 
     for (let attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
         const loginRes = http.post(base_url + '/auth/api/v1/login', loginPayload, { headers: loginHeaders });
+        console.log(`${base_url}/auth/api/v1/login`)
         
         if (loginRes.status === 200) {
             if (attempt > 1) {
@@ -243,7 +245,7 @@ function loginWithRetry(base_url, credentials, userKey, vuId) {
         }
         
         if (attempt < MAX_RETRY_ATTEMPTS) {
-            console.warn(`   ⚠️  User ${userKey} (${credentials.email}, VU${vuId}) LOGIN attempt ${attempt}/${MAX_RETRY_ATTEMPTS} FAILED - Status: ${loginRes.status}, retrying...`);
+            console.warn(`   ⚠️  User ${userKey} (${credentials.email}, VU${vuId}) LOGIN attempt ${attempt}/${MAX_RETRY_ATTEMPTS} FAILED - Status: ${loginRes.status} | Body: ${loginRes.body}, retrying...`);
             sleep(RETRY_DELAY);
         } else {
             console.error(`   ❌ User ${userKey} (${credentials.email}, VU${vuId}) LOGIN FAILED after ${MAX_RETRY_ATTEMPTS} attempts - Status: ${loginRes.status}`);
@@ -344,6 +346,7 @@ export function setup() {
                     };
 
                     const pinRes = http.post(base_url + '/auth/api/v1/protected/pin-login', pinPayload, { headers: pinHeaders });
+                    console.log(`${base_url}/auth/api/v1/protected/pin-login`)
 
                     if (pinRes.status === 200) {
                         totalPinSuccess++;
@@ -351,7 +354,7 @@ export function setup() {
                     } else {
                         totalPinFailed++;
                         if (i === batchStart || totalPinFailed <= 5) {
-                            console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) PIN FAILED - Status: ${pinRes.status}`);
+                            console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) PIN FAILED - Status: ${pinRes.status} with Respone Body: ${pinRes.body}`);
                         }
                         tokens[userKey].pin_token = null;
                     }

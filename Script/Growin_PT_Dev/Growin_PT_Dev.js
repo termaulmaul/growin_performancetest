@@ -1,4 +1,7 @@
-// 
+// pip install pyyaml 
+// Gcloud compute ssh --project compute-dev-0108 --zone asia-southeast2-c "vm-dev-k6-0" --tunnel-through-iap -- -L 22:10.188.2.36:22
+
+// BP_JSON=$(python3 -c "import sys,yaml,json; print(json.dumps(yaml.safe_load(open('Configs/BP001.yaml'))))")
 // ../../k6 run Growin_PT_Dev.js -e RUNBY=Manual -e ENV=INT -e USER=5 -e DURATION=1m -e NUMSTART=71 -e SCENARIO=BP001 -e PLATFORM=Web -e BP_CONFIG="$BP_JSON"
 /**
  * Growin_PT_Dev.js — Main k6 entry point
@@ -132,7 +135,7 @@ export const options = {
 // ─── ENV / BASE URL ────────────────────────────────────────────────────────────
 function getBaseUrl() {
     const envMap = {
-        DEV: 'https://dev-api.growin.id',
+        DEV: 'https://internal-api-dev.growin.id ',
         QA:  'https://api-qa.growin.id',
         DRC: 'https://drc-api.growin.id',
         INT: 'https://internal-api-pt.growin.id',

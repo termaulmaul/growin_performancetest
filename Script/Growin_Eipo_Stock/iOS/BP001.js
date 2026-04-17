@@ -3,6 +3,7 @@ import { Trend, Counter, Rate } from "k6/metrics";
 import http from "k6/http";
 import exec from 'k6/execution';
 
+// BP001 – Product List Screen
 // Define custom metrics
 const ProductListScreen = {
     Eipo_Pipeline_List: {
@@ -15,12 +16,93 @@ const ProductListScreen = {
     },
 };
 
-// ✅ EXPORTED FUNCTION - dengan proper VU mapping
+// // ✅ EXPORTED FUNCTION - dengan proper VU mapping
+// export function BP001(data) {
+//     const vuId = exec.vu.idInTest;
+//     const base_url = data.base_url;
+    
+//     // ✅ Get userKey dari VU mapping
+//     const mapping = data.vuMapping[vuId];
+//     if (!mapping) {
+//         console.error(`❌ VU${vuId} - No mapping found, skipping iteration`);
+//         return;
+//     }
+    
+//     const userKey = mapping.userKey;
+//     const userToken = data.tokens[userKey];
+    
+//     if (!userToken || !userToken.token) {
+//         console.error(`❌ VU${vuId} (User ${userKey}) - No valid token available, skipping iteration`);
+//         return;
+//     }
+    
+//     const token = userToken.token;
+//     const email = userToken.email;
+
+//     // Batch 1
+//     if (token) {
+//         const urls = [
+//             base_url + `/eipo/pipeline/list?filter_status=ongoing&page=1&per_page=20`,
+//         ];
+
+//         const stepOneHeaders = {
+//             'Content-Type': 'application/json',
+//             'Accept': '*/*',
+//             'Accept-Language': 'en',
+//             'Connection': 'keep-alive',
+//             'Accept-Encoding': 'gzip, deflate, br',
+//             'Cookie': `ACCESS_TOKEN=${token};`,
+//             'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+//             'X-App-Name': 'web',
+//             'X-App-Version': '1.4.1',
+//             'X-Device-Info': 'iPhone 11',
+//             'X-Device-Id': 'TEST3'
+//         };
+
+//         const requests = [
+//             ['GET', urls[0], null, { headers: stepOneHeaders }],
+//         ];
+//         const responses = http.batch(requests);
+
+//         responses.forEach((response, index) => {
+//             const metrics = [
+//                 ProductListScreen.Eipo_Pipeline_List,
+//             ];
+
+//             const metric = metrics[index];
+//             metric.httpDuration.add(response.timings.duration);
+//             if (response.status === 200) {
+//                 metric.errorRate.add(false);
+//                 metric.errorCount.add(0);
+//                 metric.requestRate.add(true);
+//                 metric.http_reqs.add(1);
+//                 if (`${__ENV.ENV}` != 'INT') {
+//                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+//                 }
+//             } else {
+//                 metric.errorRate.add(true);
+//                 metric.errorCount.add(1);
+//                 metric.requestRate.add(false);
+//                 metric.http_reqs.add(1);
+//                 check(response, {
+//                     [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+//                 });
+//                 if (`${__ENV.ENV}` != 'INT') {
+//                     const requestBody = requests[index][2];
+//                     console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+//                 }
+//             }
+//         });
+//     }
+    
+//     sleep(0.25);
+// }
+
+// ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
 export function BP001(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;
     
-    // ✅ Get userKey dari VU mapping
     const mapping = data.vuMapping[vuId];
     if (!mapping) {
         console.error(`❌ VU${vuId} - No mapping found, skipping iteration`);
@@ -31,35 +113,44 @@ export function BP001(data) {
     const userToken = data.tokens[userKey];
     
     if (!userToken || !userToken.token) {
-        console.error(`❌ VU${vuId} (User ${userKey}) - No valid token available, skipping iteration`);
+        //  || !userToken.pin_token
+        console.error(`❌ VU${vuId} (User ${userKey}) - No valid token or pin_token available, skipping iteration`);
         return;
     }
     
     const token = userToken.token;
+    const pin_token = userToken.pin_token;
+    const user_id = userToken.user_id;
+    const client_id = userToken.client_id;
+    const SID = userToken.SID;
+    const ksei_acc_no = userToken.ksei_acc_no;
+    const account_name = userToken.account_name;
     const email = userToken.email;
+    const bp = mapping.bp;
 
+    const headers = {
+        'Cookie': `ACCESS_TOKEN=${token};`,
+        'Content-Type': 'application/json',
+        'Accept': '*/*',
+        'Accept-Language': 'en',
+        'Connection': 'keep-alive',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+        'X-App-Name': 'web',
+        'X-App-Version': '1.4.1',
+        'X-Device-Info': 'iPhone 11',
+        'X-Device-Id': 'TEST3'
+    };
+
+    // console.log(`SID = ${SID}`)
     // Batch 1
     if (token) {
         const urls = [
             base_url + `/eipo/pipeline/list?filter_status=ongoing&page=1&per_page=20`,
         ];
 
-        const stepOneHeaders = {
-            'Content-Type': 'application/json',
-            'Accept': '*/*',
-            'Accept-Language': 'en',
-            'Connection': 'keep-alive',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Cookie': `ACCESS_TOKEN=${token};`,
-            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-            'X-App-Name': 'web',
-            'X-App-Version': '1.4.1',
-            'X-Device-Info': 'iPhone 11',
-            'X-Device-Id': 'TEST3'
-        };
-
         const requests = [
-            ['GET', urls[0], null, { headers: stepOneHeaders }],
+            ['GET', urls[0], null, { headers: headers }],
         ];
         const responses = http.batch(requests);
 
@@ -93,6 +184,5 @@ export function BP001(data) {
             }
         });
     }
-    
     sleep(0.25);
 }

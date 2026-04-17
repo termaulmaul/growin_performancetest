@@ -307,7 +307,7 @@ export default function (data) {
         };
 
         const Marketdata_Gpt_FinancialSummarizer_Payload = JSON.stringify({
-            message: "How the company solvency",
+            message: "",
             feature: "KEYSTAT", 
             ticker: "BMRI",
             user_id: userID
@@ -364,7 +364,7 @@ export default function (data) {
 
         // PERBAIKAN: Kirim object, bukan array
         const Marketdata_Gpt_RecommendationQuestion_Payload = JSON.stringify({
-            message: "How the company solvency",
+            message: "",
             feature: "KEYSTAT",
             ticker: "BMRI",
             user_id: userID,
@@ -440,7 +440,7 @@ export default function (data) {
             title_id: title_id,
             user_id: userID,
             agent_name: "AGENT",
-            message: "How the company solvency",
+            message: "",
             chat_type: "IN",
             is_spam: false,
             remarks: "test",
@@ -504,7 +504,7 @@ export default function (data) {
             title_id: title_id,
             user_id: userID,
             agent_name: "AGENT",
-            message: "How the company solvency",
+            message: "",
             chat_type: "OUT",
             is_spam: false,
             remarks: "test",

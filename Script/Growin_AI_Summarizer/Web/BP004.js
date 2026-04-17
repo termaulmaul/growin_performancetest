@@ -133,28 +133,28 @@ export function BP004(data) {
         'X-Device-Id': 'TEST3'
     };
 
-    let title_id;
-    if (token && user_id) {
-        const urls = [base_url + `/marketdata/api/v1/gpt/title_insert?title_name=AutomationTest`];
-        const requests = [
-            ['POST', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+    // let title_id;
+    // if (token && user_id) {
+    //     const urls = [base_url + `/marketdata/api/v1/gpt/title_insert?title_name=AutomationTest`];
+    //     const requests = [
+    //         ['POST', urls[0], null, { headers: headers }],
+    //     ];
+    //     const responses = http.batch(requests);
 
-        responses.forEach((response, index) => {
-            if (response.status === 200 || response.status === 201) {
-                title_id = response.json().data.title_id;
-                if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`200 ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);
-                }
-            } else {
-                if (`${__ENV.ENV}` != 'INT') {
-                    const requestBody = requests[index][2];
-                    console.error(`VU${exec.vu.idInTest} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-                }
-            }
-        });
-    }
+    //     responses.forEach((response, index) => {
+    //         if (response.status === 200 || response.status === 201) {
+    //             title_id = response.json().data.title_id;
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 console.log(`200 ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);
+    //             }
+    //         } else {
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 const requestBody = requests[index][2];
+    //                 console.error(`VU${exec.vu.idInTest} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+    //             }
+    //         }
+    //     });
+    // }
 
     // Batch 1
     if (token) {
@@ -163,7 +163,7 @@ export function BP004(data) {
         ];
 
         const Marketdata_Gpt_FinancialSummarizer_Payload = JSON.stringify({
-            message: "Performance Test",
+            message: "",
             feature: "ANALYSIS", 
             ticker: "BBCA",
             user_id: user_id
@@ -207,52 +207,46 @@ export function BP004(data) {
     }
 
     // Batch 2
+    let title_id;
     if (token) {
         const urls = [
             base_url + `/marketdata/api/v1/gpt/feedback?user_id=${user_id}&feature_name=ANALYSIS&ticker=BBCA`,  
-            base_url + `/marketdata/api/v1/gpt/recommendation_question`,
-            base_url + `/marketdata/api/v1/gpt/title_insert?title_name="Performance Test"`,
+            // base_url + `/marketdata/api/v1/gpt/recommendation_question`,
+            base_url + `/marketdata/api/v1/gpt/title_insert`,
         ];
 
-        const Marketdata_Gpt_Feedback_Payload = JSON.stringify({
-            user_id: user_id, 
-            feature_name: "ANALYSIS", 
-            ticker: "BBCA"
-        });
-
         const Marketdata_Gpt_RecommendationQuestion_Payload = JSON.stringify({
-            message: "", 
-            feature: "ANALYSIS", 
-            ticker: "BBCA", 
-            user_id: user_id, 
+            message: "",
+            feature: "KEYSTAT",
+            ticker: "BBCA",
+            user_id: user_id,
             locale: "en"
         });
-
-        const Marketdata_Gpt_TitleInsert_Payload = JSON.stringify({
-            feature: "ANALYSIS", 
-            source: "WEB", 
-            client_id: client_id, 
-            ksei_account: ksei_acc_no
-        });
         
+        const Marketdata_Gpt_TitleInsert_Payload = JSON.stringify({
+            title_name: "Performance Test",
+        });
 
         const requests = [
-            ['POST', urls[0], Marketdata_Gpt_Feedback_Payload, { headers: headers }],
-            ['POST', urls[1], Marketdata_Gpt_RecommendationQuestion_Payload, { headers: headers }],
-            ['POST', urls[2], Marketdata_Gpt_TitleInsert_Payload, { headers: headers }],
+            ['POST', urls[0], null, { headers: headers, timeout: '300s' }],
+            // ['POST', urls[1], Marketdata_Gpt_RecommendationQuestion_Payload, { headers: headers, timeout: '300s' }],
+            ['POST', urls[1], Marketdata_Gpt_TitleInsert_Payload, { headers: headers, timeout: '300s' }],
         ];
         const responses = http.batch(requests);
 
         responses.forEach((response, index) => {
             const metrics = [
                 StockDetailAnalysisTab.Marketdata_Gpt_Feedback,
-                StockDetailAnalysisTab.Marketdata_Gpt_RecommendationQuestion,
+                // StockDetailKeystatTab.Marketdata_Gpt_RecommendationQuestion,
                 StockDetailAnalysisTab.Marketdata_Gpt_TitleInsert,
             ];
 
             const metric = metrics[index];
             metric.httpDuration.add(response.timings.duration);
             if (response.status === 200) {
+                if (index === 1) {
+                    title_id = response.json().data.title_id;
+                }
                 metric.errorRate.add(false);
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
@@ -270,13 +264,16 @@ export function BP004(data) {
                 });
                 if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
-                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                    const timestamp = new Date().toISOString();
+                    console.error(`[${timestamp}] ${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
                 }
             }
         });
     }
 
     // Batch 3
+    // console.log(`title_id = ${title_id}`)
+    let conversation_id;
     if (token) {
         const urls = [
             base_url + `/marketdata/api/v1/gpt/conversation_activity_insert`,
@@ -316,6 +313,7 @@ export function BP004(data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
+                conversation_id = response.json().data.conversation_id;
                 if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
@@ -404,7 +402,7 @@ export function BP004(data) {
 
         const Marketdata_Gpt_FeedbackInsert_Payload = JSON.stringify({
             feedback_name: "LIKE",
-            conversation_id: 0,
+            conversation_id: conversation_id,
             remarks: "Performance Test Feedback"
         });
         
@@ -427,6 +425,7 @@ export function BP004(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 feedback_id = response.json().data.feedback_id;
+                conversation_id = response.json().data.conversation_id;
                 if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
@@ -455,8 +454,8 @@ export function BP004(data) {
         const Marketdata_Gpt_FeedbackUpdate_Payload = JSON.stringify({
             feedback_id: feedback_id,
             feedback_name: "LIKE",
-            conversation_id: "1",
-            remarks: "Performance Test Feedback Update"
+            conversation_id: conversation_id,
+            remarks: "Performance Test Update"
         });
         
 

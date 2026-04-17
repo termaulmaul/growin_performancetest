@@ -3,6 +3,7 @@ import { Trend, Counter, Rate } from "k6/metrics";
 import http from "k6/http";
 import exec from 'k6/execution';
 
+// BP007 – Edit Order
 // Define custom metrics
 const EditOrderScreen = {
     Eipo_Order: {

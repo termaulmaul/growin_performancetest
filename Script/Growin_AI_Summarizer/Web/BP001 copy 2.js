@@ -135,7 +135,7 @@ export function BP001(data) {const vuId = exec.vu.idInTest;
         ];
 
         const Marketdata_Gpt_FinancialSummarizer_Payload = JSON.stringify({
-            message: "How the company solvency",
+            message: "",
             feature: "KEYSTAT", 
             ticker: "BMRI",
             user_id: user_id
@@ -186,7 +186,7 @@ export function BP001(data) {const vuId = exec.vu.idInTest;
         ];
 
         const Marketdata_Gpt_RecommendationQuestion_Payload = JSON.stringify({
-            message: "How the company solvency",
+            message: "",
             feature: "KEYSTAT",
             ticker: "BMRI",
             user_id: user_id,
@@ -244,7 +244,7 @@ export function BP001(data) {const vuId = exec.vu.idInTest;
             title_id: title_id,
             user_id: user_id,
             agent_name: "AGENT",
-            message: "How the company solvency",
+            message: "",
             chat_type: "IN",
             is_spam: false,
             remarks: "test",
@@ -301,7 +301,7 @@ export function BP001(data) {const vuId = exec.vu.idInTest;
             title_id: title_id,
             user_id: user_id,
             agent_name: "AGENT",
-            message: "How the company solvency",
+            message: "",
             chat_type: "IN",
             is_spam: false,
             remarks: "test",

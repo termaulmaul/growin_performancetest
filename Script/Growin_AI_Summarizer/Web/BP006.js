@@ -150,7 +150,7 @@ export function BP006(data) {
         ];
 
         const Marketdata_Gpt_FinancialSummarizer_Payload = JSON.stringify({
-            message: "How the company solvency",
+            message: "",
             feature: "FINANCIAL", 
             ticker: "BBCA",
             user_id: user_id
@@ -197,12 +197,12 @@ export function BP006(data) {
     if (token) {
         const urls = [
             base_url + `/marketdata/api/v1/gpt/feedback?user_id=${user_id}&feature_name=FINANCIAL&ticker=BBCA`,
-            base_url + `/marketdata/api/v1/gpt/recommendation_question`,
+            // base_url + `/marketdata/api/v1/gpt/recommendation_question`,
             base_url + `/marketdata/api/v1/gpt/title_insert`,
         ];
 
         const Marketdata_Gpt_RecommendationQuestion_Payload = JSON.stringify({
-            message: "How the company solvency",
+            message: "",
             feature: "FINANCIAL",
             ticker: "BBCA",
             user_id: user_id,
@@ -215,22 +215,22 @@ export function BP006(data) {
 
         const requests = [
             ['POST', urls[0], null, { headers: headers, timeout: '300s' }],
-            ['POST', urls[1], Marketdata_Gpt_RecommendationQuestion_Payload, { headers: headers, timeout: '300s' }],
-            ['POST', urls[2], Marketdata_Gpt_TitleInsert_Payload, { headers: headers, timeout: '300s' }],
+            // ['POST', urls[1], Marketdata_Gpt_RecommendationQuestion_Payload, { headers: headers, timeout: '300s' }],
+            ['POST', urls[1], Marketdata_Gpt_TitleInsert_Payload, { headers: headers, timeout: '300s' }],
         ];
         const responses = http.batch(requests);
 
         responses.forEach((response, index) => {
             const metrics = [
                 StockDetailFinancialsTab.Marketdata_Gpt_Feedback,
-                StockDetailFinancialsTab.Marketdata_Gpt_RecommendationQuestion,
+                // StockDetailFinancialsTab.Marketdata_Gpt_RecommendationQuestion,
                 StockDetailFinancialsTab.Marketdata_Gpt_TitleInsert,
             ];
 
             const metric = metrics[index];
             metric.httpDuration.add(response.timings.duration);
             if (response.status === 200) {
-                if (index === 2) {
+                if (index === 1) {
                     title_id = response.json().data.title_id;
                 }
                 metric.errorRate.add(false);
@@ -327,7 +327,7 @@ export function BP006(data) {
             title_id: title_id,
             user_id: user_id,
             agent_name: "AGENT",
-            message: "How the company solvency",
+            message: "",
             chat_type: "IN",
             is_spam: false,
             remarks: "test",

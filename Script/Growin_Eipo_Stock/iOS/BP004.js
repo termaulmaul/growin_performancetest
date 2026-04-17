@@ -3,6 +3,7 @@ import { Trend, Counter, Rate } from "k6/metrics";
 import http from "k6/http";
 import exec from 'k6/execution';
 
+// BP004 – Agreement Screen
 // Define custom metrics
 const AgreementScreen = {
     Eipo_Investor: {
@@ -42,9 +43,7 @@ export function BP004(data) {
     // Batch 1
     if (token) {
         const urls = [
-            base_url + `/eipo/api/v1/cash-limit`,
-            base_url + `/eipo/order`,
-            base_url + `/eipo/pipeline/EMSM`,
+            base_url + `/eipo/investor`,
         ];
 
         const stepOneHeaders = {
