@@ -135,7 +135,7 @@ export const options = {
 // ─── ENV / BASE URL ────────────────────────────────────────────────────────────
 function getBaseUrl() {
     const envMap = {
-        DEV: 'https://internal-api-dev.growin.id ',
+        DEV: 'https://internal-api-dev.growin.id',
         QA:  'https://api-qa.growin.id',
         DRC: 'https://drc-api.growin.id',
         INT: 'https://internal-api-pt.growin.id',
