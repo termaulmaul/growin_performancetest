@@ -1,3 +1,357 @@
+; // Jenkinsfile_Manual — Growin Performance Test Pipeline (Manual Trigger)
+; // 
+; // HOW TO USE:
+; // 1. Di Jenkins, buat Pipeline job baru → pilih "Pipeline script from SCM"
+; //    atau paste script ini langsung di "Pipeline script"
+; // 2. Klik "Build with Parameters" → isi parameter → klik Build
+; // 3. Tidak ada auto-trigger. Semua dijalankan secara manual.
+; //
+; // FOLDER STRUCTURE EXPECTED (di dalam repo):
+; //   Scripts/
+; //   └── Growin_PT_Dev/
+; //       ├── Growin_PT_Dev.js
+; //       ├── Configs/
+; //       │   ├── BP001.yaml
+; //       │   ├── BP002.yaml
+; //       │   └── ...
+; //       └── Web/
+; //           ├── BP001.js
+; //           └── ...
+
+; pipeline {
+;     agent any
+
+;     parameters {
+
+;         choice(
+;             name: 'ENV',
+;             choices: ['DEV', 'QA', 'INT', 'DRC'],
+;             description: '''Target environment:
+;             • INT = https://internal-api-pt.growin.id
+;             • DEV = https://internal-api-dev.growin.id
+;             • QA  = https://api-qa.growin.id
+;             • DRC = https://drc-api.growin.id'''
+;         )
+
+;         choice(
+;             name: 'PLATFORM',
+;             choices: ['Web', 'Android', 'iOS'],
+;             description: 'Platform yang ditest'
+;         )
+
+;         choice(
+;             name: 'RUNBY',
+;             choices: ['Manual', 'Regression', 'LoadTest'],
+;             description: '''Jenis run:
+;             • Manual     = run one-off oleh QA/dev
+;             • Regression = dipakai untuk regression testing cycle
+;             • LoadTest   = load test berskala besar'''
+;         )
+
+;         string(
+;             name: 'SCENARIO',
+;             defaultValue: 'BP001',
+;             description: 'BP yang dijalankan. Bisa satu atau lebih dipisah koma. Contoh: BP001 atau BP001,BP002,BP003'
+;         )
+
+;         string(
+;             name: 'USER',
+;             defaultValue: '10',
+;             description: 'Jumlah Virtual Users (VU) yang dijalankan secara concurrent'
+;         )
+
+;         string(
+;             name: 'NUMSTART',
+;             defaultValue: '1',
+;             description: 'Nomor awal user test. Contoh: 1 → user pertama adalah TESTMON01@guysmail.com'
+;         )
+
+;         string(
+;             name: 'DURATION',
+;             defaultValue: '1m',
+;             description: 'Durasi test. Format: 30s, 1m, 5m, 1h. Untuk manual/dry-run disarankan 1m atau 30s'
+;         )
+
+;         string(
+;             name: 'THRESHOLD_AVG_RESP_MS',
+;             defaultValue: '200',
+;             description: 'Override threshold p(95) response time dalam ms. Default: 200'
+;         )
+
+;         string(
+;             name: 'THRESHOLD_ERROR_RATE',
+;             defaultValue: '0.1',
+;             description: 'Override threshold error rate dalam persen (%). Default: 0.1 (artinya < 0.1%)'
+;         )
+
+;         string(
+;             name: 'THRESHOLD_MIN_RPS',
+;             defaultValue: '381',
+;             description: 'Override threshold minimum RPS/TPS. Default: 381'
+;         )
+
+;         booleanParam(
+;             name: 'DRY_RUN',
+;             defaultValue: false,
+;             description: 'Jika TRUE: jalankan dengan 1 VU, durasi 30s. Berguna untuk verifikasi script baru.'
+;         )
+;     }
+
+;     environment {
+;         K6_PATH      = '../../k6'
+;         REPORT_DIR   = '../../Report/Growin_PT_Dev'
+;         CONFIG_DIR   = 'Configs'
+;         SCRIPTS_DIR  = 'Script/Growin_PT_Dev'
+;         GIT_REPO_URL = 'git@bitbucket.org:mandiri-sekuritas/growin_performancetest.git'
+;         GIT_CRED_ID  = 'bitbucket-ssh-key'
+;     }
+
+;     stages {
+
+;         // ── Stage 0: Checkout from Bitbucket ──────────────────────────────
+;         stage('Checkout') {
+;             steps {
+;                 cleanWs()
+
+;                 checkout([
+;                     $class: 'GitSCM',
+;                     branches: [[name: '*/main']],
+;                     userRemoteConfigs: [[
+;                         url          : env.GIT_REPO_URL,
+;                         credentialsId: env.GIT_CRED_ID
+;                     ]]
+;                 ])
+;                 echo "Checkout selesai dari ${env.GIT_REPO_URL}"
+;             }
+;         }
+
+;         // ── Stage 1: Print parameter summary ──────────────────────────────
+;         stage('Parameter Summary') {
+;             steps {
+;                 script {
+;                     def effectiveUser     = params.DRY_RUN ? '1'   : params.USER
+;                     def effectiveDuration = params.DRY_RUN ? '30s' : params.DURATION
+
+;                     echo """
+; ============================================================
+;        GROWIN PERFORMANCE TEST — MANUAL TRIGGER
+; ============================================================
+;   Environment   : ${params.ENV}
+;   Platform      : ${params.PLATFORM}
+;   Run Type      : ${params.RUNBY}
+;   Scenario(s)   : ${params.SCENARIO}
+;   Virtual Users : ${effectiveUser}
+;   User Start    : ${params.NUMSTART}
+;   Duration      : ${effectiveDuration}
+;   Dry Run       : ${params.DRY_RUN}
+; ------------------------------------------------------------
+;   Thresholds
+;   p(95) Resp    : < ${params.THRESHOLD_AVG_RESP_MS}ms
+;   Error Rate    : < ${params.THRESHOLD_ERROR_RATE}%
+;   Min RPS       : ${params.THRESHOLD_MIN_RPS} RPS
+; ============================================================
+;                     """
+;                 }
+;             }
+;         }
+
+;         // ── Stage 2: Validate parameters ──────────────────────────────────
+;         stage('Validate Parameters') {
+;             steps {
+;                 script {
+;                     def validBPs   = ['BP001']
+;                     def scenarios  = params.SCENARIO.split(',').collect { it.trim() }
+;                     def invalidBPs = scenarios.findAll { !validBPs.contains(it) }
+
+;                     if (invalidBPs) {
+;                         error "BP tidak valid: ${invalidBPs.join(', ')}. BP yang tersedia: ${validBPs.join(', ')}"
+;                     }
+
+;                     def userCount = params.DRY_RUN ? 1 : params.USER.toInteger()
+;                     if (userCount < 1 || userCount > 2000) {
+;                         error "USER harus antara 1 dan 2000. Nilai saat ini: ${userCount}"
+;                     }
+
+;                     echo "Semua parameter valid."
+;                 }
+;             }
+;         }
+
+;         // ── Stage 3: Convert YAML → JSON ──────────────────────────────────
+;         stage('Convert YAML Config') {
+;             steps {
+;                 dir('Script/Growin_PT_Dev') {
+;                     script {
+;                         def configDir = env.CONFIG_DIR
+;                         def scenarios = params.SCENARIO.split(',').collect { it.trim() }
+
+;                         scenarios.each { bp ->
+;                             def yamlFile = "${configDir}/${bp}.yaml"
+;                             def jsonFile = "${configDir}/${bp}.json"
+
+;                             def yamlExists = sh(
+;                                 script: "test -f ${yamlFile} && echo 'yes' || echo 'no'",
+;                                 returnStdout: true
+;                             ).trim()
+
+;                             if (yamlExists == 'no') {
+;                                 def fullPath = sh(script: "pwd && echo \$(pwd)/${yamlFile}", returnStdout: true).trim()
+;                                 error "Config file tidak ditemukan. Full path: ${fullPath}"
+;                             }
+
+;                             sh """
+;                                 python3 -c "
+; import yaml, json
+; with open('${yamlFile}', 'r') as f:
+;     data = yaml.safe_load(f)
+
+; data.setdefault('thresholds', {})
+; data['thresholds']['avg_response_time_ms'] = int('${params.THRESHOLD_AVG_RESP_MS}')
+; data['thresholds']['error_rate_percent']   = float('${params.THRESHOLD_ERROR_RATE}')
+; data['thresholds']['min_rps']              = int('${params.THRESHOLD_MIN_RPS}')
+
+; with open('${jsonFile}', 'w') as f:
+;     json.dump(data, f)
+
+; print('Converted: ${yamlFile} -> ${jsonFile}')
+; print('Thresholds injected: p95<${params.THRESHOLD_AVG_RESP_MS}ms | error<${params.THRESHOLD_ERROR_RATE}% | rps>=${params.THRESHOLD_MIN_RPS}')
+; "
+;                             """
+;                             echo "${bp} config ready."
+;                         }
+;                     }
+;                 }
+;             }
+;         }
+
+;         // ── Stage 4: Run k6 ───────────────────────────────────────────────
+;         stage('Run Performance Test') {
+;             steps {
+;                 dir('Script/Growin_PT_Dev') {
+;                     script {
+;                         def configDir  = env.CONFIG_DIR
+;                         def k6Path     = env.K6_PATH
+;                         def reportDir  = env.REPORT_DIR
+
+;                         def scenarios   = params.SCENARIO.split(',').collect { it.trim() }
+;                         def overallPass = true
+;                         def results     = [:]
+
+;                         def effectiveUser     = params.DRY_RUN ? '1'   : params.USER
+;                         def effectiveDuration = params.DRY_RUN ? '30s' : params.DURATION
+
+;                         if (params.DRY_RUN) {
+;                             echo "DRY RUN MODE: 1 VU, 30s — hanya verifikasi script berjalan."
+;                         }
+
+;                         scenarios.each { bp ->
+;                             def jsonFile = "${configDir}/${bp}.json"
+;                             def bpConfig = sh(
+;                                 script: "cat ${jsonFile}",
+;                                 returnStdout: true
+;                             ).trim().replace("'", "'\\''")
+
+;                             def timestamp = sh(script: "date +%m%d_%H%M", returnStdout: true).trim()
+
+;                             def htmlReport = ''
+;                             if (params.RUNBY == 'Manual') {
+;                                 htmlReport = "${reportDir}/${params.PLATFORM}/${bp}/Manual/Manual_${bp}_${timestamp}.html"
+;                             } else if (params.RUNBY == 'Regression') {
+;                                 htmlReport = "${reportDir}/${params.PLATFORM}/${bp}/Regression/Regression_${bp}_${timestamp}.html"
+;                             } else {
+;                                 htmlReport = "${reportDir}/${params.PLATFORM}/LoadTest/LoadTest_${bp}_${timestamp}.html"
+;                             }
+
+;                             sh "mkdir -p \$(dirname ${htmlReport})"
+
+;                             echo "Running k6 | BP: ${bp} | VU: ${effectiveUser} | Duration: ${effectiveDuration}"
+
+;                             def k6ExitCode = sh(
+;                                 script: """
+;                                     ${k6Path} run Growin_PT_Dev.js \\
+;                                         -e RUNBY=${params.RUNBY} \\
+;                                         -e ENV=${params.ENV} \\
+;                                         -e USER=${effectiveUser} \\
+;                                         -e DURATION=${effectiveDuration} \\
+;                                         -e NUMSTART=${params.NUMSTART} \\
+;                                         -e SCENARIO=${bp} \\
+;                                         -e PLATFORM=${params.PLATFORM} \\
+;                                         -e BP_CONFIG='${bpConfig}' \\
+;                                         --out dashboard=export=${htmlReport}
+;                                 """,
+;                                 returnStatus: true
+;                             )
+
+;                             if (k6ExitCode == 0) {
+;                                 results[bp] = 'PASS'
+;                                 echo "${bp} — Semua threshold PASSED"
+;                             } else if (k6ExitCode == 99) {
+;                                 results[bp] = 'FAIL — threshold breached'
+;                                 echo "${bp} — Ada threshold yang FAILED"
+;                                 // DRY_RUN tidak dihitung sebagai kegagalan build
+;                                 if (!params.DRY_RUN) overallPass = false
+;                             } else {
+;                                 results[bp] = "ERROR — k6 exit code ${k6ExitCode}"
+;                                 echo "${bp} — k6 error (exit code ${k6ExitCode})"
+;                                 overallPass = false
+;                             }
+
+;                             echo "Report: ${htmlReport}"
+;                         }
+
+;                         // ── Final Summary ──────────────────────────────────────────────
+;                         echo "\n============ FINAL TEST RESULTS ============"
+;                         results.each { bp, result ->
+;                             echo "  ${bp}: ${result}"
+;                         }
+;                         echo "============================================"
+
+;                         if (!overallPass) {
+;                             // Set dulu result-nya ke FAILURE
+;                             currentBuild.result = 'FAILURE'
+;                             echo "Build FAILED — Satu atau lebih BP tidak memenuhi threshold."
+;                         } else {
+;                             echo "Build SUCCESS — Semua threshold terpenuhi."
+;                         }
+;                     }
+;                 }
+;             }
+;         }
+
+;         // ── Stage 5: Archive Reports ───────────────────────────────────────
+;         stage('Archive Reports') {
+;             steps {
+;                 archiveArtifacts(
+;                     artifacts: 'Report/**/*.html',
+;                     allowEmptyArchive: true,
+;                     fingerprint: true
+;                 )
+;                 echo "Reports archived di Jenkins build artifacts."
+;                 script {
+;                     if (currentBuild.result == 'FAILURE') {
+;                         error "Performance test FAILED — threshold breached. Lihat report untuk detail."
+;                     }
+;                 }
+;             }
+;         }
+;     }
+
+;     post {
+;         success {
+;             echo "Performance test PASSED — Semua threshold terpenuhi."
+;         }
+;         unstable {
+;             echo "Performance test UNSTABLE — Ada API yang tidak memenuhi threshold. Review report."
+;         }
+;         failure {
+;             echo "Pipeline FAILED — Cek log untuk threshold breach, config error, atau k6 crash."
+;         }
+;         always {
+;             echo "Selesai: ${currentBuild.result ?: 'SUCCESS'} | ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+;         }
+;     }
+; }
+ 
 // Jenkinsfile_Manual — Growin Performance Test Pipeline (Manual Trigger)
 // 
 // HOW TO USE:
@@ -6,45 +360,39 @@
 // 2. Klik "Build with Parameters" → isi parameter → klik Build
 // 3. Tidak ada auto-trigger. Semua dijalankan secara manual.
 //
-// FOLDER STRUCTURE EXPECTED:
-//   Growin_PT_Dev/
-//   ├── Growin_PT_Dev.js
-//   ├── configs/
-//   │   ├── BP001_config.yaml
-//   │   ├── BP002_config.yaml
-//   │   └── ...
-//   └── Web/
-//       ├── BP001.js
-//       └── ...
+// FOLDER STRUCTURE EXPECTED (di dalam repo):
+//   Scripts/
+//   └── Growin_PT_Dev/
+//       ├── Growin_PT_Dev.js
+//       ├── Configs/
+//       │   ├── BP001.yaml
+//       │   ├── BP002.yaml
+//       │   └── ...
+//       └── Web/
+//           ├── BP001.js
+//           └── ...
 
 pipeline {
     agent any
 
-    // ── Manual trigger only — no automated trigger ─────────────────────────
-    // Tidak ada 'triggers' block di sini.
-    // User harus klik "Build with Parameters" di Jenkins UI secara manual.
-
     parameters {
 
-        // ── Environment ──────────────────────────────────────────────────
         choice(
             name: 'ENV',
-            choices: ['INT', 'DEV', 'QA', 'DRC'],
+            choices: ['DEV', 'QA', 'INT', 'DRC'],
             description: '''Target environment:
             • INT = https://internal-api-pt.growin.id
-            • DEV = https://dev-api.growin.id
+            • DEV = https://internal-api-dev.growin.id
             • QA  = https://api-qa.growin.id
             • DRC = https://drc-api.growin.id'''
         )
 
-        // ── Platform ──────────────────────────────────────────────────────
         choice(
             name: 'PLATFORM',
             choices: ['Web', 'Android', 'iOS'],
             description: 'Platform yang ditest'
         )
 
-        // ── Run Type ──────────────────────────────────────────────────────
         choice(
             name: 'RUNBY',
             choices: ['Manual', 'Regression', 'LoadTest'],
@@ -54,14 +402,12 @@ pipeline {
             • LoadTest   = load test berskala besar'''
         )
 
-        // ── BP Selection ──────────────────────────────────────────────────
         string(
             name: 'SCENARIO',
             defaultValue: 'BP001',
             description: 'BP yang dijalankan. Bisa satu atau lebih dipisah koma. Contoh: BP001 atau BP001,BP002,BP003'
         )
 
-        // ── Load Config ───────────────────────────────────────────────────
         string(
             name: 'USER',
             defaultValue: '10',
@@ -70,8 +416,8 @@ pipeline {
 
         string(
             name: 'NUMSTART',
-            defaultValue: '101',
-            description: 'Nomor awal user test. Contoh: 101 → user pertama adalah TESTMON101@guysmail.com'
+            defaultValue: '1',
+            description: 'Nomor awal user test. Contoh: 1 → user pertama adalah TESTMON01@guysmail.com'
         )
 
         string(
@@ -80,7 +426,6 @@ pipeline {
             description: 'Durasi test. Format: 30s, 1m, 5m, 1h. Untuk manual/dry-run disarankan 1m atau 30s'
         )
 
-        // ── Threshold Override (optional) ─────────────────────────────────
         string(
             name: 'THRESHOLD_AVG_RESP_MS',
             defaultValue: '200',
@@ -95,11 +440,10 @@ pipeline {
 
         string(
             name: 'THRESHOLD_MIN_RPS',
-            defaultValue: '400',
-            description: 'Override threshold minimum RPS/TPS. Default: 400'
+            defaultValue: '381',
+            description: 'Override threshold minimum RPS/TPS. Default: 381'
         )
 
-        // ── Dry Run Mode ──────────────────────────────────────────────────
         booleanParam(
             name: 'DRY_RUN',
             defaultValue: false,
@@ -108,12 +452,32 @@ pipeline {
     }
 
     environment {
-        K6_PATH    = '../../k6'
-        REPORT_DIR = '../../Report/Growin_PT_Dev'
-        CONFIG_DIR = './configs'
+        K6_PATH      = '../../k6'
+        REPORT_DIR   = '../../Report/Growin_PT_Dev'
+        CONFIG_DIR   = 'Configs'
+        SCRIPTS_DIR  = 'Script/Growin_PT_Dev'
+        GIT_REPO_URL = 'git@bitbucket.org:mandiri-sekuritas/growin_performancetest.git'
+        GIT_CRED_ID  = 'bitbucket-ssh-key'
     }
 
     stages {
+
+        // ── Stage 0: Checkout from Bitbucket ──────────────────────────────
+        stage('Checkout') {
+            steps {
+                cleanWs()
+
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/main']],
+                    userRemoteConfigs: [[
+                        url          : env.GIT_REPO_URL,
+                        credentialsId: env.GIT_CRED_ID
+                    ]]
+                ])
+                echo "Checkout selesai dari ${env.GIT_REPO_URL}"
+            }
+        }
 
         // ── Stage 1: Print parameter summary ──────────────────────────────
         stage('Parameter Summary') {
@@ -135,7 +499,7 @@ pipeline {
   Duration      : ${effectiveDuration}
   Dry Run       : ${params.DRY_RUN}
 ------------------------------------------------------------
-  Thresholds
+  Thresholds (Jenkins default — akan di-override jika YAML mendefinisikan nilainya)
   p(95) Resp    : < ${params.THRESHOLD_AVG_RESP_MS}ms
   Error Rate    : < ${params.THRESHOLD_ERROR_RATE}%
   Min RPS       : ${params.THRESHOLD_MIN_RPS} RPS
@@ -149,7 +513,6 @@ pipeline {
         stage('Validate Parameters') {
             steps {
                 script {
-                    // Tambahkan nama BP baru ke list ini seiring bertambahnya BP
                     def validBPs   = ['BP001']
                     def scenarios  = params.SCENARIO.split(',').collect { it.trim() }
                     def invalidBPs = scenarios.findAll { !validBPs.contains(it) }
@@ -169,136 +532,210 @@ pipeline {
         }
 
         // ── Stage 3: Convert YAML → JSON ──────────────────────────────────
+        // PERUBAHAN:
+        // - Threshold dari YAML dipakai jika sudah didefinisikan.
+        // - Jika tidak ada di YAML, baru fallback ke Jenkins parameter (default).
+        // - isPT flag dibaca dari YAML dan disimpan ke env untuk stage berikutnya.
         stage('Convert YAML Config') {
             steps {
-                script {
-                    def scenarios = params.SCENARIO.split(',').collect { it.trim() }
+                dir('Script/Growin_PT_Dev') {
+                    script {
+                        def configDir = env.CONFIG_DIR
+                        def scenarios = params.SCENARIO.split(',').collect { it.trim() }
 
-                    scenarios.each { bp ->
-                        def yamlFile = "${CONFIG_DIR}/${bp}_config.yaml"
-                        def jsonFile = "${CONFIG_DIR}/${bp}_config.json"
+                        scenarios.each { bp ->
+                            def yamlFile = "${configDir}/${bp}.yaml"
+                            def jsonFile = "${configDir}/${bp}.json"
 
-                        def yamlExists = sh(
-                            script: "test -f ${yamlFile} && echo 'yes' || echo 'no'",
-                            returnStdout: true
-                        ).trim()
+                            def yamlExists = sh(
+                                script: "test -f ${yamlFile} && echo 'yes' || echo 'no'",
+                                returnStdout: true
+                            ).trim()
 
-                        if (yamlExists == 'no') {
-                            error "Config file tidak ditemukan: ${yamlFile}"
-                        }
+                            if (yamlExists == 'no') {
+                                def fullPath = sh(script: "pwd && echo \$(pwd)/${yamlFile}", returnStdout: true).trim()
+                                error "Config file tidak ditemukan. Full path: ${fullPath}"
+                            }
 
-                        // Convert YAML ke JSON + inject threshold override dari Jenkins parameter
-                        sh """
-                            python3 -c "
+                            // CHANGED: Threshold dari YAML dipakai jika ada.
+                            // Jika tidak ada di YAML, fallback ke Jenkins param.
+                            // isPT dibaca dan di-export ke env agar bisa diakses di stage Run.
+                            sh """
+                                python3 -c "
 import yaml, json
+
 with open('${yamlFile}', 'r') as f:
     data = yaml.safe_load(f)
 
 data.setdefault('thresholds', {})
-data['thresholds']['avg_response_time_ms'] = int('${params.THRESHOLD_AVG_RESP_MS}')
-data['thresholds']['error_rate_percent']   = float('${params.THRESHOLD_ERROR_RATE}')
-data['thresholds']['min_rps']              = int('${params.THRESHOLD_MIN_RPS}')
+t = data['thresholds']
+
+# Hanya pakai Jenkins param jika YAML TIDAK mendefinisikan nilai tersebut
+if 'avg_response_time_ms' not in t:
+    t['avg_response_time_ms'] = int('${params.THRESHOLD_AVG_RESP_MS}')
+    print('avg_response_time_ms: using Jenkins default = ${params.THRESHOLD_AVG_RESP_MS}ms')
+else:
+    print('avg_response_time_ms: using YAML value =', t['avg_response_time_ms'], 'ms')
+
+if 'error_rate_percent' not in t:
+    t['error_rate_percent'] = float('${params.THRESHOLD_ERROR_RATE}')
+    print('error_rate_percent: using Jenkins default = ${params.THRESHOLD_ERROR_RATE}%')
+else:
+    print('error_rate_percent: using YAML value =', t['error_rate_percent'], '%')
+
+if 'min_rps' not in t:
+    t['min_rps'] = int('${params.THRESHOLD_MIN_RPS}')
+    print('min_rps: using Jenkins default = ${params.THRESHOLD_MIN_RPS}')
+else:
+    print('min_rps: using YAML value =', t['min_rps'])
 
 with open('${jsonFile}', 'w') as f:
     json.dump(data, f)
 
 print('Converted: ${yamlFile} -> ${jsonFile}')
-print('Thresholds injected: p95<${params.THRESHOLD_AVG_RESP_MS}ms | error<${params.THRESHOLD_ERROR_RATE}% | rps>=${params.THRESHOLD_MIN_RPS}')
 "
-                        """
-                        echo "${bp} config ready."
+                            """
+                            echo "${bp} config ready."
+                        }
                     }
                 }
             }
         }
 
-        // ── Stage 4: Run k6 ───────────────────────────────────────────────
+        // ── Stage 4: Check isPT Flag ───────────────────────────────────────
+        // BARU: Baca isPT dari JSON hasil konversi YAML.
+        // Jika isPT=false → BP di-skip dan dianggap sukses.
+        // Jika isPT=true atau tidak didefinisikan → PT dijalankan normal.
+        stage('Check isPT Flag') {
+            steps {
+                dir('Script/Growin_PT_Dev') {
+                    script {
+                        def scenarios = params.SCENARIO.split(',').collect { it.trim() }
+
+                        scenarios.each { bp ->
+                            def jsonFile = "${env.CONFIG_DIR}/${bp}.json"
+
+                            def isPT = sh(
+                                script: """python3 -c "import json; d=json.load(open('${jsonFile}')); print(str(d.get('isPT', True)).lower())" """,
+                                returnStdout: true
+                            ).trim()
+
+                            if (isPT == 'false') {
+                                echo "⏭️ ${bp}: isPT=false — Performance Test akan di-SKIP dan dianggap SUKSES."
+                                env["SKIP_PT_${bp}"] = 'true'
+                            } else {
+                                echo "✅ ${bp}: isPT=true — Performance Test akan dijalankan."
+                                env["SKIP_PT_${bp}"] = 'false'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // ── Stage 5: Run k6 ───────────────────────────────────────────────
         stage('Run Performance Test') {
             steps {
-                script {
-                    def scenarios   = params.SCENARIO.split(',').collect { it.trim() }
-                    def overallPass = true
-                    def results     = [:]
+                dir('Script/Growin_PT_Dev') {
+                    script {
+                        def configDir  = env.CONFIG_DIR
+                        def k6Path     = env.K6_PATH
+                        def reportDir  = env.REPORT_DIR
 
-                    def effectiveUser     = params.DRY_RUN ? '1'   : params.USER
-                    def effectiveDuration = params.DRY_RUN ? '30s' : params.DURATION
+                        def scenarios   = params.SCENARIO.split(',').collect { it.trim() }
+                        def overallPass = true
+                        def results     = [:]
 
-                    if (params.DRY_RUN) {
-                        echo "DRY RUN MODE: 1 VU, 30s — hanya verifikasi script berjalan."
-                    }
+                        def effectiveUser     = params.DRY_RUN ? '1'   : params.USER
+                        def effectiveDuration = params.DRY_RUN ? '30s' : params.DURATION
 
-                    scenarios.each { bp ->
-                        def jsonFile = "${CONFIG_DIR}/${bp}_config.json"
-                        def bpConfig = sh(
-                            script: "cat ${jsonFile}",
-                            returnStdout: true
-                        ).trim().replace("'", "'\\''")
-
-                        def timestamp = sh(script: "date +%m%d_%H%M", returnStdout: true).trim()
-
-                        def htmlReport = ''
-                        if (params.RUNBY == 'Manual') {
-                            htmlReport = "${REPORT_DIR}/${params.PLATFORM}/${bp}/Manual/Manual_${bp}_${timestamp}.html"
-                        } else if (params.RUNBY == 'Regression') {
-                            htmlReport = "${REPORT_DIR}/${params.PLATFORM}/${bp}/Regression/Regression_${bp}_${timestamp}.html"
-                        } else {
-                            htmlReport = "${REPORT_DIR}/${params.PLATFORM}/LoadTest/LoadTest_${bp}_${timestamp}.html"
+                        if (params.DRY_RUN) {
+                            echo "DRY RUN MODE: 1 VU, 30s — hanya verifikasi script berjalan."
                         }
 
-                        sh "mkdir -p \$(dirname ${htmlReport})"
+                        scenarios.each { bp ->
 
-                        echo "Running k6 | BP: ${bp} | VU: ${effectiveUser} | Duration: ${effectiveDuration}"
+                            // CHANGED: Cek flag isPT — jika false, skip eksekusi k6
+                            if (env["SKIP_PT_${bp}"] == 'true') {
+                                results[bp] = 'SKIPPED (isPT=false) — dianggap PASS'
+                                echo "⏭️ ${bp} — Performance Test di-skip karena isPT=false. Dianggap sukses."
+                                return // lanjut ke BP berikutnya
+                            }
 
-                        def k6ExitCode = sh(
-                            script: """
-                                ${K6_PATH} run Growin_PT_Dev.js \\
-                                    -e RUNBY=${params.RUNBY} \\
-                                    -e ENV=${params.ENV} \\
-                                    -e USER=${effectiveUser} \\
-                                    -e DURATION=${effectiveDuration} \\
-                                    -e NUMSTART=${params.NUMSTART} \\
-                                    -e SCENARIO=${bp} \\
-                                    -e PLATFORM=${params.PLATFORM} \\
-                                    -e BP_CONFIG='${bpConfig}' \\
-                                    --out dashboard=export=${htmlReport}
-                            """,
-                            returnStatus: true
-                        )
+                            def jsonFile = "${configDir}/${bp}.json"
+                            def bpConfig = sh(
+                                script: "cat ${jsonFile}",
+                                returnStdout: true
+                            ).trim().replace("'", "'\\''")
 
-                        if (k6ExitCode == 0) {
-                            results[bp] = 'PASS'
-                            echo "${bp} — Semua threshold PASSED"
-                        } else if (k6ExitCode == 99) {
-                            results[bp] = 'FAIL — threshold breached'
-                            echo "${bp} — Ada threshold yang FAILED"
-                            if (!params.DRY_RUN) overallPass = false
-                        } else {
-                            results[bp] = "ERROR — k6 exit code ${k6ExitCode}"
-                            echo "${bp} — k6 error (exit code ${k6ExitCode})"
-                            overallPass = false
+                            def timestamp = sh(script: "date +%m%d_%H%M", returnStdout: true).trim()
+
+                            def htmlReport = ''
+                            if (params.RUNBY == 'Manual') {
+                                htmlReport = "${reportDir}/${params.PLATFORM}/${bp}/Manual/Manual_${bp}_${timestamp}.html"
+                            } else if (params.RUNBY == 'Regression') {
+                                htmlReport = "${reportDir}/${params.PLATFORM}/${bp}/Regression/Regression_${bp}_${timestamp}.html"
+                            } else {
+                                htmlReport = "${reportDir}/${params.PLATFORM}/LoadTest/LoadTest_${bp}_${timestamp}.html"
+                            }
+
+                            sh "mkdir -p \$(dirname ${htmlReport})"
+
+                            echo "Running k6 | BP: ${bp} | VU: ${effectiveUser} | Duration: ${effectiveDuration}"
+
+                            def k6ExitCode = sh(
+                                script: """
+                                    ${k6Path} run Growin_PT_Dev.js \\
+                                        -e RUNBY=${params.RUNBY} \\
+                                        -e ENV=${params.ENV} \\
+                                        -e USER=${effectiveUser} \\
+                                        -e DURATION=${effectiveDuration} \\
+                                        -e NUMSTART=${params.NUMSTART} \\
+                                        -e SCENARIO=${bp} \\
+                                        -e PLATFORM=${params.PLATFORM} \\
+                                        -e BP_CONFIG='${bpConfig}' \\
+                                        --out dashboard=export=${htmlReport}
+                                """,
+                                returnStatus: true
+                            )
+
+                            if (k6ExitCode == 0) {
+                                results[bp] = 'PASS'
+                                echo "${bp} — Semua threshold PASSED"
+                            } else if (k6ExitCode == 99) {
+                                results[bp] = 'FAIL — threshold breached'
+                                echo "${bp} — Ada threshold yang FAILED"
+                                // DRY_RUN tidak dihitung sebagai kegagalan build
+                                if (!params.DRY_RUN) overallPass = false
+                            } else {
+                                results[bp] = "ERROR — k6 exit code ${k6ExitCode}"
+                                echo "${bp} — k6 error (exit code ${k6ExitCode})"
+                                overallPass = false
+                            }
+
+                            echo "Report: ${htmlReport}"
                         }
 
-                        echo "Report: ${htmlReport}"
-                    }
+                        // ── Final Summary ──────────────────────────────────────────────
+                        echo "\n============ FINAL TEST RESULTS ============"
+                        results.each { bp, result ->
+                            echo "  ${bp}: ${result}"
+                        }
+                        echo "============================================"
 
-                    // Final summary
-                    echo "\n============ FINAL TEST RESULTS ============"
-                    results.each { bp, result ->
-                        echo "  ${bp}: ${result}"
-                    }
-                    echo "============================================"
-
-                    if (!overallPass) {
-                        currentBuild.result = 'UNSTABLE'
-                        echo "Build UNSTABLE — Satu atau lebih BP tidak memenuhi threshold."
-                    } else {
-                        echo "Build SUCCESS — Semua threshold terpenuhi."
+                        if (!overallPass) {
+                            // Set dulu result-nya ke FAILURE
+                            currentBuild.result = 'FAILURE'
+                            echo "Build FAILED — Satu atau lebih BP tidak memenuhi threshold."
+                        } else {
+                            echo "Build SUCCESS — Semua threshold terpenuhi."
+                        }
                     }
                 }
             }
         }
 
-        // ── Stage 5: Archive Reports ───────────────────────────────────────
+        // ── Stage 6: Archive Reports ───────────────────────────────────────
         stage('Archive Reports') {
             steps {
                 archiveArtifacts(
@@ -307,6 +744,11 @@ print('Thresholds injected: p95<${params.THRESHOLD_AVG_RESP_MS}ms | error<${para
                     fingerprint: true
                 )
                 echo "Reports archived di Jenkins build artifacts."
+                script {
+                    if (currentBuild.result == 'FAILURE') {
+                        error "Performance test FAILED — threshold breached. Lihat report untuk detail."
+                    }
+                }
             }
         }
     }
@@ -317,14 +759,9 @@ print('Thresholds injected: p95<${params.THRESHOLD_AVG_RESP_MS}ms | error<${para
         }
         unstable {
             echo "Performance test UNSTABLE — Ada API yang tidak memenuhi threshold. Review report."
-            // Uncomment untuk Slack notification:
-            // slackSend(channel: '#perf-alerts', color: 'warning',
-            //   message: "PT UNSTABLE: ${env.JOB_NAME} #${env.BUILD_NUMBER} | ${params.SCENARIO} | ${env.BUILD_URL}")
         }
         failure {
-            echo "Pipeline FAILED — Cek log untuk config error atau k6 crash."
-            // slackSend(channel: '#perf-alerts', color: 'danger',
-            //   message: "PT FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER} | ${env.BUILD_URL}")
+            echo "Pipeline FAILED — Cek log untuk threshold breach, config error, atau k6 crash."
         }
         always {
             echo "Selesai: ${currentBuild.result ?: 'SUCCESS'} | ${env.JOB_NAME} #${env.BUILD_NUMBER}"
