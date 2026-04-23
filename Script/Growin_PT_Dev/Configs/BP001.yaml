@@ -5,7 +5,7 @@ developer: "M Sidik Augi Rahmat"
 
 # Set isPT: true untuk menjalankan performance test via Jenkins.
 # Set isPT: false untuk skip performance test (dianggap sukses otomatis).
-isPT: false
+isPT: true
 
 # VUs override per BP (optional - will use global default 335 if not set)
 vus: 350
