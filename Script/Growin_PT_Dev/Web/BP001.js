@@ -498,7 +498,6 @@ export function BP001(data) {
         }
 
         // Small sleep between API calls within same iteration to avoid burst
-        sleep(0.1);
     }
 
     sleep(0.25);

@@ -8,7 +8,7 @@ developer: "M Sidik Augi Rahmat"
 isPT: true
 
 # VUs override per BP (optional - will use global default 335 if not set)
-vus: 350
+vus: 5
 
 # Duration override per BP (optional - will use global default from Jenkins if not set)
 duration: "2m"
