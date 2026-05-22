@@ -92,6 +92,7 @@ const StockDetailKeystatTab = {
 // ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
 export function BP001(data) {
     const vuId = exec.vu.idInTest;
+    // const base_url = data.base_url;
     const base_url = data.base_url;
     
     const mapping = data.vuMapping[vuId];

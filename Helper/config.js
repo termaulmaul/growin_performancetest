@@ -14,6 +14,7 @@ export function getBaseUrl() {
         QA:  'https://api-qa.growin.id',
         DRC: 'https://drc-api.growin.id',
         INT: 'https://internal-api-pt.growin.id',
+        // INT: 'https://api-pt.growin.id',
     };
 
     if (!urlMap[env]) {

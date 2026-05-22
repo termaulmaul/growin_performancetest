@@ -28,11 +28,11 @@ apis:
     payload: null
     query_params: "filter_status=ongoing&page=1&per_page=20"
 
-  # - id: "001_01_02"
-  #   name: "EIPO_Mock_Order_PATCH"
-  #   method: "PATCH"
-  #   path: "/eipo/mock/order"
-  #   payload: 
-  #     id: "ORD-123456"
-  #     qty: "500"
-  #   query_params: null
+  - id: "001_01_02"
+    name: "EIPO_Mock_Order_PATCH"
+    method: "PATCH"
+    path: "/eipo/mock/order"
+    payload: 
+      id: "ORD-123456"
+      qty: "500"
+    query_params: null

@@ -29,8 +29,8 @@ import exec from 'k6/execution';
 // GET (iOS Only)	mutualfund/api/v1/user/filter
 // GET (iOS Only)	user/api/v1/user_settings
 // GET (iOS Only)	order/api/v1/order-status-action-map
-GET	/marketdata/api/v1/marketinfo/corporate-actions-calendar-order/home
-GET	/marketdata/api/v1/marketinfo/upcoming-corporate-actions
+// GET	/marketdata/api/v1/marketinfo/corporate-actions-calendar-order/home
+// GET	/marketdata/api/v1/marketinfo/upcoming-corporate-actions
 
 // User_Profile_Trading
 // User_Profile_Personal
@@ -328,180 +328,180 @@ export function BP001(data) {
         'X-Device-Id': 'TEST3'
     };
 
-    // // Batch 1
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/user/api/v2/profile/trading`,
-    //         base_url + `/user/api/v1/profile/personal`,
-    //     ];
+    // Batch 1
+    if (token) {
+        const urls = [
+            base_url + `/user/api/v2/profile/trading`,
+            base_url + `/user/api/v1/profile/personal`,
+        ];
 
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //         ['GET', urls[1], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+            ['GET', urls[1], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
 
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.User_Profile_Trading,
-    //             Home.User_Profile_Personal,
-    //         ];
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.User_Profile_Trading,
+                Home.User_Profile_Personal,
+            ];
 
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
 
-    // // Batch 2
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/auth/api/v1/protected/password-reminder`,
-    //     ];
+    // Batch 2
+    if (token) {
+        const urls = [
+            base_url + `/auth/api/v1/protected/password-reminder`,
+        ];
 
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
 
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.Auth_Protected_PasswordReminder,
-    //         ];
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.Auth_Protected_PasswordReminder,
+            ];
 
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
 
-    // // Batch 3
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/auth/api/v1/protected/password-remind-later`,
-    //     ];
+    // Batch 3
+    if (token) {
+        const urls = [
+            base_url + `/auth/api/v1/protected/password-remind-later`,
+        ];
 
-    //     const Auth_Protected_PasswordRemindLater_Payload = JSON.stringify({ 
-    //         current_phase: 1 
-    //     });
+        const Auth_Protected_PasswordRemindLater_Payload = JSON.stringify({ 
+            current_phase: 1 
+        });
 
-    //     const requests = [
-    //         ['POST', urls[0], Auth_Protected_PasswordRemindLater_Payload, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
+        const requests = [
+            ['POST', urls[0], Auth_Protected_PasswordRemindLater_Payload, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
 
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.Auth_Protected_PasswordRemindLater,
-    //         ];
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.Auth_Protected_PasswordRemindLater,
+            ];
 
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
 
-    // // Batch 4
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/user/api/v1/banner/promo`,
-    //     ];
+    // Batch 4
+    if (token) {
+        const urls = [
+            base_url + `/user/api/v1/banner/promo`,
+        ];
 
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
 
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.User_Banner_Promo,
-    //         ];
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.User_Banner_Promo,
+            ];
 
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
 
     // // Batch 5
     // if (token) {
@@ -545,868 +545,868 @@ export function BP001(data) {
     //     });
     // }
 
-    // // Batch 6
-    // let watchlistGroupID;
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/user/api/v1/watchlistgroup`,
-    //     ];
+    // Batch 6
+    let watchlistGroupID;
+    if (token) {
+        const urls = [
+            base_url + `/user/api/v1/watchlistgroup`,
+        ];
 
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
 
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.User_Watchlistgroup,
-    //         ];
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.User_Watchlistgroup,
+            ];
 
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
 
-    //             try {
-    //                 const watchlistData = JSON.parse(response.body);
+                try {
+                    const watchlistData = JSON.parse(response.body);
                     
-    //                 // Asumsi structure: { data: [{ id: "..." }, ...] }
-    //                 if (watchlistData && watchlistData.data && watchlistData.data.length > 0) {
-    //                     watchlistGroupID = watchlistData.data[0].id;
+                    // Asumsi structure: { data: [{ id: "..." }, ...] }
+                    if (watchlistData && watchlistData.data && watchlistData.data.length > 0) {
+                        watchlistGroupID = watchlistData.data[0].id;
                         
-    //                     if (`${__ENV.ENV}` != 'INT') {
-    //                         console.log(`${email} Got watchlistID: ${watchlistGroupID}`);
-    //                     }
-    //                 } else {
-    //                     if (`${__ENV.ENV}` != 'INT') {
-    //                         console.error(`${email} No watchlist data found in response`);
-    //                     }
-    //                 }
-    //             } catch (e) {
-    //                 if (`${__ENV.ENV}` != 'INT') {
-    //                     console.error(`${email} Failed to parse watchlistgroup response: ${e.message}`);
-    //                 }
-    //             }
-
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
-
-    // // Batch 7
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/user/api/v2/watchlist/${watchlistGroupID}`,
-    //     ];
-
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
-
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.User_WatchlistID,
-    //         ];
-
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
-
-    // // Batch 8
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/news/api/v2/`,
-    //     ];
-
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
-
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.News,
-    //         ];
-
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
-
-    // // Batch 9
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/news/api/v2/categories`,
-    //     ];
-
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
-
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.News_Categories,
-    //         ];
-
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
-
-    // // Batch 10
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/news/api/v2/categories`,
-    //     ];
-
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
-
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.News_Categories_2,
-    //         ];
-
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
-
-    // // Batch 11
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/oaofinance/api/v1/quota/status/margin`,
-    //     ];
-
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
-
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.Oaofinance_Quota_Status_Margin,
-    //         ];
-
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
-
-    // // Batch 12
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/oaofinance/api/v1/user-opening-progress-summary/monitoring/margin`,
-    //     ];
-
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
-
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.Oaofinance_UserOpeningProgressSummary_Monitoring_Margin,
-    //         ];
-
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
-
-    // // Batch 13
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/auth/api/v1/protected/account-center/switchables`,
-    //     ];
-
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
-
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.Auth_Protected_AccountCenter_Switchables,
-    //         ];
-
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
-
-    // // Batch 14
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/mutualfund/api/v1/user/risk-profile`,
-    //     ];
-
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
-
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.Mutualfund_User_RiskProfile,
-    //         ];
-
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
-
-    // // Batch 15
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/auth/api/v1/protected/account-center/status`,
-    //     ];
-
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
-
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.Auth_Protected_AccountCenter_Status,
-    //         ];
-
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
-
-    // // Batch 16
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/bond/api/v1/sbn/master/strapi/banner`,
-    //     ];
-
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
-
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.Bond_Sbn_Master_Strapi_Banner,
-    //         ];
-
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
-
-    // // Batch 17
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/mutualfund/api/v1/user/risk-profile`,
-    //     ];
-
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
-
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.Mutualfund_User_RiskProfile_2,
-    //         ];
-
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
-
-    // // Batch 18
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/mutualfund/api/v1/mutual-fund/list?limit=3`,
-    //     ];
-
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
-
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.Mutualfund_MutualFund_List,
-    //         ];
-
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
-
-    // // Batch 19
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/news/api/v2/?category=&is_sharia=0&items=5&page=1`,
-    //     ];
-
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
-
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.News_Category,
-    //         ];
-
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
-
-    // // Batch 20
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/auth/api/v1/protected/get-config`,
-    //     ];
-
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
-
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.Auth_Protected_GetConfig,
-    //         ];
-
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
-
-    // // Batch 21
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/auth/api/v1/protected/client/selected`,
-    //     ];
-
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
-
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.Auth_Protected_Client_Selected,
-    //         ];
-
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
-
-    // // Batch 22
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/bond/api/v1/sbn/client/check/status`,
-    //     ];
-
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
-
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.Bond_Sbn_Client_Check_Status,
-    //         ];
-
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
-
-    // // Batch 23
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/mutualfund/api/v1/user/filter`,
-    //     ];
-
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
-
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.Mutualfund_User_Filter,
-    //         ];
-
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
-
-    // // Batch 24
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/user/api/v1/user_settings`,
-    //     ];
-
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
-
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.User_UserSettings,
-    //         ];
-
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
-
-    // // Batch 25
-    // if (token) {
-    //     const urls = [
-    //         base_url + `/order/api/v1/order-status-action-map`,
-    //     ];
-
-    //     const requests = [
-    //         ['GET', urls[0], null, { headers: headers }],
-    //     ];
-    //     const responses = http.batch(requests);
-
-    //     responses.forEach((response, index) => {
-    //         const metrics = [
-    //             Home.Order_OrderStatusActionMap,
-    //         ];
-
-    //         const metric = metrics[index];
-    //         metric.httpDuration.add(response.timings.duration);
-    //         if (response.status === 200) {
-    //             metric.errorRate.add(false);
-    //             metric.errorCount.add(0);
-    //             metric.requestRate.add(true);
-    //             metric.http_reqs.add(1);
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
-    //             metric.errorRate.add(true);
-    //             metric.errorCount.add(1);
-    //             metric.requestRate.add(false);
-    //             metric.http_reqs.add(1);
-    //             check(response, {
-    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
-    //             if (`${__ENV.ENV}` != 'INT') {
-    //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
+                        if (`${__ENV.ENV}` != 'INT') {
+                            console.log(`${email} Got watchlistID: ${watchlistGroupID}`);
+                        }
+                    } else {
+                        if (`${__ENV.ENV}` != 'INT') {
+                            console.error(`${email} No watchlist data found in response`);
+                        }
+                    }
+                } catch (e) {
+                    if (`${__ENV.ENV}` != 'INT') {
+                        console.error(`${email} Failed to parse watchlistgroup response: ${e.message}`);
+                    }
+                }
+
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
+
+    // Batch 7
+    if (token) {
+        const urls = [
+            base_url + `/user/api/v2/watchlist/${watchlistGroupID}`,
+        ];
+
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
+
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.User_WatchlistID,
+            ];
+
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
+
+    // Batch 8
+    if (token) {
+        const urls = [
+            base_url + `/news/api/v2/`,
+        ];
+
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
+
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.News,
+            ];
+
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
+
+    // Batch 9
+    if (token) {
+        const urls = [
+            base_url + `/news/api/v2/categories`,
+        ];
+
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
+
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.News_Categories,
+            ];
+
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
+
+    // Batch 10
+    if (token) {
+        const urls = [
+            base_url + `/news/api/v2/categories`,
+        ];
+
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
+
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.News_Categories_2,
+            ];
+
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
+
+    // Batch 11
+    if (token) {
+        const urls = [
+            base_url + `/oaofinance/api/v1/quota/status/margin`,
+        ];
+
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
+
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.Oaofinance_Quota_Status_Margin,
+            ];
+
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
+
+    // Batch 12
+    if (token) {
+        const urls = [
+            base_url + `/oaofinance/api/v1/user-opening-progress-summary/monitoring/margin`,
+        ];
+
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
+
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.Oaofinance_UserOpeningProgressSummary_Monitoring_Margin,
+            ];
+
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
+
+    // Batch 13
+    if (token) {
+        const urls = [
+            base_url + `/auth/api/v1/protected/account-center/switchables`,
+        ];
+
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
+
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.Auth_Protected_AccountCenter_Switchables,
+            ];
+
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
+
+    // Batch 14
+    if (token) {
+        const urls = [
+            base_url + `/mutualfund/api/v1/user/risk-profile`,
+        ];
+
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
+
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.Mutualfund_User_RiskProfile,
+            ];
+
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
+
+    // Batch 15
+    if (token) {
+        const urls = [
+            base_url + `/auth/api/v1/protected/account-center/status`,
+        ];
+
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
+
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.Auth_Protected_AccountCenter_Status,
+            ];
+
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
+
+    // Batch 16
+    if (token) {
+        const urls = [
+            base_url + `/bond/api/v1/sbn/master/strapi/banner`,
+        ];
+
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
+
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.Bond_Sbn_Master_Strapi_Banner,
+            ];
+
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
+
+    // Batch 17
+    if (token) {
+        const urls = [
+            base_url + `/mutualfund/api/v1/user/risk-profile`,
+        ];
+
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
+
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.Mutualfund_User_RiskProfile_2,
+            ];
+
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
+
+    // Batch 18
+    if (token) {
+        const urls = [
+            base_url + `/mutualfund/api/v1/mutual-fund/list?limit=3`,
+        ];
+
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
+
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.Mutualfund_MutualFund_List,
+            ];
+
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
+
+    // Batch 19
+    if (token) {
+        const urls = [
+            base_url + `/news/api/v2/?category=&is_sharia=0&items=5&page=1`,
+        ];
+
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
+
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.News_Category,
+            ];
+
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
+
+    // Batch 20
+    if (token) {
+        const urls = [
+            base_url + `/auth/api/v1/protected/get-config`,
+        ];
+
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
+
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.Auth_Protected_GetConfig,
+            ];
+
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
+
+    // Batch 21
+    if (token) {
+        const urls = [
+            base_url + `/auth/api/v1/protected/client/selected`,
+        ];
+
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
+
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.Auth_Protected_Client_Selected,
+            ];
+
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
+
+    // Batch 22
+    if (token) {
+        const urls = [
+            base_url + `/bond/api/v1/sbn/client/check/status`,
+        ];
+
+        const requests = [
+            ['POST', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
+
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.Bond_Sbn_Client_Check_Status,
+            ];
+
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
+
+    // Batch 23
+    if (token) {
+        const urls = [
+            base_url + `/mutualfund/api/v1/user/filter`,
+        ];
+
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
+
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.Mutualfund_User_Filter,
+            ];
+
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
+
+    // Batch 24
+    if (token) {
+        const urls = [
+            base_url + `/user/api/v1/user_settings`,
+        ];
+
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
+
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.User_UserSettings,
+            ];
+
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
+
+    // Batch 25
+    if (token) {
+        const urls = [
+            base_url + `/order/api/v1/order-status-action-map`,
+        ];
+
+        const requests = [
+            ['GET', urls[0], null, { headers: headers }],
+        ];
+        const responses = http.batch(requests);
+
+        responses.forEach((response, index) => {
+            const metrics = [
+                Home.Order_OrderStatusActionMap,
+            ];
+
+            const metric = metrics[index];
+            metric.httpDuration.add(response.timings.duration);
+            if (response.status === 200) {
+                metric.errorRate.add(false);
+                metric.errorCount.add(0);
+                metric.requestRate.add(true);
+                metric.http_reqs.add(1);
+                if (`${__ENV.ENV}` != 'INT') {
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                }
+            } else {
+                metric.errorRate.add(true);
+                metric.errorCount.add(1);
+                metric.requestRate.add(false);
+                metric.http_reqs.add(1);
+                check(response, {
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                });
+                if (`${__ENV.ENV}` != 'INT') {
+                    const requestBody = requests[index][2];
+                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+                }
+            }
+        });
+    }
 
     // Batch 26
     if (token) {

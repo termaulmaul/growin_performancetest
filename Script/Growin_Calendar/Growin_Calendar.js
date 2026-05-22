@@ -111,10 +111,10 @@ console.log(`   PLATFORM: ${platform}`);
 const scenarios = {};
 selectedBPs.forEach(bp => {
     scenarios[bp] = {
-        // executor: 'per-vu-iterations',
-        // vus: 1,
-        // iterations: 1,
-        // maxDuration: '1h',
+        executor: 'per-vu-iterations',
+        vus: 1,
+        iterations: 1,
+        maxDuration: '1h',
 
         // executor: 'ramping-vus',
         // startVUs: 0,
@@ -166,9 +166,9 @@ selectedBPs.forEach(bp => {
         //     { duration: '5m', target: 0 },
         // ],
 
-        executor: 'constant-vus',
-        vus: userDistribution[bp] || 1,
-        duration: `${__ENV.DURATION}`,
+        // executor: 'constant-vus',
+        // vus: userDistribution[bp] || 1,
+        // duration: `${__ENV.DURATION}`,
 
         gracefulStop: '30s',
         exec: bp, // akan memanggil BP001() atau BP002() sesuai export di atas

@@ -3,7 +3,7 @@
 // ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Community/Web/LoadTest/Manual_LoadTest_0107_1459.html
 
 // Run Single BP Web
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP001/Manual/Manual_DryRun_0417_1028_BP001.html
+// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP001/Manual/Manual_DryRun_0521_1350_BP001.html
 // ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP002/Manual/Manual_DryRun_0413_1448_BP002.html
 // ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP003 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP003/Manual/Manual_DryRun_0414_1719_BP003.html
 // ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP004 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP004/Manual/Manual_DryRun_0415_1007_BP004.html
@@ -77,19 +77,19 @@ export const BP013 = platform === 'Android' ? BP013_Android : BP013_Web;
 // const RETRY_DELAY = 1; // seconds between retry attempts
 
 const BP_USER_PERCENTAGE = {
-    BP001: 100,
-    BP002: 100,
-    BP003: 100,
-    BP004: 100,
-    BP005: 100,
-    BP006: 100,
-    BP007: 100,
-    BP008: 100,
-    BP009: 100,
-    BP010: 100,
-    BP011: 100,
-    BP012: 100,
-    BP013: 100,
+    BP001: 26.25,
+    BP002: 2.63,
+    BP003: 16.28,
+    BP004: 11.25,
+    BP005: 1.69,
+    BP006: 7.5,
+    BP007: 1.31,
+    BP008: 18.75,
+    BP009: 2.34,
+    BP010: 7.5,
+    BP011: 0.56,
+    BP012: 3.75,
+    BP013: 0.19,
 };
 
 // ✅ Function untuk calculate user distribution
@@ -146,10 +146,10 @@ console.log(`   PLATFORM: ${platform}`);
 const scenarios = {};
 selectedBPs.forEach(bp => {
     scenarios[bp] = {
-        executor: 'per-vu-iterations',
-        vus: 1,
-        iterations: 1,
-        maxDuration: '1h',
+        // executor: 'per-vu-iterations',
+        // vus: 1,
+        // iterations: 1,
+        // maxDuration: '1h',
 
         // executor: 'ramping-vus',
         // startVUs: 0,
@@ -201,9 +201,9 @@ selectedBPs.forEach(bp => {
         //     { duration: '5m', target: 0 },
         // ],
 
-        // executor: 'constant-vus',
-        // vus: userDistribution[bp] || 1,
-        // duration: `${__ENV.DURATION}`,
+        executor: 'constant-vus',
+        vus: userDistribution[bp] || 1,
+        duration: `${__ENV.DURATION}`,
 
         gracefulStop: '30s',
         exec: bp, // akan memanggil BP001() atau BP002() sesuai export di atas

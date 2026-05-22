@@ -184,7 +184,9 @@ function loginWithRetry(base_url, credentials, userKey, vuId) {
     });
 
     for (let attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
-        const res = http.post(base_url + '/auth/api/v1/login', payload, { headers: loginHeaders });
+        const fullUrl = base_url + '/auth/api/v1/login';
+        // console.log(`   🔗 Request URL: ${fullUrl}`);  // ← tambah ini
+        const res = http.post(fullUrl, payload, { headers: loginHeaders });
         if (res.status === 200) {
             if (attempt > 1) {
                 console.log(`   ✅ User ${userKey} (${credentials.email}) LOGIN SUCCESS on attempt ${attempt}`);
@@ -192,7 +194,7 @@ function loginWithRetry(base_url, credentials, userKey, vuId) {
             return { success: true, token: res.json().data.token, attempts: attempt };
         }
         if (attempt < MAX_RETRY_ATTEMPTS) {
-            console.warn(`   ⚠️  User ${userKey} LOGIN attempt ${attempt}/${MAX_RETRY_ATTEMPTS} FAILED (${res.status}), retrying...`);
+            console.warn(`   ⚠️  User ${userKey} LOGIN attempt ${attempt}/${MAX_RETRY_ATTEMPTS} FAILED (${res.status}) || Request URL: ${fullUrl}, retrying...`);
             sleep(RETRY_DELAY);
         } else {
             console.error(`   ❌ User ${userKey} LOGIN FAILED after ${MAX_RETRY_ATTEMPTS} attempts (${res.status})`);
@@ -414,18 +416,19 @@ export function handleSummary(data) {
 
         // ── Report Paths ────────────────────────────────────────────────────
         let htmlPath = '';
-        const base = `../../Report/Growin_PT_Dev/${platform}`;
+        // const base = `../../Report/Growin_PT_Dev/${platform}`;
 
-        if (runby === 'Manual') {
-            htmlPath = `${base}/${platform}/${bp_name}/Manual/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
-        } else if (runby === 'Regression') {
-            htmlPath = `${base}/${platform}/${bp_name}/Regression/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
-        } else if (runby === 'LoadTest') {
-            htmlPath = `${base}/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
-        } else {
-            htmlPath = `${base}/${platform}/${bp_name}/${runby}_${bp_name}_${dateStr}_${timeStr}.html`;
-        }
-
+        // if (runby === 'Manual') {
+        //     htmlPath = `${base}/${platform}/${bp_name}/Manual/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
+        // } else if (runby === 'Regression') {
+        //     htmlPath = `${base}/${platform}/${bp_name}/Regression/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
+        // } else if (runby === 'LoadTest') {
+        //     htmlPath = `${base}/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
+        // } else {
+        //     htmlPath = `${base}/${platform}/${bp_name}/${runby}_${bp_name}_${dateStr}_${timeStr}.html`;
+        // }
+        htmlPath = `/home/jenkins/report/growin/${__ENV.APP_NAME}/${bp_name}-${timeStr}.html.html`;
+        
         console.log(`Generating HTML report: ${htmlPath}`);
 
         return {

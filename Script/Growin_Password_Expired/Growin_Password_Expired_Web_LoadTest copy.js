@@ -1,60 +1,53 @@
 // Command
+// Gcloud compute ssh --project compute-dev-0108 --zone asia-southeast2-c "vm-dev-k6-0" --tunnel-through-iap -- -L 22:10.188.2.36:22
 // Run Multiple BP
-// ../../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Community/Web/LoadTest/Manual_LoadTest_0107_1459.html
+// ../../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Password_Expired/Web/LoadTest/Manual_LoadTest_0107_1459.html
 
 // Run Single BP Android
-// ../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001_A -e PLATFORM=Android --out dashboard=export=../../Report/Growin_Community/Android/BP001/Manual/Manual_DryRun_0203_1640_BP001_Local.html
-// ../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002_A -e PLATFORM=Android --out dashboard=export=../../Report/Growin_Community/Android/BP002/Manual/Manual_DryRun_0113_1554_BP002_Local.html
+// ../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=Manual -e ENV=DEV -e USER=1 -e DURATION=30m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Android --out dashboard=export=../../Report/Growin_Password_Expired/Android/BP001/Manual/Manual_DryRun_0415_1407_BP001_Local.html
+// ../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=Android --out dashboard=export=../../Report/Growin_Password_Expired/Android/BP002/Manual/Manual_DryRun_0113_1554_BP002_Local.html
 
 // Run Single BP iOS
-// ../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001_i -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Community/iOS/BP001/Manual/Manual_DryRun_0113_1659_BP001_Local.html
-// ../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002_i -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Community/iOS/BP002/Manual/Manual_DryRun_0113_1554_BP002_Local.html
+// ../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=1h -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Password_Expired/iOS/BP001/Manual/Manual_DryRun_0422_0935_BP001_Local.html
+// ../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Password_Expired/iOS/BP002/Manual/Manual_DryRun_0113_1554_BP002_Local.html
 
 import { textSummary } from "../../Helper/textSummary.js";
 import { htmlReport } from '../../Helper/bundle.js';
-import { BP001_A } from "./Android/BP001.js";
-import { BP002_A } from "./Android/BP002.js";
-import { BP001_i } from "./iOS/BP001.js";
-import { BP002_i } from "./iOS/BP002.js";
+import { BP001 as BP001_Android } from "./Android/BP001.js";
+import { BP002 as BP002_Android } from "./Android/BP002.js";
+import { BP001 as BP001_iOS } from "./iOS/BP001.js";
+import { BP002 as BP002_iOS } from "./iOS/BP002.js";
+
 import http from "k6/http";
 import { sleep } from "k6";
 import { Rate } from "k6/metrics";
+// ../k6 run Growin_BurstOrder_V3.js -e ENV=INT -e USERNAME=TESTMON -e MAIL=guysmail.com -e PAD=2 -e NUMSTART=1000 -e USER=2 -e ITER=1 -e RUNTIME=60 -e INTERVAL=300
+function getPlatform() {
+    const { PLATFORM } = __ENV;
+    
+    if (PLATFORM && ['Android', 'iOS'].includes(PLATFORM)) {
+        return PLATFORM;
+    }
+    
+    console.error('❌ PLATFORM must be specified: Android or iOS');
+    console.error('   Example: -e PLATFORM=Android or -e PLATFORM=iOS');
+    return 'Android'; // default fallback
+}
 
-export { BP001_A, BP002_A, BP001_i, BP002_i }
+const platform = getPlatform();
+
+// Export BP yang tepat berdasarkan platform
+export const BP001 = platform === 'iOS' ? BP001_iOS : BP001_Android;
+export const BP002 = platform === 'iOS' ? BP002_iOS : BP002_Android;
 
 // ✅ RETRY CONFIGURATION
 const MAX_RETRY_ATTEMPTS = 10;
 const RETRY_DELAY = 1; // seconds between retry attempts
 
-// ✅ DEFINISI PERSENTASE USER PER BP
 const BP_USER_PERCENTAGE = {
-    BP001_A: 50,
-    BP002_A: 50,
-    BP001_i: 50,
-    BP002_i: 50,
+    BP001: 50,
+    BP002: 50,
 };
-
-// ✅ Extract base BP name (tanpa suffix _A/_i)
-function getBaseBP(scenario) {
-    if (!scenario) return 'Unknown';
-    const underscoreIndex = scenario.indexOf('_');
-    return underscoreIndex !== -1 ? scenario.substring(0, underscoreIndex) : scenario;
-}
-
-// ✅ Get platform dari SCENARIO jika PLATFORM tidak ada
-function getPlatform() {
-    const { PLATFORM, SCENARIO } = __ENV;
-    
-    if (PLATFORM) return PLATFORM;
-    
-    // Fallback: deteksi dari SCENARIO
-    if (SCENARIO) {
-        const firstScenario = SCENARIO.split(',')[0].trim();
-        if (firstScenario.endsWith('_A')) return 'Android';
-        if (firstScenario.endsWith('_i')) return 'iOS';
-    }
-    return 'Web'; // default
-}
 
 // ✅ Function untuk calculate user distribution
 function calculateUserDistribution(totalUsers, selectedBPs) {
@@ -88,12 +81,13 @@ function calculateUserDistribution(totalUsers, selectedBPs) {
 
 const { SCENARIO } = __ENV;
 const TOTAL_USER = parseInt(__ENV.TOTAL_USER) || parseInt(__ENV.USER) || 100;
-const platform = getPlatform();
 
 let selectedBPs = [];
 if (SCENARIO) {
+    // User bisa input: BP001 atau BP001,BP002
     selectedBPs = SCENARIO.split(',').map(s => s.trim());
 } else {
+    // Default: jalankan semua BP
     selectedBPs = Object.keys(BP_USER_PERCENTAGE);
 }
 
@@ -109,10 +103,10 @@ console.log(`   PLATFORM: ${platform}`);
 const scenarios = {};
 selectedBPs.forEach(bp => {
     scenarios[bp] = {
-        // executor: 'per-vu-iterations',
-        // vus: 1,
-        // iterations: 1,
-        // maxDuration: '1h',
+        executor: 'per-vu-iterations',
+        vus: 1,
+        iterations: 1,
+        maxDuration: '1h',
 
         // executor: 'ramping-vus',
         // startVUs: 0,
@@ -164,12 +158,12 @@ selectedBPs.forEach(bp => {
         //     { duration: '5m', target: 0 },
         // ],
 
-        executor: 'constant-vus',
-        vus: userDistribution[bp] || 1,
-        duration: `${__ENV.DURATION}`,
+        // executor: 'constant-vus',
+        // vus: userDistribution[bp] || 1,
+        // duration: `${__ENV.DURATION}`,
 
         gracefulStop: '30s',
-        exec: bp,
+        exec: bp, // akan memanggil BP001() atau BP002() sesuai export di atas
     };
 });
 
@@ -183,7 +177,7 @@ export const options = {
 
 function getBaseUrl() {
     if(`${__ENV.ENV}`=='DEV'){
-        return 'https://dev-api.growin.id';
+        return 'https://internal-api-dev.growin.id';
     } else if ((`${__ENV.ENV}`=='QA')) {
         return 'https://api-qa.growin.id';
     } else if (`${__ENV.ENV}`=='DRC') {
@@ -237,6 +231,7 @@ function loginWithRetry(base_url, credentials, userKey, vuId) {
 
     for (let attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
         const loginRes = http.post(base_url + '/auth/api/v1/login', loginPayload, { headers: loginHeaders });
+        console.log(`${base_url}/auth/api/v1/login`)
         
         if (loginRes.status === 200) {
             if (attempt > 1) {
@@ -250,7 +245,7 @@ function loginWithRetry(base_url, credentials, userKey, vuId) {
         }
         
         if (attempt < MAX_RETRY_ATTEMPTS) {
-            console.warn(`   ⚠️  User ${userKey} (${credentials.email}, VU${vuId}) LOGIN attempt ${attempt}/${MAX_RETRY_ATTEMPTS} FAILED - Status: ${loginRes.status}, retrying...`);
+            console.warn(`   ⚠️  User ${userKey} (${credentials.email}, VU${vuId}) LOGIN attempt ${attempt}/${MAX_RETRY_ATTEMPTS} FAILED - Status: ${loginRes.status} | Body: ${loginRes.body}, retrying...`);
             sleep(RETRY_DELAY);
         } else {
             console.error(`   ❌ User ${userKey} (${credentials.email}, VU${vuId}) LOGIN FAILED after ${MAX_RETRY_ATTEMPTS} attempts - Status: ${loginRes.status}`);
@@ -264,7 +259,6 @@ function loginWithRetry(base_url, credentials, userKey, vuId) {
     };
 }
 
-// ✅ SETUP FUNCTION - SEMUA BP mendapat PIN
 export function setup() {
     const base_url = getBaseUrl();
     const tokens = {};
@@ -277,6 +271,7 @@ export function setup() {
     console.log(`📦 Batch processing: ${BATCH_SIZE} users per batch, ${BATCH_DELAY}s delay`);
     console.log(`🔁 Retry enabled: Max ${MAX_RETRY_ATTEMPTS} attempts per login`);
     console.log(`🔑 ALL users will get PIN token`);
+    console.log(`📱 Platform: ${platform}`);
     
     let globalUserOffset = 0;
     let globalVuOffset = 1;
@@ -292,9 +287,8 @@ export function setup() {
     
     selectedBPs.forEach((bp, bpIndex) => {
         const usersForThisBP = userDistribution[bp];
-        const baseBP = getBaseBP(bp);
         
-        console.log(`\n📦 Processing ${bp} (Base: ${baseBP}) - ${usersForThisBP} users (VU ${globalVuOffset} to ${globalVuOffset + usersForThisBP - 1})...`);
+        console.log(`\n📦 Processing ${bp} on ${platform} - ${usersForThisBP} users (VU ${globalVuOffset} to ${globalVuOffset + usersForThisBP - 1})...`);
         
         // Create VU mapping
         for (let localUserIndex = 1; localUserIndex <= usersForThisBP; localUserIndex++) {
@@ -352,6 +346,7 @@ export function setup() {
                     };
 
                     const pinRes = http.post(base_url + '/auth/api/v1/protected/pin-login', pinPayload, { headers: pinHeaders });
+                    console.log(`${base_url}/auth/api/v1/protected/pin-login`)
 
                     if (pinRes.status === 200) {
                         totalPinSuccess++;
@@ -359,7 +354,7 @@ export function setup() {
                     } else {
                         totalPinFailed++;
                         if (i === batchStart || totalPinFailed <= 5) {
-                            console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) PIN FAILED - Status: ${pinRes.status}`);
+                            console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) PIN FAILED - Status: ${pinRes.status} with Respone Body: ${pinRes.body}`);
                         }
                         tokens[userKey].pin_token = null;
                     }
@@ -402,9 +397,8 @@ export function setup() {
         const logins = bpTokens.filter(t => t.token !== null).length;
         const pins = bpTokens.filter(t => t.pin_token !== null).length;
         const channelId = channelIds[bp] || 'N/A';
-        const baseBP = getBaseBP(bp);
         
-        console.log(`   ${bp} (${baseBP}): ${logins}/${bpTokens.length} logins, ${pins}/${bpTokens.length} PINs, channel_id: ${channelId}`);
+        console.log(`   ${bp}: ${logins}/${bpTokens.length} logins, ${pins}/${bpTokens.length} PINs, channel_id: ${channelId}`);
     });
     
     console.log(`\n🎉 Setup completed!`);
@@ -432,17 +426,16 @@ export function handleSummary(data) {
         
         const runby = __ENV.RUNBY || 'Manual';
         
-        // ✅ Dapatkan base BP name (tanpa _A/_i)
         let bp_name = 'AllBP';
-        let baseBPs = [];
         
         if (selectedBPs.length === 1) {
-            bp_name = getBaseBP(selectedBPs[0]);
+            bp_name = selectedBPs[0]; // langsung 'BP001', bukan 'BP001_A'
         } else if (selectedBPs.length > 1) {
-            // Extract base BP tanpa suffix
-            baseBPs = [...new Set(selectedBPs.map(bp => getBaseBP(bp)))].sort();
+            // Sort dan ambil range
+            const sortedBPs = [...selectedBPs].sort();
             
-            const nums = baseBPs.map(x => parseInt(x.replace('BP', '')))
+            // Extract numbers dari BP name (BP001 -> 1, BP002 -> 2)
+            const nums = sortedBPs.map(x => parseInt(x.replace('BP', '')))
                 .filter(x => !isNaN(x))
                 .sort((a, b) => a - b);
             

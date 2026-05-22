@@ -4,15 +4,15 @@
 # ./Growin_Eipo_Stock_Regression.sh
 # Declare variables
 ENV="INT"
-USER=10
-DURATION="1m"
+USER=335
+DURATION="15m"
 NUMSTART=1
 RUNBY="Regression"
 RUNTYPE="DryRun"
-SLEEP=0
+SLEEP=300
 
 pwd
-# cd /home/qa/mostng_performancetest_api/Script/Growin_Eipo_Stock || exit 1
+cd /home/qa/mostng_performancetest_api/Script/Growin_Eipo_Stock || exit 1
 pwd
 
 #BP001

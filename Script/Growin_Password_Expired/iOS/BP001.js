@@ -315,23 +315,9 @@ export function BP001(data) {
             base_url + `/user/api/v1/profile/personal`,
         ];
 
-        const stepOneHeaders = {
-            'Content-Type': 'application/json',
-            'Accept': '*/*',
-            'Accept-Language': 'en',
-            'Connection': 'keep-alive',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Cookie': `ACCESS_TOKEN=${token};`,
-            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-            'X-App-Name': 'web',
-            'X-App-Version': '1.4.1',
-            'X-Device-Info': 'iPhone 11',
-            'X-Device-Id': 'TEST3'
-        };
-
         const requests = [
-            ['GET', urls[0], null, { headers: stepOneHeaders }],
-            ['GET', urls[1], null, { headers: stepOneHeaders }],
+            ['GET', urls[0], null, { headers: headers }],
+            ['GET', urls[1], null, { headers: headers }],
         ];
         const responses = http.batch(requests);
 
@@ -373,22 +359,8 @@ export function BP001(data) {
             base_url + `/auth/api/v1/protected/password-reminder`,
         ];
 
-        const stepTwoHeaders = {
-            'Content-Type': 'application/json',
-            'Accept': '*/*',
-            'Accept-Language': 'en',
-            'Connection': 'keep-alive',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Cookie': `ACCESS_TOKEN=${token};`,
-            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-            'X-App-Name': 'web',
-            'X-App-Version': '1.4.1',
-            'X-Device-Info': 'iPhone 11',
-            'X-Device-Id': 'TEST3'
-        };
-
         const requests = [
-            ['GET', urls[0], null, { headers: stepTwoHeaders }],
+            ['GET', urls[0], null, { headers: headers }],
         ];
         const responses = http.batch(requests);
 
@@ -574,7 +546,7 @@ export function BP001(data) {
             if (response.status === 200) {
                 metric.errorRate.add(false);
                 metric.errorCount.add(0);
-                metric.requestRate.add(true);
+                metric.requestRate.add(true)
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
@@ -735,6 +707,20 @@ export function BP001(data) {
         const urls = [
             base_url + `/news/api/v2/`,
         ];
+
+        const stepEightHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+            'Accept-Language': 'en',
+            'Connection': 'keep-alive',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cookie': `ACCESS_TOKEN=${token};`,
+            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+            'X-App-Name': 'web',
+            'X-App-Version': '1.4.1',
+            'X-Device-Info': 'iPhone 11',
+            'X-Device-Id': 'TEST3'
+        };
 
         const requests = [
             ['GET', urls[0], null, { headers: stepEightHeaders }],
@@ -1047,7 +1033,7 @@ export function BP001(data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                if (`${__ENV.ENV}` != 'TEST') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
@@ -1058,7 +1044,7 @@ export function BP001(data) {
                 check(response, {
                     [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
                 });
-                if (`${__ENV.ENV}` != 'TEST') {
+                if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
                     console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
                 }
@@ -1067,46 +1053,46 @@ export function BP001(data) {
     }
 
     // Batch 16
-    if (token) {
-        const urls = [
-            base_url + `/bond/api/v1/sbn/master/strapi/banner`,
-        ];
+    // if (token) {
+    //     const urls = [
+    //         base_url + `/bond/api/v1/sbn/master/strapi/banner`,
+    //     ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+    //     const requests = [
+    //         ['GET', urls[0], null, { headers: headers }],
+    //     ];
+    //     const responses = http.batch(requests);
 
-        responses.forEach((response, index) => {
-            const metrics = [
-                Home.Bond_Sbn_Master_Strapi_Banner,
-            ];
+    //     responses.forEach((response, index) => {
+    //         const metrics = [
+    //             Home.Bond_Sbn_Master_Strapi_Banner,
+    //         ];
 
-            const metric = metrics[index];
-            metric.httpDuration.add(response.timings.duration);
-            if (response.status === 200) {
-                metric.errorRate.add(false);
-                metric.errorCount.add(0);
-                metric.requestRate.add(true);
-                metric.http_reqs.add(1);
-                if (`${__ENV.ENV}` != 'TEST') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-                }
-            } else {
-                metric.errorRate.add(true);
-                metric.errorCount.add(1);
-                metric.requestRate.add(false);
-                metric.http_reqs.add(1);
-                check(response, {
-                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-                });
-                if (`${__ENV.ENV}` != 'TEST') {
-                    const requestBody = requests[index][2];
-                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-                }
-            }
-        });
-    }
+    //         const metric = metrics[index];
+    //         metric.httpDuration.add(response.timings.duration);
+    //         if (response.status === 200) {
+    //             metric.errorRate.add(false);
+    //             metric.errorCount.add(0);
+    //             metric.requestRate.add(true);
+    //             metric.http_reqs.add(1);
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+    //             }
+    //         } else {
+    //             metric.errorRate.add(true);
+    //             metric.errorCount.add(1);
+    //             metric.requestRate.add(false);
+    //             metric.http_reqs.add(1);
+    //             check(response, {
+    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+    //             });
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 const requestBody = requests[index][2];
+    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+    //             }
+    //         }
+    //     });
+    // }
 
     // Batch 17
     if (token) {
@@ -1131,7 +1117,7 @@ export function BP001(data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                if (`${__ENV.ENV}` != 'TEST') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
@@ -1142,7 +1128,7 @@ export function BP001(data) {
                 check(response, {
                     [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
                 });
-                if (`${__ENV.ENV}` != 'TEST') {
+                if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
                     console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
                 }
@@ -1173,7 +1159,7 @@ export function BP001(data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                if (`${__ENV.ENV}` != 'TEST') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
@@ -1184,7 +1170,7 @@ export function BP001(data) {
                 check(response, {
                     [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
                 });
-                if (`${__ENV.ENV}` != 'TEST') {
+                if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
                     console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
                 }
@@ -1215,7 +1201,7 @@ export function BP001(data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                if (`${__ENV.ENV}` != 'TEST') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
@@ -1226,7 +1212,7 @@ export function BP001(data) {
                 check(response, {
                     [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
                 });
-                if (`${__ENV.ENV}` != 'TEST') {
+                if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
                     console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
                 }
@@ -1257,7 +1243,7 @@ export function BP001(data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                if (`${__ENV.ENV}` != 'TEST') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
@@ -1268,7 +1254,7 @@ export function BP001(data) {
                 check(response, {
                     [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
                 });
-                if (`${__ENV.ENV}` != 'TEST') {
+                if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
                     console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
                 }
@@ -1299,7 +1285,7 @@ export function BP001(data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                if (`${__ENV.ENV}` != 'TEST') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
@@ -1310,7 +1296,7 @@ export function BP001(data) {
                 check(response, {
                     [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
                 });
-                if (`${__ENV.ENV}` != 'TEST') {
+                if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
                     console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
                 }
@@ -1318,47 +1304,47 @@ export function BP001(data) {
         });
     }
 
-    // Batch 22
-    if (token) {
-        const urls = [
-            base_url + `/bond/api/v1/sbn/client/check/status`,
-        ];
+    // // Batch 22
+    // if (token) {
+    //     const urls = [
+    //         base_url + `/bond/api/v1/sbn/client/check/status`,
+    //     ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+    //     const requests = [
+    //         ['GET', urls[0], null, { headers: headers }],
+    //     ];
+    //     const responses = http.batch(requests);
 
-        responses.forEach((response, index) => {
-            const metrics = [
-                Home.Bond_Sbn_Client_Check_Status,
-            ];
+    //     responses.forEach((response, index) => {
+    //         const metrics = [
+    //             Home.Bond_Sbn_Client_Check_Status,
+    //         ];
 
-            const metric = metrics[index];
-            metric.httpDuration.add(response.timings.duration);
-            if (response.status === 200) {
-                metric.errorRate.add(false);
-                metric.errorCount.add(0);
-                metric.requestRate.add(true);
-                metric.http_reqs.add(1);
-                if (`${__ENV.ENV}` != 'TEST') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-                }
-            } else {
-                metric.errorRate.add(true);
-                metric.errorCount.add(1);
-                metric.requestRate.add(false);
-                metric.http_reqs.add(1);
-                check(response, {
-                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-                });
-                if (`${__ENV.ENV}` != 'TEST') {
-                    const requestBody = requests[index][2];
-                    console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-                }
-            }
-        });
-    }
+    //         const metric = metrics[index];
+    //         metric.httpDuration.add(response.timings.duration);
+    //         if (response.status === 200) {
+    //             metric.errorRate.add(false);
+    //             metric.errorCount.add(0);
+    //             metric.requestRate.add(true);
+    //             metric.http_reqs.add(1);
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+    //             }
+    //         } else {
+    //             metric.errorRate.add(true);
+    //             metric.errorCount.add(1);
+    //             metric.requestRate.add(false);
+    //             metric.http_reqs.add(1);
+    //             check(response, {
+    //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+    //             });
+    //             if (`${__ENV.ENV}` != 'INT') {
+    //                 const requestBody = requests[index][2];
+    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
+    //             }
+    //         }
+    //     });
+    // }
 
     // Batch 23
     if (token) {
@@ -1383,7 +1369,7 @@ export function BP001(data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                if (`${__ENV.ENV}` != 'TEST') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
@@ -1394,7 +1380,7 @@ export function BP001(data) {
                 check(response, {
                     [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
                 });
-                if (`${__ENV.ENV}` != 'TEST') {
+                if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
                     console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
                 }
@@ -1425,7 +1411,7 @@ export function BP001(data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                if (`${__ENV.ENV}` != 'TEST') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
@@ -1436,7 +1422,7 @@ export function BP001(data) {
                 check(response, {
                     [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
                 });
-                if (`${__ENV.ENV}` != 'TEST') {
+                if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
                     console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
                 }
@@ -1467,7 +1453,7 @@ export function BP001(data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                if (`${__ENV.ENV}` != 'TEST') {
+                if (`${__ENV.ENV}` != 'INT') {
                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
@@ -1478,7 +1464,7 @@ export function BP001(data) {
                 check(response, {
                     [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
                 });
-                if (`${__ENV.ENV}` != 'TEST') {
+                if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
                     console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
                 }

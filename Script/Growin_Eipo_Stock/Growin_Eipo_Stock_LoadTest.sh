@@ -1,18 +1,18 @@
 #!/bin/bash
 
-# chmod +x Growin_Eipo_Stock_iOS_LoadTest.sh
+# chmod +x Growin_Eipo_Stock_LoadTest.sh
 # ./Growin_Eipo_Stock_LoadTest.sh
 # Declare variables
 ENV="INT"
-USER=205
+USER=335
 DURATION="2h"
-NUMSTART=101
+NUMSTART=1
 RUNBY="LoadTest"
 RUNTYPE="LoadTest"
 SLEEP=300
 
 pwd
-# cd /home/qa/mostng_performancetest_api/Script/Growin_Eipo_Stock/iOS || exit 1
+cd /home/qa/mostng_performancetest_api/Script/Growin_Eipo_Stock || exit 1
 pwd
 
 #Load Test
@@ -26,5 +26,6 @@ echo "Captured Time    : $timeStr"
 echo "Current Scenario : Load Test All BP"
 
 # Run k6 commands using the captured date and time
-../../../k6 run Growin_Eipo_Stock_LoadTest.js -e RUNBY="$RUNBY" -e ENV="$ENV" -e USER="$USER" -e DURATION="$DURATION" -e NUMSTART="$NUMSTART" --out dashboard=export=../../../Report/Growin_Eipo_Stock/iOS/LoadTest/"$RUNBY"_"$RUNTYPE"_${dateStr}_${timeStr}_72.html
+# ../../k6 run Growin_Eipo_Stock.js -e RUNBY="$RUNBY" -e ENV="$ENV" -e USER="$USER" -e DURATION="$DURATION" -e NUMSTART="$NUMSTART" -e SCENARIO=BP007 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/LoadTest/"$RUNBY"_"$RUNTYPE"_${dateStr}_${timeStr}_72.html
+../../k6 run Growin_Eipo_Stock.js -e RUNBY="$RUNBY" -e ENV="$ENV" -e USER="$USER" -e DURATION="$DURATION" -e NUMSTART="$NUMSTART" -e SCENARIO=BP007 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/LoadTest/"$RUNBY"_"$RUNTYPE"_${dateStr}_${timeStr}_72.html
 
