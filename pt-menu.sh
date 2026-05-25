@@ -22,7 +22,6 @@ banner() {
 }
 
 env_val() {
-  # env_val KEY [default]
   local key="$1" default="${2:-}"
   if [[ -f "$ENV_FILE" ]]; then
     local val
@@ -58,21 +57,11 @@ confirm() {
 }
 
 # ── SSH Section ──────────────────────────────────────────────────────────────
-declare -A SSH_HOSTS=(
-  ["Onprem-1  │ 10.82.15.72"]="qa@10.82.15.72"
-  ["Onprem-2  │ 10.184.120.48"]="qa@10.184.120.48"
-  ["Cloud IAP │ vm-pt-ksix-0"]="GCLOUD"
-)
-declare -A SSH_PASS=(
-  ["qa@10.82.15.72"]='M@nsek.1234'
-  ["qa@10.184.120.48"]='M@nsek.1234'
-)
 
 ssh_menu() {
   banner
   echo -e "${BLD}  SSH — Select Target${RST}\n"
 
-  # Auto-detect extra hosts from .env BASE_URL
   local extra_host=""
   local base_url; base_url=$(env_val "BASE_URL")
   if [[ "$base_url" =~ ^https?://([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+) ]]; then
@@ -98,21 +87,30 @@ ssh_menu() {
     return
   fi
 
-  if [[ "${SSH_HOSTS[$sel]:-}" == "GCLOUD" ]]; then
-    echo -e "\n${GRN}Connecting via IAP: ${BLD}vm-pt-ksix-0${RST}\n"
-    gcloud compute ssh --zone "asia-southeast2-c" "vm-pt-ksix-0" \
-      --tunnel-through-iap --project "compute-pt"
-    return
-  fi
+  local target=""
+  local pass=""
 
-  local target="${SSH_HOSTS[$sel]}"
-  local pass="${SSH_PASS[$target]:-}"
+  case "$sel" in
+    "Onprem-1  │ 10.82.15.72")
+      target="qa@10.82.15.72"
+      pass="M@nsek.1234"
+      ;;
+    "Onprem-2  │ 10.184.120.48")
+      target="qa@10.184.120.48"
+      pass="M@nsek.1234"
+      ;;
+    "Cloud IAP │ vm-pt-ksix-0")
+      echo -e "\n${GRN}Connecting via IAP: ${BLD}vm-pt-ksix-0${RST}\n"
+      gcloud compute ssh --zone "asia-southeast2-c" "vm-pt-ksix-0" \
+        --tunnel-through-iap --project "compute-pt"
+      return
+      ;;
+  esac
 
   echo -e "\n${GRN}Connecting: ${BLD}$target${RST}"
   if [[ -n "$pass" ]]; then
     echo -e "  ${YLW}Password: ${BLD}${pass}${RST}  (copy if prompted)"
     echo -e "  ${CYN}(tip: use ssh-copy-id to avoid password prompt)${RST}\n"
-    # Try sshpass if available, else plain ssh
     if command -v sshpass &>/dev/null; then
       sshpass -p "$pass" ssh -o StrictHostKeyChecking=accept-new "$target"
     else
@@ -192,10 +190,8 @@ docker_menu() {
   banner
   echo -e "${BLD}  Docker — Local PT Stack${RST}\n"
 
-  local compose_file="$PROJECT_DIR/docker-local-pt/docker-compose.yml"
   local compose_dir="$PROJECT_DIR/docker-local-pt"
 
-  # Status
   echo -e "${CYN}  Running containers:${RST}"
   docker ps --format "  {{.Names}}\t{{.Status}}" 2>/dev/null | grep -E "pt-|k6" || echo "  (none)"
   echo ""
