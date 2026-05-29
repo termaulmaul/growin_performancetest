@@ -1,0 +1,6 @@
+# Minimal k6 image; adds node only if YAML render must happen inside container.
+# Default: host pre-renders YAML→JSON via tools/pt-yaml-to-json.mjs.
+FROM grafana/k6:0.51.0
+WORKDIR /work
+USER root
+# k6 image is alpine-based but has no node. Keep slim; render done by mock-api/host.

@@ -1,0 +1,102 @@
+[
+  {
+    "suite": "ExaCC",
+    "runner": "docker-local-pt/scripts/k6-mock-runner.js",
+    "platform": "Web",
+    "scenario": "BP001",
+    "variant": "original",
+    "config": "-",
+    "script": "Script/ExaCC/Web/BP001.js",
+    "mockReady": true
+  },
+  {
+    "suite": "ExaCC",
+    "runner": "docker-local-pt/scripts/k6-mock-runner.js",
+    "platform": "Web",
+    "scenario": "BP002",
+    "variant": "original",
+    "config": "-",
+    "script": "Script/ExaCC/Web/BP002.js",
+    "mockReady": true
+  },
+  {
+    "suite": "ExaCC",
+    "runner": "docker-local-pt/scripts/k6-mock-runner.js",
+    "platform": "Web",
+    "scenario": "BP003",
+    "variant": "original",
+    "config": "-",
+    "script": "Script/ExaCC/Web/BP003.js",
+    "mockReady": true
+  },
+  {
+    "suite": "ExaCC",
+    "runner": "docker-local-pt/scripts/k6-mock-runner.js",
+    "platform": "Web",
+    "scenario": "BP004",
+    "variant": "original",
+    "config": "-",
+    "script": "Script/ExaCC/Web/BP004.js",
+    "mockReady": true
+  },
+  {
+    "suite": "ExaCC",
+    "runner": "docker-local-pt/scripts/k6-mock-runner.js",
+    "platform": "Web",
+    "scenario": "BP005",
+    "variant": "original",
+    "config": "-",
+    "script": "Script/ExaCC/Web/BP005.js",
+    "mockReady": true
+  },
+  {
+    "suite": "ExaCC",
+    "runner": "docker-local-pt/scripts/k6-mock-runner.js",
+    "platform": "Web",
+    "scenario": "BP006",
+    "variant": "original",
+    "config": "-",
+    "script": "Script/ExaCC/Web/BP006.js",
+    "mockReady": true
+  },
+  {
+    "suite": "ExaCC",
+    "runner": "docker-local-pt/scripts/k6-mock-runner.js",
+    "platform": "Web",
+    "scenario": "BP007",
+    "variant": "original",
+    "config": "-",
+    "script": "Script/ExaCC/Web/BP007.js",
+    "mockReady": true
+  },
+  {
+    "suite": "ExaCC",
+    "runner": "docker-local-pt/scripts/k6-mock-runner.js",
+    "platform": "Web",
+    "scenario": "BP008",
+    "variant": "original",
+    "config": "-",
+    "script": "Script/ExaCC/Web/BP008.js",
+    "mockReady": true
+  },
+  {
+    "suite": "ExaCC",
+    "runner": "docker-local-pt/scripts/k6-mock-runner.js",
+    "platform": "Web",
+    "scenario": "BP009",
+    "variant": "original",
+    "config": "-",
+    "script": "Script/ExaCC/Web/BP009.js",
+    "mockReady": true
+  },
+  {
+    "suite": "ExaCC",
+    "runner": "docker-local-pt/scripts/k6-mock-runner.js",
+    "platform": "Web",
+    "scenario": "BP010",
+    "variant": "original",
+    "config": "-",
+    "script": "Script/ExaCC/Web/BP010.js",
+    "mockReady": true
+  }
+]

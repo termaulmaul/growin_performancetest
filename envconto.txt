@@ -1,0 +1,6 @@
+Onprem
+ssh qa@10.82.15.72 || M@nsek.1234
+ssh qa@10.184.120.48 || M@nsek.1234
+ 
+Oncloud
+gcloud compute ssh --zone "asia-southeast2-c" "vm-pt-ksix-0" --tunnel-through-iap --project "compute-pt"

@@ -1,0 +1,147 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "schemaVersion": 39,
+  "tags": ["k6","local-pt"],
+  "title": "Local k6 PT Dashboard",
+  "uid": "k6-local-pt",
+  "timezone": "browser",
+  "time": { "from": "now-15m", "to": "now" },
+  "refresh": "10s",
+  "version": 1,
+  "templating": { "list": [] },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Total HTTP Requests",
+      "id": 1,
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "influxdb", "uid": "k6-influxdb" },
+      "targets": [{
+        "refId": "A",
+        "rawQuery": true,
+        "query": "SELECT count(\"value\") FROM \"http_reqs\" WHERE $timeFilter",
+        "resultFormat": "time_series"
+      }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } }
+    },
+    {
+      "type": "stat",
+      "title": "Iterations",
+      "id": 2,
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "influxdb", "uid": "k6-influxdb" },
+      "targets": [{
+        "refId": "A", "rawQuery": true,
+        "query": "SELECT count(\"value\") FROM \"iterations\" WHERE $timeFilter"
+      }]
+    },
+    {
+      "type": "stat",
+      "title": "VUs (max)",
+      "id": 3,
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "influxdb", "uid": "k6-influxdb" },
+      "targets": [{
+        "refId": "A", "rawQuery": true,
+        "query": "SELECT max(\"value\") FROM \"vus\" WHERE $timeFilter"
+      }]
+    },
+    {
+      "type": "stat",
+      "title": "Checks Pass Rate",
+      "id": 4,
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "influxdb", "uid": "k6-influxdb" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1 } },
+      "targets": [{
+        "refId": "A", "rawQuery": true,
+        "query": "SELECT mean(\"value\") FROM \"checks\" WHERE $timeFilter"
+      }]
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP Request Duration (avg / p95 / p99)",
+      "id": 5,
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "datasource": { "type": "influxdb", "uid": "k6-influxdb" },
+      "fieldConfig": { "defaults": { "unit": "ms" } },
+      "targets": [
+        { "refId": "A", "rawQuery": true, "query": "SELECT mean(\"value\") AS \"avg\" FROM \"http_req_duration\" WHERE $timeFilter GROUP BY time($__interval) fill(null)" },
+        { "refId": "B", "rawQuery": true, "query": "SELECT percentile(\"value\", 95) AS \"p95\" FROM \"http_req_duration\" WHERE $timeFilter GROUP BY time($__interval) fill(null)" },
+        { "refId": "C", "rawQuery": true, "query": "SELECT percentile(\"value\", 99) AS \"p99\" FROM \"http_req_duration\" WHERE $timeFilter GROUP BY time($__interval) fill(null)" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP Request Rate (RPS)",
+      "id": 6,
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "datasource": { "type": "influxdb", "uid": "k6-influxdb" },
+      "fieldConfig": { "defaults": { "unit": "reqps" } },
+      "targets": [
+        { "refId": "A", "rawQuery": true, "query": "SELECT count(\"value\") / 10 FROM \"http_reqs\" WHERE $timeFilter GROUP BY time(10s) fill(0)" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP Failed Rate",
+      "id": 7,
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "datasource": { "type": "influxdb", "uid": "k6-influxdb" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1 } },
+      "targets": [
+        { "refId": "A", "rawQuery": true, "query": "SELECT mean(\"value\") FROM \"http_req_failed\" WHERE $timeFilter GROUP BY time($__interval) fill(null)" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Waiting Time (http_req_waiting)",
+      "id": 8,
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "datasource": { "type": "influxdb", "uid": "k6-influxdb" },
+      "fieldConfig": { "defaults": { "unit": "ms" } },
+      "targets": [
+        { "refId": "A", "rawQuery": true, "query": "SELECT mean(\"value\") AS \"avg\" FROM \"http_req_waiting\" WHERE $timeFilter GROUP BY time($__interval) fill(null)" },
+        { "refId": "B", "rawQuery": true, "query": "SELECT percentile(\"value\", 95) AS \"p95\" FROM \"http_req_waiting\" WHERE $timeFilter GROUP BY time($__interval) fill(null)" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Custom BP duration_* (p95)",
+      "id": 9,
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
+      "datasource": { "type": "influxdb", "uid": "k6-influxdb" },
+      "fieldConfig": { "defaults": { "unit": "ms" } },
+      "targets": [
+        { "refId": "A", "rawQuery": true, "query": "SHOW MEASUREMENTS WITH MEASUREMENT =~ /^duration_/" }
+      ],
+      "description": "Use Influx query: SELECT percentile(value, 95) FROM /^duration_/ WHERE $timeFilter GROUP BY time($__interval), \"metric\""
+    },
+    {
+      "type": "timeseries",
+      "title": "Custom BP waiting_* (avg)",
+      "id": 10,
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
+      "datasource": { "type": "influxdb", "uid": "k6-influxdb" },
+      "fieldConfig": { "defaults": { "unit": "ms" } },
+      "targets": [
+        { "refId": "A", "rawQuery": true, "query": "SHOW MEASUREMENTS WITH MEASUREMENT =~ /^waiting_/" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Mock API endpoint duration (by URL)",
+      "id": 11,
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 28 },
+      "datasource": { "type": "influxdb", "uid": "k6-influxdb" },
+      "fieldConfig": { "defaults": { "unit": "ms" } },
+      "targets": [
+        { "refId": "A", "rawQuery": true, "query": "SELECT mean(\"value\") FROM \"http_req_duration\" WHERE $timeFilter GROUP BY time($__interval), \"url\" fill(null)" }
+      ]
+    }
+  ]
+}

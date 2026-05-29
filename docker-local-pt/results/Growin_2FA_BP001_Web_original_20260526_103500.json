@@ -1,0 +1,31 @@
+{
+  "mode": "LOCAL_DOCKER_MOCK",
+  "suite": "Growin_2FA",
+  "scenario": "BP001",
+  "platform": "Web",
+  "variant": "original",
+  "module": "/workspace/Script/Growin_2FA/Web/BP001.js",
+  "base_url": "http://mock-api:8080",
+  "metricCount": 21,
+  "iterations": 33,
+  "http_reqs": 33,
+  "http_req_failed_rate": 0,
+  "checks_passed": 0,
+  "checks_failed": 0,
+  "http_req_duration_p95": 57.3152748,
+  "custom_metrics": {
+    "error_rate_001_01_01_Auth_Login": {
+      "count": 0,
+      "p95": 0
+    },
+    "sample_001_01_01_Auth_Login": {
+      "count": 33,
+      "p95": 0
+    },
+    "duration_001_01_01_Auth_Login": {
+      "count": 0,
+      "p95": 57.3152748
+    }
+  },
+  "timestamp": "2026-05-26T03:35:11.855Z"
+}

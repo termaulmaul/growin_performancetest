@@ -1,0 +1,13 @@
+{
+  "generated": "2026-05-16T13:10:44.790Z",
+  "total": 108,
+  "issues": [],
+  "summary": {
+    "pairsOk": 108,
+    "exportsOk": 108,
+    "metricsOk": 88,
+    "metricsSkipped": 20,
+    "sleepDrift": 0,
+    "issueCount": 0
+  }
+}

@@ -152,7 +152,7 @@ export function BP001(data) {
                 // Ekstrak token dari response login
                 try {
                     const body = JSON.parse(response.body);
-                    sessionToken = body?.data?.token ?? null;
+                    sessionToken = (body && body.data && body.data.token) ? body.data.token : null;
                     if (!sessionToken) {
                         console.error(`❌ VU${vuId} (${email}) - Login OK tapi token tidak ditemukan di response`);
                     }

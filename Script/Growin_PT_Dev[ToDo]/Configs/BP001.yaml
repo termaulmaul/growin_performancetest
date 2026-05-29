@@ -1,0 +1,38 @@
+bp_id: "BP001"
+bp_name: "EIPO"
+description: "EIPO Mock Order"
+developer: "M Sidik Augi Rahmat"
+
+# Set isPT: true untuk menjalankan performance test via Jenkins.
+# Set isPT: false untuk skip performance test (dianggap sukses otomatis).
+isPT: true
+
+# VUs override per BP (optional - will use global default 335 if not set)
+vus: 5
+
+# Duration override per BP (optional - will use global default from Jenkins if not set)
+duration: "2m"
+
+# Threshold override per BP (optional - will use global default if not set)
+thresholds:
+  avg_response_time_ms: 200   # avrg < 200ms
+  error_rate_percent: 0.1     # < 0.1% error rate
+  min_rps: 381                # minimum requests per second
+
+# List of APIs to test — script will iterate one by one
+apis:
+  - id: "001_01_01"
+    name: "Eipo_Pipeline_List"
+    method: "GET"
+    path: "/eipo/pipeline/list"
+    payload: null
+    query_params: "filter_status=ongoing&page=1&per_page=20"
+
+  - id: "001_01_02"
+    name: "EIPO_Mock_Order_PATCH"
+    method: "PATCH"
+    path: "/eipo/mock/order"
+    payload: 
+      id: "ORD-123456"
+      qty: "500"
+    query_params: null

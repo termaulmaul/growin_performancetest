@@ -1,0 +1,130 @@
+# Local PT lab + observability + Jenkins CI.
+# Default: mock-api + k6-runner. Profiles: observability, ci (jenkins).
+services:
+  mock-api:
+    build: ./mock-api
+    container_name: pt-mock-api
+    ports:
+      - "18080:8080"
+    environment:
+      MOCK_LATENCY_MS: "${MOCK_LATENCY_MS:-80}"
+      MOCK_ERROR_RATE: "${MOCK_ERROR_RATE:-0}"
+      MOCK_STATUS: "${MOCK_STATUS:-}"
+    deploy:
+      resources:
+        limits: { cpus: '0.5', memory: 256m }
+    mem_limit: 256m
+    healthcheck:
+      test: ["CMD","wget","-q","-O-","http://127.0.0.1:8080/health"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+    networks: [pt]
+
+  k6-runner:
+    image: grafana/k6:0.51.0
+    container_name: pt-k6-runner
+    depends_on:
+      mock-api:
+        condition: service_healthy
+    working_dir: /workspace
+    volumes:
+      - ../:/workspace:ro
+      - ./results:/results
+    env_file:
+      - ./configs/local.env
+    extra_hosts:
+      - "internal-api-pt.growin.id:host-gateway"
+      - "internal-api-dev.growin.id:host-gateway"
+      - "api-qa.growin.id:host-gateway"
+      - "drc-api.growin.id:host-gateway"
+    entrypoint: ["/bin/sh","/workspace/docker-local-pt/scripts/run-local.sh"]
+    deploy:
+      resources:
+        limits: { cpus: '2.0', memory: 1g }
+    mem_limit: 1g
+    networks: [pt]
+
+  influxdb:
+    profiles: ["observability"]
+    image: influxdb:1.8
+    container_name: pt-influx
+    ports:
+      - "18086:8086"
+    environment:
+      INFLUXDB_DB: k6
+      INFLUXDB_HTTP_AUTH_ENABLED: "false"
+    volumes:
+      - pt-influx-data:/var/lib/influxdb
+    healthcheck:
+      test: ["CMD","wget","-q","-O-","http://127.0.0.1:8086/ping"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+    deploy:
+      resources:
+        limits: { cpus: '1.0', memory: 1g }
+    mem_limit: 1g
+    networks: [pt]
+
+  grafana:
+    profiles: ["observability"]
+    image: grafana/grafana:10.4.2
+    container_name: pt-grafana
+    depends_on:
+      influxdb:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/k6-local-pt-dashboard.json
+    volumes:
+      - pt-grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    deploy:
+      resources:
+        limits: { cpus: '0.5', memory: 512m }
+    mem_limit: 512m
+    networks: [pt]
+
+  jenkins:
+    profiles: ["ci"]
+    build:
+      context: ./jenkins
+    container_name: pt-jenkins
+    ports:
+      - "18081:8080"
+      - "50000:50000"
+    environment:
+      JAVA_OPTS: "-Xms256m -Xmx1024m"
+      JENKINS_OPTS: "--prefix=/"
+    volumes:
+      - pt-jenkins-home:/var/jenkins_home
+      - ../:/workspace:rw
+      - ./results:/results:rw
+    working_dir: /workspace
+    mem_limit: 1536m
+    deploy:
+      resources:
+        limits: { cpus: '1.5', memory: 1536m }
+    depends_on:
+      mock-api:
+        condition: service_healthy
+    networks: [pt]
+
+  # jenkins uses profile ci; start with observability for Grafana/Influx sync
+
+networks:
+  pt:
+    name: pt-net
+
+volumes:
+  pt-influx-data:
+  pt-grafana-data:
+  pt-jenkins-home:

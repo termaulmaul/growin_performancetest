@@ -1,0 +1,16 @@
+{
+  "total": 108,
+  "written": 108,
+  "skipped": 0,
+  "logsWritten": 108,
+  "byRule": {
+    "R1": 388,
+    "R2": 80,
+    "R4": 755,
+    "R6": 108
+  },
+  "syntax": {
+    "pass": 0,
+    "fail": []
+  }
+}

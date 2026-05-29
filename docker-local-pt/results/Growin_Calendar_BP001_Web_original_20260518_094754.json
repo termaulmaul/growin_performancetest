@@ -1,0 +1,91 @@
+{
+  "mode": "LOCAL_DOCKER_MOCK",
+  "suite": "Growin_Calendar",
+  "scenario": "BP001",
+  "platform": "Web",
+  "variant": "original",
+  "module": "/workspace/Script/Growin_Calendar/Web/BP001.js",
+  "base_url": "http://mock-api:8080",
+  "metricCount": 46,
+  "iterations": 24,
+  "http_reqs": 144,
+  "http_req_failed_rate": 0,
+  "checks_passed": 0,
+  "checks_failed": 0,
+  "http_req_duration_p95": 86.809975,
+  "custom_metrics": {
+    "error_rate_001_02_06_CorporateActionsCalendarOrder_Detail_MyEvents_Selected_date": {
+      "count": 0,
+      "p95": 0
+    },
+    "duration_001_01_02_CorporateActionsCalendarDetail_SelectedDate_CorporateActionType": {
+      "count": 0,
+      "p95": 87.6429125
+    },
+    "sample_001_02_04_CorporateActionsCalendarDetail_MyEvents_Selected_date": {
+      "count": 24,
+      "p95": 0
+    },
+    "sample_001_02_06_CorporateActionsCalendarOrder_Detail_MyEvents_Selected_date": {
+      "count": 24,
+      "p95": 0
+    },
+    "sample_001_01_02_CorporateActionsCalendarDetail_SelectedDate_CorporateActionType": {
+      "count": 24,
+      "p95": 0
+    },
+    "error_rate_001_01_02_CorporateActionsCalendarDetail_SelectedDate_CorporateActionType": {
+      "count": 0,
+      "p95": 0
+    },
+    "error_rate_001_01_01_CorporateActionsCalendarOrder_Detail_SelectedDate": {
+      "count": 0,
+      "p95": 0
+    },
+    "error_rate_001_02_04_CorporateActionsCalendarDetail_MyEvents_Selected_date": {
+      "count": 0,
+      "p95": 0
+    },
+    "duration_001_02_04_CorporateActionsCalendarDetail_MyEvents_Selected_date": {
+      "count": 0,
+      "p95": 86.27957674999999
+    },
+    "duration_001_01_01_CorporateActionsCalendarOrder_Detail_SelectedDate": {
+      "count": 0,
+      "p95": 87.43355455
+    },
+    "duration_001_02_06_CorporateActionsCalendarOrder_Detail_MyEvents_Selected_date": {
+      "count": 0,
+      "p95": 86.37330795
+    },
+    "sample_001_02_03_CorporateActionsCalendarDetail_MyEvents_SelectedDate_CorporateActionType": {
+      "count": 24,
+      "p95": 0
+    },
+    "error_rate_001_02_03_CorporateActionsCalendarDetail_MyEvents_SelectedDate_CorporateActionType": {
+      "count": 0,
+      "p95": 0
+    },
+    "sample_001_02_05_CorporateActionsCalendarDates_MyEvents_Start_date": {
+      "count": 24,
+      "p95": 0
+    },
+    "duration_001_02_05_CorporateActionsCalendarDates_MyEvents_Start_date": {
+      "count": 0,
+      "p95": 86.31495439999999
+    },
+    "duration_001_02_03_CorporateActionsCalendarDetail_MyEvents_SelectedDate_CorporateActionType": {
+      "count": 0,
+      "p95": 86.2252669
+    },
+    "sample_001_01_01_CorporateActionsCalendarOrder_Detail_SelectedDate": {
+      "count": 24,
+      "p95": 0
+    },
+    "error_rate_001_02_05_CorporateActionsCalendarDates_MyEvents_Start_date": {
+      "count": 0,
+      "p95": 0
+    }
+  },
+  "timestamp": "2026-05-18T02:48:06.701Z"
+}

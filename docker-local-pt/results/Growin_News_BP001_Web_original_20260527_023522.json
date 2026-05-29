@@ -1,0 +1,67 @@
+{
+  "mode": "LOCAL_DOCKER_MOCK",
+  "suite": "Growin_News",
+  "scenario": "BP001",
+  "platform": "Web",
+  "variant": "original",
+  "module": "/workspace/Script/Growin_News/Web/BP001.js",
+  "base_url": "http://mock-api:8080",
+  "metricCount": 36,
+  "iterations": 22,
+  "http_reqs": 88,
+  "http_req_failed_rate": 0,
+  "checks_passed": 0,
+  "checks_failed": 0,
+  "http_req_duration_p95": 57.43322105,
+  "custom_metrics": {
+    "error_rate_001_01_02_News_Sharia": {
+      "count": 0,
+      "p95": 0
+    },
+    "sample_001_01_01_News_Shortsell": {
+      "count": 22,
+      "p95": 0
+    },
+    "sample_001_01_04_News": {
+      "count": 22,
+      "p95": 0
+    },
+    "duration_001_01_02_News_Sharia": {
+      "count": 0,
+      "p95": 56.903079149999996
+    },
+    "error_rate_001_01_03_News_Margin": {
+      "count": 0,
+      "p95": 0
+    },
+    "sample_001_01_02_News_Sharia": {
+      "count": 22,
+      "p95": 0
+    },
+    "duration_001_01_04_News": {
+      "count": 0,
+      "p95": 57.09249135
+    },
+    "error_rate_001_01_01_News_Shortsell": {
+      "count": 0,
+      "p95": 0
+    },
+    "sample_001_01_03_News_Margin": {
+      "count": 22,
+      "p95": 0
+    },
+    "duration_001_01_01_News_Shortsell": {
+      "count": 0,
+      "p95": 57.5136497
+    },
+    "duration_001_01_03_News_Margin": {
+      "count": 0,
+      "p95": 57.79180175
+    },
+    "error_rate_001_01_04_News": {
+      "count": 0,
+      "p95": 0
+    }
+  },
+  "timestamp": "2026-05-26T19:35:40.233Z"
+}
