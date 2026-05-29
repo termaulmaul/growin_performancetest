@@ -1,0 +1,141 @@
+#!/usr/bin/env python3
+import sys, json, os, getpass, bcrypt
+from datetime import datetime, timezone
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'lib', 'python'))
+from db import get_conn
+
+import click
+
+def out(status, message="", data=None, error=None):
+    r = {"status": status}
+    if message: r["message"] = message
+    if data is not None: r["data"] = data
+    if error: r["error"] = error
+    print(json.dumps(r))
+    sys.exit(0 if status == "ok" else 1)
+
+def require_role(caller, min_role='admin'):
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("""
+        SELECT r.name, r.precedence, u.is_locked
+        FROM users u JOIN roles r ON u.role_id = r.id
+        WHERE u.username = ?
+    """, (caller.lower(),))
+    row = c.fetchone()
+    if not row or row['is_locked']:
+        out("denied", error="Not authorized")
+    allowed_precedences = {'god': 1, 'admin': 2}
+    if row['precedence'] > allowed_precedences.get(min_role, 2):
+        out("denied", error=f"Requires {min_role} role")
+    return row
+
+@click.group()
+def cli():
+    pass
+
+@cli.command()
+@click.option('--by', required=True, help='Caller username (must be admin/god)')
+def list_users(by):
+    require_role(by)
+    conn = get_conn()
+    rows = conn.execute("""
+        SELECT u.username, u.is_locked, u.failed_attempts, u.last_login, r.name as role
+        FROM users u JOIN roles r ON u.role_id = r.id ORDER BY r.precedence, u.username
+    """).fetchall()
+    out("ok", data={"users": [dict(r) for r in rows]})
+
+@cli.command()
+@click.option('--by', required=True)
+@click.option('--username', required=True)
+@click.option('--role', required=True, type=click.Choice(['god','admin','operator','readonly','guest']))
+@click.option('--display', default=None)
+def create(by, username, role, display):
+    require_role(by)
+    password = getpass.getpass(f"Password for new user '{username}': ")
+    if len(password) < 8:
+        out("error", error="Password too short (min 8)")
+    
+    hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt(12)).decode()
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("SELECT id FROM roles WHERE name = ?", (role,))
+    role_row = c.fetchone()
+    if not role_row:
+        out("error", error="Role not found")
+    try:
+        now = datetime.now(timezone.utc).isoformat()
+        c.execute("""
+            INSERT INTO users (username, password_hash, role_id, created_at)
+            VALUES (?, ?, ?, ?)
+        """, (username.lower(), hashed, role_row['id'], now))
+        conn.commit()
+        out("ok", message=f"User '{username}' created with role '{role}'")
+    except Exception as e:
+        out("error", error=f"User exists or conflict: {e}")
+
+@cli.command()
+@click.option('--by', required=True)
+@click.option('--username', required=True)
+def lock_user(by, username):
+    require_role(by)
+    conn = get_conn()
+    conn.execute("UPDATE users SET is_locked = 1 WHERE username = ?", (username.lower(),))
+    conn.commit()
+    out("ok", message=f"User '{username}' locked")
+
+@cli.command()
+@click.option('--by', required=True)
+@click.option('--username', required=True)
+def unlock_user(by, username):
+    require_role(by)
+    conn = get_conn()
+    conn.execute("UPDATE users SET is_locked = 0, failed_attempts = 0 WHERE username = ?", (username.lower(),))
+    conn.commit()
+    out("ok", message=f"User '{username}' unlocked")
+
+@cli.command('reset-password')
+@click.option('--by', required=True)
+@click.option('--username', required=True)
+def reset_password(by, username):
+    require_role(by)
+    password = getpass.getpass(f"New password for '{username}': ")
+    if len(password) < 8:
+        out("error", error="Password too short")
+    hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt(12)).decode()
+    conn = get_conn()
+    conn.execute("UPDATE users SET password_hash = ? WHERE username = ?", (hashed, username.lower()))
+    conn.commit()
+    out("ok", message=f"Password reset for '{username}'")
+
+@cli.command('assign-role')
+@click.option('--by', required=True)
+@click.option('--username', required=True)
+@click.option('--role', required=True, type=click.Choice(['god','admin','operator','readonly','guest']))
+def assign_role(by, username, role):
+    require_role(by, 'god')  # only god can assign roles
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("SELECT id FROM roles WHERE name = ?", (role,))
+    role_row = c.fetchone()
+    if not role_row:
+        out("error", error="Role not found")
+    conn.execute("UPDATE users SET role_id = ? WHERE username = ?", (role_row['id'], username.lower()))
+    conn.commit()
+    out("ok", message=f"Role '{role}' assigned to '{username}'")
+
+@cli.command()
+@click.option('--by', required=True)
+@click.option('--username', required=True)
+def delete(by, username):
+    require_role(by, 'god')
+    if username.lower() == by.lower():
+        out("denied", error="Cannot delete yourself")
+    conn = get_conn()
+    conn.execute("DELETE FROM users WHERE username = ?", (username.lower(),))
+    conn.commit()
+    out("ok", message=f"User '{username}' deleted")
+
+if __name__ == '__main__':
+    cli()

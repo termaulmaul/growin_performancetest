@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# pt-dashboard.sh — tput-based live dashboard
+
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+RED='\033[0;31m'; GRN='\033[0;32m'; YLW='\033[1;33m'
+CYN='\033[0;36m'; BLD='\033[1m'; RST='\033[0m'; DIM='\033[2m'
+
+draw_dashboard() {
+  clear
+  local term_w="${COLUMNS:-$(tput cols 2>/dev/null || echo 80)}"
+  local bar; bar=$(printf '═%.0s' $(seq 1 $((term_w - 2))))
+  local sbar; sbar=$(printf '─%.0s' $(seq 1 $((term_w - 2))))
+  
+  echo -e "\n${CYN}${BLD}╔${bar}╗"
+  printf "║ %-$((term_w - 4))s ║\n" "  🖥️  Growin PT Framework — Live Dashboard"
+  echo -e "╚${bar}╝${RST}"
+  echo ""
+
+  # Resource Monitor
+  local res_json; res_json=$(python3 "$PROJECT_DIR/bin/pt-resmon" snapshot 2>/dev/null)
+  if [[ -n "$res_json" ]]; then
+    local cpu mem health k6 docker
+    cpu=$(echo "$res_json" | python3 -c "import json,sys; d=json.load(sys.stdin)['data']; print(f\"{d['cpu_percent']:.1f}%\")")
+    mem=$(echo "$res_json" | python3 -c "import json,sys; d=json.load(sys.stdin)['data']; print(f\"{d['mem_percent']:.1f}%\")")
+    health=$(echo "$res_json" | python3 -c "import json,sys; d=json.load(sys.stdin)['data']; print(d['health_score'])")
+    k6=$(echo "$res_json" | python3 -c "import json,sys; d=json.load(sys.stdin)['data']; print(d['k6_running'])")
+    docker=$(echo "$res_json" | python3 -c "import json,sys; d=json.load(sys.stdin)['data']; print(d['docker_running'])")
+    
+    echo -e "  ${BLD}Resources${RST}   CPU: ${YLW}${cpu}${RST}   MEM: ${YLW}${mem}${RST}   Health: ${GRN}${health}/100${RST}   k6: ${YLW}${k6}${RST}   Docker: ${YLW}${docker} running${RST}"
+    echo ""
+  fi
+  
+  # Active Locks
+  local lock_json; lock_json=$(python3 "$PROJECT_DIR/bin/pt-lock" status 2>/dev/null)
+  local lock_count; lock_count=$(echo "$lock_json" | python3 -c "import json,sys; print(len(json.load(sys.stdin).get('data',{}).get('locks',[])))" 2>/dev/null || echo 0)
+  
+  echo -e "  ${BLD}Active Locks${RST} (${lock_count})"
+  echo -e "  ${DIM}${sbar}${RST}"
+  
+  if [[ "$lock_count" -gt 0 ]]; then
+    echo "$lock_json" | python3 -c "
+import json, sys
+d = json.load(sys.stdin)
+locks = d.get('data', {}).get('locks', [])
+for l in locks:
+    print(f\"  🔴  ENV:{l['env']:<8} script:{l['script_name']:<30} owner:{l['owner']:<10} since:{l['acquired_at'][:19]}\")
+" 2>/dev/null
+  else
+    echo -e "  ${DIM}(no active locks)${RST}"
+  fi
+  echo ""
+  
+  # Recent Audit Log
+  echo -e "  ${BLD}Recent Activity${RST}"
+  echo -e "  ${DIM}${sbar}${RST}"
+  python3 -c "
+import sys, os, json
+sys.path.append('$PROJECT_DIR/lib/python')
+from db import get_conn
+conn = get_conn()
+rows = conn.execute('SELECT timestamp, user, action, resource, detail FROM audit_log ORDER BY id DESC LIMIT 8').fetchall()
+for r in rows:
+    print(f\"  {str(r['timestamp'])[:19]:<20} [{r['user']:<10}] {r['action']:<15} {r['resource']}\")
+" 2>/dev/null || echo -e "  ${DIM}(no recent activity)${RST}"
+  echo ""
+  
+  echo -e "  ${DIM}Refresh every 5s. Press Ctrl+C to exit.${RST}"
+}
+
+echo -e "\033[?25l"  # hide cursor
+trap 'echo -e "\033[?25h"; clear; exit 0' INT TERM
+
+while true; do
+  draw_dashboard
+  sleep 5
+done

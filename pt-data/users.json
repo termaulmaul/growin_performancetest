@@ -1,0 +1,11 @@
+{
+  "users": {
+    "maul": {
+      "display_name": "Maul",
+      "password_hash": "ec0c3e3bf91efd5088a5596dfb28d2dab510b762fa47a6d016008393e06bd5ae",
+      "role": "god",
+      "created_at": "2026-05-29",
+      "created_by": "system"
+    }
+  }
+}

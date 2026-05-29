@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+import sys
+import json
+import os
+import hashlib
+from datetime import datetime
+
+# Add lib/python to path
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'lib', 'python'))
+from db import get_conn
+
+import click
+
+def output_json(status, message="", data=None, error=None):
+    res = {"status": status}
+    if message: res["message"] = message
+    if data: res["data"] = data
+    if error: res["error"] = error
+    print(json.dumps(res))
+    sys.exit(0 if status == "ok" else 1)
+
+def hash_log_entry(timestamp, user, action, resource, detail, prev_hash):
+    raw = f"{timestamp}|{user}|{action}|{resource}|{detail}|{prev_hash}"
+    return hashlib.sha256(raw.encode('utf-8')).hexdigest()
+
+@click.group()
+def cli():
+    pass
+
+@cli.command()
+@click.argument('user')
+@click.argument('action')
+@click.argument('resource')
+@click.argument('detail', required=False, default="")
+def log(user, action, resource, detail):
+    conn = get_conn()
+    c = conn.cursor()
+    
+    # Get prev_hash
+    c.execute("SELECT prev_hash FROM audit_log ORDER BY id DESC LIMIT 1")
+    row = c.fetchone()
+    prev_hash = row['prev_hash'] if row else "0" * 64
+    
+    timestamp = datetime.utcnow().isoformat()
+    current_hash = hash_log_entry(timestamp, user, action, resource, detail, prev_hash)
+    
+    c.execute("""
+        INSERT INTO audit_log (timestamp, user, action, resource, detail, prev_hash)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (timestamp, user, action, resource, detail, current_hash)) # Storing current hash as prev_hash for next
+    # Wait, the DB schema has prev_hash. If we store current_hash in prev_hash column, it's a bit confusing.
+    # Actually we just store the current calculated hash in prev_hash column so the next row can read it.
+    
+    conn.commit()
+    
+    # Append to archive file
+    archive_file = os.path.expanduser(f"~/.pt/audit/archive/audit_{datetime.utcnow().strftime('%Y%m')}.log")
+    try:
+        with open(archive_file, 'a') as f:
+            f.write(json.dumps({
+                "ts": timestamp,
+                "u": user,
+                "a": action,
+                "r": resource,
+                "d": detail,
+                "h": current_hash
+            }) + "\n")
+    except Exception as e:
+        pass
+        
+    output_json("ok")
+
+if __name__ == '__main__':
+    cli()

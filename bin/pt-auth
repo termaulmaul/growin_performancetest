@@ -1,0 +1,178 @@
+#!/usr/bin/env python3
+import sys
+import json
+import os
+import secrets
+import hashlib
+from datetime import datetime, timedelta
+
+# Add lib/python to path
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'lib', 'python'))
+from db import get_conn
+
+import click
+import bcrypt
+import getpass
+
+SESSION_DIR = os.path.expanduser('~/.pt/sessions/')
+
+def output_json(status, message="", data=None, error=None):
+    res = {"status": status}
+    if message: res["message"] = message
+    if data: res["data"] = data
+    if error: res["error"] = error
+    print(json.dumps(res))
+    sys.exit(0 if status == "ok" else 1)
+
+def hash_session_token(token):
+    return hashlib.sha256(token.encode('utf-8')).hexdigest()
+
+@click.group()
+def cli():
+    pass
+
+@cli.command()
+@click.argument('username')
+def login(username):
+    username = username.lower()
+    password = getpass.getpass(f"Password for {username}: ")
+    
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("SELECT id, password_hash, is_locked, failed_attempts FROM users WHERE username = ?", (username,))
+    row = c.fetchone()
+    
+    if not row:
+        output_json("error", error="Invalid credentials")
+        
+    user_id, pwd_hash, is_locked, failed_attempts = row['id'], row['password_hash'], row['is_locked'], row['failed_attempts']
+    
+    if is_locked:
+        output_json("denied", error="Account locked")
+        
+    if not bcrypt.checkpw(password.encode('utf-8'), pwd_hash.encode('utf-8')):
+        c.execute("UPDATE users SET failed_attempts = failed_attempts + 1 WHERE id = ?", (user_id,))
+        if failed_attempts + 1 >= 5:
+            c.execute("UPDATE users SET is_locked = 1 WHERE id = ?", (user_id,))
+        conn.commit()
+        output_json("denied", error="Invalid credentials")
+        
+    # Login success
+    c.execute("UPDATE users SET failed_attempts = 0, last_login = ? WHERE id = ?", 
+              (datetime.utcnow().isoformat(), user_id))
+    
+    # Create session
+    raw_token = secrets.token_hex(32)
+    token_hash = hash_session_token(raw_token)
+    now = datetime.utcnow()
+    expires = now + timedelta(hours=int(os.environ.get('PT_SESSION_TIMEOUT', 12)))
+    
+    c.execute("""
+        INSERT INTO sessions (user_id, token_hash, created_at, last_verified, expires_at)
+        VALUES (?, ?, ?, ?, ?)
+    """, (user_id, token_hash, now.isoformat(), now.isoformat(), expires.isoformat()))
+    conn.commit()
+    
+    # Write to local file cache
+    os.makedirs(SESSION_DIR, exist_ok=True, mode=0o700)
+    token_file = os.path.join(SESSION_DIR, f"{username}.token")
+    with open(token_file, 'w') as f:
+        f.write(raw_token)
+    os.chmod(token_file, 0o600)
+    
+    output_json("ok", message="Login successful", data={"username": username})
+
+@cli.command()
+@click.argument('username')
+def verify_session(username):
+    username = username.lower()
+    token_file = os.path.join(SESSION_DIR, f"{username}.token")
+    
+    if not os.path.exists(token_file):
+        output_json("denied", error="No session file found")
+        
+    with open(token_file, 'r') as f:
+        raw_token = f.read().strip()
+        
+    token_hash = hash_session_token(raw_token)
+    
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("""
+        SELECT s.id, s.expires_at, u.username, r.name as role 
+        FROM sessions s
+        JOIN users u ON s.user_id = u.id
+        JOIN roles r ON u.role_id = r.id
+        WHERE s.token_hash = ? AND u.username = ? AND u.is_locked = 0
+    """, (token_hash, username))
+    
+    row = c.fetchone()
+    if not row:
+        output_json("denied", error="Invalid session")
+        
+    expires = datetime.fromisoformat(row['expires_at'])
+    if datetime.utcnow() > expires:
+        c.execute("DELETE FROM sessions WHERE id = ?", (row['id'],))
+        conn.commit()
+        output_json("denied", error="Session expired")
+        
+    # Update last verified occasionally to avoid too many writes
+    c.execute("UPDATE sessions SET last_verified = ? WHERE id = ?", (datetime.utcnow().isoformat(), row['id']))
+    conn.commit()
+    
+    output_json("ok", data={"username": username, "role": row['role']})
+
+@cli.command()
+@click.argument('username')
+def logout(username):
+    username = username.lower()
+    token_file = os.path.join(SESSION_DIR, f"{username}.token")
+    
+    if os.path.exists(token_file):
+        with open(token_file, 'r') as f:
+            raw_token = f.read().strip()
+        token_hash = hash_session_token(raw_token)
+        
+        conn = get_conn()
+        conn.execute("DELETE FROM sessions WHERE token_hash = ?", (token_hash,))
+        conn.commit()
+        
+        os.remove(token_file)
+        
+    output_json("ok", message="Logged out")
+
+@cli.command()
+def bootstrap():
+    """Create god user interactively if no god exists."""
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("SELECT COUNT(*) FROM users JOIN roles ON users.role_id = roles.id WHERE roles.name = 'god'")
+    if c.fetchone()[0] > 0:
+        output_json("error", error="God user already exists. Use user management tools.")
+        
+    print("Bootstrap: Create God User")
+    username = input("Username: ").strip().lower()
+    password = getpass.getpass("Password: ")
+    confirm = getpass.getpass("Confirm Password: ")
+    
+    if password != confirm:
+        output_json("error", error="Passwords do not match")
+        
+    if len(password) < 8:
+        output_json("error", error="Password too short (min 8 chars)")
+        
+    hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(12)).decode('utf-8')
+    
+    c.execute("SELECT id FROM roles WHERE name = 'god'")
+    role_id = c.fetchone()['id']
+    
+    c.execute("""
+        INSERT INTO users (username, password_hash, role_id, created_at)
+        VALUES (?, ?, ?, ?)
+    """, (username, hashed, role_id, datetime.utcnow().isoformat()))
+    conn.commit()
+    
+    output_json("ok", message=f"God user '{username}' created successfully.")
+
+if __name__ == '__main__':
+    cli()

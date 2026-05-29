@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "READMOCKDOCK.md",
+                "file": "blueprint/growin_pt_architecture_arbitration.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "READMOCKDOCK"
+              "title": "growin_pt_architecture_arbitration"
             }
           }
         ]
@@ -78,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "c57e93285495ee17",
@@ -185,20 +186,20 @@
   },
   "active": "3fb20bc5cc81c245",
   "lastOpenFiles": [
-    "hasil-sebelum-kidran/adb/dumpsys_activity_initial.txt",
-    "hasil-sebelum-kidran/adb/dumpsys_window_initial.txt",
-    "hasil-sebelum-kidran/adb/getprop.txt",
-    "hasil-sebelum-kidran/wdio",
-    "hasil-sebelum-kidran/scripts",
-    "hasil-sebelum-kidran/screenshots",
-    "hasil-sebelum-kidran/reports",
-    "hasil-sebelum-kidran/raw",
-    "hasil-sebelum-kidran/qdrant",
-    "hasil-sebelum-kidran/neo4j",
-    "hasil-sebelum-kidran/logs",
+    "dummy.json",
+    "bin/__pycache__/pt-schedulercpython-314.pyc",
+    "bin/pt-scheduler",
+    "tools/migrate-scheduler.py",
+    "bin/__pycache__/pt-usermgmtcpython-314.pyc",
+    "bin/pt-usermgmt",
+    "bin/pt-dashboard",
+    "bin/pt-resmon",
+    "bin/pt-lock-status",
+    "bin/__pycache__/pt-lockcpython-314.pyc",
+    "bin/pt-lock",
+    "READMOCKDOCK.md",
     "docker-local-pt/jenkins/README.md",
     "docker-local-pt/results/mock-suite-report.md",
-    "READMOCKDOCK.md",
     "Script/Growin_Calendar/iOS/enchange_BP001_enhance_log.md",
     "Script/Growin_Community/Web/enchange_BP005_enhance_log.md"
   ]

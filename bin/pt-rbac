@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+import sys
+import json
+import os
+
+# Add lib/python to path
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'lib', 'python'))
+from db import get_conn
+
+import click
+
+def output_json(status, message="", data=None, error=None):
+    res = {"status": status}
+    if message: res["message"] = message
+    if data: res["data"] = data
+    if error: res["error"] = error
+    print(json.dumps(res))
+    sys.exit(0 if status == "ok" else 1)
+
+@click.group()
+def cli():
+    pass
+
+@cli.command()
+@click.argument('username')
+@click.argument('resource')
+@click.argument('action')
+def check(username, resource, action):
+    conn = get_conn()
+    c = conn.cursor()
+    
+    # 1. Get user role precedence
+    c.execute("""
+        SELECT r.precedence, u.is_locked 
+        FROM users u 
+        JOIN roles r ON u.role_id = r.id 
+        WHERE u.username = ?
+    """, (username.lower(),))
+    row = c.fetchone()
+    
+    if not row or row['is_locked']:
+        output_json("denied", error="User not found or locked")
+        
+    user_precedence = row['precedence']
+    
+    # Precedence 1 (god) has implicit access to everything
+    if user_precedence == 1:
+        output_json("ok", data={"allowed": True, "reason": "god_role"})
+        
+    # 2. Check if permission exists for role precedence <= user_precedence
+    # Meaning: A role with higher precedence (lower number) having this perm DOES NOT mean lower roles get it.
+    # Wait, the logic for hierarchy: if a permission is granted to 'operator' (precedence 3),
+    # then 'admin' (precedence 2) and 'god' (precedence 1) should also get it automatically.
+    # So we check if there exists a permission linked to a role with precedence >= user_precedence.
+    
+    c.execute("""
+        SELECT 1 FROM permissions p
+        JOIN roles r ON p.role_id = r.id
+        WHERE p.resource = ? AND p.action = ? AND r.precedence >= ?
+    """, (resource, action, user_precedence))
+    
+    if c.fetchone():
+        output_json("ok", data={"allowed": True})
+    else:
+        output_json("denied", data={"allowed": False})
+
+@cli.command()
+def list_permissions():
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("""
+        SELECT r.name as role, p.resource, p.action 
+        FROM permissions p
+        JOIN roles r ON p.role_id = r.id
+        ORDER BY r.precedence ASC, p.resource ASC
+    """)
+    perms = [dict(r) for r in c.fetchall()]
+    output_json("ok", data={"permissions": perms})
+
+@cli.command()
+@click.argument('role_name')
+@click.argument('resource')
+@click.argument('action')
+def grant(role_name, resource, action):
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("SELECT id FROM roles WHERE name = ?", (role_name,))
+    row = c.fetchone()
+    if not row:
+        output_json("error", error="Role not found")
+        
+    try:
+        c.execute("INSERT INTO permissions (role_id, resource, action) VALUES (?, ?, ?)", 
+                  (row['id'], resource, action))
+        conn.commit()
+        output_json("ok", message=f"Granted {action} on {resource} to {role_name}")
+    except sqlite3.IntegrityError:
+        output_json("error", error="Permission already exists")
+
+if __name__ == '__main__':
+    cli()

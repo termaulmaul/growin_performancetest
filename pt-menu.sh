@@ -8,6 +8,18 @@ trap '[[ -n "${_SPINNER_PID:-}" ]] && kill "$_SPINNER_PID" 2>/dev/null || true' 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_FILE="$PROJECT_DIR/docker-local-pt/configs/local.env"
 
+# PT Auth Source
+if [[ -f "$PROJECT_DIR/lib/bash/pt_auth_client.sh" ]]; then
+  source "$PROJECT_DIR/lib/bash/pt_auth_client.sh"
+else
+  # Fallback variables if client missing
+  PT_USER="legacy"
+  PT_ROLE="god"
+  pt_require_auth() { return 0; }
+  pt_auth_check_perm() { return 0; }
+fi
+
+
 # ── Colors ─────────────────────────────────────────────────────────────────
 RED='\033[0;31m'; GRN='\033[0;32m'; YLW='\033[1;33m'
 BLU='\033[0;34m'; CYN='\033[0;36m'; BLD='\033[1m'; RST='\033[0m'
@@ -16,14 +28,17 @@ DIM='\033[2m'; MAG='\033[0;35m'
 _RUN_START=0
 _RUN_LABEL=""
 _FZF_KEY=""
+_AUTH_USER=""
+_AUTH_ROLE=""
+_AUTH_DISP=""
 
 # ── Run UI ───────────────────────────────────────────────────────────────────
 print_run_header() {
   local label="$1" target="${2:-}"
   _RUN_START=$(date +%s)
   _RUN_LABEL="$label"
-  local term_w; term_w=$(tput cols 2>/dev/null || echo 80)
-  local w=$(( term_w - 4 )); true
+  local term_w; term_w="${COLUMNS:-$(tput cols 2>/dev/null || echo 80)}"
+  local w=$(( term_w - 4 ))
   local bar; bar=$(printf '─%.0s' $(seq 1 $w))
   echo -e "\n${CYN}${BLD}┌─ ▶  $label${RST}"
   [[ -n "$target" ]] && echo -e "${CYN}${BLD}│${RST}${DIM}     Target : ${RST}${YLW}$target${RST}"
@@ -36,8 +51,8 @@ print_run_footer() {
   local elapsed=$(( $(date +%s) - _RUN_START ))
   local dur_str="${elapsed}s"
   [[ $elapsed -ge 60 ]] && dur_str="$(( elapsed/60 ))m $(( elapsed%60 ))s"
-  local term_w; term_w=$(tput cols 2>/dev/null || echo 80)
-  local w=$(( term_w - 4 )); true
+  local term_w; term_w="${COLUMNS:-$(tput cols 2>/dev/null || echo 80)}"
+  local w=$(( term_w - 4 ))
   local bar; bar=$(printf '─%.0s' $(seq 1 $w))
   echo -e "\n${CYN}${BLD}┌${bar}${RST}"
   echo -e "${CYN}${BLD}│${RST}${DIM}     End    : $(date '+%H:%M:%S')  (+${dur_str})${RST}"
@@ -97,14 +112,153 @@ banner() {
   local env_tag; env_tag=$(env_val ENV "—")
   local vus; vus=$(env_val K6_USERS "—")
   local dur; dur=$(env_val DURATION "—")
-  local docker_ct; docker_ct=$(docker ps --format "{{.Names}}" 2>/dev/null | grep -cE "pt-|k6" || echo 0)
+  local docker_ct; docker_ct=$(docker ps --format "{{.Names}}" 2>/dev/null | grep -cE "pt-|k6" | tail -n 1 || echo 0)
+  docker_ct="${docker_ct//[!0-9]/}"
+  [[ -z "$docker_ct" ]] && docker_ct=0
   local docker_color="$RED"
   [[ "$docker_ct" -gt 0 ]] && docker_color="$GRN"
   local sep="${DIM}│${RST}"
-  echo -e "  ${DIM}IP:${RST} $(get_local_ip)  $sep  ${YLW}ENV:${RST} $env_tag  $sep  ${YLW}VUs:${RST} $vus  $sep  ${YLW}Dur:${RST} $dur  $sep  ${docker_color}Docker: ${docker_ct} up${RST}"
-  echo -e "  ${DIM}$(printf '─%.0s' $(seq 1 $(( $(tput cols 2>/dev/null || echo 80) - 4 ))))${RST}\n"
+  local run_status
+  run_status=$(python3 "$PROJECT_DIR/bin/pt-lock-status" "${PT_USER:-Unknown}" "$(env_val ENV INT)" 2>/dev/null || echo "🟢 Available | ${PT_USER:-Unknown} [Idle]")
+  
+  echo -e "  ${DIM}IP:${RST} $(get_local_ip)  $sep  ${YLW}ENV:${RST} $env_tag  $sep  ${YLW}VUs:${RST} $vus  $sep  ${YLW}Dur:${RST} $dur  $sep  ${YLW}${run_status}${RST}"
+  echo -e "  ${DIM}$(printf '─%.0s' $(seq 1 $(( ${COLUMNS:-$(tput cols 2>/dev/null || echo 80)} - 4 ))))${RST}\n"
 }
 
+
+login_screen() {
+  while true; do
+    clear
+    echo -e "${CYN}${BLD}"
+    echo '┏━╸┏━┓┏━┓╻ ╻╻┏┓╻   ┏━┓╺┳╸   ┏━╸┏━┓┏━┓┏┳┓┏━╸╻ ╻┏━┓┏━┓╻┏ '
+    echo '┃╺┓┣┳┛┃ ┃┃╻┃┃┃┗┫   ┣━┛ ┃    ┣╸ ┣┳┛┣━┫┃┃┃┣╸ ┃╻┃┃ ┃┣┳┛┣┻┓'
+    echo '┗━┛╹┗╸┗━┛┗┻┛╹╹ ╹   ╹   ╹    ╹  ╹┗╸╹ ╹╹ ╹┗━╸┗┻┛┗━┛╹┗╸╹ ╹'
+    echo -e "${RST}"
+    echo -e "  ${DIM}Welcome to Growin Performance Test Framework${RST}\n"
+    
+    printf "  Username : "
+    read -r input_user
+    [[ -z "$input_user" ]] && continue
+    
+    printf "  Password : "
+    read -rs input_pwd
+    echo ""
+    
+    local login_out
+    local login_rc
+    set +e
+    login_out=$(python3 "$PROJECT_DIR/pt-data/auth.py" login "$input_user" "$input_pwd" 2>&1)
+    login_rc=$?
+    set -e
+    
+    if [[ $login_rc -eq 0 ]]; then
+      _AUTH_USER="$input_user"
+      _AUTH_DISP="${login_out%|*}"
+      _AUTH_ROLE="${login_out#*|}"
+      echo -e "\n  ${GRN}Login successful. Welcome, $PT_USER [Role: $PT_ROLE]${RST}"
+      sleep 1
+      return
+    else
+      echo -e "\n  ${RED}Login failed: $login_out${RST}"
+      sleep 1
+    fi
+  done
+}
+
+user_mgmt_menu() {
+  if [[ "$PT_ROLE" != "god" && "$PT_ROLE" != "admin" ]]; then
+    echo -e "  ${RED}Access Denied. Admin+ role required.${RST}"
+    read -r -p $'\nPress Enter...'
+    return
+  fi
+  banner
+  section_header "User Management"
+
+  local choices=(
+    "[1] List Users"
+    "[2] Create User"
+    "[3] Lock/Unlock User"
+    "[4] Reset Password"
+    "[5] Assign Role"
+    "[6] Delete User"
+    "[0] Back"
+  )
+  local sel; sel=$(pick_fzf "Action>" "${choices[@]}")
+  [[ -z "$sel" ]] && return
+
+  case "$sel" in
+    "[1] List Users")
+      echo ""
+      python3 "$PROJECT_DIR/bin/pt-usermgmt" list-users --by "$PT_USER" 2>&1 | python3 -c "
+import json, sys
+raw = sys.stdin.read().strip()
+if not raw.startswith('{'): raw = raw[raw.find('{'):]
+try: d = json.loads(raw)
+except: d = {}
+users = d.get('data', {}).get('users', [])
+print(f\"  {'Username':<12} {'Role':<10} {'Locked':<8} {'Last Login'}\")
+print('  ' + '-'*55)
+for u in users:
+    locked = 'YES' if u['is_locked'] else 'no'
+    ll = (u.get('last_login') or 'never')[:19]
+    print(f\"  {u['username']:<12} {u['role']:<10} {locked:<8} {ll}\")
+"
+      read -r -p $'\nPress Enter...'
+      ;;
+    "[2] Create User")
+      if [[ "$PT_ROLE" != "god" ]]; then
+        echo -e "  ${RED}Only god can create users.${RST}"
+        read -r -p $'\nPress Enter...'; return
+      fi
+      printf "\n  Username : "; read -r n_user
+      [[ -z "$n_user" ]] && return
+      local r_choices=("operator" "admin" "readonly" "guest" "god")
+      local n_role; n_role=$(pick_fzf "Role>" "${r_choices[@]}")
+      [[ -z "$n_role" ]] && return
+      python3 "$PROJECT_DIR/bin/pt-usermgmt" create --by "$PT_USER" --username "$n_user" --role "$n_role" 2>&1 | python3 -c "import json,sys; raw=sys.stdin.read().strip(); raw=raw[raw.find('{'):] if '{' in raw else '{}'; d=json.loads(raw) if raw else {}; print(d.get('message', d.get('error','?')))"
+      read -r -p $'\nPress Enter...'
+      ;;
+    "[3] Lock/Unlock User")
+      printf "\n  Username : "; read -r t_user
+      [[ -z "$t_user" ]] && return
+      local la_choices=("lock" "unlock")
+      local la; la=$(pick_fzf "Action>" "${la_choices[@]}")
+      [[ -z "$la" ]] && return
+      python3 "$PROJECT_DIR/bin/pt-usermgmt" "${la}-user" --by "$PT_USER" --username "$t_user" 2>&1 | python3 -c "import json,sys; raw=sys.stdin.read().strip(); raw=raw[raw.find('{'):] if '{' in raw else '{}'; d=json.loads(raw) if raw else {}; print(d.get('message', d.get('error','?')))"
+      read -r -p $'\nPress Enter...'
+      ;;
+    "[4] Reset Password")
+      printf "\n  Username : "; read -r t_user
+      [[ -z "$t_user" ]] && return
+      python3 "$PROJECT_DIR/bin/pt-usermgmt" reset-password --by "$PT_USER" --username "$t_user" 2>&1 | python3 -c "import json,sys; raw=sys.stdin.read().strip(); raw=raw[raw.find('{'):] if '{' in raw else '{}'; d=json.loads(raw) if raw else {}; print(d.get('message', d.get('error','?')))"
+      read -r -p $'\nPress Enter...'
+      ;;
+    "[5] Assign Role")
+      if [[ "$PT_ROLE" != "god" ]]; then
+        echo -e "  ${RED}Only god can assign roles.${RST}"; read -r -p $'\nPress Enter...'; return
+      fi
+      printf "\n  Username : "; read -r t_user
+      [[ -z "$t_user" ]] && return
+      local r2_choices=("operator" "admin" "readonly" "guest" "god")
+      local n_role2; n_role2=$(pick_fzf "New Role>" "${r2_choices[@]}")
+      [[ -z "$n_role2" ]] && return
+      python3 "$PROJECT_DIR/bin/pt-usermgmt" assign-role --by "$PT_USER" --username "$t_user" --role "$n_role2" 2>&1 | python3 -c "import json,sys; raw=sys.stdin.read().strip(); raw=raw[raw.find('{'):] if '{' in raw else '{}'; d=json.loads(raw) if raw else {}; print(d.get('message', d.get('error','?')))"
+      read -r -p $'\nPress Enter...'
+      ;;
+    "[6] Delete User")
+      if [[ "$PT_ROLE" != "god" ]]; then
+        echo -e "  ${RED}Only god can delete users.${RST}"; read -r -p $'\nPress Enter...'; return
+      fi
+      printf "\n  Username : "; read -r t_user
+      [[ -z "$t_user" ]] && return
+      printf "  Confirm delete '%s'? (yes/no): " "$t_user"; read -r confirm
+      [[ "$confirm" != "yes" ]] && { echo "Cancelled."; read -r -p $'\nPress Enter...'; return; }
+      python3 "$PROJECT_DIR/bin/pt-usermgmt" delete --by "$PT_USER" --username "$t_user" 2>&1 | python3 -c "import json,sys; raw=sys.stdin.read().strip(); raw=raw[raw.find('{'):] if '{' in raw else '{}'; d=json.loads(raw) if raw else {}; print(d.get('message', d.get('error','?')))"
+      read -r -p $'\nPress Enter...'
+      ;;
+    "[0] Back") return ;;
+  esac
+}
 env_val() {
   local key="$1" default="${2:-}"
   if [[ -f "$ENV_FILE" ]]; then
@@ -120,7 +274,12 @@ show_env_summary() {
   echo -e "${CYN}${BLD}  ── ENV: $ENV_FILE ──${RST}"
   if [[ -f "$ENV_FILE" ]]; then
     grep -v "^#" "$ENV_FILE" | grep -v "^$" | head -8 | while IFS= read -r line; do
-      echo -e "  ${YLW}${line}${RST}"
+      if [[ "$PT_ROLE" != "god" ]] && echo "$line" | grep -qiE "pass|secret|token|key|pwd"; then
+        key="${line%%=*}"
+        echo -e "  ${YLW}${key}=***MASKED***${RST}"
+      else
+        echo -e "  ${YLW}${line}${RST}"
+      fi
     done
     echo "  ..."
   else
@@ -132,25 +291,42 @@ show_env_summary() {
 pick_fzf() {
   local prompt="$1"; shift
   local val
-  # Run fzf; ESC/Ctrl-C = abort = exit code 130 → treat as "back" (return empty)
   val=$(printf '%s\n' "$@" | fzf \
     --prompt="$prompt " \
     --header="  ↑↓ navigate  ↵ select  ESC=back  Ctrl-C=exit" \
-    --height=~60% --border=rounded --layout=reverse \
+    ${_FZF_HEIGHT_FLAG} --border=rounded --layout=reverse \
     --color='prompt:cyan,pointer:yellow,fg+:bright-green,header:240,border:cyan,hl:yellow,hl+:bright-yellow' \
-    --no-info --ansi 2>/dev/null) || true
+    ${_FZF_NOINFO_FLAG} --ansi 2>/dev/null) || true
   _FZF_KEY=""
   echo "$val"
 }
 
+# Detect fzf version compatibility once at startup
+_fzf_detect_flags() {
+  local fzf_ver
+  fzf_ver=$(fzf --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+' | head -1)
+  local major minor
+  major=${fzf_ver%%.*}
+  minor=${fzf_ver##*.}
+  # --no-info available since 0.21
+  _FZF_NOINFO_FLAG=""
+  [[ "${major:-0}" -gt 0 || "${minor:-0}" -ge 21 ]] && _FZF_NOINFO_FLAG="--no-info"
+  # --height=~X% (tilde) available since 0.30
+  _FZF_HEIGHT_FLAG="--height=60%"
+  [[ "${major:-0}" -gt 0 || "${minor:-0}" -ge 30 ]] && _FZF_HEIGHT_FLAG="--height=~60%"
+}
+_fzf_detect_flags
+
 section_header() {
   local title="$1"
-  local term_w; term_w=$(tput cols 2>/dev/null || echo 80)
-  local w=$(( term_w - 4 ))
+  local term_w
+  # $COLUMNS is updated by bash on resize; tput cols as fallback
+  term_w="${COLUMNS:-$(tput cols 2>/dev/null || echo 80)}"
+  local w=$(( term_w - 2 ))
   [[ $w -lt 40 ]] && w=40
   local bar; bar=$(printf '═%.0s' $(seq 1 $w))
   echo -e "\n${CYN}${BLD}╔${bar}╗${RST}"
-  printf "${CYN}${BLD}║${RST}  ${BLD}%-${w}s${CYN}${BLD}║${RST}\n" "$title"
+  printf "${CYN}${BLD}║ ${BLD}%-$(( w - 2 ))s ${CYN}${BLD}║${RST}\n" "$title"
   echo -e "${CYN}${BLD}╚${bar}╝${RST}\n"
 }
 
@@ -304,6 +480,7 @@ ssh_menu() {
 
          run_cmd="cd Script/$suite_name && ../../k6 run $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform --out dashboard=export=$report_file"
          _run_label="$suite_name / $file_sel  [$platform · ${scenario:-AllBP} · ${vus}VU · $dur]"
+         python3 "$PROJECT_DIR/pt-data/auth.py" set_run "$PT_USER" "$file_sel" "$dur" 2>/dev/null || true
        fi
        ;;
     "Custom Command")
@@ -375,6 +552,7 @@ ssh_menu() {
   esac
 
   rm -f "$_run_log"
+  python3 "$PROJECT_DIR/pt-data/auth.py" clear_run "$PT_USER" 2>/dev/null || true
   read -r -p $'\nPress Enter...'
 }
 
@@ -445,7 +623,7 @@ docker_menu() {
   section_header "Docker — Local PT Stack"
   local compose_dir="$PROJECT_DIR/docker-local-pt"
   echo -e "${CYN}${BLD}  Container         Status                  Ports${RST}"
-  echo -e "  ${DIM}$(printf '─%.0s' $(seq 1 $(( $(tput cols 2>/dev/null || echo 80) - 4 ))))${RST}"
+  echo -e "  ${DIM}$(printf '─%.0s' $(seq 1 $(( ${COLUMNS:-$(tput cols 2>/dev/null || echo 80)} - 4 ))))${RST}"
   local ct_lines; ct_lines=$(docker ps --format "  {{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null | grep -E "pt-|k6" || true)
   if [[ -n "$ct_lines" ]]; then
     echo -e "$ct_lines" | awk -F'\t' '{printf "  '"${GRN}"'▶'"${RST}"'  %-18s  %-22s  '"${DIM}"'%s'"${RST}"'\n", $1, $2, $3}'
@@ -513,7 +691,7 @@ run_test_menu() {
   # Build mock-ready set from list-scenarios.mjs
   local mock_suites
   mock_suites=$(node "$PROJECT_DIR/docker-local-pt/scripts/list-scenarios.mjs" --json 2>/dev/null \
-    | python3 -c "import sys,json; data=json.load(sys.stdin); [print(d['suite']) for d in data if d.get('mockReady')]" 2>/dev/null \
+    | python3 -c "import sys,json; data=json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]'); [print(d['suite']) for d in data if d.get('mockReady')]" 2>/dev/null \
     | sort -u || true)
 
   echo -e "  ${CYN}ENV: $(env_val ENV LOCAL) | VUs: $(env_val K6_USERS 1) | ${YLW}$(env_val DURATION 30s)${RST}"
@@ -549,12 +727,14 @@ run_test_menu() {
       [[ "$platform" != "All" ]] && platform_arg="$platform"
 
       print_run_header "$suite_name  [Mock Suite · $platform]" "Local Docker Mock"
+      python3 "$PROJECT_DIR/pt-data/auth.py" set_run "$PT_USER" "MockSuite:$suite_name" "5m" 2>/dev/null || true
       set +e
       bash "$run_sh" "$suite_name" "$platform_arg" 2>&1 | tee "$_local_log"
       _local_rc=${PIPESTATUS[0]}; set -e
       print_run_footer "$_local_rc" "$_local_log"
       python3 "$PROJECT_DIR/docker-local-pt/scripts/print-summary-table.py" "$PROJECT_DIR/docker-local-pt/results/summary.json" 2>/dev/null || true
       rm -f "$_local_log"
+      python3 "$PROJECT_DIR/pt-data/auth.py" clear_run "$PT_USER" 2>/dev/null || true
       read -r -p $'\nPress Enter...' ;;
 
     "⚡ Direct: "*)
@@ -599,6 +779,7 @@ run_test_menu() {
       fi
 
       print_run_header "$suite_name / $(basename "$js_sel")  [Direct · ${vus}VU · $dur]" "k6 binary"
+      python3 "$PROJECT_DIR/pt-data/auth.py" set_run "$PT_USER" "$(basename "$js_sel")" "$dur" 2>/dev/null || true
       set +e
       if [[ "$use_mock" == "y" ]]; then
         BASE_URL="$mock_url" "$K6_BIN" run "$PROJECT_DIR/$js_sel" \
@@ -613,6 +794,7 @@ run_test_menu() {
       print_run_footer "$_local_rc" "$_local_log"
       python3 "$PROJECT_DIR/docker-local-pt/scripts/print-summary-table.py" "$PROJECT_DIR/docker-local-pt/results/summary.json" 2>/dev/null || true
       rm -f "$_local_log"
+      python3 "$PROJECT_DIR/pt-data/auth.py" clear_run "$PT_USER" 2>/dev/null || true
       read -r -p $'\nPress Enter...' ;;
 
     "← Back") rm -f "$_local_log"; return ;;
@@ -622,53 +804,40 @@ run_test_menu() {
 # ── Cron Scheduler ──────────────────────────────────────────────────────────
 cron_scheduler_menu() {
   banner
-  section_header "Cron Scheduler — Manage Scheduled Jobs"
-
-  local scheduler="$PROJECT_DIR/scheduler_cli/main.py"
-  if [[ ! -f "$scheduler" ]]; then
-    echo -e "  ${RED}scheduler_cli/main.py not found${RST}"
-    read -r -p $'\nPress Enter...'
-    return
-  fi
+  section_header "Cron Scheduler (SQLite)"
 
   local choices=(
     "[1] Dashboard (List Jobs)"
     "[2] Add Job"
     "[3] Pause/Resume Job"
     "[4] Remove Job"
-    "[5] Run Self-Test"
     "[0] Back"
   )
   local sel; sel=$(pick_fzf "Scheduler>" "${choices[@]}")
-
-
   [[ -z "$sel" ]] && return
+
   case "$sel" in
     "[1] Dashboard"*)
       echo -e "\n${CYN}  Managed Jobs:${RST}\n"
-      local state="$PROJECT_DIR/scheduler_cli/data/jobs_state.json"
-      if [[ -f "$state" ]]; then
-        echo -e "\n${BLD}  Jobs State:${RST}"
-        local py_out
-        py_out=$(python3 -c "import json; d=json.load(open('$state')); jobs=d.get('jobs',{}); [print(f'  {k}: {v[\"status\"]} | {v[\"cron_expr\"]} | {v[\"script_path\"]}') for k,v in jobs.items()]" 2>&1) || true
-        if [[ -n "$py_out" ]]; then
-          echo "$py_out"
-        else
-          echo "  (empty)"
-        fi
-      else
-        echo -e "  ${YLW}No jobs configured yet${RST}"
-      fi
+      python3 "$PROJECT_DIR/bin/pt-scheduler" list | python3 -c "
+import json, sys
+jobs = json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]').get('data', {}).get('jobs', [])
+if not jobs:
+    print('  (empty)')
+else:
+    print(f\"  {'ID':<15} | {'Status':<8} | {'Cron Expr':<15} | {'Script'}\")
+    print('  ' + '-'*60)
+    for j in jobs:
+        print(f\"  {j['id']:<15} | {j['status']:<8} | {j['cron_expr']:<15} | {j['script_path']}\")
+"
+      read -r -p $'\nPress Enter...'
       ;;
     "[2] Add Job"*)
-      echo -e "\n${BLD}  Add Scheduled Job${RST}\n"
       printf "  Job ID: "; read -r job_id
-      [[ -z "$job_id" ]] && { echo -e "  ${RED}Cancelled${RST}"; read -r -p $'\nPress Enter...'; return; }
-
-      printf "  Cron expression [*/5 * * * *]: "; read -r cron_expr
+      [[ -z "$job_id" ]] && return
+      printf "  Cron expr [*/5 * * * *]: "; read -r cron_expr
       cron_expr="${cron_expr:-*/5 * * * *}"
 
-      # Pick script from Script/ directory
       local script_choices=()
       while IFS= read -r s; do
         [[ -z "$s" ]] && continue
@@ -679,110 +848,40 @@ cron_scheduler_menu() {
       script_choices+=("Custom path")
 
       local script_sel; script_sel=$(pick_fzf "Script>" "${script_choices[@]}")
-
-      [[ -z "$script_sel" ]] && { read -r -p $'\nPress Enter...'; return; }
+      [[ -z "$script_sel" ]] && return
       local script_path="$script_sel"
       if [[ "$script_sel" == "Custom path" ]]; then
         printf "  Script path: "; read -r script_path
-        [[ -z "$script_path" ]] && { echo "Cancelled."; read -r -p $'\nPress Enter...'; return; }
+        [[ -z "$script_path" ]] && return
       fi
-
-      # AI slope check first
-      echo -e "\n${YLW}  Running AI Slope Check...${RST}"
-      set +e
-      python3 -c "
-import sys; sys.path.insert(0,'$PROJECT_DIR/scheduler_cli')
-from ai.slope_validator import validate_script, format_report
-r = validate_script('$script_path')
-print(format_report(r))
-if not r['passed']:
-    sys.exit(1)
-" 2>&1
-      local slope_rc=$?
-      set -e
-      if [[ $slope_rc -ne 0 ]]; then
-        printf "  ${YLW}AI check failed. Add anyway? (y/n): ${RST}"; read -r force_add
-        [[ "$force_add" != "y" ]] && { read -r -p $'\nPress Enter...'; return; }
-      fi
-
-      set +e
-      python3 -c "
-import sys; sys.path.insert(0,'$PROJECT_DIR/scheduler_cli')
-from core.cron_manager import add_job
-ok, msg = add_job('$job_id', '$cron_expr', '$script_path')
-print(msg)
-" 2>&1
-      set -e
+      
+      python3 "$PROJECT_DIR/bin/pt-scheduler" add --id "$job_id" --cron "$cron_expr" --script "$script_path" --by "$PT_USER" | python3 -c "import json,sys; print(json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]').get('message', 'Failed'))"
+      read -r -p $'\nPress Enter...'
       ;;
     "[3] Pause/Resume"*)
-      local state="$PROJECT_DIR/scheduler_cli/data/jobs_state.json"
-      if [[ ! -f "$state" ]]; then
-        echo -e "  ${YLW}No jobs${RST}"
-        read -r -p $'\nPress Enter...'
-        return
-      fi
-      local job_list
-      job_list=$(python3 -c "import json; d=json.load(open('$state')); [print(k+' ('+v['status']+')') for k,v in d.get('jobs',{}).items()]" 2>/dev/null || true)
-      if [[ -z "$job_list" ]]; then
-        echo -e "  ${YLW}No jobs${RST}"
-        read -r -p $'\nPress Enter...'
-        return
-      fi
-      local job_sel; job_sel=$(echo "$job_list" | fzf --prompt="Toggle> " --height=~30% --border=rounded)
+      local job_list; job_list=$(python3 "$PROJECT_DIR/bin/pt-scheduler" list | python3 -c "import json,sys; [print(f\"{j['id']} ({j['status']})\") for j in json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]').get('data',{}).get('jobs',[])]")
+      [[ -z "$job_list" ]] && return
+      local job_sel; job_sel=$(echo "$job_list" | pick_fzf "Toggle>")
       [[ -z "$job_sel" ]] && return
+      
       local jid="${job_sel%% *}"
-      local jstatus
-      jstatus=$(echo "$job_sel" | sed 's/.*(//' | sed 's/)//')
-
-      local action="pause"
-      [[ "$jstatus" == "paused" ]] && action="resume"
-
-      set +e
-      python3 -c "
-import sys; sys.path.insert(0,'$PROJECT_DIR/scheduler_cli')
-from core.cron_manager import ${action}_job
-ok, msg = ${action}_job('$jid')
-print(msg)
-" 2>&1
-      set -e
+      local act="resume"
+      [[ "$job_sel" == *"(active)"* ]] && act="pause"
+      
+      python3 "$PROJECT_DIR/bin/pt-scheduler" toggle --id "$jid" --action "$act" | python3 -c "import json,sys; print(json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]').get('message', 'Failed'))"
+      read -r -p $'\nPress Enter...'
       ;;
     "[4] Remove"*)
-      local state="$PROJECT_DIR/scheduler_cli/data/jobs_state.json"
-      if [[ ! -f "$state" ]]; then
-        echo -e "  ${YLW}No jobs to remove${RST}"
-        read -r -p $'\nPress Enter...'
-        return
-      fi
-      local job_list
-      job_list=$(python3 -c "import json; d=json.load(open('$state')); [print(k) for k in d.get('jobs',{}).keys()]" 2>/dev/null || true)
-      if [[ -z "$job_list" ]]; then
-        echo -e "  ${YLW}No jobs${RST}"
-        read -r -p $'\nPress Enter...'
-        return
-      fi
-      local job_sel; job_sel=$(echo "$job_list" | fzf --prompt="Remove> " --height=~30% --border=rounded)
+      local job_list; job_list=$(python3 "$PROJECT_DIR/bin/pt-scheduler" list | python3 -c "import json,sys; [print(j['id']) for j in json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]').get('data',{}).get('jobs',[])]")
+      [[ -z "$job_list" ]] && return
+      local job_sel; job_sel=$(echo "$job_list" | pick_fzf "Remove>")
       [[ -z "$job_sel" ]] && return
-      printf "  Remove '%s'? (y/n): " "$job_sel"; read -r confirm
-      [[ "$confirm" != "y" ]] && { read -r -p $'\nPress Enter...'; return; }
-
-      set +e
-      python3 -c "
-import sys; sys.path.insert(0,'$PROJECT_DIR/scheduler_cli')
-from core.cron_manager import remove_job
-ok, msg = remove_job('$job_sel')
-print(msg)
-" 2>&1
-      set -e
-      ;;
-    "[5] Run Self-Test"*)
-      echo -e "\n${CYN}  Running scheduler self-test...${RST}\n"
-      set +e
-      python3 "$scheduler" --test-check
-      set -e
+      
+      python3 "$PROJECT_DIR/bin/pt-scheduler" remove --id "$job_sel" | python3 -c "import json,sys; print(json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]').get('message', 'Failed'))"
+      read -r -p $'\nPress Enter...'
       ;;
     "[0] Back") return ;;
   esac
-  read -r -p $'\nPress Enter...'
 }
 
 # ── AI Slope Check (Standalone) ────────────────────────────────────────────
@@ -834,19 +933,22 @@ print(format_report(r))
 
 # ── Main Menu ───────────────────────────────────────────────────────────────
 main_menu() {
+  pt_require_auth
+  python3 "$PROJECT_DIR/bin/pt-audit" log "${PT_USER:-unknown}" "login" "pt-menu" "" 2>/dev/null || true
   while true; do
     banner
 
-    local choices=(
-      "[1] Remote Runner (SSH + Cloud/Onprem)"
-      "[2] Local Runner (Mock Docker K6)"
-      "[3] Cron Scheduler"
-      "[4] AI Slope (Code Quality)"
-      "[5] ENV Editor"
-      "[6] Docker Stack"
-      "[7] Open Project Dir"
-      "[Q] Quit"
-    )
+    local choices=()
+    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" || "$PT_ROLE" == "tester" ]] && choices+=("[1] Remote Runner (SSH + Cloud/Onprem)")
+    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" || "$PT_ROLE" == "tester" ]] && choices+=("[2] Local Runner (Mock Docker K6)")
+    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" ]] && choices+=("[3] Cron Scheduler")
+    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" || "$PT_ROLE" == "tester" ]] && choices+=("[4] AI Slope (Code Quality)")
+    [[ "$PT_ROLE" != "viewer" ]] && choices+=("[5] ENV Editor")
+    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" ]] && choices+=("[6] Docker Stack")
+    choices+=("[7] Open Project Dir")
+    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" ]] && choices+=("[D] Dashboard (Live Monitor)")
+    [[ "$PT_ROLE" == "god" ]] && choices+=("[8] User Management")
+    choices+=("[Q] Quit")
 
     local sel; sel=$(pick_fzf "Action>" "${choices[@]}")
 
@@ -859,6 +961,8 @@ main_menu() {
       "[5] ENV Editor"*)  env_edit_menu ;;
       "[6] Docker Stack"*) docker_menu ;;
       "[7] Open Project Dir"*) open_dir "$PROJECT_DIR" ;;
+      "[8] User Management"*) user_mgmt_menu ;;
+      "[D] Dashboard"*) bash "$PROJECT_DIR/bin/pt-dashboard" ;;
       "[Q] Quit"|"") echo -e "\n${GRN}bye.${RST}\n"; exit 0 ;;
     esac
   done
