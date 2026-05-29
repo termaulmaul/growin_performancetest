@@ -186,6 +186,7 @@
   },
   "active": "3fb20bc5cc81c245",
   "lastOpenFiles": [
+    "bin/pt-remote-daemon.sh",
     "setup-pt.sh",
     "CHANGELOG.md",
     "test_boot.expect",
@@ -197,7 +198,6 @@
     "tools/migrate-scheduler.py",
     "bin/__pycache__/pt-usermgmtcpython-314.pyc",
     "bin/pt-usermgmt",
-    "bin/pt-dashboard",
     "READMOCKDOCK.md",
     "docker-local-pt/jenkins/README.md",
     "docker-local-pt/results/mock-suite-report.md",
