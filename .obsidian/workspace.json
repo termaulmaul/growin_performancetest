@@ -186,6 +186,7 @@
   },
   "active": "3fb20bc5cc81c245",
   "lastOpenFiles": [
+    "bin/pt-rescue",
     "dummy.json",
     "bin/__pycache__/pt-schedulercpython-314.pyc",
     "bin/pt-scheduler",
@@ -196,7 +197,6 @@
     "bin/pt-resmon",
     "bin/pt-lock-status",
     "bin/__pycache__/pt-lockcpython-314.pyc",
-    "bin/pt-lock",
     "READMOCKDOCK.md",
     "docker-local-pt/jenkins/README.md",
     "docker-local-pt/results/mock-suite-report.md",
