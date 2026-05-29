@@ -1,253 +1,130 @@
-# Growin Performance Test
+# Growin Performance Test Framework
 
-k6-based performance test suite for Growin platform. Supports Web, Android, iOS scenarios across multiple product suites with local Docker mock environment and remote VM execution.
+Enterprise-grade **k6-based** performance testing suite for the Growin platform. Designed to run massive scale load tests across Web, Android, and iOS scenarios using remote VMs or safely test locally via Dockerized Mock APIs. 
 
-## Quick Start
+Includes an advanced **interactive terminal UI (TUI)** to orchestrate all environments, schedulers, code quality checks, and runners seamlessly from your command line.
+
+---
+
+## 🚀 Quick Start
+
+Launch the interactive TUI (Requires `fzf` and `python3`):
 
 ```bash
-# Interactive TUI menu (recommended)
 ./pt-menu.sh
-
-# Direct local mock run
-cd docker-local-pt
-docker compose --env-file configs/local.env up -d mock-api
-docker compose --env-file configs/local.env run --rm k6-runner
 ```
 
-## Repository Structure
+## 🗺️ TUI Architecture & Navigation
 
+```mermaid
+flowchart TD
+    A(main_menu) --> B[1. Remote Runner]
+    A --> C[2. Local Runner]
+    A --> D[3. Cron Scheduler]
+    A --> E[4. AI Slope Scanner]
+    A --> F[5. ENV Editor]
+    A --> G[6. Docker Stack]
+    A --> H[7. Open Project Dir]
+
+    B --> B1{Pick Target}
+    B1 -->|Onprem| B2[SSH Jump 10.82.. -> 10.184..]
+    B1 -->|Oncloud| B3[GCP IAP vm-pt-ksix-0]
+    B1 -->|Local Sandbox| B4[Docker 127.0.0.1:2222]
+    B2 & B3 & B4 --> B5{Pick Script}
+    B5 -->|Custom Command| B6[Run Cmd]
+    B5 -->|Pick .sh / .js| B7[Execute via remote k6]
+
+    C --> C1{Pick Suite}
+    C1 -->|✓ MockReady| C2[Run via Mock API]
+    C1 -->|⚡ Direct| C3[Run via Host k6 binary]
+    C2 & C3 --> C4[Generate Summary Table]
+
+    D --> D1[Dashboard]
+    D --> D2[Add Job]
+    D --> D3[Pause/Resume]
+    D --> D4[Remove]
+
+    G --> G1[Start mock-api]
+    G --> G2[Start mock + Influx/Grafana]
+    G --> G3[Restart Stack]
+    G --> G4[Show Logs]
 ```
+
+---
+
+## 💻 Environment Capabilities
+
+### 1. Local Runner (Mock & Direct)
+Execute scripts directly from your host machine.
+- **✓ MockReady Suites:** Scripts structured inside `Web/`, `iOS/`, `Android/` subdirectories (`BPxxx.js`). Runs tests through the `docker-local-pt` stack against `http://mock-api:8080`.
+- **⚡ Direct Suites:** Scripts that use flat structures or hardcoded environments (`ENV=INT`). Runs via the native `./k6` binary from your host.
+
+> **Note:** A metric summary table (RPS, Errors, P95, Max/Min) is automatically printed to the terminal after every local run.
+
+### 2. Remote Runner (SSH)
+Deploy load tests to high-capacity execution environments.
+- **Onprem:** Connects through bastion jump host to execution servers via automated `sshpass`.
+- **Oncloud:** Connects to GCP VMs via Google Cloud IAP tunneling.
+- **Local Sandbox:** SSH into an isolated Docker container (`127.0.0.1:2222`) that simulates a remote server environment.
+
+### 3. Cron Scheduler CLI
+Built-in Python scheduling system for unmanned execution.
+- Automatically validates script quality via **AI Slope Scanner** before adding jobs to the schedule.
+- Dashboard for viewing `Running` or `Paused` jobs.
+
+### 4. Docker Stack
+A complete isolated ecosystem for test development.
+- **`mock-api`:** Simulates platform responses safely.
+- **`influxdb` + `grafana`:** Local observability when needed.
+
+---
+
+## 📁 Repository Structure
+
+```text
 growin_performancetest/
-├── Script/                    # Test suites by product
+├── Script/                    # Test suites by product (~25 products)
 │   ├── Growin_Calendar/       # Calendar module (Web/Android/iOS)
-│   ├── Growin_Community/      # Community features
-│   ├── Growin_2FA/            # Two-factor auth scenarios
-│   ├── Growin_PT_Dev[ToDo]/   # Dev playground suite
-│   └── ...                    # ~25 product suites
+│   ├── OMO_Android/           # Flat-structure android tests
+│   └── ... 
 ├── docker-local-pt/           # Local mock PT environment
 │   ├── docker-compose.yml     # mock-api + k6 + observability
 │   ├── configs/local.env      # Environment config
-│   ├── scripts/               # Runner/generator scripts
-│   └── results/               # Test outputs
-├── docker/pt/                 # Alternative compose (real INT)
-├── tools/                     # Audit & utility scripts
-├── Report/                    # Historical test reports
-├── Helper/                    # k6 helpers (bundle, config)
-├── pt-menu.sh                 # Interactive TUI menu
-└── go.mod                     # xk6 extension (mostngk6x)
+│   ├── scripts/               # Generators, YAML/JSON converters, table parsers
+│   └── results/               # Test outputs & summaries
+├── Report/                    # Generated HTML Dashboard Reports
+├── scheduler_cli/             # Python Cron scheduler & AI scanner
+├── pt-menu.sh                 # 🌟 Main entrypoint TUI
+└── k6                         # Native k6 binary (compiled with custom extensions)
 ```
 
-## Test Suites
+---
 
-| Suite | Description | Platforms |
-|-------|-------------|-----------|
-| `Growin_Calendar` | Calendar/scheduling features | Web, Android, iOS |
-| `Growin_Community` | Social/community features | Web, Android, iOS |
-| `Growin_2FA` | Two-factor authentication | Web |
-| `Growin_Banner_Promo` | Banner/promo display | Web, Android, iOS |
-| `Growin_Password_Expired` | Password expiry flows | Android |
-| `Growin_PT_Dev[ToDo]` | Development test scenarios | Web |
-| ... | ~25 total suites | varies |
+## 🛠️ Script Authoring Guidelines
 
-Each suite contains:
-- `BPxxx.js` — Original scenario scripts
-- `enchange_BPxxx.js` — Enhanced variants with improvements
-- Organized by platform: `Web/`, `Android/`, `iOS/`
+To ensure compatibility across both **Local Mock** and **Remote Environments**, scripts should dynamically construct URLs based on environment variables:
 
-## Local Mock Environment
+```javascript
+// ✅ Correct (Supports Mocking)
+const env = __ENV.ENV || 'LOCAL';
+const baseUrl = env === 'LOCAL' ? __ENV.BASE_URL : `https://${env.toLowerCase()}-api.growin.com`;
 
-Docker-based mock API for safe local testing without hitting real backends.
-
-### Start Stack
-
-```bash
-cd docker-local-pt
-
-# Basic: mock-api + k6
-docker compose --env-file configs/local.env up -d mock-api
-
-# With observability (Grafana + InfluxDB)
-docker compose --env-file configs/local.env --profile observability up -d
-
-# With Jenkins CI
-docker compose --env-file configs/local.env --profile ci up -d
+// ❌ Incorrect (Cannot be mocked locally)
+if (`${__ENV.ENV}` != 'INT') {
+    // Only works on Real Servers
+}
 ```
 
-### Run Tests
+**Variants:**
+- `BPxxx.js` — Original scenario scripts.
+- `enchange_BPxxx.js` — Refactored, enhanced variants with structured modularity.
 
-```bash
-# Single scenario via helper
-bash scripts/run-mock-scenario.sh BP001 Web original
+---
 
-# Suite sweep
-bash scripts/run-mock-suite.sh Growin_Calendar Web
+## 📊 K6 Custom Extensions (mostngk6x)
+The `k6` binary included is compiled via `xk6` with specialized drivers for our ecosystem:
+- `xk6-dashboard`
+- `xk6-file`
+- `xk6-sql` (Postgres & Oracle drivers)
 
-# Generate static runners
-node scripts/gen-mock-runner.mjs
-```
-
-### Environment Config (`configs/local.env`)
-
-```bash
-SUITE=Growin_PT_Dev[ToDo]     # Active suite
-SCENARIO=BP001                 # Scenario ID (BPxxx)
-PLATFORM=Web                   # Web | Android | iOS
-VARIANT=original               # original | enchange
-K6_USERS=1                     # Virtual users
-DURATION=30s                   # Test duration
-ENV=LOCAL                      # LOCAL | DEV | QA | INT
-BASE_URL=http://mock-api:8080  # Target API
-DEBUG=true                     # Verbose logging
-USE_GRAFANA_OUTPUT=false       # Send metrics to Influx
-```
-
-## Remote Execution
-
-### SSH Targets
-
-| Environment | Host | User | Access |
-|-------------|------|------|--------|
-| Onprem-1 | `10.82.15.72` | `qa` | Password: `M@nsek.1234` |
-| Onprem-2 | `10.184.120.48` | `qa` | Password: `M@nsek.1234` |
-| Cloud (GCP) | `vm-pt-ksix-0` | IAP | `gcloud compute ssh --zone asia-southeast2-c vm-pt-ksix-0 --tunnel-through-iap --project compute-pt` |
-
-Use `pt-menu.sh` → SSH for interactive selection, or:
-
-```bash
-# Onprem
-ssh qa@10.82.15.72
-
-# Cloud via IAP
-gcloud compute ssh --zone "asia-southeast2-c" "vm-pt-ksix-0" \
-  --tunnel-through-iap --project "compute-pt"
-```
-
-### Report Sync
-
-```bash
-# Pull reports from VM to local
-scp -r qa@10.82.15.72:/home/qa/Report/Growin_Calendar ./Report/
-
-# Push to VM
-scp -r ./Report/Growin_Calendar qa@10.82.15.72:/home/qa/Report/
-```
-
-## TUI Menu (`pt-menu.sh`)
-
-Interactive fzf-based menu for common operations:
-
-```bash
-./pt-menu.sh
-```
-
-**Features:**
-- 🖥 **SSH** — Connect to Onprem/Cloud servers (auto password copy)
-- ⚙️ **ENV** — Edit `local.env` inline (BASE_URL, VUs, duration, etc.)
-- 🐳 **Docker** — Start/stop/restart local PT stack
-- ▶️ **Run Test** — Execute scenarios via mock runner
-
-**Requirements:** `fzf` (install: `brew install fzf`)
-
-## Custom k6 Extension (mostngk6x)
-
-Built via xk6 with multiple extensions:
-
-```bash
-# Compile extension
-go mod init mostngk6x
-go mod tidy
-
-# Build k6 with extensions
-xk6 build \
-  --with github.com/grafana/xk6-dashboard \
-  --with github.com/avitalique/xk6-file \
-  --with github.com/grafana/xk6-sql \
-  --with github.com/denyshuzovskyi/xk6-sql-driver-oracle \
-  --with github.com/grafana/xk6-sql-driver-postgres \
-  --with github.com/stefnedelchevbrady/xk6-sql-with-oracle \
-  --with mostngk6x=.
-```
-
-## Scripts Reference
-
-### docker-local-pt/scripts/
-
-| Script | Purpose |
-|--------|---------|
-| `run-mock-scenario.sh` | Run single BP scenario |
-| `run-mock-suite.sh` | Sweep all scenarios in suite |
-| `gen-mock-runner.mjs` | Generate static k6 runner files |
-| `list-scenarios.mjs` | List available scenarios |
-| `compare-summary.mjs` | Compare original vs enchange results |
-| `yaml-to-json.mjs` | Convert YAML config to JSON |
-| `check-k6-js-compat.mjs` | Check JS syntax compatibility |
-| `resolve-k6-users.sh` | Resolve VU count from env vars |
-
-### tools/
-
-| Script | Purpose |
-|--------|---------|
-| `audit-enhanced-contracts.mjs` | Audit enchange script contracts |
-| `audit-banner-promo-bp001-parity.mjs` | Banner promo parity check |
-
-## Observability
-
-### Grafana Dashboard
-
-When running with `--profile observability`:
-- **URL:** http://localhost:3000
-- **Dashboard:** `Local k6 PT Dashboard` (uid: `k6-local-pt`)
-- **Credentials:** admin/admin
-
-### InfluxDB
-
-- **URL:** http://localhost:8086
-- **Database:** `k6`
-
-### Jenkins CI
-
-When running with `--profile ci`:
-- **URL:** http://localhost:18081
-- **Pipeline:** `local-k6-mock-pipeline`
-
-```bash
-# Get initial admin password
-docker exec pt-jenkins cat /var/jenkins_home/secrets/initialAdminPassword
-```
-
-## Workflow
-
-### Local Development
-
-```mermaid
-flowchart LR
-  Edit[Edit BP script] --> Mock[Run mock test]
-  Mock --> Check{Pass?}
-  Check -->|No| Edit
-  Check -->|Yes| Compare[Compare original vs enchange]
-  Compare --> INT[Test on INT]
-  INT --> Promote[Promote to production]
-```
-
-### Promotion Checklist
-
-1. ✅ Mock test passes (original + enchange)
-2. ✅ `compare-summary.mjs` shows compatible metrics
-3. ✅ INT parallel run (low VU)
-4. ✅ Grafana metrics comparison
-5. ✅ Jenkins env reproduction
-
-## Documentation
-
-- [`READMOCKDOCK.md`](./READMOCKDOCK.md) — Detailed Docker mock operator guide
-- [`docs/`](./docs/) — Additional documentation
-- [`docker-local-pt/README.md`](./docker-local-pt/README.md) — Local PT stack details
-
-## Requirements
-
-- Docker Desktop (for local mock)
-- Node.js 18+ (for generator scripts)
-- pnpm (optional, for dependency management)
-- fzf (for `pt-menu.sh`)
-- Go 1.22+ (for xk6 extension compilation)
-- gcloud CLI (for Cloud IAP SSH)
+*For complete local mock operator documentation, see [`READMOCKDOCK.md`](./READMOCKDOCK.md).*
