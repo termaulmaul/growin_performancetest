@@ -3,6 +3,8 @@
 
 set -euo pipefail
 
+trap '[[ -n "${_SPINNER_PID:-}" ]] && kill "$_SPINNER_PID" 2>/dev/null || true' EXIT
+
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_FILE="$PROJECT_DIR/docker-local-pt/configs/local.env"
 
@@ -13,13 +15,15 @@ DIM='\033[2m'; MAG='\033[0;35m'
 
 _RUN_START=0
 _RUN_LABEL=""
+_FZF_KEY=""
 
 # ── Run UI ───────────────────────────────────────────────────────────────────
 print_run_header() {
   local label="$1" target="${2:-}"
   _RUN_START=$(date +%s)
   _RUN_LABEL="$label"
-  local w=50
+  local term_w; term_w=$(tput cols 2>/dev/null || echo 80)
+  local w=$(( term_w - 4 )); true
   local bar; bar=$(printf '─%.0s' $(seq 1 $w))
   echo -e "\n${CYN}${BLD}┌─ ▶  $label${RST}"
   [[ -n "$target" ]] && echo -e "${CYN}${BLD}│${RST}${DIM}     Target : ${RST}${YLW}$target${RST}"
@@ -32,7 +36,8 @@ print_run_footer() {
   local elapsed=$(( $(date +%s) - _RUN_START ))
   local dur_str="${elapsed}s"
   [[ $elapsed -ge 60 ]] && dur_str="$(( elapsed/60 ))m $(( elapsed%60 ))s"
-  local w=50
+  local term_w; term_w=$(tput cols 2>/dev/null || echo 80)
+  local w=$(( term_w - 4 )); true
   local bar; bar=$(printf '─%.0s' $(seq 1 $w))
   echo -e "\n${CYN}${BLD}┌${bar}${RST}"
   echo -e "${CYN}${BLD}│${RST}${DIM}     End    : $(date '+%H:%M:%S')  (+${dur_str})${RST}"
@@ -97,7 +102,7 @@ banner() {
   [[ "$docker_ct" -gt 0 ]] && docker_color="$GRN"
   local sep="${DIM}│${RST}"
   echo -e "  ${DIM}IP:${RST} $(get_local_ip)  $sep  ${YLW}ENV:${RST} $env_tag  $sep  ${YLW}VUs:${RST} $vus  $sep  ${YLW}Dur:${RST} $dur  $sep  ${docker_color}Docker: ${docker_ct} up${RST}"
-  echo -e "  ${DIM}$(printf '─%.0s' $(seq 1 70))${RST}\n"
+  echo -e "  ${DIM}$(printf '─%.0s' $(seq 1 $(( $(tput cols 2>/dev/null || echo 80) - 4 ))))${RST}\n"
 }
 
 env_val() {
@@ -126,17 +131,23 @@ show_env_summary() {
 
 pick_fzf() {
   local prompt="$1"; shift
-  printf '%s\n' "$@" | fzf \
+  local val
+  # Run fzf; ESC/Ctrl-C = abort = exit code 130 → treat as "back" (return empty)
+  val=$(printf '%s\n' "$@" | fzf \
     --prompt="$prompt " \
-    --header="  ↑↓ navigate  ↵ select  ESC back" \
-    --height=~50% --border=rounded --layout=reverse \
+    --header="  ↑↓ navigate  ↵ select  ESC=back  Ctrl-C=exit" \
+    --height=~60% --border=rounded --layout=reverse \
     --color='prompt:cyan,pointer:yellow,fg+:bright-green,header:240,border:cyan,hl:yellow,hl+:bright-yellow' \
-    --no-info --ansi
+    --no-info --ansi 2>/dev/null) || true
+  _FZF_KEY=""
+  echo "$val"
 }
 
 section_header() {
   local title="$1"
-  local w=54
+  local term_w; term_w=$(tput cols 2>/dev/null || echo 80)
+  local w=$(( term_w - 4 ))
+  [[ $w -lt 40 ]] && w=40
   local bar; bar=$(printf '═%.0s' $(seq 1 $w))
   echo -e "\n${CYN}${BLD}╔${bar}╗${RST}"
   printf "${CYN}${BLD}║${RST}  ${BLD}%-${w}s${CYN}${BLD}║${RST}\n" "$title"
@@ -191,12 +202,13 @@ ssh_menu() {
   local choices=(
     "Onprem (Jump 10.82.15.72 -> 10.184.120.48)"
     "Oncloud (GCP IAP vm-pt-ksix-0)"
-    "Local Sandbox (Docker 127.0.0.1:2222)"
+    "Local Sandbox (Docker 127.0.0.1:2222)  [mock=host:18080]"
     "← Back"
   )
 
   local sel; sel=$(pick_fzf "SSH target>" "${choices[@]}")
-  [[ "$sel" == "← Back" ]] && return
+
+  [[ -z "$sel" || "$sel" == "← Back" ]] && return
 
   section_header "Select Script / Command"
   local scripts=()
@@ -207,6 +219,7 @@ ssh_menu() {
   scripts+=("Custom Command" "Only Connect (Interactive Shell)")
 
   local script_sel; script_sel=$(pick_fzf "Script>" "${scripts[@]}")
+
 
   [[ -z "$script_sel" || "$script_sel" == "← Back" ]] && return
 
@@ -231,6 +244,7 @@ ssh_menu() {
        fi
 
        local file_sel; file_sel=$(pick_fzf "Select script file>" "${files[@]}")
+
        [[ -z "$file_sel" ]] && { echo "Cancelled."; read -r -p $'\nPress Enter...'; return; }
 
        if [[ "$file_sel" == *.sh ]]; then
@@ -241,6 +255,7 @@ ssh_menu() {
 
          local plat_choices=("Web" "iOS" "Android")
          local platform; platform=$(pick_fzf "Platform>" "${plat_choices[@]}")
+
          [[ -z "$platform" ]] && { echo "Cancelled."; read -r -p $'\nPress Enter...'; return; }
 
          local bps=()
@@ -253,6 +268,7 @@ ssh_menu() {
          if [[ ${#bps[@]} -gt 0 ]]; then
            local scenario_choices=("All" "${bps[@]}")
            local scenario_sel; scenario_sel=$(pick_fzf "Scenario (BP)>" "${scenario_choices[@]}")
+
            [[ -z "$scenario_sel" ]] && { echo "Cancelled."; read -r -p $'\nPress Enter...'; return; }
            if [[ "$scenario_sel" != "All" ]]; then
              scenario="$scenario_sel"
@@ -280,6 +296,7 @@ ssh_menu() {
 
          local runby_choices=("Manual" "Regression" "LoadTest")
          local runby; runby=$(pick_fzf "RUNBY>" "${runby_choices[@]}")
+
          [[ -z "$runby" ]] && { echo "Cancelled."; read -r -p $'\nPress Enter...'; return; }
 
          local scen_label="${scenario:-AllBP}"
@@ -292,6 +309,7 @@ ssh_menu() {
     "Custom Command")
        printf "Command: "
        read -r run_cmd
+       [[ -z "$run_cmd" ]] && { echo "Cancelled."; read -r -p $'\nPress Enter...'; return; }
        _run_label="Custom: $run_cmd"
        ;;
   esac
@@ -373,10 +391,11 @@ env_edit_menu() {
   )
   local sel; sel=$(pick_fzf "ENV action>" "${choices[@]}")
 
+
   [[ -z "$sel" ]] && return
   case "$sel" in
     "Edit full .env"*)
-      ${EDITOR:-nano} "$ENV_FILE" ;;
+      ${EDITOR:-nano} "$ENV_FILE"; return ;;
     "Set single key=value")
       if [[ ! -f "$ENV_FILE" ]]; then
         echo -e "  ${RED}ENV file not found: $ENV_FILE${RST}"
@@ -391,6 +410,7 @@ env_edit_menu() {
       done < <(grep -E '^[A-Z_]+=.' "$ENV_FILE" | cut -d= -f1 | sort -u)
       keys+=("New key")
       local key_sel; key_sel=$(pick_fzf "Key>" "${keys[@]}")
+
       [[ -z "$key_sel" ]] && { read -r -p $'\nPress Enter...'; return; }
 
       local key="$key_sel"
@@ -416,7 +436,7 @@ env_edit_menu() {
       ;;
     "← Back") return ;;
   esac
-  sleep 1
+  read -r -p $'\nPress Enter...'
 }
 
 # ── Docker Section ──────────────────────────────────────────────────────────
@@ -425,7 +445,7 @@ docker_menu() {
   section_header "Docker — Local PT Stack"
   local compose_dir="$PROJECT_DIR/docker-local-pt"
   echo -e "${CYN}${BLD}  Container         Status                  Ports${RST}"
-  echo -e "  ${DIM}$(printf '─%.0s' $(seq 1 58))${RST}"
+  echo -e "  ${DIM}$(printf '─%.0s' $(seq 1 $(( $(tput cols 2>/dev/null || echo 80) - 4 ))))${RST}"
   local ct_lines; ct_lines=$(docker ps --format "  {{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null | grep -E "pt-|k6" || true)
   if [[ -n "$ct_lines" ]]; then
     echo -e "$ct_lines" | awk -F'\t' '{printf "  '"${GRN}"'▶'"${RST}"'  %-18s  %-22s  '"${DIM}"'%s'"${RST}"'\n", $1, $2, $3}'
@@ -443,6 +463,7 @@ docker_menu() {
     "← Back"
   )
   local sel; sel=$(pick_fzf "Docker action>" "${choices[@]}")
+
 
   [[ -z "$sel" ]] && return
   cd "$compose_dir"
@@ -481,37 +502,49 @@ docker_menu() {
     "← Back") cd "$PROJECT_DIR"; return ;;
   esac
   cd "$PROJECT_DIR"
-  sleep 1
+  read -r -p $'\nPress Enter...'
 }
 
 # ── Local Run Test ──────────────────────────────────────────────────────────
 run_test_menu() {
   banner
   section_header "Run Test — Local Docker Mock"
-  echo -e "  ${CYN}ENV: $(env_val ENV LOCAL) | VUs: $(env_val K6_USERS 1) | ${YLW}$(env_val DURATION 30s)${RST}\n"
+
+  # Build mock-ready set from list-scenarios.mjs
+  local mock_suites
+  mock_suites=$(node "$PROJECT_DIR/docker-local-pt/scripts/list-scenarios.mjs" --json 2>/dev/null \
+    | python3 -c "import sys,json; data=json.load(sys.stdin); [print(d['suite']) for d in data if d.get('mockReady')]" 2>/dev/null \
+    | sort -u || true)
+
+  echo -e "  ${CYN}ENV: $(env_val ENV LOCAL) | VUs: $(env_val K6_USERS 1) | ${YLW}$(env_val DURATION 30s)${RST}"
+  echo -e "  ${DIM}✓ = Mock API ready   ⚡ = Direct k6 (real ENV)${RST}\n"
 
   local choices=()
   while IFS= read -r s; do
     [[ -z "$s" ]] && continue
-    choices+=("Mock Suite: $s")
+    if echo "$mock_suites" | grep -qx "$s"; then
+      choices+=("✓ Mock: $s")
+    else
+      choices+=("⚡ Direct: $s")
+    fi
   done < <(find "$PROJECT_DIR/Script" -maxdepth 1 -mindepth 1 -type d -exec basename {} \; | sort)
-  choices+=("Run BP001 Growin_PT_Dev")
   choices+=("← Back")
 
   local sel; sel=$(pick_fzf "Run Local>" "${choices[@]}")
-
   [[ -z "$sel" ]] && return
+
   local _local_log; _local_log=$(mktemp)
   local _local_rc=0
+
   case "$sel" in
-    "Mock Suite: "*)
-      local suite_name="${sel#Mock Suite: }"
+    "✓ Mock: "*)
+      local suite_name="${sel#✓ Mock: }"
       local run_sh="$PROJECT_DIR/docker-local-pt/scripts/run-mock-suite.sh"
 
-      # Platform picker
       local plat_choices=("Web" "iOS" "Android" "All")
       local platform; platform=$(pick_fzf "Platform>" "${plat_choices[@]}")
       [[ -z "$platform" ]] && { rm -f "$_local_log"; return; }
+
       local platform_arg=""
       [[ "$platform" != "All" ]] && platform_arg="$platform"
 
@@ -520,17 +553,68 @@ run_test_menu() {
       bash "$run_sh" "$suite_name" "$platform_arg" 2>&1 | tee "$_local_log"
       _local_rc=${PIPESTATUS[0]}; set -e
       print_run_footer "$_local_rc" "$_local_log"
+      python3 "$PROJECT_DIR/docker-local-pt/scripts/print-summary-table.py" "$PROJECT_DIR/docker-local-pt/results/summary.json" 2>/dev/null || true
       rm -f "$_local_log"
       read -r -p $'\nPress Enter...' ;;
-    "Run BP001 Growin_PT_Dev")
-      local run_sc="$PROJECT_DIR/docker-local-pt/scripts/run-mock-scenario.sh"
-      print_run_header "Growin_PT_Dev / BP001  [Web · enchange]" "Local Docker Mock"
+
+    "⚡ Direct: "*)
+      local suite_name="${sel#⚡ Direct: }"
+      local suite_dir="$PROJECT_DIR/Script/$suite_name"
+      local K6_BIN="$PROJECT_DIR/k6"
+
+      # Collect all .js files (flat + sub-folders)
+      local js_files=()
+      while IFS= read -r f; do
+        [[ "$f" == *"copy"* || "$f" == *"_enhance_log.md" ]] && continue
+        js_files+=("$f")
+      done < <(find "$suite_dir" -name "*.js" | sed "s|$PROJECT_DIR/||" | sort)
+
+      if [[ ${#js_files[@]} -eq 0 ]]; then
+        echo -e "  ${RED}No .js scripts found in $suite_name${RST}"
+        read -r -p $'\nPress Enter...'; rm -f "$_local_log"; return
+      fi
+
+      local js_sel; js_sel=$(pick_fzf "Script>" "${js_files[@]}")
+      [[ -z "$js_sel" ]] && { rm -f "$_local_log"; return; }
+
+      # Config
+      local default_vus; default_vus=$(env_val K6_USERS 1)
+      printf "  VUs [%s]: " "$default_vus"; read -r vus
+      vus="${vus:-$default_vus}"
+
+      local default_dur; default_dur=$(env_val DURATION 30s)
+      printf "  Duration [%s]: " "$default_dur"; read -r dur
+      dur="${dur:-$default_dur}"
+
+      local default_env; default_env=$(env_val ENV INT)
+      printf "  ENV [%s]: " "$default_env"; read -r env_name
+      env_name="${env_name:-$default_env}"
+
+      local mock_url="http://localhost:18080"
+      local use_mock="n"
+      if [[ "$env_name" == "LOCAL" ]]; then
+        use_mock="y"
+      else
+        printf "  Use mock-api (%s)? (y/n): " "$mock_url"; read -r use_mock
+      fi
+
+      print_run_header "$suite_name / $(basename "$js_sel")  [Direct · ${vus}VU · $dur]" "k6 binary"
       set +e
-      SUITE='Growin_PT_Dev[ToDo]' bash "$run_sc" BP001 Web enchange 2>&1 | tee "$_local_log"
+      if [[ "$use_mock" == "y" ]]; then
+        BASE_URL="$mock_url" "$K6_BIN" run "$PROJECT_DIR/$js_sel" \
+          -e ENV="$env_name" -e USER="$vus" -e K6_USERS="$vus" \
+          -e DURATION="$dur" -e BASE_URL="$mock_url" 2>&1 | tee "$_local_log"
+      else
+        "$K6_BIN" run "$PROJECT_DIR/$js_sel" \
+          -e ENV="$env_name" -e USER="$vus" -e K6_USERS="$vus" \
+          -e DURATION="$dur" 2>&1 | tee "$_local_log"
+      fi
       _local_rc=${PIPESTATUS[0]}; set -e
       print_run_footer "$_local_rc" "$_local_log"
+      python3 "$PROJECT_DIR/docker-local-pt/scripts/print-summary-table.py" "$PROJECT_DIR/docker-local-pt/results/summary.json" 2>/dev/null || true
       rm -f "$_local_log"
       read -r -p $'\nPress Enter...' ;;
+
     "← Back") rm -f "$_local_log"; return ;;
   esac
 }
@@ -556,6 +640,7 @@ cron_scheduler_menu() {
     "[0] Back"
   )
   local sel; sel=$(pick_fzf "Scheduler>" "${choices[@]}")
+
 
   [[ -z "$sel" ]] && return
   case "$sel" in
@@ -594,10 +679,12 @@ cron_scheduler_menu() {
       script_choices+=("Custom path")
 
       local script_sel; script_sel=$(pick_fzf "Script>" "${script_choices[@]}")
+
       [[ -z "$script_sel" ]] && { read -r -p $'\nPress Enter...'; return; }
       local script_path="$script_sel"
       if [[ "$script_sel" == "Custom path" ]]; then
         printf "  Script path: "; read -r script_path
+        [[ -z "$script_path" ]] && { echo "Cancelled."; read -r -p $'\nPress Enter...'; return; }
       fi
 
       # AI slope check first
@@ -642,6 +729,7 @@ print(msg)
         return
       fi
       local job_sel; job_sel=$(echo "$job_list" | fzf --prompt="Toggle> " --height=~30% --border=rounded)
+      [[ -z "$job_sel" ]] && return
       local jid="${job_sel%% *}"
       local jstatus
       jstatus=$(echo "$job_sel" | sed 's/.*(//' | sed 's/)//')
@@ -673,6 +761,7 @@ print(msg)
         return
       fi
       local job_sel; job_sel=$(echo "$job_list" | fzf --prompt="Remove> " --height=~30% --border=rounded)
+      [[ -z "$job_sel" ]] && return
       printf "  Remove '%s'? (y/n): " "$job_sel"; read -r confirm
       [[ "$confirm" != "y" ]] && { read -r -p $'\nPress Enter...'; return; }
 
@@ -716,11 +805,13 @@ ai_slope_menu() {
   script_choices+=("Custom path" "← Back")
 
   local sel; sel=$(pick_fzf "Analyze>" "${script_choices[@]}")
-  [[ "$sel" == "← Back" ]] && return
+
+  [[ -z "$sel" || "$sel" == "← Back" ]] && return
 
   local target_path="$sel"
   if [[ "$sel" == "Custom path" ]]; then
     printf "  File path: "; read -r target_path
+    [[ -z "$target_path" ]] && { echo "Cancelled."; read -r -p $'\nPress Enter...'; return; }
   fi
 
   if [[ ! -f "$target_path" ]]; then
@@ -758,6 +849,7 @@ main_menu() {
     )
 
     local sel; sel=$(pick_fzf "Action>" "${choices[@]}")
+
 
     case "$sel" in
       "[1] Remote Runner"*) ssh_menu ;;
