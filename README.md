@@ -77,6 +77,8 @@ Deploy load tests to high-capacity execution environments.
 - **Oncloud:** Connects to GCP VMs via Google Cloud IAP tunneling.
 - **Local Sandbox:** SSH into an isolated Docker container (`127.0.0.1:2222`) that simulates a remote server environment.
 
+> **Remote Process Detection:** The framework runs a background daemon (`pt-remote-daemon.sh`) that polls target environments to detect if active `k6` processes are already running by another engineer, independently of the TUI execution context. If an active remote test is detected, the TUI will display a warning and require confirmation before proceeding to avoid test collisions.
+
 ### 3. Distributed Locking & Concurrency Protection
 Prevents QA engineers from stepping on each other's toes.
 - Automatically acquires an **environment lock** (e.g., `INT`, `STG`) before launching a test.
