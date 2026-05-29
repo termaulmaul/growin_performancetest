@@ -35,7 +35,10 @@ def cli():
 @click.argument('username')
 def login(username):
     username = username.lower()
-    password = getpass.getpass(f"Password for {username}: ")
+    # Read password from stdin so bash can use 'read -rs' and pipe it safely
+    password = sys.stdin.read().strip()
+    if not password:
+        output_json("error", error="Empty password")
     
     conn = get_conn()
     c = conn.cursor()
@@ -142,34 +145,27 @@ def logout(username):
     output_json("ok", message="Logged out")
 
 @cli.command()
-def bootstrap():
-    """Create god user interactively if no god exists."""
+@click.argument('username')
+def bootstrap(username):
+    """Create god user if no god exists."""
     conn = get_conn()
     c = conn.cursor()
     c.execute("SELECT COUNT(*) FROM users JOIN roles ON users.role_id = roles.id WHERE roles.name = 'god'")
     if c.fetchone()[0] > 0:
-        output_json("error", error="God user already exists. Use user management tools.")
+        output_json("error", error="God user already exists.")
         
-    print("Bootstrap: Create God User")
-    username = input("Username: ").strip().lower()
-    password = getpass.getpass("Password: ")
-    confirm = getpass.getpass("Confirm Password: ")
-    
-    if password != confirm:
-        output_json("error", error="Passwords do not match")
-        
+    password = sys.stdin.read().strip()
     if len(password) < 8:
         output_json("error", error="Password too short (min 8 chars)")
         
     hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(12)).decode('utf-8')
-    
     c.execute("SELECT id FROM roles WHERE name = 'god'")
     role_id = c.fetchone()['id']
     
     c.execute("""
         INSERT INTO users (username, password_hash, role_id, created_at)
         VALUES (?, ?, ?, ?)
-    """, (username, hashed, role_id, datetime.utcnow().isoformat()))
+    """, (username.lower(), hashed, role_id, datetime.utcnow().isoformat()))
     conn.commit()
     
     output_json("ok", message=f"God user '{username}' created successfully.")

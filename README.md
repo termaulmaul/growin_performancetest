@@ -14,9 +14,10 @@ Launch the interactive TUI (Requires `fzf` and `python3`):
 ./pt-menu.sh
 ```
 
-**Default God User:**
-- Username: `maul`
-- Password: `Mandirisekuritas2026.`
+**Initial Setup:**
+When running the TUI for the first time on a fresh server, it will detect that no users exist and will enter **Initial Setup Mode**. You will be prompted to create the first `god` level username and password.
+
+*(You can change passwords later inside the TUI via `User Management` > `Reset Password`)*
 
 *(You can change this password inside the TUI via `User Management` > `Reset Password`)*
 
