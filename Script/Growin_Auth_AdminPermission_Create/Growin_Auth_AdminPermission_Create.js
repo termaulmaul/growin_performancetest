@@ -5,7 +5,7 @@
 // Run Single BP Web
 // ../../k6 run Growin_Auth_AdminPermission_Create.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Auth_AdminPermission_Create/Web/BP001/Manual/Manual_DryRun_0506_1353_BP001.html
 // ../../k6 run Growin_Auth_AdminPermission_Create.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Auth_AdminPermission_Create/Web/BP002/Manual/Manual_DryRun_0518_1712_BP002.html
-// ../../k6 run Growin_Auth_AdminPermission_Create.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP003 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Auth_AdminPermission_Create/Web/BP003/Manual/Manual_DryRun_0522_0954_BP003.html
+// ../../k6 run Growin_Auth_AdminPermission_Create.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP003 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Auth_AdminPermission_Create/Web/BP003/Manual/Manual_DryRun_0602_1603_BP003.html
 
 // Run Single BP iOS
 // ../../k6 run Growin_Auth_AdminPermission_Create.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Auth_AdminPermission_Create/iOS/BP001/Manual/Manual_DryRun_0520_1209_BP001.html
@@ -60,17 +60,17 @@ const platform = getPlatform();
 //                         (digunakan saat LoadTest multi-BP, single BP tetap pakai -e NUMSTART dari command)
 const BP_CONFIG = {
     Web: {
-        BP001: { fn: BP001_Web, skipSetupLogin: true, numStart: 1 },
-        BP002: { fn: BP002_Web, skipSetupLogin: true, numStart: 1 },
-        BP003: { fn: BP003_Web, skipSetupLogin: false, numStart: 1 },
+        BP001: { fn: BP001_Web, skipSetupLogin: true},
+        BP002: { fn: BP002_Web, skipSetupLogin: true},
+        BP003: { fn: BP003_Web, skipSetupLogin: true},
     },
     iOS: {
-        BP001: { fn: BP001_iOS, skipSetupLogin: false,  numStart: 1001 },
-        // BP002: { fn: BP002_iOS, skipSetupLogin: false, numStart: 1    },
+        BP001: { fn: BP001_iOS, skipSetupLogin: false},
+        // BP002: { fn: BP002_iOS, skipSetupLogin: false},
     },
     Android: {
-        BP001: { fn: BP001_Android, skipSetupLogin: false, numStart: 1001 },
-        // BP002: { fn: BP002_Android, skipSetupLogin: false, numStart: 1    },
+        BP001: { fn: BP001_Android, skipSetupLogin: false},
+        // BP002: { fn: BP002_Android, skipSetupLogin: false},
     },
 };
 
@@ -99,9 +99,9 @@ export function BP003(data) { return dispatch('BP003', data); }
 // const RETRY_DELAY = 1; // seconds between retry attempts
 
 const BP_USER_PERCENTAGE = {
-    BP001: 100,
-    BP002: 100,
-    BP003: 100,
+    BP001: 50,
+    BP002: 50,
+    BP003: 50,
 };
 
 // ✅ Function untuk calculate user distribution
@@ -134,8 +134,22 @@ function calculateUserDistribution(totalUsers, selectedBPs) {
     return distribution;
 }
 
+// ✅ Function untuk calculate numStart per BP secara kumulatif
+// Multi-BP (LoadTest): setiap BP melanjutkan dari angka terakhir BP sebelumnya
+// Single BP (Manual) : semua pakai NUMSTART dari env langsung (behaviour tidak berubah)
+function calculateNumStarts(selectedBPs, userDistribution, baseStart) {
+    const numStarts = {};
+    let cursor = baseStart;
+    selectedBPs.forEach(bp => {
+        numStarts[bp] = cursor;
+        cursor += (userDistribution[bp] || 0);
+    });
+    return numStarts;
+}
+
 const { SCENARIO } = __ENV;
 const TOTAL_USER = parseInt(__ENV.TOTAL_USER) || parseInt(__ENV.USER) || 100;
+const NUMSTART_env = parseInt(__ENV.NUMSTART) || 1;
 
 let selectedBPs = [];
 if (SCENARIO) {
@@ -151,14 +165,26 @@ if (SCENARIO) {
     selectedBPs = platformBPs;
 }
 
+const isMultiBP = selectedBPs.length > 1;
+
 const userDistribution = calculateUserDistribution(TOTAL_USER, selectedBPs);
+
+// ✅ Hitung numStart per BP:
+//    - Multi-BP: kumulatif, setiap BP lanjut dari user terakhir BP sebelumnya
+//    - Single BP: semua pakai NUMSTART dari env (tidak ada perubahan behaviour)
+const BP_NUM_STARTS = isMultiBP
+    ? calculateNumStarts(selectedBPs, userDistribution, NUMSTART_env)
+    : Object.fromEntries(selectedBPs.map(bp => [bp, NUMSTART_env]));
 
 console.log('📊 User Distribution:');
 Object.keys(userDistribution).forEach(bp => {
-    console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
+    const start = BP_NUM_STARTS[bp];
+    const count = userDistribution[bp];
+    console.log(`   ${bp}: ${count} users (${BP_USER_PERCENTAGE[bp]}%) → user #${start} to #${start + count - 1}`);
 });
 console.log(`   TOTAL: ${TOTAL_USER} users`);
 console.log(`   PLATFORM: ${platform}`);
+console.log(`   MODE: ${isMultiBP ? 'Multi-BP (LoadTest) — numStart kumulatif per BP' : 'Single BP (Manual) — NUMSTART dari env'}`);
 
 const scenarios = {};
 selectedBPs.forEach(bp => {
@@ -173,7 +199,7 @@ selectedBPs.forEach(bp => {
         // stages: [
         //     { duration: '5m', target: 100 },
         //     { duration: '10m', target: 100 },
-        //     { duration: '5m', target: 200 },1
+        //     { duration: '5m', target: 200 },
         //     { duration: '10m', target: 200 },
         //     { duration: '5m', target: 300 },
         //     { duration: '10m', target: 300 },
@@ -262,7 +288,7 @@ function loginWithRetry(base_url, credentials, userKey, vuId) {
         }
         
         if (attempt < MAX_RETRY_ATTEMPTS) {
-            console.warn(`   ⚠️  User ${userKey} (${credentials.email}, VU${vuId}) LOGIN attempt ${attempt}/${MAX_RETRY_ATTEMPTS} FAILED - Status: ${loginRes.status} | Body: ${loginRes.body}, retrying...`);
+            console.warn(`   ⚠️  User ${userKey} (${credentials.email}, VU${vuId}) LOGIN attempt ${attempt}/${MAX_RETRY_ATTEMPTS} FAILED - Status: ${loginRes.status} | Body: ${loginRes.body} | Request: ${loginPayload}, retrying...`);
             sleep(RETRY_DELAY);
         } else {
             console.error(`   ❌ User ${userKey} (${credentials.email}, VU${vuId}) LOGIN FAILED after ${MAX_RETRY_ATTEMPTS} attempts - Status: ${loginRes.status}`);
@@ -276,19 +302,13 @@ export function setup() {
     const base_url = getBaseUrl();
     const tokens = {};
     const vuMapping = {};
-
-    // ✅ Deteksi apakah ini multi-BP run (LoadTest) atau single BP run (Manual)
-    // Single BP: -e SCENARIO=BP001 → pakai NUMSTART dari env command langsung
-    // Multi BP: tanpa -e SCENARIO → pakai numStart dari BP_CONFIG per-BP
-    const isMultiBP = selectedBPs.length > 1;
-    const NUMSTART_env = parseInt(__ENV.NUMSTART) || 1;
     
     console.log(`🔐 Starting login for ${TOTAL_USER} users distributed across ${selectedBPs.length} BPs...`);
     console.log(`📦 Batch processing: ${BATCH_SIZE} users per batch, ${BATCH_DELAY}s delay`);
     console.log(`🔁 Retry enabled: Max ${MAX_RETRY_ATTEMPTS} attempts per login`);
     console.log(`🔑 ALL users will get PIN token`);
     console.log(`📱 Platform: ${platform}`);
-    console.log(`🔢 Mode: ${isMultiBP ? 'Multi-BP (LoadTest) — pakai numStart dari BP_CONFIG' : 'Single BP (Manual) — pakai NUMSTART dari env'}`);
+    console.log(`🔢 Mode: ${isMultiBP ? 'Multi-BP (LoadTest) — numStart kumulatif per BP' : 'Single BP (Manual) — pakai NUMSTART dari env'}`);
     
     let globalVuOffset = 1;
     
@@ -309,21 +329,13 @@ export function setup() {
         const bpConfig = BP_CONFIG[platform]?.[bp] ?? {};
         const skipSetupLogin = bpConfig.skipSetupLogin === true;
 
-        // ✅ Hitung globalUserOffset per-BP berdasarkan mode run:
-        //    - Single BP (Manual): pakai NUMSTART dari env → offset = 0 (behaviour asli tidak berubah)
-        //    - Multi BP (LoadTest): pakai numStart dari BP_CONFIG → offset = bpNumStart - NUMSTART_env
-        //
-        //    Formula getUserCredentials: email_index = NUMSTART_env + userNum + globalUserOffset - 1
-        //    Agar userNum=1 menghasilkan bpNumStart:
-        //    NUMSTART_env + 1 + globalUserOffset - 1 = bpNumStart
-        //    globalUserOffset = bpNumStart - NUMSTART_env
-        const bpNumStart = (bpConfig.numStart != null) ? bpConfig.numStart : NUMSTART_env;
-        const globalUserOffset = isMultiBP
-            ? (bpNumStart - NUMSTART_env)   // ✅ multi-BP: offset dari numStart config
-            : 0;                             // ✅ single BP: offset 0, NUMSTART env langsung dipakai
+        // ✅ Pakai BP_NUM_STARTS yang sudah dihitung di atas (kumulatif untuk multi-BP,
+        //    atau NUMSTART env untuk single BP). globalUserOffset diturunkan dari sana.
+        const bpNumStart = BP_NUM_STARTS[bp];
+        const globalUserOffset = bpNumStart - NUMSTART_env;
 
         console.log(`\n📦 Processing ${bp} on ${platform} - ${usersForThisBP} users (VU ${globalVuOffset} to ${globalVuOffset + usersForThisBP - 1})...`);
-        console.log(`   🔢 numStart efektif: ${NUMSTART_env + globalUserOffset} (globalUserOffset: ${globalUserOffset})`);
+        console.log(`   🔢 numStart efektif: ${bpNumStart} (user #${bpNumStart} to #${bpNumStart + usersForThisBP - 1})`);
 
         if (skipSetupLogin) {
             console.log(`   ⏩ skipSetupLogin=true: setup login di-skip untuk ${bp}, BP akan login sendiri per-iterasi`);
@@ -359,7 +371,7 @@ export function setup() {
             return; // lanjut ke BP berikutnya
         }
 
-        // ─── Logic login original (tidak diubah) ──────────────────────────────
+        // ─── Logic login original ──────────────────────────────────────────────
         const numBatches = Math.ceil(usersForThisBP / BATCH_SIZE);
         
         for (let batchNum = 0; batchNum < numBatches; batchNum++) {
@@ -400,13 +412,17 @@ export function setup() {
                         
                         if (!tokens[userKey]) tokens[userKey] = {};
                         
-                        tokens[userKey].user_id     = tradingData.user_id;
-                        tokens[userKey].client_id   = tradingData.client_id;
-                        tokens[userKey].SID         = tradingData.sid;
-                        tokens[userKey].ksei_acc_no = tradingData.ksei_acc_no;
+                        // ✅ FIX: assign dulu, baru log
+                        tokens[userKey].user_id      = tradingData.user_id;
+                        tokens[userKey].client_id    = tradingData.client_id;
+                        tokens[userKey].SID          = tradingData.sid;
+                        tokens[userKey].ksei_acc_no  = tradingData.ksei_acc_no;
                         tokens[userKey].account_name = tradingData.account_name;
+
+                        // const tradingData = profileResponses[0].json().data;
+                        // console.log(`🔍 tradingData RAW: ${JSON.stringify(tradingData)}`);
                         
-                        console.log(`✅ Assigned - user_id: ${tokens[userKey].user_id}, client_id: ${tokens[userKey].client_id}`);
+                        console.log(`✅ Assigned Email ${credentials.email} - user_id: ${tokens[userKey].user_id}, client_id: ${tokens[userKey].client_id}`);
                     } else {
                         totalUserIdFailed++;
                         if (i === batchStart || totalUserIdFailed <= 5) {
@@ -455,7 +471,7 @@ export function setup() {
         
         globalVuOffset += usersForThisBP;
         // ✅ globalUserOffset TIDAK diakumulasi di sini — setiap BP menghitung offsetnya
-        //    sendiri dari bpConfig.numStart di awal forEach, sehingga setiap BP
+        //    sendiri dari BP_NUM_STARTS di awal forEach, sehingga setiap BP
         //    selalu mulai dari nomor user yang benar terlepas dari urutan BP lainnya.
     });
     
@@ -497,6 +513,7 @@ export function setup() {
         base_url: base_url, 
         tokens: tokens,
         vuMapping: vuMapping,
+        bp_num_starts: BP_NUM_STARTS,
     };
 }
 

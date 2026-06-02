@@ -1,22 +1,24 @@
 // Command
 // Run Multiple BP
-// ../../../k6 run Growin_Data_Visualization_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 -e PLATFORM=Web  --out dashboard=export=../../../Report/Growin_Data_Visualization/Web/LoadTest/Manual_LoadTest_0519_1459.html
+// ../../../k6 run Growin_2FA_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 -e PLATFORM=Web  --out dashboard=export=../../../Report/Growin_2FA/Web/LoadTest/Manual_LoadTest_0107_1459.html
 
 // Run Single BP Web
-// ../../k6 run Growin_Data_Visualization.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Data_Visualization/Web/BP001/Manual/Manual_DryRun_0602_1033_BP001.html
+// ../../k6 run Growin_2FA.js -e RUNBY=Manual -e ENV=INT -e USER=1000 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_2FA/Web/BP001/Manual/Manual_DryRun_0506_1353_BP001.html
+// ../../k6 run Growin_2FA.js -e RUNBY=Manual -e ENV=INT -e USER=200 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_2FA/Web/BP002/Manual/Manual_DryRun_0506_1409_BP002.html
 
 // Run Single BP iOS
-// ../../k6 run Growin_Data_Visualization.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Data_Visualization/iOS/BP001/Manual/Manual_DryRun_0428_1403_BP001.html
+// ../../k6 run Growin_2FA.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_2FA/iOS/BP001/Manual/Manual_DryRun_0428_1403_BP001.html
 
 // Run Single BP Android
-// ../../k6 run Growin_Data_Visualization.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Android --out dashboard=export=../../Report/Growin_Data_Visualization/Android/BP001/Manual/Manual_DryRun_0428_1100_BP001.html
+// ../../k6 run Growin_2FA.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Android --out dashboard=export=../../Report/Growin_2FA/Android/BP001/Manual/Manual_DryRun_0428_1100_BP001.html
 
 import { getBaseUrl, getUserCredentials, getDefaultHeaders, MAX_RETRY_ATTEMPTS, RETRY_DELAY, BATCH_SIZE, BATCH_DELAY } from '../../Helper/config.js';
 import { textSummary } from "../../Helper/textSummary.js";
 import { htmlReport } from '../../Helper/bundle.js';
 
 // ─── IMPORTS WEB ──────────────────────────────────────────────────────────────
-import { BP001 as BP001_Web } from "./Web/BP001.js";
+import { BP001 as BP001_Web } from "./Web/Template_ByPass_Setup.js";
+import { BP002 as BP002_Web } from "./Web/Template_Use_Setup.js";
 
 // ─── IMPORTS iOS ──────────────────────────────────────────────────────────────
 // import { BP001 as BP001_iOS } from "./iOS/BP001.js";
@@ -56,7 +58,8 @@ const platform = getPlatform();
 //                         (digunakan saat LoadTest multi-BP, single BP tetap pakai -e NUMSTART dari command)
 const BP_CONFIG = {
     Web: {
-        BP001: { fn: BP001_Web, skipSetupLogin: false,  numStart: 1 },
+        BP001: { fn: BP001_Web, skipSetupLogin: true,  numStart: 1501 },
+        BP002: { fn: BP002_Web, skipSetupLogin: false, numStart: 1    },
     },
     // iOS: {
     //     BP001: { fn: BP001_iOS, skipSetupLogin: true,  numStart: 1001 },
@@ -78,21 +81,22 @@ const BP_MAP = Object.fromEntries(
 
 // ─── DISPATCHER ───────────────────────────────────────────────────────────────
 function dispatch(bpName, data) {
-    // const fn = BP_MAP[platform]?.[bpName];
-    const fn = BP_MAP[platform] && BP_MAP[platform][bpName];
+    const fn = BP_MAP[platform]?.[bpName];
     if (!fn) throw new Error(`❌ ${bpName} not found for platform: ${platform}`);
     return fn(data);
 }
 
 // ─── EXPORTS (tambah baris baru di sini setiap ada BP baru) ──────────────────
 export function BP001(data) { return dispatch('BP001', data); }
+export function BP002(data) { return dispatch('BP002', data); }
 
 // ✅ RETRY CONFIGURATION
 // const MAX_RETRY_ATTEMPTS = 10;
 // const RETRY_DELAY = 1; // seconds between retry attempts
 
 const BP_USER_PERCENTAGE = {
-    BP001: 100,
+    BP001: 80,
+    BP002: 20,
 };
 
 // ✅ Function untuk calculate user distribution
@@ -155,7 +159,7 @@ const scenarios = {};
 selectedBPs.forEach(bp => {
     scenarios[bp] = {
         // executor: 'per-vu-iterations',
-        // vus: 1,
+        // vus: 1000,
         // iterations: 1,
         // maxDuration: '1h',
 
@@ -297,8 +301,7 @@ export function setup() {
         const usersForThisBP = userDistribution[bp];
 
         // ✅ Ambil config per-BP
-        // const bpConfig = BP_CONFIG[platform]?.[bp] ?? {};
-        const bpConfig = (BP_CONFIG[platform] && BP_CONFIG[platform][bp]) || {};
+        const bpConfig = BP_CONFIG[platform]?.[bp] ?? {};
         const skipSetupLogin = bpConfig.skipSetupLogin === true;
 
         // ✅ Hitung globalUserOffset per-BP berdasarkan mode run:
@@ -470,8 +473,7 @@ export function setup() {
     
     console.log(`\n📋 Per-BP Summary:`);
     selectedBPs.forEach(bp => {
-        // const bpConfig = BP_CONFIG[platform]?.[bp] ?? {};
-        const bpConfig = (BP_CONFIG[platform] && BP_CONFIG[platform][bp]) || {};
+        const bpConfig = BP_CONFIG[platform]?.[bp] ?? {};
         const skipSetupLogin = bpConfig.skipSetupLogin === true;
         const bpTokens = Object.values(tokens).filter(t => t.bp === bp);
 
@@ -529,7 +531,7 @@ export function handleSummary(data) {
         console.log(`[${dateStr}_${timeStr}] Starting report generation for ${bp_name} on ${platform}...`);
         
         if (runby === 'Manual') {
-            const htmlPath = `../../Report/Growin_Data_Visualization/${platform}/${bp_name}/Manual/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../Report/Growin_2FA/${platform}/${bp_name}/Manual/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -537,7 +539,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if (runby === 'Regression') {
-            const htmlPath = `../../Report/Growin_Data_Visualization/${platform}/${bp_name}/Regression/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../Report/Growin_2FA/${platform}/${bp_name}/Regression/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -545,7 +547,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if (runby === 'LoadTest') {
-            const htmlPath = `../../Report/Growin_Data_Visualization/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../Report/Growin_2FA/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {

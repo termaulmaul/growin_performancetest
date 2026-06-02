@@ -5,7 +5,7 @@
 # Declare variables
 ENV="INT"
 USER=420
-DURATION="15m"
+DURATION="2h"
 NUMSTART=1
 RUNBY="LoadTest"
 RUNTYPE="LoadTest"

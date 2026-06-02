@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# chmod +x [Template]_Regression.sh
-# ./[Template]_Regression.sh
+# chmod +x Growin_Ratelimit_Reset_Password_Regression.sh
+# ./Growin_Ratelimit_Reset_Password_Regression.sh
 # Declare variables
 ENV="INT"
 USER=250
@@ -12,7 +12,7 @@ RUNTYPE="DryRun"
 SLEEP=300
 
 pwd
-cd /home/qa/mostng_performancetest_api/Script/[Template] || exit 1
+cd /home/qa/mostng_performancetest_api/Script/Growin_Ratelimit_Reset_Password || exit 1
 pwd
 
 #BP001
@@ -26,7 +26,7 @@ echo "Captured Time    : $timeStr"
 echo "Current Scenario : BP001 Web"
 
 # Run k6 commands using the captured date and times
-../../k6 run [Template].js -e RUNBY="$RUNBY" -e ENV="$ENV" -e USER="$USER" -e DURATION="$DURATION" -e NUMSTART=1501 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/[Template]/Web/BP001/${RUNBY}/"$RUNBY"_"$RUNTYPE"_${dateStr}_${timeStr}_BP001_72.html
+../../k6 run Growin_Ratelimit_Reset_Password.js -e RUNBY="$RUNBY" -e ENV="$ENV" -e USER="$USER" -e DURATION="$DURATION" -e NUMSTART=1501 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Ratelimit_Reset_Password/Web/BP001/${RUNBY}/"$RUNBY"_"$RUNTYPE"_${dateStr}_${timeStr}_BP001_72.html
 sleep "$SLEEP"
 
 #BP002
@@ -40,5 +40,5 @@ echo "Captured Time    : $timeStr"
 echo "Current Scenario : BP002 Web"
 
 # Run k6 commands using the captured date and time
-../../k6 run [Template].js -e RUNBY="$RUNBY" -e ENV="$ENV" -e USER="$USER" -e DURATION="$DURATION" -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=Web --out dashboard=export=../../Report/[Template]/Web/BP002/${RUNBY}/"$RUNBY"_"$RUNTYPE"_${dateStr}_${timeStr}_BP002_72.html
+../../k6 run Growin_Ratelimit_Reset_Password.js -e RUNBY="$RUNBY" -e ENV="$ENV" -e USER="$USER" -e DURATION="$DURATION" -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Ratelimit_Reset_Password/Web/BP002/${RUNBY}/"$RUNBY"_"$RUNTYPE"_${dateStr}_${timeStr}_BP002_72.html
 sleep "$SLEEP"
