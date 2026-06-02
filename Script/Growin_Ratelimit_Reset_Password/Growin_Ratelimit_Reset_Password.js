@@ -1,20 +1,20 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// [Template].js — k6 Load Test Script
+// Growin_Ratelimit_Reset_Password.js — k6 Load Test Script
 // ─────────────────────────────────────────────────────────────────────────────
 //
 // COMMAND EXAMPLES:
 //
 // Run Multiple BP (LoadTest):
-//   ../../../k6 run [Template]_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 -e PLATFORM=Web --out dashboard=export=../../../Report/[Template]/Web/LoadTest/Manual_LoadTest_0107_1459.html
+//   ../../../k6 run Growin_Ratelimit_Reset_Password_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 -e PLATFORM=Web --out dashboard=export=../../../Report/Growin_Ratelimit_Reset_Password/Web/LoadTest/Manual_LoadTest_0107_1459.html
 //
 // Run Single BP Web:
-//   ../../k6 run [Template].js -e RUNBY=Manual -e ENV=INT -e USER=1000 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/[Template]/Web/BP001/Manual/Manual_DryRun_0506_1353_BP001.html
+//   ../../k6 run Growin_Ratelimit_Reset_Password.js -e RUNBY=Manual -e ENV=INT -e USER=1000 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Ratelimit_Reset_Password/Web/BP001/Manual/Manual_DryRun_0506_1353_BP001.html
 //
 // Run Single BP iOS:
-//   ../../k6 run [Template].js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS --out dashboard=export=../../Report/[Template]/iOS/BP001/Manual/Manual_DryRun_0428_1403_BP001.html
+//   ../../k6 run Growin_Ratelimit_Reset_Password.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Ratelimit_Reset_Password/iOS/BP001/Manual/Manual_DryRun_0428_1403_BP001.html
 //
 // Run Single BP Android:
-//   ../../k6 run [Template].js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Android --out dashboard=export=../../Report/[Template]/Android/BP001/Manual/Manual_DryRun_0428_1100_BP001.html
+//   ../../k6 run Growin_Ratelimit_Reset_Password.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Android --out dashboard=export=../../Report/Growin_Ratelimit_Reset_Password/Android/BP001/Manual/Manual_DryRun_0428_1100_BP001.html
 //
 // ─────────────────────────────────────────────────────────────────────────────
 // numStart Priority Rules (per BP):
@@ -62,8 +62,8 @@ http.setResponseCallback(http.expectedStatuses(200, 201, 400, 401, 403, 404, 500
 // ─────────────────────────────────────────────────────────────────────────────
 const BP_CONFIG = {
     Web: {
-        BP001: { fn: BP001_Web, skipSetupLogin: true,  numStart: 1501 },
-        BP002: { fn: BP002_Web, skipSetupLogin: false                  },
+        BP001: { fn: BP001_Web, skipSetupLogin: true },
+        BP002: { fn: BP002_Web, skipSetupLogin: false },
     },
     // iOS: {
     //     BP001: { fn: BP001_iOS, skipSetupLogin: true,  numStart: 1001 },
@@ -77,8 +77,8 @@ const BP_CONFIG = {
 
 // ─── User distribution (percentage per BP across all platforms) ───────────────
 const BP_USER_PERCENTAGE = {
-    BP001: 80,
-    BP002: 20,
+    BP001: 50,
+    BP002: 50,
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -593,9 +593,9 @@ export function handleSummary(data) {
         }
 
         const reportDirs = {
-            Manual:     `../../Report/[Template]/${platform}/${bp_name}/Manual`,
-            Regression: `../../Report/[Template]/${platform}/${bp_name}/Regression`,
-            LoadTest:   `../../Report/[Template]/${platform}/LoadTest`,
+            Manual:     `../../Report/Growin_Ratelimit_Reset_Password/${platform}/${bp_name}/Manual`,
+            Regression: `../../Report/Growin_Ratelimit_Reset_Password/${platform}/${bp_name}/Regression`,
+            LoadTest:   `../../Report/Growin_Ratelimit_Reset_Password/${platform}/LoadTest`,
         };
 
         const dir      = reportDirs[runby] ?? reportDirs.Manual;

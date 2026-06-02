@@ -1,9 +1,9 @@
 // Command
 // Run Multiple BP
-// ../../../k6 run ExaCC_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 -e PLATFORM=Web  --out dashboard=export=../../../Report/ExaCC/Web/LoadTest/Manual_LoadTest_0107_1459.html
+// ../../k6 run ExaCC.js -e RUNBY=LoadTest -e ENV=INT -e USER=420 -e DURATION=5m -e NUMSTART=1 -e PLATFORM=Web  --out dashboard=export=../../../Report/ExaCC/Web/LoadTest/Manual_LoadTest_0525_2116.html
 
 // Run Single BP Web
-// ../../k6 run ExaCC.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/ExaCC/Web/BP001/Manual/Manual_DryRun_0506_1353_BP001.html
+// ../../k6 run ExaCC.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=336 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/ExaCC/Web/BP001/Manual/Manual_DryRun_0506_1353_BP001.html
 // ../../k6 run ExaCC.js -e RUNBY=Manual -e ENV=INT -e USER=200 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=Web --out dashboard=export=../../Report/ExaCC/Web/BP002/Manual/Manual_DryRun_0506_1409_BP002.html
 
 // Run Single BP iOS
@@ -318,7 +318,7 @@ function loginWithRetry(base_url, credentials, userKey, vuId) {
         }
         
         if (attempt < MAX_RETRY_ATTEMPTS) {
-            console.warn(`   ⚠️  User ${userKey} (${credentials.email}, VU${vuId}) LOGIN attempt ${attempt}/${MAX_RETRY_ATTEMPTS} FAILED - Status: ${loginRes.status} | Body: ${loginRes.body}, retrying...`);
+            console.warn(`   ⚠️  User ${userKey} (${credentials.email}, VU${vuId}) LOGIN attempt ${attempt}/${MAX_RETRY_ATTEMPTS} FAILED - Status: ${loginRes.status} | Body: ${loginRes.body} | Request: ${loginPayload}, retrying...`);
             sleep(RETRY_DELAY);
         } else {
             console.error(`   ❌ User ${userKey} (${credentials.email}, VU${vuId}) LOGIN FAILED after ${MAX_RETRY_ATTEMPTS} attempts - Status: ${loginRes.status}`);
@@ -401,7 +401,7 @@ export function setup() {
             return; // lanjut ke BP berikutnya
         }
 
-        // ─── Logic login original (tidak diubah) ──────────────────────────────
+        // ─── Logic login original ──────────────────────────────────────────────
         const numBatches = Math.ceil(usersForThisBP / BATCH_SIZE);
         
         for (let batchNum = 0; batchNum < numBatches; batchNum++) {
@@ -442,13 +442,17 @@ export function setup() {
                         
                         if (!tokens[userKey]) tokens[userKey] = {};
                         
-                        tokens[userKey].user_id     = tradingData.user_id;
-                        tokens[userKey].client_id   = tradingData.client_id;
-                        tokens[userKey].SID         = tradingData.sid;
-                        tokens[userKey].ksei_acc_no = tradingData.ksei_acc_no;
+                        // ✅ FIX: assign dulu, baru log
+                        tokens[userKey].user_id      = tradingData.user_id;
+                        tokens[userKey].client_id    = tradingData.client_id;
+                        tokens[userKey].SID          = tradingData.sid;
+                        tokens[userKey].ksei_acc_no  = tradingData.ksei_acc_no;
                         tokens[userKey].account_name = tradingData.account_name;
+
+                        // const tradingData = profileResponses[0].json().data;
+                        // console.log(`🔍 tradingData RAW: ${JSON.stringify(tradingData)}`);
                         
-                        console.log(`✅ Assigned - user_id: ${tokens[userKey].user_id}, client_id: ${tokens[userKey].client_id}`);
+                        console.log(`✅ Assigned Email ${credentials.email} - user_id: ${tokens[userKey].user_id}, client_id: ${tokens[userKey].client_id}`);
                     } else {
                         totalUserIdFailed++;
                         if (i === batchStart || totalUserIdFailed <= 5) {

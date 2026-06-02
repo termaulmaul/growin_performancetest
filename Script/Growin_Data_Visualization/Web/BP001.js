@@ -4,18 +4,8 @@ import http from "k6/http";
 import exec from 'k6/execution';
 
 // Data_Visualization
-// /udf/api/v1/indicators?symbol=COMPOSITE&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX
+// /udf/api/v1/indicators?symbol=COMPOSITE,IDXBASIC,IDXCYCLIC,IDXENERGY,IDXFINANCE,IDXHEALTH,IDXINDUST,IDXINFRA,IDXNONCYC,IDXPROPERT,IDXTECHNO,IDXTRANS&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX
 // /udf/api/v1/indicators?symbol=IDXBASIC&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX
-// /udf/api/v1/indicators?symbol=IDXCYCLIC&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX
-// /udf/api/v1/indicators?symbol=IDXENERGY&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX
-// /udf/api/v1/indicators?symbol=IDXFINANCE&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX
-// /udf/api/v1/indicators?symbol=IDXHEALTH&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX
-// /udf/api/v1/indicators?symbol=IDXINDUST&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX
-// /udf/api/v1/indicators?symbol=IDXINFRA&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX
-// /udf/api/v1/indicators?symbol=IDXNONCYC&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX
-// /udf/api/v1/indicators?symbol=IDXPROPERT&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX
-// /udf/api/v1/indicators?symbol=IDXTECHNO&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX
-// /udf/api/v1/indicators?symbol=IDXTRANS&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX
 // /udf/api/v1/indicators?symbol=BMRI&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=RG
 
 // /marketdata/api/v1/stakeholders?type=STOCK&value=BMRI
@@ -23,16 +13,6 @@ import exec from 'k6/execution';
 // =====
 
 // Udf_Indicators_COMPOSITE_D_IDX
-// Udf_Indicators_IDXBASIC_D_IDX
-// Udf_Indicators_IDXCYCLIC_D_IDX
-// Udf_Indicators_IDXENERGY_D_IDX
-// Udf_Indicators_IDXFINANCE_D_IDX
-// Udf_Indicators_IDXHEALTH_D_IDX
-// Udf_Indicators_IDXINDUST_D_IDX
-// Udf_Indicators_IDXINFRA_D_IDX
-// Udf_Indicators_IDXNONCYC_D_IDX
-// Udf_Indicators_IDXPROPERT_D_IDX
-// Udf_Indicators_IDXTECHNO_D_IDX
 // Udf_Indicators_IDXTRANS_D_IDX
 // Udf_Indicators_BMRI_D_RG
 
@@ -41,118 +21,30 @@ import exec from 'k6/execution';
 // Define custom metrics
 const Trend_Rotation = {
     Udf_Indicators_COMPOSITE_D_IDX: {
-        errorCount: new Counter("error_count_001_01_01_Udf_Indicators_COMPOSITE_D_IDX"),
-        errorRate: new Rate("error_rate_001_01_01_Udf_Indicators_COMPOSITE_D_IDX"),
-        httpDuration: new Trend("duration_001_01_01_Udf_Indicators_COMPOSITE_D_IDX"),
-        httpWaiting: new Trend("waiting_001_01_01_Udf_Indicators_COMPOSITE_D_IDX"),
-        requestRate: new Counter("rps_001_01_01_Udf_Indicators_COMPOSITE_D_IDX"),
-        http_reqs: new Counter("sample_001_01_01_Udf_Indicators_COMPOSITE_D_IDX"),
-    },
-    Udf_Indicators_IDXBASIC_D_IDX: {
-        errorCount: new Counter("error_count_001_01_02_Udf_Indicators_IDXBASIC_D_IDX"),
-        errorRate: new Rate("error_rate_001_01_02_Udf_Indicators_IDXBASIC_D_IDX"),
-        httpDuration: new Trend("duration_001_01_02_Udf_Indicators_IDXBASIC_D_IDX"),
-        httpWaiting: new Trend("waiting_001_01_02_Udf_Indicators_IDXBASIC_D_IDX"),
-        requestRate: new Counter("rps_001_01_02_Udf_Indicators_IDXBASIC_D_IDX"),
-        http_reqs: new Counter("sample_001_01_02_Udf_Indicators_IDXBASIC_D_IDX"),
-    },
-    Udf_Indicators_IDXCYCLIC_D_IDX: {
-        errorCount: new Counter("error_count_001_01_03_Udf_Indicators_IDXCYCLIC_D_IDX"),
-        errorRate: new Rate("error_rate_001_01_03_Udf_Indicators_IDXCYCLIC_D_IDX"),
-        httpDuration: new Trend("duration_001_01_03_Udf_Indicators_IDXCYCLIC_D_IDX"),
-        httpWaiting: new Trend("waiting_001_01_03_Udf_Indicators_IDXCYCLIC_D_IDX"),
-        requestRate: new Counter("rps_001_01_03_Udf_Indicators_IDXCYCLIC_D_IDX"),
-        http_reqs: new Counter("sample_001_01_03_Udf_Indicators_IDXCYCLIC_D_IDX"),
-    },
-    Udf_Indicators_IDXENERGY_D_IDX: {
-        errorCount: new Counter("error_count_001_01_04_Udf_Indicators_IDXENERGY_D_IDX"),
-        errorRate: new Rate("error_rate_001_01_04_Udf_Indicators_IDXENERGY_D_IDX"),
-        httpDuration: new Trend("duration_001_01_04_Udf_Indicators_IDXENERGY_D_IDX"),
-        httpWaiting: new Trend("waiting_001_01_04_Udf_Indicators_IDXENERGY_D_IDX"),
-        requestRate: new Counter("rps_001_01_04_Udf_Indicators_IDXENERGY_D_IDX"),
-        http_reqs: new Counter("sample_001_01_04_Udf_Indicators_IDXENERGY_D_IDX"),
-    },
-    Udf_Indicators_IDXFINANCE_D_IDX: {
-        errorCount: new Counter("error_count_001_01_05_Udf_Indicators_IDXFINANCE_D_IDX"),
-        errorRate: new Rate("error_rate_001_01_05_Udf_Indicators_IDXFINANCE_D_IDX"),
-        httpDuration: new Trend("duration_001_01_05_Udf_Indicators_IDXFINANCE_D_IDX"),
-        httpWaiting: new Trend("waiting_001_01_05_Udf_Indicators_IDXFINANCE_D_IDX"),
-        requestRate: new Counter("rps_001_01_05_Udf_Indicators_IDXFINANCE_D_IDX"),
-        http_reqs: new Counter("sample_001_01_05_Udf_Indicators_IDXFINANCE_D_IDX"),
-    },
-    Udf_Indicators_IDXHEALTH_D_IDX: {
-        errorCount: new Counter("error_count_001_01_06_Udf_Indicators_IDXHEALTH_D_IDX"),
-        errorRate: new Rate("error_rate_001_01_06_Udf_Indicators_IDXHEALTH_D_IDX"),
-        httpDuration: new Trend("duration_001_01_06_Udf_Indicators_IDXHEALTH_D_IDX"),
-        httpWaiting: new Trend("waiting_001_01_06_Udf_Indicators_IDXHEALTH_D_IDX"),
-        requestRate: new Counter("rps_001_01_06_Udf_Indicators_IDXHEALTH_D_IDX"),
-        http_reqs: new Counter("sample_001_01_06_Udf_Indicators_IDXHEALTH_D_IDX"),
-    },
-    Udf_Indicators_IDXINDUST_D_IDX: {
-        errorCount: new Counter("error_count_001_01_07_Udf_Indicators_IDXINDUST_D_IDX"),
-        errorRate: new Rate("error_rate_001_01_07_Udf_Indicators_IDXINDUST_D_IDX"),
-        httpDuration: new Trend("duration_001_01_07_Udf_Indicators_IDXINDUST_D_IDX"),
-        httpWaiting: new Trend("waiting_001_01_07_Udf_Indicators_IDXINDUST_D_IDX"),
-        requestRate: new Counter("rps_001_01_07_Udf_Indicators_IDXINDUST_D_IDX"),
-        http_reqs: new Counter("sample_001_01_07_Udf_Indicators_IDXINDUST_D_IDX"),
-    },
-    Udf_Indicators_IDXINFRA_D_IDX: {
-        errorCount: new Counter("error_count_001_01_08_Udf_Indicators_IDXINFRA_D_IDX"),
-        errorRate: new Rate("error_rate_001_01_08_Udf_Indicators_IDXINFRA_D_IDX"),
-        httpDuration: new Trend("duration_001_01_08_Udf_Indicators_IDXINFRA_D_IDX"),
-        httpWaiting: new Trend("waiting_001_01_08_Udf_Indicators_IDXINFRA_D_IDX"),
-        requestRate: new Counter("rps_001_01_08_Udf_Indicators_IDXINFRA_D_IDX"),
-        http_reqs: new Counter("sample_001_01_08_Udf_Indicators_IDXINFRA_D_IDX"),
-    },
-    Udf_Indicators_IDXNONCYC_D_IDX: {
-        errorCount: new Counter("error_count_001_01_09_Udf_Indicators_IDXNONCYC_D_IDX"),
-        errorRate: new Rate("error_rate_001_01_09_Udf_Indicators_IDXNONCYC_D_IDX"),
-        httpDuration: new Trend("duration_001_01_09_Udf_Indicators_IDXNONCYC_D_IDX"),
-        httpWaiting: new Trend("waiting_001_01_09_Udf_Indicators_IDXNONCYC_D_IDX"),
-        requestRate: new Counter("rps_001_01_09_Udf_Indicators_IDXNONCYC_D_IDX"),
-        http_reqs: new Counter("sample_001_01_09_Udf_Indicators_IDXNONCYC_D_IDX"),
-    },
-    Udf_Indicators_IDXPROPERT_D_IDX: {
-        errorCount: new Counter("error_count_001_01_10_Udf_Indicators_IDXPROPERT_D_IDX"),
-        errorRate: new Rate("error_rate_001_01_10_Udf_Indicators_IDXPROPERT_D_IDX"),
-        httpDuration: new Trend("duration_001_01_10_Udf_Indicators_IDXPROPERT_D_IDX"),
-        httpWaiting: new Trend("waiting_001_01_10_Udf_Indicators_IDXPROPERT_D_IDX"),
-        requestRate: new Counter("rps_001_01_10_Udf_Indicators_IDXPROPERT_D_IDX"),
-        http_reqs: new Counter("sample_001_01_10_Udf_Indicators_IDXPROPERT_D_IDX"),
-    },
-    Udf_Indicators_IDXTECHNO_D_IDX: {
-        errorCount: new Counter("error_count_001_01_11_Udf_Indicators_IDXTECHNO_D_IDX"),
-        errorRate: new Rate("error_rate_001_01_11_Udf_Indicators_IDXTECHNO_D_IDX"),
-        httpDuration: new Trend("duration_001_01_11_Udf_Indicators_IDXTECHNO_D_IDX"),
-        httpWaiting: new Trend("waiting_001_01_11_Udf_Indicators_IDXTECHNO_D_IDX"),
-        requestRate: new Counter("rps_001_01_11_Udf_Indicators_IDXTECHNO_D_IDX"),
-        http_reqs: new Counter("sample_001_01_11_Udf_Indicators_IDXTECHNO_D_IDX"),
-    },
-    Udf_Indicators_IDXTRANS_D_IDX: {
-        errorCount: new Counter("error_count_001_01_12_Udf_Indicators_IDXTRANS_D_IDX"),
-        errorRate: new Rate("error_rate_001_01_12_Udf_Indicators_IDXTRANS_D_IDX"),
-        httpDuration: new Trend("duration_001_01_12_Udf_Indicators_IDXTRANS_D_IDX"),
-        httpWaiting: new Trend("waiting_001_01_12_Udf_Indicators_IDXTRANS_D_IDX"),
-        requestRate: new Counter("rps_001_01_12_Udf_Indicators_IDXTRANS_D_IDX"),
-        http_reqs: new Counter("sample_001_01_12_Udf_Indicators_IDXTRANS_D_IDX"),
+        errorCount: new Counter("error_count_001_01_001_Udf_Indicators_COMPOSITE_D_IDX"),
+        errorRate: new Rate("error_rate_001_01_001_Udf_Indicators_COMPOSITE_D_IDX"),
+        httpDuration: new Trend("duration_001_01_001_Udf_Indicators_COMPOSITE_D_IDX"),
+        httpWaiting: new Trend("waiting_001_01_001_Udf_Indicators_COMPOSITE_D_IDX"),
+        requestRate: new Counter("rps_001_01_001_Udf_Indicators_COMPOSITE_D_IDX"),
+        http_reqs: new Counter("sample_001_01_001_Udf_Indicators_COMPOSITE_D_IDX"),
     },
     Udf_Indicators_BMRI_D_RG: {
-        errorCount: new Counter("error_count_001_01_13_Udf_Indicators_BMRI_D_RG"),
-        errorRate: new Rate("error_rate_001_01_13_Udf_Indicators_BMRI_D_RG"),
-        httpDuration: new Trend("duration_001_01_13_Udf_Indicators_BMRI_D_RG"),
-        httpWaiting: new Trend("waiting_001_01_13_Udf_Indicators_BMRI_D_RG"),
-        requestRate: new Counter("rps_001_01_13_Udf_Indicators_BMRI_D_RG"),
-        http_reqs: new Counter("sample_001_01_13_Udf_Indicators_BMRI_D_RG"),
+        errorCount: new Counter("error_count_001_01_002_Udf_Indicators_BMRI_D_RG"),
+        errorRate: new Rate("error_rate_001_01_002_Udf_Indicators_BMRI_D_RG"),
+        httpDuration: new Trend("duration_001_01_002_Udf_Indicators_BMRI_D_RG"),
+        httpWaiting: new Trend("waiting_001_01_002_Udf_Indicators_BMRI_D_RG"),
+        requestRate: new Counter("rps_001_01_002_Udf_Indicators_BMRI_D_RG"),
+        http_reqs: new Counter("sample_001_01_002_Udf_Indicators_BMRI_D_RG"),
     },
 };
 const Ownership_Mapping = {
     Marketdata_Stakeholders_STOCK_BMRI: {
-        errorCount: new Counter("error_count_001_02_01_Marketdata_Stakeholders_STOCK_BMRI"),
-        errorRate: new Rate("error_rate_001_02_01_Marketdata_Stakeholders_STOCK_BMRI"),
-        httpDuration: new Trend("duration_001_02_01_Marketdata_Stakeholders_STOCK_BMRI"),
-        httpWaiting: new Trend("waiting_001_02_01_Marketdata_Stakeholders_STOCK_BMRI"),
-        requestRate: new Counter("rps_001_02_01_Marketdata_Stakeholders_STOCK_BMRI"),
-        http_reqs: new Counter("sample_001_02_01_Marketdata_Stakeholders_STOCK_BMRI"),
+        errorCount: new Counter("error_count_001_02_001_Marketdata_Stakeholders_STOCK_BMRI"),
+        errorRate: new Rate("error_rate_001_02_001_Marketdata_Stakeholders_STOCK_BMRI"),
+        httpDuration: new Trend("duration_001_02_001_Marketdata_Stakeholders_STOCK_BMRI"),
+        httpWaiting: new Trend("waiting_001_02_001_Marketdata_Stakeholders_STOCK_BMRI"),
+        requestRate: new Counter("rps_001_02_001_Marketdata_Stakeholders_STOCK_BMRI"),
+        http_reqs: new Counter("sample_001_02_001_Marketdata_Stakeholders_STOCK_BMRI"),
     },
 }
 
@@ -215,52 +107,19 @@ export function BP001(data) {
     // ─── Batch 1 - Trend Rotation ───────────────────────────────────────────────────
     {
         const urls = [
-            base_url + `/udf/api/v1/indicators?symbol=COMPOSITE&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX`,
-            base_url + `/udf/api/v1/indicators?symbol=IDXBASIC&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX`,
-            base_url + `/udf/api/v1/indicators?symbol=IDXCYCLIC&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX`,
-            base_url + `/udf/api/v1/indicators?symbol=IDXENERGY&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX`,
-            base_url + `/udf/api/v1/indicators?symbol=IDXFINANCE&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX`,
-            base_url + `/udf/api/v1/indicators?symbol=IDXHEALTH&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX`,
-            base_url + `/udf/api/v1/indicators?symbol=IDXINDUST&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX`,
-            base_url + `/udf/api/v1/indicators?symbol=IDXINFRA&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX`,
-            base_url + `/udf/api/v1/indicators?symbol=IDXNONCYC&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX`,
-            base_url + `/udf/api/v1/indicators?symbol=IDXPROPERT&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX`,
-            base_url + `/udf/api/v1/indicators?symbol=IDXTECHNO&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX`,
-            base_url + `/udf/api/v1/indicators?symbol=IDXTRANS&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX`,
+            base_url + `/udf/api/v1/indicators?symbol=COMPOSITE,IDXBASIC,IDXCYCLIC,IDXENERGY,IDXFINANCE,IDXHEALTH,IDXINDUST,IDXINFRA,IDXNONCYC,IDXPROPERT,IDXTECHNO,IDXTRANS&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=IDX`,
             base_url + `/udf/api/v1/indicators?symbol=BMRI&start_time=2026-01-01T17:00:00.000%2B07:00&end_time=2026-05-01T16:59:59.000%2B07:00&resolution=D&board=RG`,
         ];
 
         const requests = [
             ['GET', urls[0], null, { headers: headersAfterLogin }],
             ['GET', urls[1], null, { headers: headersAfterLogin }],
-            ['GET', urls[2], null, { headers: headersAfterLogin }],
-            ['GET', urls[3], null, { headers: headersAfterLogin }],
-            ['GET', urls[4], null, { headers: headersAfterLogin }],
-            ['GET', urls[5], null, { headers: headersAfterLogin }],
-            ['GET', urls[6], null, { headers: headersAfterLogin }],
-            ['GET', urls[7], null, { headers: headersAfterLogin }],
-            ['GET', urls[8], null, { headers: headersAfterLogin }],
-            ['GET', urls[9], null, { headers: headersAfterLogin }],
-            ['GET', urls[10], null, { headers: headersAfterLogin }],
-            ['GET', urls[11], null, { headers: headersAfterLogin }],
-            ['GET', urls[12], null, { headers: headersAfterLogin }],
         ];
         const responses = http.batch(requests);
 
         responses.forEach((response, index) => {
             const metrics = [
                 Trend_Rotation.Udf_Indicators_COMPOSITE_D_IDX,
-                Trend_Rotation.Udf_Indicators_IDXBASIC_D_IDX,
-                Trend_Rotation.Udf_Indicators_IDXCYCLIC_D_IDX,
-                Trend_Rotation.Udf_Indicators_IDXENERGY_D_IDX,
-                Trend_Rotation.Udf_Indicators_IDXFINANCE_D_IDX,
-                Trend_Rotation.Udf_Indicators_IDXHEALTH_D_IDX,
-                Trend_Rotation.Udf_Indicators_IDXINDUST_D_IDX,
-                Trend_Rotation.Udf_Indicators_IDXINFRA_D_IDX,
-                Trend_Rotation.Udf_Indicators_IDXNONCYC_D_IDX,
-                Trend_Rotation.Udf_Indicators_IDXPROPERT_D_IDX,
-                Trend_Rotation.Udf_Indicators_IDXTECHNO_D_IDX,
-                Trend_Rotation.Udf_Indicators_IDXTRANS_D_IDX,
                 Trend_Rotation.Udf_Indicators_BMRI_D_RG
             ]
             const metric = metrics[index];
@@ -290,6 +149,8 @@ export function BP001(data) {
             }
         });
     }
+
+    sleep(0.25);
 
     // ─── Batch 2 - Ownership Mapping ───────────────────────────────────────────────────
     {

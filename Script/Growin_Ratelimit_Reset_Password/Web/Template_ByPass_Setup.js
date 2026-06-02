@@ -70,165 +70,78 @@ export function BP001(data) {
     const base_url = data.base_url;
     const iterationId = exec.scenario.iterationInTest;
     const runTimestamp = Date.now();
-
-    const deviceId = `TEST_${vuId}`;  // ✅ konsisten per-VU — server tidak anggap device baru tiap iterasi
-
-    const mapping = data.vuMapping[vuId];
-    if (!mapping) {
-        console.error(`❌ VU${vuId} - No mapping found, skipping iteration`);
-        return;
-    }
-
+    
+    const deviceId = `TEST_${runTimestamp}_${vuId}_${iterationId}`;
+    
+    // ✅ Get mapping from setup
+    // const mapping = data.vuMapping[vuId];
+    // if (!mapping) {
+    //     console.error(`❌ VU${vuId} - No mapping found, skipping iteration`);
+    //     return;
+    // }
+    
     const userKey = mapping.userKey;
-    const userToken = data.tokens[userKey];
+    
+    // ✅ CRITICAL: Ambil token langsung dari setup - TIDAK perlu login ulang
+    const userTokenData = data.tokens[userKey];
+    
+    // if (!userTokenData || !userTokenData.token || !userTokenData.pin_token) {
+    //     console.error(`❌ VU${vuId} (${userTokenData?.email}) - No valid tokens from setup, skipping iteration`);
+    //     return;
+    // }
+    
+    // const token = userTokenData.token;
+    // const pinToken = userTokenData.pin_token;
+    const email = userTokenData.email;
 
-    if (!userToken) {
-        console.error(`❌ VU${vuId} (User ${userKey}) - No token data available, skipping iteration`);
-        return;
-    }
-
-    const pin_token = userToken.pin_token;
-    const user_id = userToken.user_id;
-    const client_id = userToken.client_id;
-    const SID = userToken.SID;
-    const ksei_acc_no = userToken.ksei_acc_no;
-    const account_name = userToken.account_name;
-    const email = userToken.email;
-    const bp = mapping.bp;
-
-    // ✅ Batch 1: Login
-    let sessionToken = null;
-    {
-        const urls = [
-            base_url + `/auth/api/v1/login`,
-        ];
-
-        const Auth_Login_Payload = JSON.stringify({
-            email: email,
-            password: "M@nsek.123",
-            recaptcha: '',
-        });
-
-        const Auth_Login_Headers = {
-            'Content-Type': 'application/json',
-            'Accept': '*/*',
-            'Accept-Language': 'en',
-            'Connection': 'keep-alive',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-            'X-App-Name': 'web',
-            'X-App-Version': '1.4.1',
-            'X-Device-Info': 'iPhone 11',
-            'X-Device-Id': 'TEST3',
-            // 'X-Device-Id': deviceId,
-            "priority": "u=1, i",
-            "sec-ch-ua": '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": '"macOS"',
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "same-site",
-        };
-
-        const requests = [
-            ['POST', urls[0], Auth_Login_Payload, { headers: Auth_Login_Headers }],
-        ];
-        const responses = http.batch(requests);
-
-        responses.forEach((response, index) => {
-            const metrics = [
-                Home.Auth_Login,
-            ];
-
-            const metric = metrics[index];
-            metric.httpDuration.add(response.timings.duration);
-            if (response.status === 200) {
-                // console.log(response.body)
-                metric.errorRate.add(false);
-                metric.errorCount.add(0);
-                metric.requestRate.add(true);
-                metric.http_reqs.add(1);
-
-                // Ekstrak token dari response login
-                try {
-                    const body = JSON.parse(response.body);
-                    sessionToken = body?.data?.token ?? null;
-                    if (!sessionToken) {
-                        console.error(`❌ VU${vuId} (${email}) - Login OK tapi token tidak ditemukan di response`);
-                    }
-                } catch (e) {
-                    console.error(`❌ VU${vuId} (${email}) - Gagal parse login response: ${e}`);
-                }
-
-                if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-                }
-            } else {
-                metric.errorRate.add(true);
-                metric.errorCount.add(1);
-                metric.requestRate.add(false);
-                metric.http_reqs.add(1);
-                check(response, {
-                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-                });
-                if (`${__ENV.ENV}` != 'INT') {
-                    const requestBody = requests[index][2];
-                    const timestamp = new Date().toISOString();
-                    console.error(`[${timestamp}] ${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-                }
-            }
-        });
-    }
-
-    // ✅ Guard: stop jika login gagal dapat token
-    if (!sessionToken) {
-        console.error(`❌ VU${vuId} (${email}) - sessionToken null, skip batch selanjutnya`);
-        sleep(0.25);
-        return;
-    }
-
-    // Headers pakai sessionToken hasil login, bukan token dari setup
-    const headers = {
-        'Cookie': `ACCESS_TOKEN=${sessionToken};`,
+    const headersBeforeLogin = {
         'Content-Type': 'application/json',
-        'Accept': '*/*',
         'Accept-Language': 'en',
         'Connection': 'keep-alive',
         'Accept-Encoding': 'gzip, deflate, br',
+        'Accept': '*/*',
         'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
         'X-App-Name': 'web',
         'X-App-Version': '1.4.1',
         'X-Device-Info': 'iPhone 11',
         'X-Device-Id': 'TEST3',
-        // 'X-Device-Id': deviceId,
-        "priority": "u=1, i",
-        "sec-ch-ua": '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
-        "sec-ch-ua-mobile": "?0",
-        "sec-ch-ua-platform": '"macOS"',
-        "sec-fetch-dest": "empty",
-        "sec-fetch-mode": "cors",
-        "sec-fetch-site": "same-site",
     };
 
-    // Batch 2: OTP Status (Home Page)
+    // Deklarasi token dan pinToken di luar block agar bisa diakses lintas batch
+    let token = null;
+    let pinToken = null;
+
+    // ─── Batch 1 - Login_Password ──────────────────────────────────────────────
     {
         const urls = [
-            base_url + `/auth/api/v1/protected/otp/status`,
+            base_url + `/auth/api/v2/admin-login`,
         ];
 
+        const Auth_AdminLogin_Payload = JSON.stringify({
+            identity: its_user,
+            password: "M@nsek.123",
+        });
+
         const requests = [
-            ['GET', urls[0], null, { headers: headers }],
+            ['POST', urls[0], Auth_AdminLogin_Payload, { headers: headersBeforeLogin }],
         ];
         const responses = http.batch(requests);
 
         responses.forEach((response, index) => {
             const metrics = [
-                Home.Auth_Protected_Otp_Status,
-            ];
+                Login_Password.Auth_AdminLogin
+            ]
 
             const metric = metrics[index];
             metric.httpDuration.add(response.timings.duration);
+
             if (response.status === 200) {
+                try {
+                    const body = JSON.parse(response.body);
+                    token = body?.data?.token ?? null; // assign ke outer variable
+                } catch (e) {
+                    console.error(`❌ VU${vuId} - Gagal parse login response: ${e}`);
+                }
                 metric.errorRate.add(false);
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
@@ -253,28 +166,51 @@ export function BP001(data) {
         });
     }
 
-    // Batch 3: VerifyPage — OTP Status + OTP Request
+    sleep(0.25);
+
+    const headersAfterLogin = {
+        'Cookie': `ACCESS_TOKEN=${token}`,
+        'Content-Type': 'application/json',
+        'Accept-Language': 'en',
+        'Connection': 'keep-alive',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept': '*/*',
+        'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+        'X-App-Name': 'web',
+        'X-App-Version': '1.4.1',
+        'X-Device-Info': 'iPhone 11',
+        'X-Device-Id': 'TEST3',
+    };
+
+    // ─── Batch 2 - Login_PIN ───────────────────────────────────────────────────
     {
         const urls = [
-            base_url + `/auth/api/v1/protected/otp/status`,
-            base_url + `/auth/api/v1/protected/otp/request?channel=email`,
+            base_url + `/auth/api/v1/protected/admin-pin-login`,
         ];
 
+        const Auth_Protected_AdminPinLogin_Payload = JSON.stringify({
+            value: "123456"
+        });
+
         const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-            ['POST', urls[1], null, { headers: headers }],
+            ['POST', urls[0], Auth_Protected_AdminPinLogin_Payload, { headers: headersAfterLogin }],
         ];
         const responses = http.batch(requests);
 
         responses.forEach((response, index) => {
             const metrics = [
-                VerifyPage.Auth_Protected_Otp_Status,
-                VerifyPage.Auth_Protected_Otp_Request,
-            ];
-
+                Login_PIN.Auth_Protected_AdminPinLogin
+            ]
             const metric = metrics[index];
             metric.httpDuration.add(response.timings.duration);
+
             if (response.status === 200) {
+                try {
+                    const body = JSON.parse(response.body);
+                    pinToken = body?.data?.pin_token ?? null; // assign ke outer variable
+                } catch (e) {
+                    console.error(`❌ VU${vuId} - Gagal parse pin login response: ${e}`);
+                }
                 metric.errorRate.add(false);
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
@@ -299,28 +235,39 @@ export function BP001(data) {
         });
     }
 
-    // Batch 4: VerifyPage — OTP Validate
+    const headersAfterPin = {
+        'Cookie': `ACCESS_TOKEN=${token}; PIN_ACCESS_TOKEN=${pinToken}`,
+        'Content-Type': 'application/json',
+        'Accept-Language': 'en',
+        'Connection': 'keep-alive',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept': '*/*',
+        'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
+        'X-App-Name': 'web',
+        'X-App-Version': '1.4.1',
+        'X-Device-Info': 'iPhone 11',
+        'X-Device-Id': 'TEST3',
+    };
+
+    // ─── Batch 3 - Refresh_Token_Pass ───────────────────────────────────────────────────
     {
         const urls = [
-            base_url + `/auth/api/v1/protected/otp/validate`,
+            base_url + `/auth/api/v1/admin/refresh/pass-token`,
         ];
 
-        const Auth_Protected_Otp_Validate_Payload = JSON.stringify({ 
-            otp: "123321",
-        });
-
         const requests = [
-            ['POST', urls[0], Auth_Protected_Otp_Validate_Payload, { headers: headers }],
+            ['GET', urls[0], null, { headers: headersAfterPin }],
         ];
         const responses = http.batch(requests);
 
         responses.forEach((response, index) => {
             const metrics = [
-                VerifyPage.Auth_Protected_Otp_Validate,
-            ];
+                Refresh_Token_Pass.Auth_Admin_Refresh_PassToken
+            ]
 
             const metric = metrics[index];
             metric.httpDuration.add(response.timings.duration);
+
             if (response.status === 200) {
                 metric.errorRate.add(false);
                 metric.errorCount.add(0);

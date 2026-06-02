@@ -98,7 +98,7 @@ export function BP001(data) {
                 metric.requestRate.add(false);
                 metric.http_reqs.add(1);
                 check(response, {
-                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
+                    [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body} || Request Body: ${requests.body} `]: (r) => r.status === 200
                 });
                 if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];

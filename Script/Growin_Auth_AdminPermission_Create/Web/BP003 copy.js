@@ -230,55 +230,20 @@ export function BP003(data) {
     // ✅ CRITICAL: Ambil token langsung dari setup - TIDAK perlu login ulang
     const userTokenData = data.tokens[userKey];
     
+    if (!userTokenData || !userTokenData.token || !userTokenData.pin_token) {
+        // console.error(`❌ VU${vuId} (${userTokenData?.email}) - No valid tokens from setup, skipping iteration`);
+        return;
+    }
+    
     // const token = userTokenData.token;
     // const pinToken = userTokenData.pin_token;
     // const email = userTokenData.email;
     
-    // const token = userTokenData.token;
+    const token = userTokenData.token;
     const pinToken = userTokenData.pin_token;
     const email = userTokenData.email;
     
     let watchlistGroupID = null;
-
-    let token = null;
-    {
-        const url = base_url + `/auth/api/v1/login`;
-
-        const loginPayload = JSON.stringify({
-            email: email,
-            password: "M@nsek.123",
-            recaptcha: '',
-        });
-
-        const loginHeaders = {
-            'Content-Type': 'application/json',
-            'Accept': '*/*',
-            'Accept-Language': 'en',
-            'Connection': 'keep-alive',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-            'X-App-Name': 'web',
-            'X-App-Version': '1.4.1',
-            'X-Device-Info': 'iPhone 11',
-            'X-Device-Id': 'TEST3',
-        };
-
-        const requests = [['POST', url, loginPayload, { headers: loginHeaders }]];
-        const responses = http.batch(requests);
-
-        responses.forEach((response, index) => {
-            const metric = Home.Auth_Login;
-            // metric.httpDuration.add(response.timings.duration);
-
-            if (response.status === 200) {
-                try {
-                    token = response.json().data.token;
-                } catch (e) {
-                    console.error(`❌ VU${vuId} (${email}) - Gagal parse login response: ${e}`);
-                }
-            }
-        });
-    }
 
     const headersAfterLogin = {
         'Cookie': `ACCESS_TOKEN=${token}`,
