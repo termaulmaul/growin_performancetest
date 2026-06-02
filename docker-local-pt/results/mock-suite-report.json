@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-05-29T09:12:46.735Z",
-  "pass": 0,
-  "fail": 1,
+  "generatedAt": "2026-06-02T05:54:11.759Z",
+  "pass": 1,
+  "fail": 0,
   "total": 1,
   "defaults": {
     "USER": "maul",
@@ -9,12 +9,12 @@
   },
   "items": [
     {
-      "suite": "ExaCC",
+      "suite": "Growin_Daily_Trade",
       "scenario": "BP001",
       "platform": "Web",
       "variant": "original",
-      "status": "fail",
-      "exit": 107
+      "status": "pass",
+      "exit": 0
     }
   ]
 }

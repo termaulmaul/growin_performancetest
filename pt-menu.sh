@@ -34,6 +34,8 @@ _AUTH_DISP=""
 
 # ── Run UI ───────────────────────────────────────────────────────────────────
 print_run_header() {
+  rm -f "$PROJECT_DIR/docker-local-pt/results/summary.json"
+
   local label="$1" target="${2:-}"
   _RUN_START=$(date +%s)
   _RUN_LABEL="$label"
@@ -71,6 +73,35 @@ print_run_footer() {
     fi
   fi
   echo -e "${CYN}${BLD}└${bar}${RST}"
+
+  # Webhook Summary Send
+  if [[ "$(env_val NOTIFY_TEAMS 'false')" == "true" || -n "$(env_val TELEGRAM_WEBHOOK '')" || -n "$(env_val DISCORD_WEBHOOK '')" || -n "$(env_val TEAMS_WEBHOOK '')" || -n "$(env_val BRRR_WEBHOOK '')" ]]; then
+    local res="$PROJECT_DIR/docker-local-pt/results/summary.json"
+    if [[ -n "$tmplog" && -f "$tmplog" ]]; then
+      python3 "$PROJECT_DIR/docker-local-pt/scripts/parse-k6-log.py" "$tmplog" "$res" "${_RUN_LABEL:-Unknown}" 2>/dev/null || true
+    fi
+    if [[ ! -f "$res" ]]; then
+      mkdir -p "$PROJECT_DIR/docker-local-pt/results"
+      cat <<EOF > "$res"
+{
+  "suite": "${_RUN_LABEL:-Unknown}",
+  "mode": "Sandbox / Direct",
+  "duration": "${dur_str}",
+  "http_req_failed_rate": $([[ "$rc" -eq 0 ]] && echo 0 || echo 1)
+}
+EOF
+    fi
+    
+    [[ -n "$(env_val TELEGRAM_WEBHOOK '')" ]] && node "$PROJECT_DIR/docker-local-pt/scripts/send-summary-webhook.mjs" "$res" --type telegram --webhook "$(env_val TELEGRAM_WEBHOOK '')" 2>/dev/null
+    [[ -n "$(env_val DISCORD_WEBHOOK '')" ]] && node "$PROJECT_DIR/docker-local-pt/scripts/send-summary-webhook.mjs" "$res" --type discord --webhook "$(env_val DISCORD_WEBHOOK '')" 2>/dev/null
+    [[ -n "$(env_val BRRR_WEBHOOK '')" ]] && node "$PROJECT_DIR/docker-local-pt/scripts/send-summary-webhook.mjs" "$res" --type brrr --webhook "$(env_val BRRR_WEBHOOK '')" 2>/dev/null
+    
+    local tm; tm=$(env_val TEAMS_WEBHOOK '')
+    if [[ -n "$tm" || "$(env_val NOTIFY_TEAMS 'false')" == "true" ]]; then
+      [[ -z "$tm" ]] && tm=$(env_val TEAMS_WEBHOOK '')
+      [[ -n "$tm" ]] && node "$PROJECT_DIR/docker-local-pt/scripts/send-summary-webhook.mjs" "$res" --type teams --webhook "$tm" 2>/dev/null
+    fi
+  fi
 }
 
 # ── Helpers ─────────────────────────────────────────────────────────────────
@@ -168,96 +199,113 @@ login_screen() {
 user_mgmt_menu() {
   if [[ "$PT_ROLE" != "god" && "$PT_ROLE" != "admin" ]]; then
     echo -e "  ${RED}Access Denied. Admin+ role required.${RST}"
-    read -r -p $'\nPress Enter...'
+    read -r -p $'
+Press Enter...'
     return
   fi
-  banner
-  section_header "User Management"
+  while true; do
+    banner
+    section_header "User Management"
 
-  local choices=(
-    "[1] List Users"
-    "[2] Create User"
-    "[3] Lock/Unlock User"
-    "[4] Reset Password"
-    "[5] Assign Role"
-    "[6] Delete User"
-    "[0] Back"
-  )
-  local sel; sel=$(pick_fzf "Action>" "${choices[@]}")
-  [[ -z "$sel" ]] && return
+    local choices=(
+      "[1] List Users"
+      "[2] Create User"
+      "[3] Lock/Unlock User"
+      "[4] Reset Password"
+      "[5] Assign Role"
+      "[6] Delete User"
+      "[0] Back"
+    )
+    local sel; sel=$(pick_fzf "Action>" "${choices[@]}")
+    [[ -z "$sel" || "$sel" == "[0] Back" ]] && return 0
 
-  case "$sel" in
-    "[1] List Users")
-      echo ""
-      python3 "$PROJECT_DIR/bin/pt-usermgmt" list-users --by "$PT_USER" 2>&1 | python3 -c "
+    case "$sel" in
+      "[1] List Users")
+        echo ""
+        python3 "$PROJECT_DIR/bin/pt-usermgmt" list-users --by "$PT_USER" 2>&1 | python3 -c "
 import json, sys
 raw = sys.stdin.read().strip()
 if not raw.startswith('{'): raw = raw[raw.find('{'):]
 try: d = json.loads(raw)
 except: d = {}
 users = d.get('data', {}).get('users', [])
-print(f\"  {'Username':<12} {'Role':<10} {'Locked':<8} {'Last Login'}\")
+print(f"  {'Username':<12} {'Role':<10} {'Locked':<8} {'Last Login'}")
 print('  ' + '-'*55)
 for u in users:
     locked = 'YES' if u['is_locked'] else 'no'
     ll = (u.get('last_login') or 'never')[:19]
-    print(f\"  {u['username']:<12} {u['role']:<10} {locked:<8} {ll}\")
+    print(f"  {u['username']:<12} {u['role']:<10} {locked:<8} {ll}")
 "
-      read -r -p $'\nPress Enter...'
-      ;;
-    "[2] Create User")
-      if [[ "$PT_ROLE" != "god" ]]; then
-        echo -e "  ${RED}Only god can create users.${RST}"
-        read -r -p $'\nPress Enter...'; return
-      fi
-      printf "\n  Username : "; read -r n_user
-      [[ -z "$n_user" ]] && return
-      local r_choices=("operator" "admin" "readonly" "guest" "god")
-      local n_role; n_role=$(pick_fzf "Role>" "${r_choices[@]}")
-      [[ -z "$n_role" ]] && return
-      python3 "$PROJECT_DIR/bin/pt-usermgmt" create --by "$PT_USER" --username "$n_user" --role "$n_role" 2>&1 | python3 -c "import json,sys; raw=sys.stdin.read().strip(); raw=raw[raw.find('{'):] if '{' in raw else '{}'; d=json.loads(raw) if raw else {}; print(d.get('message', d.get('error','?')))"
-      read -r -p $'\nPress Enter...'
-      ;;
-    "[3] Lock/Unlock User")
-      printf "\n  Username : "; read -r t_user
-      [[ -z "$t_user" ]] && return
-      local la_choices=("lock" "unlock")
-      local la; la=$(pick_fzf "Action>" "${la_choices[@]}")
-      [[ -z "$la" ]] && return
-      python3 "$PROJECT_DIR/bin/pt-usermgmt" "${la}-user" --by "$PT_USER" --username "$t_user" 2>&1 | python3 -c "import json,sys; raw=sys.stdin.read().strip(); raw=raw[raw.find('{'):] if '{' in raw else '{}'; d=json.loads(raw) if raw else {}; print(d.get('message', d.get('error','?')))"
-      read -r -p $'\nPress Enter...'
-      ;;
-    "[4] Reset Password")
-      printf "\n  Username : "; read -r t_user
-      [[ -z "$t_user" ]] && return
-      python3 "$PROJECT_DIR/bin/pt-usermgmt" reset-password --by "$PT_USER" --username "$t_user" 2>&1 | python3 -c "import json,sys; raw=sys.stdin.read().strip(); raw=raw[raw.find('{'):] if '{' in raw else '{}'; d=json.loads(raw) if raw else {}; print(d.get('message', d.get('error','?')))"
-      read -r -p $'\nPress Enter...'
-      ;;
-    "[5] Assign Role")
-      if [[ "$PT_ROLE" != "god" ]]; then
-        echo -e "  ${RED}Only god can assign roles.${RST}"; read -r -p $'\nPress Enter...'; return
-      fi
-      printf "\n  Username : "; read -r t_user
-      [[ -z "$t_user" ]] && return
-      local r2_choices=("operator" "admin" "readonly" "guest" "god")
-      local n_role2; n_role2=$(pick_fzf "New Role>" "${r2_choices[@]}")
-      [[ -z "$n_role2" ]] && return
-      python3 "$PROJECT_DIR/bin/pt-usermgmt" assign-role --by "$PT_USER" --username "$t_user" --role "$n_role2" 2>&1 | python3 -c "import json,sys; raw=sys.stdin.read().strip(); raw=raw[raw.find('{'):] if '{' in raw else '{}'; d=json.loads(raw) if raw else {}; print(d.get('message', d.get('error','?')))"
-      read -r -p $'\nPress Enter...'
-      ;;
-    "[6] Delete User")
-      if [[ "$PT_ROLE" != "god" ]]; then
-        echo -e "  ${RED}Only god can delete users.${RST}"; read -r -p $'\nPress Enter...'; return
-      fi
-      printf "\n  Username : "; read -r t_user
-      [[ -z "$t_user" ]] && return
-      printf "  Confirm delete '%s'? (yes/no): " "$t_user"; read -r confirm
-      [[ "$confirm" != "yes" ]] && { echo "Cancelled."; read -r -p $'\nPress Enter...'; return; }
-      python3 "$PROJECT_DIR/bin/pt-usermgmt" delete --by "$PT_USER" --username "$t_user" 2>&1 | python3 -c "import json,sys; raw=sys.stdin.read().strip(); raw=raw[raw.find('{'):] if '{' in raw else '{}'; d=json.loads(raw) if raw else {}; print(d.get('message', d.get('error','?')))"
-      read -r -p $'\nPress Enter...'
-      ;;
-    "[0] Back") return ;;
-  esac
+        read -r -p $'
+Press Enter...'
+        ;;
+      "[2] Create User")
+        if [[ "$PT_ROLE" != "god" ]]; then
+          echo -e "  ${RED}Only god can create users.${RST}"
+          read -r -p $'
+Press Enter...'; continue
+        fi
+        printf "
+  Username : "; read -r n_user
+        [[ -z "$n_user" ]] && continue
+        local r_choices=("operator" "admin" "readonly" "guest" "god")
+        local n_role; n_role=$(pick_fzf "Role>" "${r_choices[@]}")
+        [[ -z "$n_role" ]] && continue
+        python3 "$PROJECT_DIR/bin/pt-usermgmt" create --by "$PT_USER" --username "$n_user" --role "$n_role" 2>&1 | python3 -c "import json,sys; raw=sys.stdin.read().strip(); raw=raw[raw.find('{'):] if '{' in raw else '{}'; d=json.loads(raw) if raw else {}; print(d.get('message', d.get('error','?')))"
+        read -r -p $'
+Press Enter...'
+        ;;
+      "[3] Lock/Unlock User")
+        printf "
+  Username : "; read -r t_user
+        [[ -z "$t_user" ]] && continue
+        local la_choices=("lock" "unlock")
+        local la; la=$(pick_fzf "Action>" "${la_choices[@]}")
+        [[ -z "$la" ]] && continue
+        python3 "$PROJECT_DIR/bin/pt-usermgmt" "${la}-user" --by "$PT_USER" --username "$t_user" 2>&1 | python3 -c "import json,sys; raw=sys.stdin.read().strip(); raw=raw[raw.find('{'):] if '{' in raw else '{}'; d=json.loads(raw) if raw else {}; print(d.get('message', d.get('error','?')))"
+        read -r -p $'
+Press Enter...'
+        ;;
+      "[4] Reset Password")
+        printf "
+  Username : "; read -r t_user
+        [[ -z "$t_user" ]] && continue
+        python3 "$PROJECT_DIR/bin/pt-usermgmt" reset-password --by "$PT_USER" --username "$t_user" 2>&1 | python3 -c "import json,sys; raw=sys.stdin.read().strip(); raw=raw[raw.find('{'):] if '{' in raw else '{}'; d=json.loads(raw) if raw else {}; print(d.get('message', d.get('error','?')))"
+        read -r -p $'
+Press Enter...'
+        ;;
+      "[5] Assign Role")
+        if [[ "$PT_ROLE" != "god" ]]; then
+          echo -e "  ${RED}Only god can assign roles.${RST}"; read -r -p $'
+Press Enter...'; continue
+        fi
+        printf "
+  Username : "; read -r t_user
+        [[ -z "$t_user" ]] && continue
+        local r2_choices=("operator" "admin" "readonly" "guest" "god")
+        local n_role2; n_role2=$(pick_fzf "New Role>" "${r2_choices[@]}")
+        [[ -z "$n_role2" ]] && continue
+        python3 "$PROJECT_DIR/bin/pt-usermgmt" assign-role --by "$PT_USER" --username "$t_user" --role "$n_role2" 2>&1 | python3 -c "import json,sys; raw=sys.stdin.read().strip(); raw=raw[raw.find('{'):] if '{' in raw else '{}'; d=json.loads(raw) if raw else {}; print(d.get('message', d.get('error','?')))"
+        read -r -p $'
+Press Enter...'
+        ;;
+      "[6] Delete User")
+        if [[ "$PT_ROLE" != "god" ]]; then
+          echo -e "  ${RED}Only god can delete users.${RST}"; read -r -p $'
+Press Enter...'; continue
+        fi
+        printf "
+  Username : "; read -r t_user
+        [[ -z "$t_user" ]] && continue
+        printf "  Confirm delete '%s'? (yes/no): " "$t_user"; read -r confirm
+        [[ "$confirm" != "yes" ]] && { echo "Cancelled."; read -r -p $'
+Press Enter...'; continue; }
+        python3 "$PROJECT_DIR/bin/pt-usermgmt" delete --by "$PT_USER" --username "$t_user" 2>&1 | python3 -c "import json,sys; raw=sys.stdin.read().strip(); raw=raw[raw.find('{'):] if '{' in raw else '{}'; d=json.loads(raw) if raw else {}; print(d.get('message', d.get('error','?')))"
+        read -r -p $'
+Press Enter...'
+        ;;
+    esac
+  done
 }
 env_val() {
   local key="$1" default="${2:-}"
@@ -268,6 +316,24 @@ env_val() {
   else
     echo "$default"
   fi
+}
+
+set_env_val() {
+  local key="$1" value="$2"
+  if [[ ! -f "$ENV_FILE" ]]; then
+    echo -e "  ${RED}ENV file not found: $ENV_FILE${RST}"
+    return 1
+  fi
+
+  local tmpf
+  tmpf=$(mktemp)
+  if grep -qE "^${key}=" "$ENV_FILE"; then
+    sed "s|^${key}=.*|${key}=${value}|" "$ENV_FILE" > "$tmpf"
+  else
+    cat "$ENV_FILE" > "$tmpf"
+    printf '%s=%s\n' "$key" "$value" >> "$tmpf"
+  fi
+  mv "$tmpf" "$ENV_FILE"
 }
 
 show_env_summary() {
@@ -476,7 +542,7 @@ ssh_menu() {
          [[ -z "$runby" ]] && { echo "Cancelled."; read -r -p $'\nPress Enter...'; return; }
 
          local scen_label="${scenario:-AllBP}"
-         local report_file="../../Report/$suite_name/$platform/$scen_label/$runby/${runby}_DryRun_\$(date +%m%d)_\$(date +%H%M)_${scen_label}.html"
+         local report_file="../../Report/$suite_name/$platform/$scen_label/$runby/${runby}_DryRun_$(date +%m%d)_$(date +%H%M)_${scen_label}.html"
 
          run_cmd="cd Script/$suite_name && ../../k6 run $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform --out dashboard=export=$report_file"
          _run_label="$suite_name / $file_sel  [$platform · ${scenario:-AllBP} · ${vus}VU · $dur]"
@@ -558,129 +624,143 @@ ssh_menu() {
 
 # ── ENV Edit ────────────────────────────────────────────────────────────────
 env_edit_menu() {
-  banner
-  section_header "ENV Editor — ${ENV_FILE##*/}"
-  show_env_summary
+  while true; do
+    banner
+    section_header "ENV Editor — ${ENV_FILE##*/}"
+    show_env_summary
 
-  local choices=(
-    "Edit full .env in \$EDITOR"
-    "Set single key=value"
-    "← Back"
-  )
-  local sel; sel=$(pick_fzf "ENV action>" "${choices[@]}")
+    local choices=(
+      "Edit full .env in $EDITOR"
+      "Set single key=value"
+      "← Back"
+    )
+    local sel; sel=$(pick_fzf "ENV action>" "${choices[@]}")
 
+    [[ -z "$sel" || "$sel" == "← Back" ]] && return 0
+    case "$sel" in
+      "Edit full .env"*)
+        ${EDITOR:-nano} "$ENV_FILE"
+        read -r -p $'
+Press Enter...'
+        ;;
+      "Set single key=value")
+        if [[ ! -f "$ENV_FILE" ]]; then
+          echo -e "  ${RED}ENV file not found: $ENV_FILE${RST}"
+          read -r -p $'
+Press Enter...'
+          continue
+        fi
+        local keys=()
+        while IFS= read -r k; do
+          [[ -z "$k" ]] && continue
+          keys+=("$k")
+        done < <(grep -E '^[A-Z_]+=.' "$ENV_FILE" | cut -d= -f1 | sort -u)
+        keys+=("New key")
+        local key_sel; key_sel=$(pick_fzf "Key>" "${keys[@]}")
+        [[ -z "$key_sel" ]] && { read -r -p $'
+Press Enter...'; continue; }
 
-  [[ -z "$sel" ]] && return
-  case "$sel" in
-    "Edit full .env"*)
-      ${EDITOR:-nano} "$ENV_FILE"; return ;;
-    "Set single key=value")
-      if [[ ! -f "$ENV_FILE" ]]; then
-        echo -e "  ${RED}ENV file not found: $ENV_FILE${RST}"
-        read -r -p $'\nPress Enter...'
-        return
-      fi
-      # Pick key from existing keys
-      local keys=()
-      while IFS= read -r k; do
-        [[ -z "$k" ]] && continue
-        keys+=("$k")
-      done < <(grep -E '^[A-Z_]+=.' "$ENV_FILE" | cut -d= -f1 | sort -u)
-      keys+=("New key")
-      local key_sel; key_sel=$(pick_fzf "Key>" "${keys[@]}")
+        local key="$key_sel"
+        if [[ "$key_sel" == "New key" ]]; then
+          printf "  Key name: "; read -r key
+          [[ -z "$key" ]] && { echo "Cancelled."; read -r -p $'
+Press Enter...'; continue; }
+        fi
 
-      [[ -z "$key_sel" ]] && { read -r -p $'\nPress Enter...'; return; }
+        local current; current=$(env_val "$key" "")
+        printf "  %s [%s]: " "$key" "$current"
+        local newval; read -r newval
+        [[ -z "$newval" ]] && { echo "No change."; read -r -p $'
+Press Enter...'; continue; }
 
-      local key="$key_sel"
-      if [[ "$key_sel" == "New key" ]]; then
-        printf "  Key name: "; read -r key
-        [[ -z "$key" ]] && { echo "Cancelled."; read -r -p $'\nPress Enter...'; return; }
-      fi
-
-      local current; current=$(env_val "$key" "")
-      printf "  %s [%s]: " "$key" "$current"
-      local newval; read -r newval
-      [[ -z "$newval" ]] && { echo "No change."; read -r -p $'\nPress Enter...'; return; }
-
-      if grep -qE "^${key}=" "$ENV_FILE"; then
-        # Replace existing
-        local tmpf; tmpf=$(mktemp)
-        sed "s|^${key}=.*|${key}=${newval}|" "$ENV_FILE" > "$tmpf" && mv "$tmpf" "$ENV_FILE"
-      else
-        # Append new
-        echo "${key}=${newval}" >> "$ENV_FILE"
-      fi
-      echo -e "  ${GRN}✓ Set ${key}=${newval}${RST}"
-      ;;
-    "← Back") return ;;
-  esac
-  read -r -p $'\nPress Enter...'
+        if grep -qE "^${key}=" "$ENV_FILE"; then
+          local tmpf; tmpf=$(mktemp)
+          sed "s|^${key}=.*|${key}=${newval}|" "$ENV_FILE" > "$tmpf" && mv "$tmpf" "$ENV_FILE"
+        else
+          echo "${key}=${newval}" >> "$ENV_FILE"
+        fi
+        echo -e "  ${GRN}✓ Set ${key}=${newval}${RST}"
+        read -r -p $'
+Press Enter...'
+        ;;
+    esac
+  done
 }
 
 # ── Docker Section ──────────────────────────────────────────────────────────
 docker_menu() {
-  banner
-  section_header "Docker — Local PT Stack"
-  local compose_dir="$PROJECT_DIR/docker-local-pt"
-  echo -e "${CYN}${BLD}  Container         Status                  Ports${RST}"
-  echo -e "  ${DIM}$(printf '─%.0s' $(seq 1 $(( ${COLUMNS:-$(tput cols 2>/dev/null || echo 80)} - 4 ))))${RST}"
-  local ct_lines; ct_lines=$(docker ps --format "  {{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null | grep -E "pt-|k6" || true)
-  if [[ -n "$ct_lines" ]]; then
-    echo -e "$ct_lines" | awk -F'\t' '{printf "  '"${GRN}"'▶'"${RST}"'  %-18s  %-22s  '"${DIM}"'%s'"${RST}"'\n", $1, $2, $3}'
-  else
-    echo -e "  ${DIM}(no pt/k6 containers running)${RST}"
-  fi
-  echo ""
+  while true; do
+    banner
+    section_header "Docker — Local PT Stack"
+    local compose_dir="$PROJECT_DIR/docker-local-pt"
+    echo -e "${CYN}${BLD}  Container         Status                  Ports${RST}"
+    echo -e "  ${DIM}$(printf '─%.0s' $(seq 1 $(( ${COLUMNS:-$(tput cols 2>/dev/null || echo 80)} - 4 ))))${RST}"
+    local ct_lines; ct_lines=$(docker ps --format "  {{.Names}}	{{.Status}}	{{.Ports}}" 2>/dev/null | grep -E "pt-|k6" || true)
+    if [[ -n "$ct_lines" ]]; then
+      echo -e "$ct_lines" | awk -F'	' '{printf "  '"${GRN}"'▶'"${RST}"'  %-18s  %-22s  '"${DIM}"'%s'"${RST}"'
+", $1, $2, $3}'
+    else
+      echo -e "  ${DIM}(no pt/k6 containers running)${RST}"
+    fi
+    echo ""
 
-  local choices=(
-    "Start stack (mock + k6)"
-    "Start stack + observability (Grafana/Influx)"
-    "Restart stack"
-    "Show logs (mock-api)"
-    "Stop all"
-    "← Back"
-  )
-  local sel; sel=$(pick_fzf "Docker action>" "${choices[@]}")
+    local choices=(
+      "Start stack (mock + k6)"
+      "Start stack + observability (Grafana/Influx)"
+      "Restart stack"
+      "Show logs (mock-api)"
+      "Stop all"
+      "← Back"
+    )
+    local sel; sel=$(pick_fzf "Docker>" "${choices[@]}")
 
-
-  [[ -z "$sel" ]] && return
-  cd "$compose_dir"
-  case "$sel" in
-    "Start stack (mock + k6)")
-      echo ""
-      spinner_start "Starting mock-api"
-      docker compose --env-file configs/local.env up -d mock-api 2>&1
-      spinner_stop
-      echo -e "  ${GRN}${BLD}✓ mock-api started${RST}" ;;
-    "Start stack + observability"*)
-      echo ""
-      spinner_start "Starting full stack + observability"
-      docker compose --env-file configs/local.env --profile observability up -d 2>&1
-      spinner_stop
-      echo -e "  ${GRN}${BLD}✓ full stack started${RST}" ;;
-    "Restart stack")
-      echo ""
-      spinner_start "Restarting stack"
-      docker compose down 2>&1
-      docker compose --env-file configs/local.env up -d mock-api 2>&1
-      spinner_stop
-      echo -e "  ${GRN}${BLD}✓ stack restarted${RST}" ;;
-    "Show logs (mock-api)")
-      cd "$PROJECT_DIR"
-      echo -e "\n${CYN}  Logs — mock-api (last 50 lines, Ctrl+C to exit):${RST}\n"
-      docker compose -f "$compose_dir/docker-compose.yml" logs --tail=50 -f mock-api 2>&1 || true
-      read -r -p $'\nPress Enter...'
-      return ;;
-    "Stop all")
-      echo ""
-      spinner_start "Stopping all containers"
-      docker compose down 2>&1
-      spinner_stop
-      echo -e "  ${YLW}${BLD}⏹ stack stopped${RST}" ;;
-    "← Back") cd "$PROJECT_DIR"; return ;;
-  esac
-  cd "$PROJECT_DIR"
-  read -r -p $'\nPress Enter...'
+    [[ -z "$sel" || "$sel" == "← Back" ]] && return 0
+    case "$sel" in
+      "Start stack (mock + k6)")
+        echo ""
+        spinner_start "Starting stack"
+        docker compose --env-file configs/local.env up -d mock-api 2>&1
+        spinner_stop
+        echo -e "  ${GRN}${BLD}✓ stack started${RST}" 
+        read -r -p $'
+Press Enter...' ;;
+      "Start stack + observability"*)
+        echo ""
+        spinner_start "Starting full stack"
+        docker compose --env-file configs/local.env --profile observability up -d mock-api influxdb grafana 2>&1
+        spinner_stop
+        echo -e "  ${GRN}${BLD}✓ full stack started${RST}" 
+        read -r -p $'
+Press Enter...' ;;
+      "Restart stack")
+        echo ""
+        spinner_start "Restarting stack"
+        docker compose down 2>&1
+        docker compose --env-file configs/local.env up -d mock-api 2>&1
+        spinner_stop
+        echo -e "  ${GRN}${BLD}✓ stack restarted${RST}" 
+        read -r -p $'
+Press Enter...' ;;
+      "Show logs (mock-api)")
+        cd "$PROJECT_DIR"
+        echo -e "
+${CYN}  Logs — mock-api (last 50 lines, Ctrl+C to exit):${RST}
+"
+        docker compose -f "$compose_dir/docker-compose.yml" logs --tail=50 -f mock-api 2>&1 || true
+        read -r -p $'
+Press Enter...'
+        continue ;;
+      "Stop all")
+        echo ""
+        spinner_start "Stopping all containers"
+        docker compose down 2>&1
+        spinner_stop
+        echo -e "  ${YLW}${BLD}⏹ stack stopped${RST}" 
+        read -r -p $'
+Press Enter...' ;;
+    esac
+    cd "$PROJECT_DIR"
+  done
 }
 
 # ── Local Run Test ──────────────────────────────────────────────────────────
@@ -803,85 +883,92 @@ run_test_menu() {
 
 # ── Cron Scheduler ──────────────────────────────────────────────────────────
 cron_scheduler_menu() {
-  banner
-  section_header "Cron Scheduler (SQLite)"
+  while true; do
+    banner
+    section_header "Cron Scheduler (SQLite)"
 
-  local choices=(
-    "[1] Dashboard (List Jobs)"
-    "[2] Add Job"
-    "[3] Pause/Resume Job"
-    "[4] Remove Job"
-    "[0] Back"
-  )
-  local sel; sel=$(pick_fzf "Scheduler>" "${choices[@]}")
-  [[ -z "$sel" ]] && return
+    local choices=(
+      "[1] Dashboard (List Jobs)"
+      "[2] Add Job"
+      "[3] Pause/Resume Job"
+      "[4] Remove Job"
+      "[0] Back"
+    )
+    local sel; sel=$(pick_fzf "Scheduler>" "${choices[@]}")
+    [[ -z "$sel" || "$sel" == "[0] Back" ]] && return 0
 
-  case "$sel" in
-    "[1] Dashboard"*)
-      echo -e "\n${CYN}  Managed Jobs:${RST}\n"
-      python3 "$PROJECT_DIR/bin/pt-scheduler" list | python3 -c "
+    case "$sel" in
+      "[1] Dashboard"*)
+        echo -e "
+${CYN}  Managed Jobs:${RST}
+"
+        python3 "$PROJECT_DIR/bin/pt-scheduler" list | python3 -c "
 import json, sys
 jobs = json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]').get('data', {}).get('jobs', [])
 if not jobs:
     print('  (empty)')
 else:
-    print(f\"  {'ID':<15} | {'Status':<8} | {'Cron Expr':<15} | {'Script'}\")
-    print('  ' + '-'*60)
     for j in jobs:
-        print(f\"  {j['id']:<15} | {j['status']:<8} | {j['cron_expr']:<15} | {j['script_path']}\")
+        print(f"  {j['id']:<15} | {j['status']:<8} | {j['cron_expr']:<15} | {j['script_path']}")
 "
-      read -r -p $'\nPress Enter...'
-      ;;
-    "[2] Add Job"*)
-      printf "  Job ID: "; read -r job_id
-      [[ -z "$job_id" ]] && return
-      printf "  Cron expr [*/5 * * * *]: "; read -r cron_expr
-      cron_expr="${cron_expr:-*/5 * * * *}"
+        read -r -p $'
+Press Enter...'
+        ;;
+      "[2] Add Job"*)
+        printf "  Job ID: "; read -r job_id
+        [[ -z "$job_id" ]] && continue
+        printf "  Cron expr [*/5 * * * *]: "; read -r cron_expr
+        cron_expr="${cron_expr:-*/5 * * * *}"
 
-      local script_choices=()
-      while IFS= read -r s; do
-        [[ -z "$s" ]] && continue
-        while IFS= read -r js; do
-          script_choices+=("$js")
-        done < <(find "$PROJECT_DIR/Script/$s" -name '*.js' -maxdepth 1 2>/dev/null)
-      done < <(find "$PROJECT_DIR/Script" -maxdepth 1 -mindepth 1 -type d -exec basename {} \; | sort)
-      script_choices+=("Custom path")
+        local script_choices=()
+        while IFS= read -r s; do
+          [[ -z "$s" ]] && continue
+          while IFS= read -r js; do
+            script_choices+=("$js")
+          done < <(find "$PROJECT_DIR/Script/$s" -name '*.js' -maxdepth 1 2>/dev/null)
+        done < <(find "$PROJECT_DIR/Script" -maxdepth 1 -mindepth 1 -type d -exec basename {} \; | sort)
+        script_choices+=("Custom path")
 
-      local script_sel; script_sel=$(pick_fzf "Script>" "${script_choices[@]}")
-      [[ -z "$script_sel" ]] && return
-      local script_path="$script_sel"
-      if [[ "$script_sel" == "Custom path" ]]; then
-        printf "  Script path: "; read -r script_path
-        [[ -z "$script_path" ]] && return
-      fi
-      
-      python3 "$PROJECT_DIR/bin/pt-scheduler" add --id "$job_id" --cron "$cron_expr" --script "$script_path" --by "$PT_USER" | python3 -c "import json,sys; print(json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]').get('message', 'Failed'))"
-      read -r -p $'\nPress Enter...'
-      ;;
-    "[3] Pause/Resume"*)
-      local job_list; job_list=$(python3 "$PROJECT_DIR/bin/pt-scheduler" list | python3 -c "import json,sys; [print(f\"{j['id']} ({j['status']})\") for j in json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]').get('data',{}).get('jobs',[])]")
-      [[ -z "$job_list" ]] && return
-      local job_sel; job_sel=$(echo "$job_list" | pick_fzf "Toggle>")
-      [[ -z "$job_sel" ]] && return
-      
-      local jid="${job_sel%% *}"
-      local act="resume"
-      [[ "$job_sel" == *"(active)"* ]] && act="pause"
-      
-      python3 "$PROJECT_DIR/bin/pt-scheduler" toggle --id "$jid" --action "$act" | python3 -c "import json,sys; print(json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]').get('message', 'Failed'))"
-      read -r -p $'\nPress Enter...'
-      ;;
-    "[4] Remove"*)
-      local job_list; job_list=$(python3 "$PROJECT_DIR/bin/pt-scheduler" list | python3 -c "import json,sys; [print(j['id']) for j in json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]').get('data',{}).get('jobs',[])]")
-      [[ -z "$job_list" ]] && return
-      local job_sel; job_sel=$(echo "$job_list" | pick_fzf "Remove>")
-      [[ -z "$job_sel" ]] && return
-      
-      python3 "$PROJECT_DIR/bin/pt-scheduler" remove --id "$job_sel" | python3 -c "import json,sys; print(json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]').get('message', 'Failed'))"
-      read -r -p $'\nPress Enter...'
-      ;;
-    "[0] Back") return ;;
-  esac
+        local script_sel; script_sel=$(pick_fzf "Script>" "${script_choices[@]}")
+        [[ -z "$script_sel" ]] && continue
+        local script_path="$script_sel"
+        if [[ "$script_sel" == "Custom path" ]]; then
+          printf "  Script path: "; read -r script_path
+          [[ -z "$script_path" ]] && continue
+        fi
+        
+        python3 "$PROJECT_DIR/bin/pt-scheduler" add --id "$job_id" --cron "$cron_expr" --script "$script_path" --by "$PT_USER" | python3 -c "import json,sys; print(json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]').get('message', 'Failed'))"
+        read -r -p $'
+Press Enter...'
+        ;;
+      "[3] Pause/Resume"*)
+        local job_list; job_list=$(python3 "$PROJECT_DIR/bin/pt-scheduler" list | python3 -c "import json,sys; [print(f"{j['id']} ({j['status']})") for j in json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]').get('data',{}).get('jobs',[])]")
+        [[ -z "$job_list" ]] && { read -r -p $'
+Press Enter...'; continue; }
+        local job_sel; job_sel=$(echo "$job_list" | pick_fzf "Toggle>")
+        [[ -z "$job_sel" ]] && continue
+        
+        local jid="${job_sel%% *}"
+        local act="resume"
+        [[ "$job_sel" == *"(active)"* ]] && act="pause"
+        
+        python3 "$PROJECT_DIR/bin/pt-scheduler" toggle --id "$jid" --action "$act" | python3 -c "import json,sys; print(json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]').get('message', 'Failed'))"
+        read -r -p $'
+Press Enter...'
+        ;;
+      "[4] Remove"*)
+        local job_list; job_list=$(python3 "$PROJECT_DIR/bin/pt-scheduler" list | python3 -c "import json,sys; [print(j['id']) for j in json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]').get('data',{}).get('jobs',[])]")
+        [[ -z "$job_list" ]] && { read -r -p $'
+Press Enter...'; continue; }
+        local job_sel; job_sel=$(echo "$job_list" | pick_fzf "Remove>")
+        [[ -z "$job_sel" ]] && continue
+        
+        python3 "$PROJECT_DIR/bin/pt-scheduler" remove --id "$job_sel" | python3 -c "import json,sys; print(json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]').get('message', 'Failed'))"
+        read -r -p $'
+Press Enter...'
+        ;;
+    esac
+  done
 }
 
 # ── AI Slope Check (Standalone) ────────────────────────────────────────────
@@ -931,6 +1018,117 @@ print(format_report(r))
   read -r -p $'\nPress Enter...'
 }
 
+
+# ── Webhook Menu ───────────────────────────────────────────────────────────
+webhook_menu() {
+  while true; do
+  banner
+  section_header "Webhook Notifications"
+
+  echo -e "  ${CYN}Telegram:${RST} $(env_val TELEGRAM_WEBHOOK '<unset>')"
+  echo -e "  ${CYN}Discord :${RST} $(env_val DISCORD_WEBHOOK '<unset>')"
+  echo -e "  ${CYN}Teams   :${RST} $(env_val TEAMS_WEBHOOK '<unset>')"
+  echo -e "  ${CYN}Brrr    :${RST} $(env_val BRRR_WEBHOOK '<unset>')"
+  echo -e "  ${CYN}Notify  :${RST} $(env_val NOTIFY_TEAMS 'false')"
+  echo ""
+
+  local choices=(
+    "Set Telegram Webhook"
+    "Set Discord Webhook"
+    "Set Teams Webhook"
+    "Set Brrr Webhook"
+    "Toggle Teams Notify"
+    "Test Webhook (Send Sample)"
+    "← Back"
+  )
+  local sel; sel=$(pick_fzf "Webhook>" "${choices[@]}")
+  [[ -z "$sel" || "$sel" == "← Back" ]] && return 0
+
+  case "$sel" in
+    "Set Telegram Webhook")
+      printf "  Telegram URL: "; read -r url
+      [[ -z "$url" ]] && continue
+      set_env_val "TELEGRAM_WEBHOOK" "$url"
+      echo -e "  ${GRN}✓ saved TELEGRAM_WEBHOOK${RST}"
+      read -r -p $'\nPress Enter...'
+      ;;
+    "Set Discord Webhook")
+      printf "  Discord URL: "; read -r url
+      [[ -z "$url" ]] && continue
+      set_env_val "DISCORD_WEBHOOK" "$url"
+      echo -e "  ${GRN}✓ saved DISCORD_WEBHOOK${RST}"
+      read -r -p $'\nPress Enter...'
+      ;;
+    "Set Teams Webhook")
+      printf "  Teams URL: "; read -r url
+      [[ -z "$url" ]] && continue
+      set_env_val "TEAMS_WEBHOOK" "$url"
+      echo -e "  ${GRN}✓ saved TEAMS_WEBHOOK${RST}"
+      read -r -p $'\nPress Enter...'
+      ;;
+    "Set Brrr Webhook")
+      printf "  Brrr URL: "; read -r url
+      [[ -z "$url" ]] && continue
+      set_env_val "BRRR_WEBHOOK" "$url"
+      echo -e "  ${GRN}✓ saved BRRR_WEBHOOK${RST}"
+      read -r -p $'\nPress Enter...'
+      ;;
+    "Toggle Teams Notify")
+      local cur next
+      cur=$(env_val NOTIFY_TEAMS 'false')
+      [[ "$cur" == "true" ]] && next="false" || next="true"
+      set_env_val "NOTIFY_TEAMS" "$next"
+      echo -e "  ${GRN}✓ NOTIFY_TEAMS=${next}${RST}"
+      read -r -p $'\nPress Enter...'
+      ;;
+    "Test Webhook (Send Sample)")
+      local target_choices=()
+      [[ -n "$(env_val TELEGRAM_WEBHOOK "")" ]] && target_choices+=("Telegram")
+      [[ -n "$(env_val DISCORD_WEBHOOK "")" ]] && target_choices+=("Discord")
+      [[ -n "$(env_val TEAMS_WEBHOOK "")" ]] && target_choices+=("Teams")
+      [[ -n "$(env_val BRRR_WEBHOOK "")" ]] && target_choices+=("Brrr")
+      target_choices+=("← Back")
+      
+      local target_sel; target_sel=$(pick_fzf "Select Target>" "${target_choices[@]}")
+      [[ -z "$target_sel" || "$target_sel" == "← Back" ]] && continue
+      
+      local wh
+      case "$target_sel" in
+        "Telegram")
+          wh=$(env_val TELEGRAM_WEBHOOK "")
+          print_run_header "Telegram Webhook Test" "Telegram"
+          set +e
+          node "$PROJECT_DIR/docker-local-pt/scripts/webhook-tester.mjs" telegram "$wh" 2>&1
+          print_run_footer "$?"
+          ;;
+        "Discord")
+          wh=$(env_val DISCORD_WEBHOOK "")
+          print_run_header "Discord Webhook Test" "Discord"
+          set +e
+          node "$PROJECT_DIR/docker-local-pt/scripts/webhook-tester.mjs" discord "$wh" 2>&1
+          print_run_footer "$?"
+          ;;
+        "Teams")
+          wh=$(env_val TEAMS_WEBHOOK "")
+          print_run_header "Teams Webhook Test" "Teams"
+          set +e
+          node "$PROJECT_DIR/docker-local-pt/scripts/webhook-tester.mjs" teams "$wh" 2>&1
+          print_run_footer "$?"
+          ;;
+        "Brrr")
+          wh=$(env_val BRRR_WEBHOOK "")
+          print_run_header "Brrr Webhook Test" "Brrr"
+          set +e
+          node "$PROJECT_DIR/docker-local-pt/scripts/webhook-tester.mjs" brrr "$wh" 2>&1
+          print_run_footer "$?"
+          ;;
+      esac
+      read -r -p $'\nPress Enter...'
+      ;;
+  esac
+  done
+}
+
 # ── Main Menu ───────────────────────────────────────────────────────────────
 main_menu() {
   pt_require_auth
@@ -946,6 +1144,7 @@ main_menu() {
     [[ "$PT_ROLE" != "viewer" ]] && choices+=("[5] ENV Editor")
     [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" ]] && choices+=("[6] Docker Stack")
     choices+=("[7] Open Project Dir")
+    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" ]] && choices+=("[9] Webhooks")
     [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" ]] && choices+=("[D] Dashboard (Live Monitor)")
     [[ "$PT_ROLE" == "god" ]] && choices+=("[8] User Management")
     choices+=("[Q] Quit")
@@ -961,6 +1160,7 @@ main_menu() {
       "[5] ENV Editor"*)  env_edit_menu ;;
       "[6] Docker Stack"*) docker_menu ;;
       "[7] Open Project Dir"*) open_dir "$PROJECT_DIR" ;;
+      "[9] Webhooks"*) webhook_menu ;;
       "[8] User Management"*) user_mgmt_menu ;;
       "[D] Dashboard"*) bash "$PROJECT_DIR/bin/pt-dashboard" ;;
       "[Q] Quit"|"") echo -e "\n${GRN}bye.${RST}\n"; exit 0 ;;

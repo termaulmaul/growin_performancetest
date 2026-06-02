@@ -1,0 +1,31 @@
+{
+  "mode": "LOCAL_DOCKER_MOCK",
+  "suite": "Growin_Daily_Trade",
+  "scenario": "BP001",
+  "platform": "Web",
+  "variant": "original",
+  "module": "/workspace/Script/Growin_Daily_Trade/Web/BP001.js",
+  "base_url": "http://mock-api:8080",
+  "metricCount": 21,
+  "iterations": 33,
+  "http_reqs": 33,
+  "http_req_failed_rate": 0,
+  "checks_passed": 0,
+  "checks_failed": 0,
+  "http_req_duration_p95": 57.3589838,
+  "custom_metrics": {
+    "error_rate_001_01_01_Marketdata_DailyTrade": {
+      "count": 0,
+      "p95": 0
+    },
+    "sample_001_01_01_Marketdata_DailyTrade": {
+      "count": 33,
+      "p95": 0
+    },
+    "duration_001_01_01_Marketdata_DailyTrade": {
+      "count": 0,
+      "p95": 57.3589838
+    }
+  },
+  "timestamp": "2026-06-02T05:54:10.239Z"
+}

@@ -83,6 +83,49 @@ def init_db():
     );
     ''')
     
+
+    # Locks
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS locks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        env TEXT NOT NULL,
+        script_name TEXT NOT NULL,
+        owner TEXT NOT NULL,
+        heartbeat_pid INTEGER,
+        acquired_at TEXT NOT NULL,
+        last_heartbeat TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'active',
+        released_at TEXT,
+        release_reason TEXT
+    );
+    """)
+    c.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_locks_env_active ON locks(env) WHERE status = 'active';")
+    
+    # Lock Queue
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS lock_queue (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        env TEXT NOT NULL,
+        script_name TEXT NOT NULL,
+        requester TEXT NOT NULL,
+        requested_at TEXT NOT NULL,
+        notified INTEGER DEFAULT 0
+    );
+    """)
+    
+    # Scheduler
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS scheduler_jobs (
+        id TEXT PRIMARY KEY,
+        cron_expr TEXT NOT NULL,
+        script_path TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'active',
+        last_run TEXT,
+        created_at TEXT NOT NULL,
+        created_by TEXT NOT NULL
+    );
+    """)
+
     # Insert default roles if not exist
     roles = [
         ('god', 1, 'Super Administrator'),

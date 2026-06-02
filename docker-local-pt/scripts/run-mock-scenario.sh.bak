@@ -17,9 +17,6 @@ MOCK_ERROR_RATE="${MOCK_ERROR_RATE:-0}"
 USE_GRAFANA_OUTPUT="${USE_GRAFANA_OUTPUT:-false}"
 ENV="${ENV:-LOCAL}"
 RUNBY="${RUNBY:-LocalDocker}"
-TEAMS_WEBHOOK="${TEAMS_WEBHOOK:-}"
-NOTIFY_TEAMS="${NOTIFY_TEAMS:-false}"
-RUN_NO="${RUN_NO:-1}"
 
 resolve_k6_users
 USER_N="$K6_USERS"
@@ -97,3 +94,7 @@ fi
 echo ">> k6 ${SCRIPT_REL} (${VARIANT}) K6_USERS=${K6_USERS} DURATION=${DURATION} ENV=${ENV}"
 docker compose -f "$COMPOSE_FILE" run --rm "${ENV_ARGS[@]}" k6-runner
 
+if [[ -f "docker-local-pt/results/summary.json" ]]; then
+  cp "docker-local-pt/results/summary.json" "docker-local-pt/results/${BASENAME}.json"
+  echo ">> summary: docker-local-pt/results/${BASENAME}.json"
+fi

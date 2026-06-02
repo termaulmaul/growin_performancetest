@@ -1,24 +1,21 @@
 <claude-mem-context>
 # Memory Context
 
-# [growin_performancetest] recent context, 2026-05-29 5:43pm GMT+7
+# [growin_performancetest] recent context, 2026-06-02 4:35pm GMT+7
 
 Legend: 🎯session 🔴bugfix 🟣feature 🔄refactor ✅change 🔵discovery ⚖️decision 🚨security_alert 🔐security_note
 Format: ID TIME TYPE TITLE
 Fetch details: get_observations([IDs]) | Search: mem-search skill
 
-Stats: 50 obs (24,816t read) | 123,726t work | 80% savings
+Stats: 50 obs (24,856t read) | 162,288t work | 85% savings
 
 ### May 29, 2026
-S149 Fix menu back navigation and SSH remote execution in pt-menu.sh for growin_performancetest (May 29 at 9:40 AM)
 S150 Fix GitHub large file warning for app.apk exceeding 50 MB size limit (May 29 at 9:45 AM)
 S151 Menu Navigation Audit and Fallback Handler Fixes - Ensure all menus handle cancellation/ESC/back navigation without executing invalid operations (May 29 at 10:16 AM)
 S152 Improve pt-menu.sh seamless menu transitions with better output handling and TUI appearance (May 29 at 10:21 AM)
 S153 Enhanced pt-menu.sh with keyboard-driven navigation: ESC to exit script, Backspace to navigate back to parent menu, maintaining Enter for normal selection (May 29 at 10:28 AM)
 S154 Diagnose and fix backslash escaping bug in pt-menu.sh pick_fzf() function discovered during keyboard navigation enhancement (May 29 at 10:39 AM)
 S155 Audit and enable all test scripts to support local execution via Mock Docker K6 (docker-compose mock-api) or Local Sandbox Docker (127.0.0.1:2222 SSH) (May 29 at 10:40 AM)
-898 10:50a 🔵 Growin_2FA Suite: Multi-Format Test Scripts with Platform Variants
-899 " 🔵 run-local.sh: K6 Container Entrypoint with Environment Configuration Cascade
 900 10:51a 🔵 Growin_2FA_LoadTest.sh: Local k6 Binary Execution (Non-Docker)
 901 " 🔵 run-mock-scenario.sh: Argument Parsing and Script Path Construction
 902 " 🔵 docker-local-pt/sandbox: SSH-Based Test Sandbox Container
@@ -41,6 +38,7 @@ S156 Implement multi-user authentication, role-based access control, and active 
 918 11:20a ✅ pt-menu.sh: Refactored pick_fzf Function - Remove --expect Flag, Simplify Navigation
 919 11:25a ✅ pt-menu.sh: Added Dynamic Terminal Width Detection for Menu Formatting
 S157 Kimi Architecture implementation specification for Growin PT Framework — 4-phase phased plan covering auth gate (Phase 1), locking + heartbeat (Phase 2), observability (Phase 3), and enterprise features (Phase 4). (May 29 at 12:54 PM)
+S158 Implement Kimi Architecture Phase 1 (Auth Gate + RBAC) for Growin PT Framework; read RFC and arbitration report, build secure SQLite-backed authentication system with bcrypt hashing and session management. (May 29 at 3:07 PM)
 920 3:10p 🔵 Kimi RFC document exists and is fully accessible
 921 3:12p ⚖️ Architecture arbitration verdict: Kimi selected as foundation over Manus and DeepSeek
 922 " ✅ Phase 1 directory structure created and secured
@@ -55,7 +53,6 @@ S157 Kimi Architecture implementation specification for Growin PT Framework — 
 931 " ✅ pt-menu.sh integrated with Phase 1 auth system; old login_screen removed
 932 " 🔵 Phase 1 validation tests executed; CLI tools functional, pt-menu.sh syntax valid
 933 3:18p 🔵 Interactive login test via expect failed; pt-menu.sh input handling issue
-S158 Implement Kimi Architecture Phase 1 (Auth Gate + RBAC) for Growin PT Framework; read RFC and arbitration report, build secure SQLite-backed authentication system with bcrypt hashing and session management. (May 29 at 3:19 PM)
 934 3:21p ✅ SQLite locks and lock_queue tables created for Phase 2 locking implementation
 935 3:26p 🟣 bin/pt-lock CLI tool implemented with acquire/release/status/force-release and heartbeat daemon
 936 3:28p 🔵 Phase 2 lock acquisition/release cycle validated; heartbeat daemon functional
@@ -70,6 +67,17 @@ S158 Implement Kimi Architecture Phase 1 (Auth Gate + RBAC) for Growin PT Framew
 945 3:43p 🔵 Phase 4 user management CLI validated; pt-usermgmt list-users functional
 946 3:45p 🔵 Phase 4 user management menu integration blocked; user_mgmt_menu function not found
 947 3:46p 🔵 user_mgmt_menu function found in pt-menu.sh; previous integration pattern match failed due to escaping
+948 7:09p 🔴 pt-lock database initialization schema missing tables
+949 7:22p 🟣 pt-menu.sh lock denial error handling
+S159 Fix and update pt-menu.sh and its locking/status functions to properly track test execution state across users (May 29 at 7:26 PM)
+**Investigated**: Root cause of "Idle" status showing despite active K6 tests; missing SQLite locks table; why qacentral couldn't detect qa01 running tests; error suppression in pt-menu.sh masking lock failures
 
-Access 124k tokens of past work via get_observations([IDs]) or mem-search skill.
+**Learned**: CREATE TABLE locks was missing from init_db() function in lib/python/db.py, causing all pt-lock acquire calls to fail silently due to || true error suppression; dashboard/banner read empty results and fell back to "Idle"; lock state must be captured and acted upon in pt-menu.sh to prevent execution collisions
+
+**Completed**: Added CREATE TABLE locks, lock_queue, scheduler_jobs (with unique indexes) to lib/python/db.py init_db() function; removed || true error suppression from pt-menu.sh; updated pt-menu.sh to properly capture JSON lock response from pt-lock acquire and abort test execution if status is "denied"; database tables created successfully on local environment; pt-menu.sh syntax validation passed (exit code 0)
+
+**Next Steps**: User testing from qa01 account using "Run Direct" in Local Runner menu to verify: (1) test execution starts and banner displays "🔴 PT ACTIVE", (2) concurrent access from qacentral shows "🟡 OCCUPIED by qa01", (3) lock denial properly prevents collision when environment is already in use
+
+
+Access 162k tokens of past work via get_observations([IDs]) or mem-search skill.
 </claude-mem-context>
