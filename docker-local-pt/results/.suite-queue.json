@@ -1,12 +1,12 @@
 [
   {
-    "suite": "Growin_Daily_Trade",
+    "suite": "Growin_Data_Visualization",
     "runner": "docker-local-pt/scripts/k6-mock-runner.js",
     "platform": "Web",
     "scenario": "BP001",
     "variant": "original",
     "config": "-",
-    "script": "Script/Growin_Daily_Trade/Web/BP001.js",
+    "script": "Script/Growin_Data_Visualization/Web/BP001.js",
     "mockReady": true
   }
 ]

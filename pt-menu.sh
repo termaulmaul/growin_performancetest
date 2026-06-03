@@ -318,6 +318,17 @@ env_val() {
   fi
 }
 
+mask_secret() {
+  local val="$1"
+  if [[ -z "$val" || "$val" == "<unset>" || "$val" == "true" || "$val" == "false" ]]; then
+    echo "$val"
+  elif [[ ${#val} -gt 15 ]]; then
+    echo "${val:0:15}**********"
+  else
+    echo "**********"
+  fi
+}
+
 set_env_val() {
   local key="$1" value="$2"
   if [[ ! -f "$ENV_FILE" ]]; then
@@ -327,10 +338,9 @@ set_env_val() {
 
   local tmpf
   tmpf=$(mktemp)
-  if grep -qE "^${key}=" "$ENV_FILE"; then
-    sed "s|^${key}=.*|${key}=${value}|" "$ENV_FILE" > "$tmpf"
-  else
-    cat "$ENV_FILE" > "$tmpf"
+  # Clean existing keys first to avoid duplicates
+  grep -vE "^${key}=" "$ENV_FILE" > "$tmpf"
+  if [[ -n "$value" ]]; then
     printf '%s=%s\n' "$key" "$value" >> "$tmpf"
   fi
   mv "$tmpf" "$ENV_FILE"
@@ -630,7 +640,7 @@ env_edit_menu() {
     show_env_summary
 
     local choices=(
-      "Edit full .env in $EDITOR"
+      "Edit full .env in ${EDITOR:-nano}"
       "Set single key=value"
       "← Back"
     )
@@ -1036,11 +1046,11 @@ webhook_menu() {
   banner
   section_header "Webhook Notifications"
 
-  echo -e "  ${CYN}Telegram:${RST} $(env_val TELEGRAM_WEBHOOK '<unset>')"
-  echo -e "  ${CYN}Discord :${RST} $(env_val DISCORD_WEBHOOK '<unset>')"
-  echo -e "  ${CYN}Teams   :${RST} $(env_val TEAMS_WEBHOOK '<unset>')"
-  echo -e "  ${CYN}Brrr    :${RST} $(env_val BRRR_WEBHOOK '<unset>')"
-  echo -e "  ${CYN}Notify  :${RST} $(env_val NOTIFY_TEAMS 'false')"
+  echo -e "  ${CYN}Telegram:${RST} $(mask_secret "$(env_val TELEGRAM_WEBHOOK '<unset>')")"
+  echo -e "  ${CYN}Discord :${RST} $(mask_secret "$(env_val DISCORD_WEBHOOK '<unset>')")"
+  echo -e "  ${CYN}Teams   :${RST} $(mask_secret "$(env_val TEAMS_WEBHOOK '<unset>')")"
+  echo -e "  ${CYN}Brrr    :${RST} $(mask_secret "$(env_val BRRR_WEBHOOK '<unset>')")"
+  echo -e "  ${CYN}Notify  :${RST} $(mask_secret "$(env_val NOTIFY_TEAMS 'false')")"
   echo ""
 
   local choices=(
@@ -1048,6 +1058,7 @@ webhook_menu() {
     "Set Discord Webhook"
     "Set Teams Webhook"
     "Set Brrr Webhook"
+    "Clear/Delete Webhooks"
     "Toggle Teams Notify"
     "Test Webhook (Send Sample)"
     "← Back"
@@ -1082,6 +1093,14 @@ webhook_menu() {
       [[ -z "$url" ]] && continue
       set_env_val "BRRR_WEBHOOK" "$url"
       echo -e "  ${GRN}✓ saved BRRR_WEBHOOK${RST}"
+      read -r -p $'\nPress Enter...'
+      ;;
+    "Clear/Delete Webhooks")
+      local clear_sel
+      clear_sel=$(pick_fzf "Clear Webhook>" "TELEGRAM_WEBHOOK" "DISCORD_WEBHOOK" "TEAMS_WEBHOOK" "BRRR_WEBHOOK" "← Cancel")
+      [[ -z "$clear_sel" || "$clear_sel" == "← Cancel" ]] && continue
+      set_env_val "$clear_sel" ""
+      echo -e "  ${GRN}✓ cleared $clear_sel${RST}"
       read -r -p $'\nPress Enter...'
       ;;
     "Toggle Teams Notify")

@@ -1,6 +1,6 @@
 # Mock Suite Report
 
-Generated: 2026-06-03T05:49:19.359Z
+Generated: 2026-06-03T07:57:55.814Z
 
 | Pass | Fail | Total |
 |---:|---:|---:|
@@ -8,4 +8,4 @@ Generated: 2026-06-03T05:49:19.359Z
 
 | Suite | Scenario | Platform | Variant | Status |
 |---|---|---|---|---|
-| Growin_Daily_Trade | BP001 | Web | original | fail |
+| Growin_Data_Visualization | BP001 | Web | original | fail |

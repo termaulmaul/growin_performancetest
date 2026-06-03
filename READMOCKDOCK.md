@@ -55,60 +55,56 @@ Local Docker mock PT lab memungkinkan smoke/sweep skenario k6 **tanpa** backend 
 
 ```mermaid
 flowchart TD
-  Host[MacBook Pro M4 16GB] --> Docker[Docker Desktop]
-  Docker --> Mock[pt-mock-api :18080]
-  Docker --> K6[pt-k6-runner]
-  Docker --> Results[results/summary.json]
-  Docker --> Influx[pt-influx optional]
-  Docker --> Grafana[pt-grafana optional :3000]
+  Host["MacBook Pro M4 16GB"] --> Docker["Docker Desktop"]
+  Docker --> Mock["pt-mock-api :18080"]
+  Docker --> K6["pt-k6-runner"]
+  Docker --> Results["results/summary.json"]
+  Docker --> Influx["pt-influx optional"]
+  Docker --> Grafana["pt-grafana optional :3000"]
   K6 -->|HTTP| Mock
   K6 -->|summary.json| Results
   K6 -->|K6_OUT| Influx
-  Grafana -->|datasource| Influx
-```
+  Grafana -->|datasource| Influx```
 
 ### Config Flow
 
 ```mermaid
 flowchart LR
-  YAML[BPxxx.yaml] --> Converter[yaml-to-json.mjs]
-  Converter --> BPJSON[BP_CONFIG JSON]
-  Env[Docker env] --> K6[k6-runner]
+  YAML["BPxxx.yaml"] --> Converter["yaml-to-json.mjs"]
+  Converter --> BPJSON["BP_CONFIG JSON"]
+  Env["Docker env"] --> K6["k6-runner"]
   BPJSON --> K6
-  Gen[gen-mock-runner.mjs] --> Runner[.runner-*.js]
+  Gen["gen-mock-runner.mjs"] --> Runner[".runner-*.js"]
   Runner --> K6
-  K6 --> Scenario[BPxxx / enchange_BPxxx]
-  Scenario --> Mock[Mock API]
-```
+  K6 --> Scenario["BPxxx / enchange_BPxxx"]
+  Scenario --> Mock["Mock API"]```
 
 ### Run Mode Decision
 
 ```mermaid
 flowchart TD
-  Start[Need PT run] --> Mode{Goal}
-  Mode -->|Quick check| Smoke[Mode 1: Contract Smoke]
-  Mode -->|Many scripts| Sweep[Mode 2: Suite Sweep]
-  Mode -->|Error handling| Error[Mode 3: Error Path]
-  Mode -->|Dashboard| Obs[Mode 4: Observability]
-  Smoke --> Mock[Mock API]
+  Start["Need PT run"] --> Mode{"Goal"}
+  Mode -->|Quick check| Smoke["Mode 1: Contract Smoke"]
+  Mode -->|Many scripts| Sweep["Mode 2: Suite Sweep"]
+  Mode -->|Error handling| Error["Mode 3: Error Path"]
+  Mode -->|Dashboard| Obs["Mode 4: Observability"]
+  Smoke --> Mock["Mock API"]
   Sweep --> Mock
   Error --> Mock
   Obs --> Mock
-  Obs --> Grafana[Grafana]
-```
+  Obs --> Grafana["Grafana"]```
 
 ### Promotion Gate
 
 ```mermaid
 flowchart TD
-  MockPass[Mock pass] --> Compare[Original vs Enchange summary compare]
-  Compare --> LocalDecision{Compatible locally?}
-  LocalDecision -->|No| Fix[Patch enhanced script]
-  LocalDecision -->|Yes| INT[INT parallel run]
-  INT --> GrafanaCompare[Grafana metric compare]
-  GrafanaCompare --> Jenkins[Jenkins env reproduction]
-  Jenkins --> Promote[Safe import swap]
-```
+  MockPass["Mock pass"] --> Compare["Original vs Enchange summary compare"]
+  Compare --> LocalDecision{"Compatible locally?"}
+  LocalDecision -->|No| Fix["Patch enhanced script"]
+  LocalDecision -->|Yes| INT["INT parallel run"]
+  INT --> GrafanaCompare["Grafana metric compare"]
+  GrafanaCompare --> Jenkins["Jenkins env reproduction"]
+  Jenkins --> Promote["Safe import swap"]```
 
 ---
 
@@ -138,25 +134,23 @@ sequenceDiagram
 
 ```mermaid
 flowchart LR
-  Original[Original BPxxx.js] --> MockRun1[Mock k6 Run]
-  Enchange[enchange_BPxxx.js] --> MockRun2[Mock k6 Run]
-  MockRun1 --> Summary1[summary original]
-  MockRun2 --> Summary2[summary enchange]
-  Summary1 --> Compare[compare-summary.mjs]
+  Original["Original BPxxx.js"] --> MockRun1["Mock k6 Run"]
+  Enchange["enchange_BPxxx.js"] --> MockRun2["Mock k6 Run"]
+  MockRun1 --> Summary1["summary original"]
+  MockRun2 --> Summary2["summary enchange"]
+  Summary1 --> Compare["compare-summary.mjs"]
   Summary2 --> Compare
-  Compare --> Decision{Compatible?}
-  Decision -->|Yes| ParallelINT[INT parallel run]
-  Decision -->|No| Patch[Fix enhanced script]
-```
+  Compare --> Decision{"Compatible?"}
+  Decision -->|Yes| ParallelINT["INT parallel run"]
+  Decision -->|No| Patch["Fix enhanced script"]```
 
 ## Grafana Flow
 
 ```mermaid
 flowchart TD
-  K6[k6-runner] --> Influx[(InfluxDB k6)]
-  Grafana[Grafana] --> Influx
-  User[User] --> Grafana
-```
+  K6["k6-runner"] --> Influx["(InfluxDB k6)"]
+  Grafana["Grafana"] --> Influx
+  User["User"] --> Grafana```
 
 ---
 
@@ -502,13 +496,12 @@ docker exec pt-jenkins bash /workspace/docker-local-pt/jenkins/scripts/run-k6-mo
 
 ```mermaid
 flowchart TD
-  User[User] --> Jenkins[Jenkins :18081]
-  Jenkins --> Workspace[/workspace]
-  Jenkins --> Audit[audit-enhanced-contracts.mjs]
-  Jenkins --> K6[k6]
-  K6 --> Mock[mock-api:8080]
-  K6 --> Results[results/jenkins]
-```
+  User["User"] --> Jenkins["Jenkins :18081"]
+  Jenkins --> Workspace["/workspace"]
+  Jenkins --> Audit["audit-enhanced-contracts.mjs"]
+  Jenkins --> K6["k6"]
+  K6 --> Mock["mock-api:8080"]
+  K6 --> Results["results/jenkins"]```
 
 **Job auto-created:** `local-k6-mock-pipeline` (init Groovy on fresh `pt-jenkins-home`).
 
