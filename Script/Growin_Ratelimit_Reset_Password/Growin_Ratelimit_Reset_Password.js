@@ -45,7 +45,6 @@ import { BP002 as BP002_Web } from './Web/BP002.js';
 import http from 'k6/http';
 import { sleep } from 'k6';
 
-http.setResponseCallback(http.expectedStatuses(200, 201, 400, 401, 403, 404, 500));
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BP CONFIGURATION
@@ -165,7 +164,11 @@ function calculateUserDistribution(totalUsers, bps) {
 
 const userDistribution = calculateUserDistribution(TOTAL_USER, selectedBPs);
 
-console.log('📊 User Distribution:');
+let __summaryShown = false;
+if (!__summaryShown) {
+  __summaryShown = true;
+  console.log('📊 User Distribution:');
+}
 selectedBPs.forEach(bp => {
     console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
 });

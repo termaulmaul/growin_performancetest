@@ -27,7 +27,6 @@ import { BP001 as BP001_Web } from "./Web/BP001.js";
 // import { BP002 as BP002_Android } from "./Android/BP002.js";
 
 import http from "k6/http";
-http.setResponseCallback(http.expectedStatuses(200, 201, 400, 401, 403, 404, 500));
 import { sleep } from "k6";
 import { Rate } from "k6/metrics";
 
@@ -144,12 +143,22 @@ if (SCENARIO) {
 
 const userDistribution = calculateUserDistribution(TOTAL_USER, selectedBPs);
 
-console.log('📊 User Distribution:');
+let __summaryShown = false;
+if (!__summaryShown) {
+  __summaryShown = true;
+  console.log('📊 User Distribution:');
+}
 Object.keys(userDistribution).forEach(bp => {
     console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
 });
-console.log(`   TOTAL: ${TOTAL_USER} users`);
-console.log(`   PLATFORM: ${platform}`);
+if (!__summaryShown) {
+  __summaryShown = true;
+  console.log(`   TOTAL: ${TOTAL_USER} users`);
+}
+if (!__summaryShown) {
+  __summaryShown = true;
+  console.log(`   PLATFORM: ${platform}`);
+}
 
 const scenarios = {};
 selectedBPs.forEach(bp => {
@@ -315,7 +324,10 @@ export function setup() {
             : 0;                             // ✅ single BP: offset 0, NUMSTART env langsung dipakai
 
         console.log(`\n📦 Processing ${bp} on ${platform} - ${usersForThisBP} users (VU ${globalVuOffset} to ${globalVuOffset + usersForThisBP - 1})...`);
-        console.log(`   🔢 numStart efektif: ${NUMSTART_env + globalUserOffset} (globalUserOffset: ${globalUserOffset})`);
+        if (!__summaryShown) {
+          __summaryShown = true;
+          console.log(`   🔢 numStart efektif: ${NUMSTART_env + globalUserOffset} (globalUserOffset: ${globalUserOffset})`);
+        }
 
         if (skipSetupLogin) {
             console.log(`   ⏩ skipSetupLogin=true: setup login di-skip untuk ${bp}, BP akan login sendiri per-iterasi`);
@@ -547,13 +559,19 @@ export function handleSummary(data) {
         } else if (runby === 'LoadTest') {
             const htmlPath = `../../Report/Growin_Data_Visualization/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
-            
+
             return {
                 [htmlPath]: htmlReport(data),
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         }
-        
+
+        // BUG FIX 3: Default fallback for unknown RUNBY values
+        console.warn(`⚠️  Unknown RUNBY="${runby}" — no HTML report generated, outputting to stdout only`);
+        return {
+            'stdout': textSummary(data, { indent: ' ', enableColors: true }),
+        };
+
     } catch (error) {
         console.error(`❌ handleSummary error: ${error.message}`);
         console.error(`Stack: ${error.stack}`);

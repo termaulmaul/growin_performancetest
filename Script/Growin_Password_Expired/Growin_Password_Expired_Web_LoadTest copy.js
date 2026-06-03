@@ -93,12 +93,22 @@ if (SCENARIO) {
 
 const userDistribution = calculateUserDistribution(TOTAL_USER, selectedBPs);
 
-console.log('📊 User Distribution:');
+let __summaryShown = false;
+if (!__summaryShown) {
+  __summaryShown = true;
+  console.log('📊 User Distribution:');
+}
 Object.keys(userDistribution).forEach(bp => {
     console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
 });
-console.log(`   TOTAL: ${TOTAL_USER} users`);
-console.log(`   PLATFORM: ${platform}`);
+if (!__summaryShown) {
+  __summaryShown = true;
+  console.log(`   TOTAL: ${TOTAL_USER} users`);
+}
+if (!__summaryShown) {
+  __summaryShown = true;
+  console.log(`   PLATFORM: ${platform}`);
+}
 
 const scenarios = {};
 selectedBPs.forEach(bp => {
