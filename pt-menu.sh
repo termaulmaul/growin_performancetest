@@ -550,6 +550,7 @@ ssh_menu() {
          printf "  Duration [%s]: " "$default_dur"
          local dur; read -r dur
          dur="${dur:-$default_dur}"
+	         dur=$(normalize_duration "$dur")
 
          local default_env; default_env=$(env_val ENV INT)
          printf "  ENV [%s]: " "$default_env"
@@ -873,6 +874,7 @@ for d in data:
       local default_dur; default_dur=$(env_val DURATION 30s)
       printf "  Duration [%s]: " "$default_dur"; read -r dur
       dur="${dur:-$default_dur}"
+	      dur=$(normalize_duration "$dur")
 
       local default_env; default_env=$(env_val ENV INT)
       printf "  ENV [%s]: " "$default_env"; read -r env_name
