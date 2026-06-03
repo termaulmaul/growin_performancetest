@@ -1,8 +1,10 @@
 # Growin Performance Test Framework
 
-Enterprise-grade **k6-based** performance testing suite for the Growin platform. Designed to run massive scale load tests across Web, Android, and iOS scenarios using remote VMs or safely test locally via Dockerized Mock APIs. 
+Enterprise-grade **k6-based** performance testing suite for the Growin platform. Designed to run massive-scale load tests across Web, Android, and iOS scenarios using remote VMs, or safely test locally via Dockerized Mock APIs. 
 
-Built on the **Kimi Enterprise Architecture RFC**, it includes terminal-native authentication, RBAC, environment concurrency locking, metric parsing, and a live NOC-style dashboard.
+Built on the **Kimi Enterprise Architecture RFC**, it features terminal-native authentication, RBAC, environment concurrency locking, metric parsing, AI agents integration, and a live NOC-style dashboard.
+
+See [AGENTS.md](./AGENTS.md) for information regarding the autonomous agents framework and capabilities.
 
 ---
 
@@ -17,16 +19,14 @@ Launch the interactive TUI (Requires `fzf` and `python3`):
 **Initial Setup:**
 When running the TUI for the first time on a fresh server, it will detect that no users exist and will enter **Initial Setup Mode**. You will be prompted to create the first `god` level username and password.
 
-*(You can change passwords later inside the TUI via `User Management` > `Reset Password`)*
-
-*(You can change this password inside the TUI via `User Management` > `Reset Password`)*
+*(You can change this password later inside the TUI via `User Management` > `Reset Password`)*
 
 ### 🚑 Emergency Access (Forgot Password)
 If you lose access to the `god` account or get locked out, run the CLI rescue tool directly from the terminal:
 ```bash
 python3 bin/pt-rescue
 ```
-It will prompt for the username and force-reset the password/unlock the account directly via SQLite.
+It will prompt for the username and force-reset the password or unlock the account directly via SQLite.
 
 ---
 
@@ -43,6 +43,7 @@ flowchart TD
     B --> H[6. Docker Stack]
     B --> I[7. Open Project Dir]
     B --> J[8. User Management]
+    B --> L[9. Webhooks]
     B --> K[D. Dashboard]
 
     C --> C1{Pick Target}
@@ -56,10 +57,13 @@ flowchart TD
     D1 -->|⚡ Direct| D3[Run via Host k6 binary]
     D2 & D3 -->|Acquire Lock| D4[Generate Metric Summary Table]
 
-    E --> E1[Add / List / Pause / Remove Jobs via SQLite]
-    G --> G1[Inline Edit w/ Secret Masking for non-god roles]
-    J --> J1[God/Admin: Create User, Set Roles, Unlock]
+    E --> E1[Manage Jobs via SQLite]
+    G --> G1[Inline Edit w/ Secret Masking]
+    J --> J1[God/Admin: Users, Roles, Unlock]
+    L --> L1[Telegram / Discord / Teams / Brrr]
     K --> K1[Live tput NOC: CPU, RAM, Active Locks, Audit Trail]
+    
+    Z[Emergency] -.->|python3 bin/pt-rescue| J1
 ```
 
 ---
@@ -68,8 +72,8 @@ flowchart TD
 
 ### 1. Local Runner (Mock & Direct)
 Execute scripts directly from your host machine. Safely extracts and prints a tabulated **K6 Load Test Summary** (RPS, P95, Errors, etc.) at the end of each run.
-- **✓ MockReady Suites:** Scripts structured inside `Web/`, `iOS/`, `Android/` subdirectories (`BPxxx.js`). Runs tests through the `docker-local-pt` stack against `http://mock-api:8080`.
-- **⚡ Direct Suites:** Scripts that use flat structures or hardcoded environments (`ENV=INT`). Runs via the native `./k6` binary from your host.
+- **✓ MockReady Suites:** Scripts inside `Web/`, `iOS/`, `Android/` subdirectories (`BPxxx.js`). Run tests through the `docker-local-pt` stack against `http://mock-api:8080`.
+- **⚡ Direct Suites:** Scripts with flat structures or hardcoded environments (`ENV=INT`). Run via the native `./k6` binary from your host.
 
 ### 2. Remote Runner (SSH)
 Deploy load tests to high-capacity execution environments.
@@ -77,13 +81,13 @@ Deploy load tests to high-capacity execution environments.
 - **Oncloud:** Connects to GCP VMs via Google Cloud IAP tunneling.
 - **Local Sandbox:** SSH into an isolated Docker container (`127.0.0.1:2222`) that simulates a remote server environment.
 
-> **Remote Process Detection:** The framework runs a background daemon (`pt-remote-daemon.sh`) that polls target environments to detect if active `k6` processes are already running by another engineer, independently of the TUI execution context. If an active remote test is detected, the TUI will display a warning and require confirmation before proceeding to avoid test collisions.
+> **Remote Process Detection:** A background daemon (`pt-remote-daemon.sh`) polls target environments to detect if active `k6` processes are running independently of the TUI execution context. If an active remote test is detected, the TUI issues a warning and requires confirmation to avoid collisions.
 
 ### 3. Distributed Locking & Concurrency Protection
-Prevents QA engineers from stepping on each other's toes.
+Prevents QA engineers from overlapping test executions.
 - Automatically acquires an **environment lock** (e.g., `INT`, `STG`) before launching a test.
 - Forks a background heartbeat daemon (`pt-lock`) that checks in every 15s.
-- TUI Status Bar transforms into 3 states dynamically:
+- Dynamic TUI Status Bar states:
   - 🟢 `Available | maul [Idle]`
   - 🟡 `OCCUPIED | BP001 | By: budi | since 2m 10s`
   - 🔴 `PT ACTIVE | BP001 | 5m elapsed`
@@ -93,24 +97,26 @@ Full terminal-native role-based access control backed by SQLite (`~/.pt/var/pt.d
 - **Roles:** `god` (Full admin), `admin`, `operator` (PT runner), `readonly`, `guest`.
 - **User Management TUI:** Create users, lock/unlock, reset passwords, assign roles.
 
+### 5. Webhook Notifications
+Integrated alerting and reporting.
+- Supports **Telegram**, **Discord**, **Microsoft Teams**, and custom **Brrr** webhook endpoints.
+- Configurable interactively via the Webhook menu [9].
+
 ---
 
 ## 📁 Repository Structure
 
 ```text
 growin_performancetest/
-├── bin/                       # 🌟 Kimi Architecture Python CLIs (pt-auth, pt-lock, pt-dashboard)
+├── bin/                       # 🌟 Kimi Architecture Python CLIs (pt-auth, pt-lock, pt-rescue, pt-dashboard)
+├── blueprint/                 # System architecture & component design blueprints
+├── docker-local-pt/           # Local mock PT environment (mock-api + k6 + observability)
 ├── lib/                       # Python DB models and Bash auth clients
-├── Script/                    # Test suites by product (~25 products)
+├── scheduler_cli/             # Python Cron scheduler & AI scanner utilities
+├── Script/                    # Test suites by product (~28 products)
 │   ├── Growin_Calendar/       # Calendar module (Web/Android/iOS)
 │   ├── OMO_Android/           # Flat-structure android tests
 │   └── ... 
-├── docker-local-pt/           # Local mock PT environment
-│   ├── docker-compose.yml     # mock-api + k6 + observability
-│   ├── configs/local.env      # Environment config
-│   ├── scripts/               # Generators, YAML/JSON converters, table parsers
-│   └── results/               # Test outputs & summaries
-├── scheduler_cli/             # Python Cron scheduler & AI scanner
 ├── pt-menu.sh                 # 🌟 Main entrypoint Bash TUI
 └── k6                         # Native k6 binary (compiled with custom extensions)
 ```
@@ -120,7 +126,7 @@ growin_performancetest/
 
 ## 🛠️ Script Authoring Guidelines
 
-To ensure compatibility across both **Local Mock** and **Remote Environments**, scripts should dynamically construct URLs based on environment variables:
+To ensure compatibility across both **Local Mock** and **Remote Environments**, scripts must construct URLs dynamically based on environment variables:
 
 ```javascript
 // ✅ Correct (Supports Mocking)
@@ -138,8 +144,9 @@ if (`${__ENV.ENV}` != 'INT') {
 ## 📊 Observability & K6 Extensions
 
 The framework provides real-time and post-run observability:
-- **Live Dashboard:** Select `[D] Dashboard` in the TUI to watch CPU/RAM health, active test locks, and a tail of the audit trail.
+- **Live Dashboard:** Select `[D] Dashboard` in the TUI to monitor CPU/RAM health, active test locks, and a tail of the audit trail.
 - **Summary Table:** A custom Python parser (`print-summary-table.py`) renders an Excel-like ASCII table of K6 metrics locally.
 - **Grafana/InfluxDB:** Start the `observability` Docker profile to ship real-time metrics.
 
 *For complete local mock operator documentation, see [`READMOCKDOCK.md`](./READMOCKDOCK.md).*
+*For autonomous agents configuration, see [`AGENTS.md`](./AGENTS.md).*

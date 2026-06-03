@@ -54,3 +54,9 @@ Report/*
 # Tapi jangan ignore Template_Report
 !Report/[Template_Report]/
 !Report/[Template_Report]/***.apk
+
+# Claude/Performance Test
+.audit_guard_report.md
+results/
+.pt/
+*.token

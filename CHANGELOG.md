@@ -1,5 +1,21 @@
 # Changelog
 
+
+## [2.1.2] - 2026-06-03
+
+### Fixed
+- Docker-compose path issues in `pt-menu.sh`.
+- Python stdin exhaustion bugs in scheduler and user management menus.
+
+### Removed
+- Stale files: `c.txt`, `envconto.txt`, legacy `docker/pt` artifacts, `tui/` experiments.
+
+### Changed
+- Refreshed documentation and repository structure in `README.md`.
+
+# Changelog
+
+
 ## [Unreleased] - 2026-05-29
 
 ### Added (Kimi Architecture Implementation)

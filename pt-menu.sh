@@ -693,6 +693,8 @@ docker_menu() {
     banner
     section_header "Docker — Local PT Stack"
     local compose_dir="$PROJECT_DIR/docker-local-pt"
+    local compose_yml="$compose_dir/docker-compose.yml"
+    local compose_env="$compose_dir/configs/local.env"
     echo -e "${CYN}${BLD}  Container         Status                  Ports${RST}"
     echo -e "  ${DIM}$(printf '─%.0s' $(seq 1 $(( ${COLUMNS:-$(tput cols 2>/dev/null || echo 80)} - 4 ))))${RST}"
     local ct_lines; ct_lines=$(docker ps --format "  {{.Names}}	{{.Status}}	{{.Ports}}" 2>/dev/null | grep -E "pt-|k6" || true)
@@ -719,7 +721,7 @@ docker_menu() {
       "Start stack (mock + k6)")
         echo ""
         spinner_start "Starting stack"
-        docker compose --env-file configs/local.env up -d mock-api 2>&1
+        docker compose -f "$compose_yml" --env-file "$compose_env" up -d mock-api 2>&1
         spinner_stop
         echo -e "  ${GRN}${BLD}✓ stack started${RST}" 
         read -r -p $'
@@ -727,7 +729,7 @@ Press Enter...' ;;
       "Start stack + observability"*)
         echo ""
         spinner_start "Starting full stack"
-        docker compose --env-file configs/local.env --profile observability up -d mock-api influxdb grafana 2>&1
+        docker compose -f "$compose_yml" --env-file "$compose_env" --profile observability up -d mock-api influxdb grafana 2>&1
         spinner_stop
         echo -e "  ${GRN}${BLD}✓ full stack started${RST}" 
         read -r -p $'
@@ -735,8 +737,8 @@ Press Enter...' ;;
       "Restart stack")
         echo ""
         spinner_start "Restarting stack"
-        docker compose down 2>&1
-        docker compose --env-file configs/local.env up -d mock-api 2>&1
+        docker compose -f "$compose_yml" down 2>&1
+        docker compose -f "$compose_yml" --env-file "$compose_env" up -d mock-api 2>&1
         spinner_stop
         echo -e "  ${GRN}${BLD}✓ stack restarted${RST}" 
         read -r -p $'
@@ -753,7 +755,7 @@ Press Enter...'
       "Stop all")
         echo ""
         spinner_start "Stopping all containers"
-        docker compose down 2>&1
+        docker compose -f "$compose_yml" down 2>&1
         spinner_stop
         echo -e "  ${YLW}${BLD}⏹ stack stopped${RST}" 
         read -r -p $'
@@ -913,7 +915,7 @@ ${CYN}  Managed Jobs:${RST}
 "
         python3 "$PROJECT_DIR/bin/pt-scheduler" list | python3 -c "
 import json, sys
-jobs = json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]').get('data', {}).get('jobs', [])
+raw = sys.stdin.read().strip(); data = json.loads(raw[raw.find('{'):]) if '{' in raw else {}; jobs = data.get('data', {}).get('jobs', [])
 if not jobs:
     print('  (empty)')
 else:
@@ -946,12 +948,12 @@ Press Enter...'
           [[ -z "$script_path" ]] && continue
         fi
         
-        python3 "$PROJECT_DIR/bin/pt-scheduler" add --id "$job_id" --cron "$cron_expr" --script "$script_path" --by "$PT_USER" | python3 -c "import json,sys; print(json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]').get('message', 'Failed'))"
+        python3 "$PROJECT_DIR/bin/pt-scheduler" add --id "$job_id" --cron "$cron_expr" --script "$script_path" --by "$PT_USER" | python3 -c "import json,sys; raw=sys.stdin.read().strip(); raw=raw[raw.find('{'):] if '{' in raw else '{}'; print(json.loads(raw).get('message', 'Failed'))"
         read -r -p $'
 Press Enter...'
         ;;
       "[3] Pause/Resume"*)
-        local job_list; job_list=$(python3 "$PROJECT_DIR/bin/pt-scheduler" list | python3 -c "import json,sys; [print(f"{j['id']} ({j['status']})") for j in json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]').get('data',{}).get('jobs',[])]")
+        local job_list; job_list=$(python3 "$PROJECT_DIR/bin/pt-scheduler" list | python3 -c "import json,sys; raw=sys.stdin.read().strip(); raw=raw[raw.find('{'):] if '{' in raw else '{}'; data=json.loads(raw) if raw else {}; [print(f"{j['id']} ({j['status']})") for j in data.get('data',{}).get('jobs',[])]")
         [[ -z "$job_list" ]] && { read -r -p $'
 Press Enter...'; continue; }
         local job_sel; job_sel=$(echo "$job_list" | pick_fzf "Toggle>")
@@ -961,18 +963,18 @@ Press Enter...'; continue; }
         local act="resume"
         [[ "$job_sel" == *"(active)"* ]] && act="pause"
         
-        python3 "$PROJECT_DIR/bin/pt-scheduler" toggle --id "$jid" --action "$act" | python3 -c "import json,sys; print(json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]').get('message', 'Failed'))"
+        python3 "$PROJECT_DIR/bin/pt-scheduler" toggle --id "$jid" --action "$act" | python3 -c "import json,sys; raw=sys.stdin.read().strip(); raw=raw[raw.find('{'):] if '{' in raw else '{}'; print(json.loads(raw).get('message', 'Failed'))"
         read -r -p $'
 Press Enter...'
         ;;
       "[4] Remove"*)
-        local job_list; job_list=$(python3 "$PROJECT_DIR/bin/pt-scheduler" list | python3 -c "import json,sys; [print(j['id']) for j in json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]').get('data',{}).get('jobs',[])]")
+        local job_list; job_list=$(python3 "$PROJECT_DIR/bin/pt-scheduler" list | python3 -c "import json,sys; raw=sys.stdin.read().strip(); raw=raw[raw.find('{'):] if '{' in raw else '{}'; data=json.loads(raw) if raw else {}; [print(j['id']) for j in data.get('data',{}).get('jobs',[])]")
         [[ -z "$job_list" ]] && { read -r -p $'
 Press Enter...'; continue; }
         local job_sel; job_sel=$(echo "$job_list" | pick_fzf "Remove>")
         [[ -z "$job_sel" ]] && continue
         
-        python3 "$PROJECT_DIR/bin/pt-scheduler" remove --id "$job_sel" | python3 -c "import json,sys; print(json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]').get('message', 'Failed'))"
+        python3 "$PROJECT_DIR/bin/pt-scheduler" remove --id "$job_sel" | python3 -c "import json,sys; raw=sys.stdin.read().strip(); raw=raw[raw.find('{'):] if '{' in raw else '{}'; print(json.loads(raw).get('message', 'Failed'))"
         read -r -p $'
 Press Enter...'
         ;;
