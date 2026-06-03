@@ -111,10 +111,14 @@ console.log(`   PLATFORM: ${platform}`);
 const scenarios = {};
 selectedBPs.forEach(bp => {
     scenarios[bp] = {
-        executor: 'per-vu-iterations',
-        vus: 1,
-        iterations: 1,
-        maxDuration: '1h',
+        executor: 'constant-vus',
+        vus: userDistribution[bp] || 1,
+        duration: `${__ENV.DURATION}`,
+
+        // executor: 'per-vu-iterations',
+        // vus: 1,
+        // iterations: 1,
+        // maxDuration: '1h',
 
         // executor: 'ramping-vus',
         // startVUs: 0,
