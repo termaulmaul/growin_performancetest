@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-06-02T05:54:11.759Z",
-  "pass": 1,
-  "fail": 0,
+  "generatedAt": "2026-06-03T05:49:19.359Z",
+  "pass": 0,
+  "fail": 1,
   "total": 1,
   "defaults": {
     "USER": "maul",
@@ -13,8 +13,8 @@
       "scenario": "BP001",
       "platform": "Web",
       "variant": "original",
-      "status": "pass",
-      "exit": 0
+      "status": "fail",
+      "exit": 1
     }
   ]
 }

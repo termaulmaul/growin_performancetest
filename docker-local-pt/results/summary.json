@@ -1,12 +1,12 @@
 {
   "mode": "Sandbox / Direct",
-  "suite": "Growin_Daily_Trade / Growin_Daily_Trade.js  [Direct \u00b7 1VU \u00b7 30s]",
+  "suite": "Growin_Daily_Trade  [Mock Suite \u00b7 Web]",
   "scenario": "BP001",
-  "platform": "Web\" source=console",
+  "platform": "Web",
   "variant": "original",
   "iterations": 0,
-  "http_reqs": 10,
-  "http_req_failed_rate": 1.0,
+  "http_reqs": 0,
+  "http_req_failed_rate": 0.0,
   "http_req_duration_p95": 0.0,
   "timestamp": ""
 }

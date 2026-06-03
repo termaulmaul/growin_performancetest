@@ -8,15 +8,5 @@
     "config": "-",
     "script": "Script/Growin_Daily_Trade/Web/BP001.js",
     "mockReady": true
-  },
-  {
-    "suite": "Growin_Daily_Trade",
-    "runner": "docker-local-pt/scripts/k6-mock-runner.js",
-    "platform": "Web",
-    "scenario": "BP001",
-    "variant": "enchange",
-    "config": "-",
-    "script": "Script/Growin_Daily_Trade/Web/enchange_BP001.js",
-    "mockReady": true
   }
 ]
