@@ -329,6 +329,16 @@ mask_secret() {
   fi
 }
 
+normalize_duration() {
+  local val="$1"
+  # If bare number (no unit suffix), append 's'
+  if [[ "$val" =~ ^[0-9]+$ ]]; then
+    echo "${val}s"
+  else
+    echo "$val"
+  fi
+}
+
 set_env_val() {
   local key="$1" value="$2"
   if [[ ! -f "$ENV_FILE" ]]; then
