@@ -771,7 +771,13 @@ run_test_menu() {
   # Build mock-ready set from list-scenarios.mjs
   local mock_suites
   mock_suites=$(node "$PROJECT_DIR/docker-local-pt/scripts/list-scenarios.mjs" --json 2>/dev/null \
-    | python3 -c "import sys,json; data=json.loads(sys.stdin.read().strip()[sys.stdin.read().strip().find('{') if '{' in sys.stdin.read() else sys.stdin.read().strip().find('['):] if '{' in sys.stdin.read() or '[' in sys.stdin.read() else '[]'); [print(d['suite']) for d in data if d.get('mockReady')]" 2>/dev/null \
+    | python3 -c "import sys, json
+raw = sys.stdin.read().strip()
+i = min([p for p in (raw.find('['), raw.find('{')) if p != -1], default=-1)
+data = json.loads(raw[i:]) if i != -1 else []
+for d in data:
+    if d.get('mockReady'):
+        print(d['suite'])" 2>/dev/null \
     | sort -u || true)
 
   echo -e "  ${CYN}ENV: $(env_val ENV LOCAL) | VUs: $(env_val K6_USERS 1) | ${YLW}$(env_val DURATION 30s)${RST}"
@@ -860,15 +866,18 @@ run_test_menu() {
 
       print_run_header "$suite_name / $(basename "$js_sel")  [Direct · ${vus}VU · $dur]" "k6 binary"
       python3 "$PROJECT_DIR/pt-data/auth.py" set_run "$PT_USER" "$(basename "$js_sel")" "$dur" 2>/dev/null || true
+      # Run from suite dir so script's relative ../../Report path resolves to repo root
+      local _run_cwd="$PROJECT_DIR/Script/$suite_name"
+      local _script_abs="$PROJECT_DIR/$js_sel"
       set +e
       if [[ "$use_mock" == "y" ]]; then
-        BASE_URL="$mock_url" "$K6_BIN" run "$PROJECT_DIR/$js_sel" \
+        ( cd "$_run_cwd" && BASE_URL="$mock_url" "$K6_BIN" run "$_script_abs" \
           -e ENV="$env_name" -e USER="$vus" -e K6_USERS="$vus" \
-          -e DURATION="$dur" -e BASE_URL="$mock_url" 2>&1 | tee "$_local_log"
+          -e DURATION="$dur" -e BASE_URL="$mock_url" ) 2>&1 | tee "$_local_log"
       else
-        "$K6_BIN" run "$PROJECT_DIR/$js_sel" \
+        ( cd "$_run_cwd" && "$K6_BIN" run "$_script_abs" \
           -e ENV="$env_name" -e USER="$vus" -e K6_USERS="$vus" \
-          -e DURATION="$dur" 2>&1 | tee "$_local_log"
+          -e DURATION="$dur" ) 2>&1 | tee "$_local_log"
       fi
       _local_rc=${PIPESTATUS[0]}; set -e
       print_run_footer "$_local_rc" "$_local_log"
