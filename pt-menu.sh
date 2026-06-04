@@ -27,6 +27,8 @@ DIM='\033[2m'; MAG='\033[0;35m'
 
 _RUN_START=0
 _RUN_LABEL=""
+_RUN_TARGET=""
+_RUN_MODE=""
 _FZF_KEY=""
 _AUTH_USER=""
 _AUTH_ROLE=""
@@ -34,12 +36,13 @@ _AUTH_DISP=""
 
 # ── Run UI ───────────────────────────────────────────────────────────────────
 print_run_header() {
-  rm -f "$PROJECT_DIR/docker-local-pt/results/summary.json"
+  rm -f "$PROJECT_DIR/artifacts/results/summary.json"
 
-  local label="$1" target="${2:-}"
+  local label="$1" target="${2:-}" mode="${3:-}"
   _RUN_START=$(date +%s)
   _RUN_LABEL="$label"
   _RUN_TARGET="$target"
+  _RUN_MODE="$mode"
   local term_w; term_w="${COLUMNS:-$(tput cols 2>/dev/null || echo 80)}"
   local w=$(( term_w - 4 ))
   local bar; bar=$(printf '─%.0s' $(seq 1 $w))
@@ -77,30 +80,30 @@ print_run_footer() {
 
   # Webhook Summary Send
   if [[ "$(env_val NOTIFY_TEAMS 'false')" == "true" || -n "$(env_val TELEGRAM_WEBHOOK '')" || -n "$(env_val DISCORD_WEBHOOK '')" || -n "$(env_val TEAMS_WEBHOOK '')" || -n "$(env_val BRRR_WEBHOOK '')" ]]; then
-    local res="$PROJECT_DIR/docker-local-pt/results/summary.json"
+    local res="$PROJECT_DIR/artifacts/results/summary.json"
     if [[ -n "$tmplog" && -f "$tmplog" ]]; then
-      python3 "$PROJECT_DIR/docker-local-pt/scripts/parse-k6-log.py" "$tmplog" "$res" "${_RUN_LABEL:-Unknown}" "${_RUN_TARGET:-}" 2>/dev/null || true
+      python3 "$PROJECT_DIR/lib/webhook/parse-k6-log.py" "$tmplog" "$res" "${_RUN_LABEL:-Unknown}" "${_RUN_TARGET:-}" "${_RUN_MODE:-}" 2>/dev/null || true
     fi
     if [[ ! -f "$res" ]]; then
-      mkdir -p "$PROJECT_DIR/docker-local-pt/results"
+      mkdir -p "$PROJECT_DIR/artifacts/results"
       cat <<EOF > "$res"
 {
   "suite": "${_RUN_LABEL:-Unknown}",
-  "mode": "Sandbox / Direct",
+  "mode": "${_RUN_MODE:-Unknown}",
   "duration": "${dur_str}",
   "http_req_failed_rate": $([[ "$rc" -eq 0 ]] && echo 0 || echo 1)
 }
 EOF
     fi
     
-    [[ -n "$(env_val TELEGRAM_WEBHOOK '')" ]] && node "$PROJECT_DIR/docker-local-pt/scripts/send-summary-webhook.mjs" "$res" --type telegram --webhook "$(env_val TELEGRAM_WEBHOOK '')" 2>/dev/null
-    [[ -n "$(env_val DISCORD_WEBHOOK '')" ]] && node "$PROJECT_DIR/docker-local-pt/scripts/send-summary-webhook.mjs" "$res" --type discord --webhook "$(env_val DISCORD_WEBHOOK '')" 2>/dev/null
-    [[ -n "$(env_val BRRR_WEBHOOK '')" ]] && node "$PROJECT_DIR/docker-local-pt/scripts/send-summary-webhook.mjs" "$res" --type brrr --webhook "$(env_val BRRR_WEBHOOK '')" 2>/dev/null
+    [[ -n "$(env_val TELEGRAM_WEBHOOK '')" ]] && node "$PROJECT_DIR/lib/webhook/send-summary-webhook.mjs" "$res" --type telegram --webhook "$(env_val TELEGRAM_WEBHOOK '')" 2>/dev/null
+    [[ -n "$(env_val DISCORD_WEBHOOK '')" ]] && node "$PROJECT_DIR/lib/webhook/send-summary-webhook.mjs" "$res" --type discord --webhook "$(env_val DISCORD_WEBHOOK '')" 2>/dev/null
+    [[ -n "$(env_val BRRR_WEBHOOK '')" ]] && node "$PROJECT_DIR/lib/webhook/send-summary-webhook.mjs" "$res" --type brrr --webhook "$(env_val BRRR_WEBHOOK '')" 2>/dev/null
     
     local tm; tm=$(env_val TEAMS_WEBHOOK '')
     if [[ -n "$tm" || "$(env_val NOTIFY_TEAMS 'false')" == "true" ]]; then
       [[ -z "$tm" ]] && tm=$(env_val TEAMS_WEBHOOK '')
-      [[ -n "$tm" ]] && node "$PROJECT_DIR/docker-local-pt/scripts/send-summary-webhook.mjs" "$res" --type teams --webhook "$tm" 2>/dev/null
+      [[ -n "$tm" ]] && node "$PROJECT_DIR/lib/webhook/send-summary-webhook.mjs" "$res" --type teams --webhook "$tm" 2>/dev/null
     fi
   fi
 }
@@ -594,7 +597,7 @@ ssh_menu() {
   case "$sel" in
     "Onprem "*)
       if [[ -n "$ssh_cmd" ]]; then
-        print_run_header "${_run_label:-cmd}" "Onprem  10.82.15.72 → 10.184.120.48"
+        print_run_header "${_run_label:-cmd}" "Onprem  10.82.15.72 → 10.184.120.48" "Onprem"
         set +e
         _sshpass_cmd "$pass" ssh -o StrictHostKeyChecking=no \
           -o ProxyCommand="sshpass -p \"$pass\" ssh -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72" \
@@ -610,7 +613,7 @@ ssh_menu() {
       ;;
     "Oncloud "*)
       if [[ -n "$ssh_cmd" ]]; then
-        print_run_header "${_run_label:-cmd}" "Oncloud  GCP IAP → vm-pt-ksix-0"
+        print_run_header "${_run_label:-cmd}" "Oncloud  GCP IAP → vm-pt-ksix-0" "Oncloud"
         set +e
         gcloud compute ssh --zone "asia-southeast2-c" "vm-pt-ksix-0" \
           --tunnel-through-iap --project "compute-pt" \
@@ -625,7 +628,7 @@ ssh_menu() {
       ;;
     "Local Sandbox "*)
       if [[ -n "$ssh_cmd" ]]; then
-        print_run_header "${_run_label:-cmd}" "Local Sandbox  127.0.0.1:2222"
+        print_run_header "${_run_label:-cmd}" "Local Sandbox  127.0.0.1:2222" "Sandbox"
         set +e
         _sshpass_cmd "$pass" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
           -p 2222 qa@127.0.0.1 "$ssh_cmd" 2>&1 | tee "$_run_log"
@@ -836,13 +839,13 @@ for d in data:
       local platform_arg=""
       [[ "$platform" != "All" ]] && platform_arg="$platform"
 
-      print_run_header "$suite_name  [Mock Suite · $platform]" "Local Docker Mock"
+      print_run_header "$suite_name  [Mock Suite · $platform]" "Local Docker Mock" "Mock"
       python3 "$PROJECT_DIR/pt-data/auth.py" set_run "$PT_USER" "MockSuite:$suite_name" "5m" 2>/dev/null || true
       set +e
       bash "$run_sh" "$suite_name" "$platform_arg" 2>&1 | tee "$_local_log"
       _local_rc=${PIPESTATUS[0]}; set -e
       print_run_footer "$_local_rc" "$_local_log"
-      python3 "$PROJECT_DIR/docker-local-pt/scripts/print-summary-table.py" "$PROJECT_DIR/docker-local-pt/results/summary.json" 2>/dev/null || true
+      python3 "$PROJECT_DIR/docker-local-pt/scripts/print-summary-table.py" "$PROJECT_DIR/artifacts/results/summary.json" 2>/dev/null || true
       rm -f "$_local_log"
       python3 "$PROJECT_DIR/pt-data/auth.py" clear_run "$PT_USER" 2>/dev/null || true
       read -r -p $'\nPress Enter...' ;;
@@ -906,7 +909,7 @@ for d in data:
       fi
       _local_rc=${PIPESTATUS[0]}; set -e
       print_run_footer "$_local_rc" "$_local_log"
-      python3 "$PROJECT_DIR/docker-local-pt/scripts/print-summary-table.py" "$PROJECT_DIR/docker-local-pt/results/summary.json" 2>/dev/null || true
+      python3 "$PROJECT_DIR/docker-local-pt/scripts/print-summary-table.py" "$PROJECT_DIR/artifacts/results/summary.json" 2>/dev/null || true
       rm -f "$_local_log"
       python3 "$PROJECT_DIR/pt-data/auth.py" clear_run "$PT_USER" 2>/dev/null || true
       read -r -p $'\nPress Enter...' ;;
@@ -1141,28 +1144,28 @@ webhook_menu() {
           wh=$(env_val TELEGRAM_WEBHOOK "")
           print_run_header "Telegram Webhook Test" "Telegram"
           set +e
-          node "$PROJECT_DIR/docker-local-pt/scripts/webhook-tester.mjs" telegram "$wh" 2>&1
+          node "$PROJECT_DIR/lib/webhook/webhook-tester.mjs" telegram "$wh" 2>&1
           print_run_footer "$?"
           ;;
         "Discord")
           wh=$(env_val DISCORD_WEBHOOK "")
           print_run_header "Discord Webhook Test" "Discord"
           set +e
-          node "$PROJECT_DIR/docker-local-pt/scripts/webhook-tester.mjs" discord "$wh" 2>&1
+          node "$PROJECT_DIR/lib/webhook/webhook-tester.mjs" discord "$wh" 2>&1
           print_run_footer "$?"
           ;;
         "Teams")
           wh=$(env_val TEAMS_WEBHOOK "")
           print_run_header "Teams Webhook Test" "Teams"
           set +e
-          node "$PROJECT_DIR/docker-local-pt/scripts/webhook-tester.mjs" teams "$wh" 2>&1
+          node "$PROJECT_DIR/lib/webhook/webhook-tester.mjs" teams "$wh" 2>&1
           print_run_footer "$?"
           ;;
         "Brrr")
           wh=$(env_val BRRR_WEBHOOK "")
           print_run_header "Brrr Webhook Test" "Brrr"
           set +e
-          node "$PROJECT_DIR/docker-local-pt/scripts/webhook-tester.mjs" brrr "$wh" 2>&1
+          node "$PROJECT_DIR/lib/webhook/webhook-tester.mjs" brrr "$wh" 2>&1
           print_run_footer "$?"
           ;;
       esac

@@ -5,7 +5,8 @@ import json
 log_path = sys.argv[1]
 out_path = sys.argv[2]
 suite_name = sys.argv[3]
-target = sys.argv[4] if len(sys.argv) > 4 else "" 
+target = sys.argv[4] if len(sys.argv) > 4 else ""
+mode = sys.argv[5] if len(sys.argv) > 5 else ""
 
 with open(log_path, 'r') as f:
     text = f.read()
@@ -40,7 +41,7 @@ if m_fail:
     failed_rate = float(m_fail.group(1)) / 100.0
 
 summary = {
-    "mode": "Sandbox / Direct",
+    "mode": mode or "Unknown",
     "suite": suite_name,
     "scenario": "BP001",
     "platform": "Web",
