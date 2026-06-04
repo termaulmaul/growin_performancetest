@@ -55,6 +55,10 @@ const apiRows = parseCustomMetrics(result.custom_metrics).sort((a, b) => a.name.
 const durS = parseDuration(result.duration || '30s');
 const totalReqs = result.http_reqs || 0;
 const p95All = result.http_req_duration_p95 || 0;
+const targetUrl = result.base_url || 'Local Sandbox 127.0.0.1:2222';
+const nowTs = new Date();
+const endTs = nowTs.toISOString().replace('T',' ').slice(0,19);
+const startTs = result.start_ts || new Date(nowTs.getTime() - durS * 1000).toISOString().replace('T',' ').slice(0,19);
 
 // Thresholds defaults
 const tAvg = 200;
@@ -64,6 +68,7 @@ const tRps = 381;
 const overallAvg = parseFloat(p95All);
 const overallErr = (result.http_req_failed_rate || 0) * 100;
 const totalRpsVal = durS > 0 ? (totalReqs / durS) : 0;
+const avgTps = apiRows.length > 0 ? (totalRpsVal / apiRows.length) : totalRpsVal;
 
 const avgOk = overallAvg < tAvg;
 const errOk = overallErr < tErr;
@@ -100,26 +105,38 @@ const text = `🧪 **growin_performancetest — PT Run Report**\n` +
              `**Suite**\n` +
              `${result.suite || 'Direct Run'} / ${result.scenario || 'BP001'}\n` +
              `**Target**\n` +
-             `${result.base_url || 'Local Sandbox 127.0.0.1:2222'}\n` +
-             `**Time**\n` +
-             `${new Date().toISOString().replace('T', ' ').slice(0, 19)}`;
+             `${targetUrl}\n` +
+             `**Start → End**\n` +
+             `${startTs} → ${endTs}\n` +
+             `**Avg TPS**\n` +
+             `${avgTps.toFixed(2)}`;
 
 if (type === 'teams') {
   const cardBody = [
     {
       "type": "TextBlock",
-      "text": `📊 PT Performance Report — ${result.suite || 'Direct Run'}`,
+      "text": "📊 PT Performance Report",
       "weight": "Bolder",
       "size": "Large",
       "wrap": true
     },
     {
+      "type": "TextBlock",
+      "text": `**${result.suite || 'Direct Run'}** / ${result.scenario || '—'}`,
+      "size": "Medium",
+      "wrap": true,
+      "spacing": "None"
+    },
+    {
       "type": "FactSet",
       "facts": [
         { "title": "Suite", "value": result.suite || "—" },
-        { "title": "Target", "value": result.base_url || "—" },
+        { "title": "Target", "value": targetUrl },
         { "title": "Mode", "value": result.mode || "—" },
-        { "title": "Execution", "value": `${result.duration || '30s'} duration` }
+        { "title": "Execution", "value": `${result.duration || '30s'} duration` },
+        { "title": "Start", "value": startTs },
+        { "title": "End", "value": endTs },
+        { "title": "Avg TPS", "value": avgTps.toFixed(2) }
       ]
     },
     {
@@ -198,12 +215,13 @@ if (type === 'teams') {
           "type": "ColumnSet",
           "columns": [
             { "type": "Column", "width": "5", "items": [{ "type": "TextBlock", "text": "**#**", "size": "Small", "weight": "Bolder" }] },
-            { "type": "Column", "width": "40", "items": [{ "type": "TextBlock", "text": "**API**", "size": "Small", "weight": "Bolder", "wrap": true }] },
-            { "type": "Column", "width": "15", "items": [{ "type": "TextBlock", "text": "**Samp**", "size": "Small", "weight": "Bolder" }] },
-            { "type": "Column", "width": "15", "items": [{ "type": "TextBlock", "text": "**Avg**", "size": "Small", "weight": "Bolder" }] },
-            { "type": "Column", "width": "15", "items": [{ "type": "TextBlock", "text": "**P95**", "size": "Small", "weight": "Bolder" }] },
-            { "type": "Column", "width": "15", "items": [{ "type": "TextBlock", "text": "**Err%**", "size": "Small", "weight": "Bolder" }] },
-            { "type": "Column", "width": "15", "items": [{ "type": "TextBlock", "text": "**RPS**", "size": "Small", "weight": "Bolder" }] }
+            { "type": "Column", "width": "35", "items": [{ "type": "TextBlock", "text": "**API**", "size": "Small", "weight": "Bolder", "wrap": true }] },
+            { "type": "Column", "width": "12", "items": [{ "type": "TextBlock", "text": "**Samp**", "size": "Small", "weight": "Bolder" }] },
+            { "type": "Column", "width": "12", "items": [{ "type": "TextBlock", "text": "**Avg**", "size": "Small", "weight": "Bolder" }] },
+            { "type": "Column", "width": "12", "items": [{ "type": "TextBlock", "text": "**P95**", "size": "Small", "weight": "Bolder" }] },
+            { "type": "Column", "width": "12", "items": [{ "type": "TextBlock", "text": "**Err%**", "size": "Small", "weight": "Bolder" }] },
+            { "type": "Column", "width": "12", "items": [{ "type": "TextBlock", "text": "**RPS**", "size": "Small", "weight": "Bolder" }] },
+            { "type": "Column", "width": "12", "items": [{ "type": "TextBlock", "text": "**TPS**", "size": "Small", "weight": "Bolder" }] }
           ]
         }
       ]
@@ -215,18 +233,20 @@ if (type === 'teams') {
       let displayName = api.name.replace(/_/g, ' ').replace(/^BP\d+\s+/, '').replace(/^001\s+01\s+\d+\s+/, '');
       if (displayName.length > 25) displayName = displayName.substring(0, 22) + '...';
       const rps = durS > 0 ? ((api.samples || 0) / durS).toFixed(1) : "—";
-      
+      const tps = apiRows.length > 0 ? (parseFloat(rps) / apiRows.length).toFixed(1) : "—";
+
       rowsContainer.items.push({
         "type": "ColumnSet",
         "spacing": "Small",
         "columns": [
           { "type": "Column", "width": "5", "items": [{ "type": "TextBlock", "text": String(idx + 1), "size": "Small" }] },
-          { "type": "Column", "width": "40", "items": [{ "type": "TextBlock", "text": displayName, "size": "Small", "wrap": true, "weight": "Bolder" }] },
-          { "type": "Column", "width": "15", "items": [{ "type": "TextBlock", "text": String(api.samples || 0), "size": "Small" }] },
-          { "type": "Column", "width": "15", "items": [{ "type": "TextBlock", "text": (api.dur_avg || 0).toFixed(1), "size": "Small" }] },
-          { "type": "Column", "width": "15", "items": [{ "type": "TextBlock", "text": (api.dur_p95 || 0).toFixed(1), "size": "Small" }] },
-          { "type": "Column", "width": "15", "items": [{ "type": "TextBlock", "text": errRate + "%", "size": "Small", "color": failed ? "Attention" : "Good" }] },
-          { "type": "Column", "width": "15", "items": [{ "type": "TextBlock", "text": String(rps), "size": "Small", "color": parseFloat(rps) < tRps ? "Attention" : "Default" }] }
+          { "type": "Column", "width": "35", "items": [{ "type": "TextBlock", "text": displayName, "size": "Small", "wrap": true, "weight": "Bolder" }] },
+          { "type": "Column", "width": "12", "items": [{ "type": "TextBlock", "text": String(api.samples || 0), "size": "Small" }] },
+          { "type": "Column", "width": "12", "items": [{ "type": "TextBlock", "text": (api.dur_avg || 0).toFixed(1), "size": "Small" }] },
+          { "type": "Column", "width": "12", "items": [{ "type": "TextBlock", "text": (api.dur_p95 || 0).toFixed(1), "size": "Small" }] },
+          { "type": "Column", "width": "12", "items": [{ "type": "TextBlock", "text": errRate + "%", "size": "Small", "color": failed ? "Attention" : "Good" }] },
+          { "type": "Column", "width": "12", "items": [{ "type": "TextBlock", "text": String(rps), "size": "Small", "color": parseFloat(rps) < tRps ? "Attention" : "Default" }] },
+          { "type": "Column", "width": "12", "items": [{ "type": "TextBlock", "text": String(tps), "size": "Small" }] }
         ]
       });
     });
@@ -254,16 +274,19 @@ if (type === 'teams') {
 } else {
   // Plain text table for Discord / Telegram
   let txt = `🧪 **PT Run Report** — ${result.suite}\n`;
-  txt += `Status: ${statusText.replace('## ','')} | Target: ${result.base_url||'—'}\n\n`;
+  txt += `Status: ${statusText.replace('## ','')} | Target: ${targetUrl}\n`;
+  txt += `Start: ${startTs} → End: ${endTs} | Avg TPS: ${avgTps.toFixed(2)}\n\n`;
   txt += "```text\n";
-  txt += "API | Samp | Avg | P95 | Err% | RPS\n";
-  txt += "---------------------------------------\n";
+  txt += "API | Samp | Avg | P95 | Err% | RPS | TPS\n";
+  txt += "---------------------------------------------\n";
   if (apiRows.length === 0) {
-    txt += `Total | ${totalReqs} | ${p95All.toFixed(1)} | ${p95All.toFixed(1)} | ${((result.http_req_failed_rate||0)*100).toFixed(1)}% | ${durS>0?(totalReqs/durS).toFixed(1):'—'}\n`;
+    txt += `Total | ${totalReqs} | ${p95All.toFixed(1)} | ${p95All.toFixed(1)} | ${((result.http_req_failed_rate||0)*100).toFixed(1)}% | ${durS>0?(totalReqs/durS).toFixed(1):'—'} | ${avgTps.toFixed(1)}\n`;
   } else {
     for (const r of apiRows) {
       let n = r.name.replace(/^BP\d+_|001_01_/g,'').substring(0,12);
-      txt += `${n.padEnd(12)} | ${String(r.samples||0).padEnd(4)} | ${(r.dur_avg||r.dur_p95||0).toFixed(0).padStart(3)} | ${(r.dur_p95||0).toFixed(0).padStart(3)} | ${(r.err_rate!=null?r.err_rate*100:0).toFixed(1)}% | ${durS>0?((r.samples||0)/durS).toFixed(1):'—'}\n`;
+      const rps = durS > 0 ? ((r.samples||0)/durS).toFixed(1) : '—';
+      const tps = apiRows.length > 0 ? (parseFloat(rps)/apiRows.length).toFixed(1) : '—';
+      txt += `${n.padEnd(12)} | ${String(r.samples||0).padEnd(4)} | ${(r.dur_avg||r.dur_p95||0).toFixed(0).padStart(3)} | ${(r.dur_p95||0).toFixed(0).padStart(3)} | ${(r.err_rate!=null?r.err_rate*100:0).toFixed(1)}% | ${rps} | ${tps}\n`;
     }
   }
   txt += "```";

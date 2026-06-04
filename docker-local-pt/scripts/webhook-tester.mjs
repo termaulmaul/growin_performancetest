@@ -39,8 +39,10 @@ const text = `🧪 **growin_performancetest — Webhook Test**\n` +
              `Webhook_Test / pt-menu.sh\n` +
              `**Target**\n` +
              `Local Sandbox 127.0.0.1:2222\n` +
-             `**Time**\n` +
-             `${new Date().toISOString().replace('T', ' ').slice(0, 19)}`;
+             `**Start → End**\n` +
+             `${new Date(Date.now() - 30000).toISOString().replace('T',' ').slice(0,19)} → ${new Date().toISOString().replace('T',' ').slice(0,19)}\n` +
+             `**Avg TPS**\n` +
+             `87.10`;
 
 if (type === 'teams') {
   body = JSON.stringify({
@@ -55,10 +57,17 @@ if (type === 'teams') {
           "body": [
             {
               "type": "TextBlock",
-              "text": "📊 PT Performance Report — Webhook Test",
+              "text": "📊 PT Performance Report",
               "weight": "Bolder",
               "size": "Large",
               "wrap": true
+            },
+            {
+              "type": "TextBlock",
+              "text": "**Webhook_Test** / pt-menu.sh",
+              "size": "Medium",
+              "wrap": true,
+              "spacing": "None"
             },
             {
               "type": "FactSet",
@@ -66,7 +75,10 @@ if (type === 'teams') {
                 { "title": "Suite", "value": "Webhook_Test" },
                 { "title": "Target", "value": "Local Sandbox 127.0.0.1:2222" },
                 { "title": "Mode", "value": "Direct · 1VU · 30s" },
-                { "title": "Execution", "value": "30s duration" }
+                { "title": "Execution", "value": "30s duration" },
+                { "title": "Start", "value": new Date(Date.now() - 30000).toISOString().replace('T',' ').slice(0,19) },
+                { "title": "End", "value": new Date().toISOString().replace('T',' ').slice(0,19) },
+                { "title": "Avg TPS", "value": "87.10" }
               ]
             },
             {
@@ -141,12 +153,13 @@ if (type === 'teams') {
                   "type": "ColumnSet",
                   "columns": [
                     { "type": "Column", "width": "5", "items": [{ "type": "TextBlock", "text": "**#**", "size": "Small", "weight": "Bolder" }] },
-                    { "type": "Column", "width": "40", "items": [{ "type": "TextBlock", "text": "**API**", "size": "Small", "weight": "Bolder", "wrap": true }] },
-                    { "type": "Column", "width": "15", "items": [{ "type": "TextBlock", "text": "**Samp**", "size": "Small", "weight": "Bolder" }] },
-                    { "type": "Column", "width": "15", "items": [{ "type": "TextBlock", "text": "**Avg**", "size": "Small", "weight": "Bolder" }] },
-                    { "type": "Column", "width": "15", "items": [{ "type": "TextBlock", "text": "**P95**", "size": "Small", "weight": "Bolder" }] },
-                    { "type": "Column", "width": "15", "items": [{ "type": "TextBlock", "text": "**Err%**", "size": "Small", "weight": "Bolder" }] },
-                    { "type": "Column", "width": "15", "items": [{ "type": "TextBlock", "text": "**RPS**", "size": "Small", "weight": "Bolder" }] }
+                    { "type": "Column", "width": "35", "items": [{ "type": "TextBlock", "text": "**API**", "size": "Small", "weight": "Bolder", "wrap": true }] },
+                    { "type": "Column", "width": "12", "items": [{ "type": "TextBlock", "text": "**Samp**", "size": "Small", "weight": "Bolder" }] },
+                    { "type": "Column", "width": "12", "items": [{ "type": "TextBlock", "text": "**Avg**", "size": "Small", "weight": "Bolder" }] },
+                    { "type": "Column", "width": "12", "items": [{ "type": "TextBlock", "text": "**P95**", "size": "Small", "weight": "Bolder" }] },
+                    { "type": "Column", "width": "12", "items": [{ "type": "TextBlock", "text": "**Err%**", "size": "Small", "weight": "Bolder" }] },
+                    { "type": "Column", "width": "12", "items": [{ "type": "TextBlock", "text": "**RPS**", "size": "Small", "weight": "Bolder" }] },
+                    { "type": "Column", "width": "12", "items": [{ "type": "TextBlock", "text": "**TPS**", "size": "Small", "weight": "Bolder" }] }
                   ]
                 },
                 {
@@ -154,12 +167,13 @@ if (type === 'teams') {
                   "spacing": "Small",
                   "columns": [
                     { "type": "Column", "width": "5", "items": [{ "type": "TextBlock", "text": "1", "size": "Small" }] },
-                    { "type": "Column", "width": "40", "items": [{ "type": "TextBlock", "text": "Marketdata DailyTrade", "size": "Small", "wrap": true, "weight": "Bolder" }] },
-                    { "type": "Column", "width": "15", "items": [{ "type": "TextBlock", "text": "10454", "size": "Small" }] },
-                    { "type": "Column", "width": "15", "items": [{ "type": "TextBlock", "text": "47.4", "size": "Small" }] },
-                    { "type": "Column", "width": "15", "items": [{ "type": "TextBlock", "text": "57.3", "size": "Small" }] },
-                    { "type": "Column", "width": "15", "items": [{ "type": "TextBlock", "text": "0.0%", "size": "Small", "color": "Good" }] },
-                    { "type": "Column", "width": "15", "items": [{ "type": "TextBlock", "text": "348.4", "size": "Small", "color": "Attention" }] }
+                    { "type": "Column", "width": "35", "items": [{ "type": "TextBlock", "text": "Marketdata DailyTrade", "size": "Small", "wrap": true, "weight": "Bolder" }] },
+                    { "type": "Column", "width": "12", "items": [{ "type": "TextBlock", "text": "10454", "size": "Small" }] },
+                    { "type": "Column", "width": "12", "items": [{ "type": "TextBlock", "text": "47.4", "size": "Small" }] },
+                    { "type": "Column", "width": "12", "items": [{ "type": "TextBlock", "text": "57.3", "size": "Small" }] },
+                    { "type": "Column", "width": "12", "items": [{ "type": "TextBlock", "text": "0.0%", "size": "Small", "color": "Good" }] },
+                    { "type": "Column", "width": "12", "items": [{ "type": "TextBlock", "text": "348.4", "size": "Small", "color": "Attention" }] },
+                    { "type": "Column", "width": "12", "items": [{ "type": "TextBlock", "text": "348.4", "size": "Small" }] }
                   ]
                 }
               ]
