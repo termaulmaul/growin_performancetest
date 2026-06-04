@@ -657,7 +657,8 @@ ssh_menu() {
         # Build sandbox-aware command:
         #   - use container's k6 (v1.4) + sobek runtime for ES2020+
         #   - symlink Report → /tmp/sandbox-report (writable, since /workspace is RO)
-        local sandbox_cmd="mkdir -p /tmp/sandbox-report/Growin_Auth_AdminPermission_Create/$platform/$scen_label/$runby /tmp/sandbox-report/$suite_name/$platform/$scen_label/$runby 2>/dev/null; cd /tmp && ln -sfn /workspace/Script Script && ln -sfn /tmp/sandbox-report Report && ln -sfn /workspace/Helper Helper && ln -sfn /usr/local/bin/k6 k6 2>/dev/null; cd /tmp/Script/$suite_name && k6 run --compatibility-mode=experimental_enhanced $file_sel -e RUNBY=${runby:-Manual} -e ENV=SANDBOX -e USER=${vus:-1} -e K6_USERS=${vus:-1} -e DURATION=${dur:-30s} -e SCENARIO=${scenario:-BP001} -e PLATFORM=${platform:-Web} -e BASE_URL=http://mock-api:8080 -e NUMSTART=1"
+        #   - mkdir -p Report dirs BEFORE k6 start (script's k6-reporter writes there)
+        local sandbox_cmd="mkdir -p /tmp/sandbox-report/$suite_name/$platform/$scen_label/$runby 2>/dev/null; cd /tmp && ln -sfn /workspace/Script Script && ln -sfn /tmp/sandbox-report Report && ln -sfn /workspace/Helper Helper && ln -sfn /usr/local/bin/k6 k6 2>/dev/null; cd /tmp/Script/$suite_name && k6 run --compatibility-mode=experimental_enhanced $file_sel -e RUNBY=${runby:-Manual} -e ENV=SANDBOX -e USER=${vus:-1} -e K6_USERS=${vus:-1} -e DURATION=${dur:-30s} -e SCENARIO=${scenario:-BP001} -e PLATFORM=${platform:-Web} -e BASE_URL=http://mock-api:8080 -e NUMSTART=1"
         print_run_header "$_run_label [DEMO]" "Sandbox  127.0.0.1:2222 → http://mock-api:8080" "Sandbox"
         set +e
         _sshpass_cmd "$pass" ssh -p 2222 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null qa@127.0.0.1 "$sandbox_cmd" 2>&1 | tee "$_run_log"
