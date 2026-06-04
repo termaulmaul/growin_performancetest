@@ -15,8 +15,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
     && rm -rf /var/lib/apt/lists/*
 
-# ── Install k6 binary ────────────────────────────────────────────────────────
-ARG K6_VERSION=v0.51.0
+# ── Install k6 binary (v1.4.0+ for optional chaining ?., ??, etc) ───────────
+ARG K6_VERSION=v1.4.0
 RUN ARCH=$(dpkg --print-architecture) \
     && case "$ARCH" in \
        amd64)  K6_ARCH=linux-amd64  ;; \
