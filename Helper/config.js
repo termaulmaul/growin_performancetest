@@ -4,24 +4,40 @@
 // ============================================================
 
 /**
- * Returns the base URL based on the ENV environment variable.
+ * Returns the base URL.
+ *
+ * Resolution priority:
+ *   1. BASE_URL env var (set by pt-menu.sh from configs/pt.env per target)
+ *   2. ENV=ONPREM | ONCLOUD | SANDBOX  (target aliases)
+ *   3. ENV=DEV | QA | DRC | INT        (legacy environment mapping)
+ *   4. Fallback to placeholder
+ *
  * Usage: import { getBaseUrl } from '../../Helper/config.js';
  */
 export function getBaseUrl() {
+    // 1. Highest priority: BASE_URL passed via -e BASE_URL=... (from pt-menu.sh)
+    if (__ENV.BASE_URL && __ENV.BASE_URL.length > 0) {
+        return __ENV.BASE_URL;
+    }
+
     const env = `${__ENV.ENV}`;
     const urlMap = {
-        DEV: 'https://api-dev.growin.id',
-        QA:  'https://api-qa.growin.id',
-        DRC: 'https://drc-api.growin.id',
-        INT: 'https://internal-api-pt.growin.id',
-        // INT: 'https://api-pt.growin.id',
+        // Target aliases (pt-menu.sh selection)
+        ONPREM:  __ENV.ONPREM_BASE_URL  || 'https://int-api.onprem.growin.com',
+        ONCLOUD: __ENV.ONCLOUD_BASE_URL || 'https://int-api-oncloud.growin.com',
+        SANDBOX: 'http://localhost:18080',
+        // Legacy environment mapping (backward compat)
+        DEV:  'https://api-dev.growin.id',
+        QA:   'https://api-qa.growin.id',
+        DRC:  'https://drc-api.growin.id',
+        INT:  'https://internal-api-pt.growin.id',
     };
 
     if (!urlMap[env]) {
-        console.warn(`⚠️  ENV="${env}" is not recognized. Falling back to INT base URL.`);
+        console.warn(`⚠️  ENV="${env}" not recognized and no BASE_URL provided. Falling back to INT.`);
     }
 
-    return urlMap[env] || 'https://internal-api-pt.growin.id';
+    return urlMap[env] || urlMap.INT;
 }
 
 /**

@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.3.0] - 2026-06-04
+
+### Fixed — DNS / BASE_URL Override
+- **`Helper/config.js` getBaseUrl()** now respects `__ENV.BASE_URL` (highest priority). Previously hardcoded `urlMap[ENV]` always won, ignoring `-e BASE_URL=...` from `pt-menu.sh`.
+- Added target aliases: `ENV=ONPREM`, `ENV=ONCLOUD`, `ENV=SANDBOX` map to `ONPREM_BASE_URL`, `ONCLOUD_BASE_URL`, `http://localhost:18080` respectively.
+- Legacy `ENV=DEV|QA|DRC|INT` still work for backward compat.
+
+### Fixed — Architecture (v2.2.1 carried forward)
+- k6 now runs **locally** on PT/dev machine. Targets Onprem/Oncloud differ only by `BASE_URL`, not SSH hops.
+- Removed SSH jump + GCP IAP execution path (still available for interactive shell, but not for script execution).
+
 ## [2.2.0] - 2026-06-04
 
 ### Fixed — Webhook & Report Accuracy
