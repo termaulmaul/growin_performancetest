@@ -5,6 +5,7 @@ import json
 log_path = sys.argv[1]
 out_path = sys.argv[2]
 suite_name = sys.argv[3]
+target = sys.argv[4] if len(sys.argv) > 4 else "" 
 
 with open(log_path, 'r') as f:
     text = f.read()
@@ -50,6 +51,9 @@ summary = {
     "http_req_duration_p95": p95,
     "timestamp": ""
 }
+if target:
+    summary["base_url"] = target
+
 
 # Try extracting suite, scenario, platform from log header if printed by run-local.sh
 m_suite = re.search(r'SUITE\s*:\s*([^\n]+)', text)

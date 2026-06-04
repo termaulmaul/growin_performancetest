@@ -81,7 +81,7 @@ let reason = "";
 if (avgOk && errOk && rpsOk) {
     statusText = "## ✅ PASSED";
     statusColor = "Good";
-    reason = `All metrics meet thresholds (Avg <${tAvg}ms, Err <${tErr}%, RPS >=${tRps}).`;
+    reason = `All metrics meet thresholds.`;
 } else if (avgOk && errOk && !rpsOk) {
     statusText = "## ⚠️ PASSED with Warnings";
     statusColor = "Warning";
@@ -106,6 +106,8 @@ const text = `🧪 **growin_performancetest — PT Run Report**\n` +
              `${result.suite || 'Direct Run'} / ${result.scenario || 'BP001'}\n` +
              `**Target**\n` +
              `${targetUrl}\n` +
+             `**Run by**\n` +
+             `${process.env.PT_USER || 'qacentral'}\n` +
              `**Start → End**\n` +
              `${startTs} → ${endTs}\n` +
              `**Avg TPS**\n` +
@@ -120,19 +122,13 @@ if (type === 'teams') {
       "size": "Large",
       "wrap": true
     },
-    {
-      "type": "TextBlock",
-      "text": `**${result.suite || 'Direct Run'}** / ${result.scenario || '—'}`,
-      "size": "Medium",
-      "wrap": true,
-      "spacing": "None"
-    },
+
     {
       "type": "FactSet",
       "facts": [
-        { "title": "Suite", "value": result.suite || "—" },
+        { "title": "Suite", "value": `${result.suite || 'Direct Run'} / ${result.scenario || 'BP001'}` },
         { "title": "Target", "value": targetUrl },
-        { "title": "Mode", "value": result.mode || "—" },
+        { "title": "Run by", "value": process.env.PT_USER || "qacentral" },
         { "title": "Execution", "value": `${result.duration || '30s'} duration` },
         { "title": "Start", "value": startTs },
         { "title": "End", "value": endTs },
@@ -274,7 +270,7 @@ if (type === 'teams') {
 } else {
   // Plain text table for Discord / Telegram
   let txt = `🧪 **PT Run Report** — ${result.suite}\n`;
-  txt += `Status: ${statusText.replace('## ','')} | Target: ${targetUrl}\n`;
+  txt += `Status: ${statusText.replace('## ','')} | Target: ${targetUrl} | Run by: ${process.env.PT_USER || 'qacentral'}\n`;
   txt += `Start: ${startTs} → End: ${endTs} | Avg TPS: ${avgTps.toFixed(2)}\n\n`;
   txt += "```text\n";
   txt += "API | Samp | Avg | P95 | Err% | RPS | TPS\n";

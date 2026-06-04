@@ -39,6 +39,7 @@ print_run_header() {
   local label="$1" target="${2:-}"
   _RUN_START=$(date +%s)
   _RUN_LABEL="$label"
+  _RUN_TARGET="$target"
   local term_w; term_w="${COLUMNS:-$(tput cols 2>/dev/null || echo 80)}"
   local w=$(( term_w - 4 ))
   local bar; bar=$(printf '─%.0s' $(seq 1 $w))
@@ -78,7 +79,7 @@ print_run_footer() {
   if [[ "$(env_val NOTIFY_TEAMS 'false')" == "true" || -n "$(env_val TELEGRAM_WEBHOOK '')" || -n "$(env_val DISCORD_WEBHOOK '')" || -n "$(env_val TEAMS_WEBHOOK '')" || -n "$(env_val BRRR_WEBHOOK '')" ]]; then
     local res="$PROJECT_DIR/docker-local-pt/results/summary.json"
     if [[ -n "$tmplog" && -f "$tmplog" ]]; then
-      python3 "$PROJECT_DIR/docker-local-pt/scripts/parse-k6-log.py" "$tmplog" "$res" "${_RUN_LABEL:-Unknown}" 2>/dev/null || true
+      python3 "$PROJECT_DIR/docker-local-pt/scripts/parse-k6-log.py" "$tmplog" "$res" "${_RUN_LABEL:-Unknown}" "${_RUN_TARGET:-}" 2>/dev/null || true
     fi
     if [[ ! -f "$res" ]]; then
       mkdir -p "$PROJECT_DIR/docker-local-pt/results"

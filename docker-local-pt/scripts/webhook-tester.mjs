@@ -34,11 +34,13 @@ const text = `🧪 **growin_performancetest — Webhook Test**\n` +
              `**Status**\n` +
              `✓ PASSED\n` +
              `**Reason**\n` +
-             `All metrics meet thresholds (Avg <200ms, Err <0.1%, RPS >=381).\n` +
+             `All metrics meet thresholds.\n` +
              `**Suite**\n` +
              `Webhook_Test / pt-menu.sh\n` +
              `**Target**\n` +
              `Local Sandbox 127.0.0.1:2222\n` +
+             `**Run by**\n` +
+             `qacentral\n` +
              `**Start → End**\n` +
              `${new Date(Date.now() - 30000).toISOString().replace('T',' ').slice(0,19)} → ${new Date().toISOString().replace('T',' ').slice(0,19)}\n` +
              `**Avg TPS**\n` +
@@ -62,19 +64,13 @@ if (type === 'teams') {
               "size": "Large",
               "wrap": true
             },
-            {
-              "type": "TextBlock",
-              "text": "**Webhook_Test** / pt-menu.sh",
-              "size": "Medium",
-              "wrap": true,
-              "spacing": "None"
-            },
+
             {
               "type": "FactSet",
               "facts": [
-                { "title": "Suite", "value": "Webhook_Test" },
+                { "title": "Suite", "value": "Webhook_Test / pt-menu.sh" },
                 { "title": "Target", "value": "Local Sandbox 127.0.0.1:2222" },
-                { "title": "Mode", "value": "Direct · 1VU · 30s" },
+                { "title": "Run by", "value": process.env.PT_USER || "qacentral" },
                 { "title": "Execution", "value": "30s duration" },
                 { "title": "Start", "value": new Date(Date.now() - 30000).toISOString().replace('T',' ').slice(0,19) },
                 { "title": "End", "value": new Date().toISOString().replace('T',' ').slice(0,19) },
@@ -89,7 +85,7 @@ if (type === 'teams') {
             },
             {
               "type": "TextBlock",
-              "text": "**Reason:** All metrics meet thresholds (Avg <200ms, Err <0.1%, RPS >=381).",
+              "text": "**Reason:** All metrics meet thresholds.",
               "wrap": true,
               "spacing": "Small"
             },
