@@ -55,7 +55,7 @@ services:
         condition: service_healthy
     working_dir: /workspace
     volumes:
-      - ../..:/workspace:ro
+      - ..:/workspace:ro
       - ./results:/results
     env_file:
       - ./configs/local.env
@@ -94,7 +94,7 @@ services:
     ports:
       - "2222:22"
     volumes:
-      - ../..:/workspace:ro
+      - ..:/workspace:ro
       - ./results:/results
     networks: [pt]
     healthcheck:
@@ -179,7 +179,7 @@ services:
       JENKINS_OPTS: "--prefix=/"
     volumes:
       - pt-jenkins-home:/var/jenkins_home
-      - ../..:/workspace:rw
+      - ..:/workspace:rw
       - ./results:/results:rw
     working_dir: /workspace
     mem_limit: 1536m
