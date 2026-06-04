@@ -591,8 +591,8 @@ ssh_menu() {
        ;;
   esac
 
-  # Remote repo canonical path. Scripts live under Script/ inside repo root.
-  local remote_base="cd growin_performancetest 2>/dev/null || cd mostng_performancetest_api 2>/dev/null || cd /home/qa/growin_performancetest 2>/dev/null || { echo 'ERROR: repo not found on remote'; exit 1; }"
+  # Remote repo: auto-sync + cd. Scripts live under Script/ inside repo root.
+  local remote_base="(cd growin_performancetest 2>/dev/null && git pull --ff-only origin main 2>/dev/null || cd mostng_performancetest_api 2>/dev/null && git pull --ff-only origin main 2>/dev/null || true); cd growin_performancetest || cd mostng_performancetest_api || cd /home/qa/growin_performancetest || { echo 'FATAL: repo not found on remote. Clone /home/qa/growin_performancetest first.'; exit 1; }"
   local ssh_cmd=""
 
   if [[ -n "$run_cmd" ]]; then
