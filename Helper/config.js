@@ -58,7 +58,7 @@ export function getUserCredentials(userNum, bpOffset = 0) {
     } else if (env === 'DRC') {
         const formatted = String(startNum + actualNum - 1); // padStart(0) = no padding
         email = `MOSTNG${formatted}@guysmail.com`;
-    } else if (env === 'INT') {
+    } else if (env === 'INT' || env === 'SANDBOX') {
         const formatted = String(startNum + actualNum - 1).padStart(2, '0');
         email = `TESTMON${formatted}@guysmail.com`;
     } else {
