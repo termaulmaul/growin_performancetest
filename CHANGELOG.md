@@ -1,5 +1,26 @@
 # Changelog
 
+## [2.5.0] - 2026-06-04
+
+### Added — Sandbox_Demo Suite
+- **New dedicated demo script:** `Script/Sandbox_Demo/Sandbox_Demo.js` for
+  framework validation in Sandbox target. Mock-api cannot fully emulate Growin
+  backend (login + PIN + userId + trading + portfolio + market data + ...),
+  so real Growin scripts will fail there. Sandbox_Demo uses only endpoints
+  that mock supports: login, userid, health.
+- Pattern matches real Growin scripts: BP001 with `duration_BP001_NN_*`,
+  `error_rate_BP001_NN_*`, `sample_BP001_NN_*` custom metrics.
+
+### Changed — pt-menu.sh Sandbox flow
+- Real Growin scripts on Sandbox now show warning prompt:
+  `⚠️ Sandbox warning: Real Growin scripts need real backend (Onprem/Oncloud).`
+  User can still proceed but expected to fail at first non-trivial endpoint.
+- `Sandbox_Demo` and `Sandbox_Test` suites bypass warning (designed for sandbox).
+
+### Documentation
+- `Script/Sandbox_Demo/README.md` explains sandbox's purpose: framework
+  validation only, not backend testing. Real testing happens on Onprem/Oncloud.
+
 ## [2.4.0] - 2026-06-04
 
 ### Fixed — Restore SSH Execution Architecture

@@ -639,8 +639,17 @@ ssh_menu() {
         ;;
 
       "Sandbox")
-        # Sandbox: SSH to pt-sandbox-ssh container, run k6 there (uses container's /usr/local/bin/k6).
-        # Mirrors Onprem/Oncloud flow exactly — only target + creds differ.
+        # Sandbox: SSH to pt-sandbox-ssh container, run k6 there.
+        # Real Growin scripts won't fully work here (mock-api can't emulate
+        # entire backend). Use Sandbox_Demo suite for framework validation,
+        # use Onprem/Oncloud for real script testing.
+        if [[ "$suite_name" != "Sandbox_Demo" && "$suite_name" != "Sandbox_Test" ]]; then
+          echo -e "\n  ${YLW}⚠️  Sandbox warning:${RST} Real Growin scripts need real backend"
+          echo -e "  ${YLW}    (Onprem/Oncloud). Mock-api cannot emulate full Growin API.${RST}"
+          echo -e "  ${YLW}    Continue anyway? Will likely fail at first non-trivial endpoint.${RST}"
+          read -r -p "  Continue? (y/N): " continue_anyway
+          [[ "$continue_anyway" != "y" && "$continue_anyway" != "Y" ]] && continue
+        fi
         if [[ "$suite_sel" == "Custom Command" || "$suite_sel" == "Only Connect"* ]]; then
           if [[ "$suite_sel" == "Only Connect"* ]]; then
             echo -e "\n${GRN}Connecting to Sandbox SSH (interactive)...${RST}"
