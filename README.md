@@ -1,10 +1,10 @@
 # Growin Performance Test Framework
 
-Enterprise-grade **k6-based** performance testing suite for the Growin platform. Designed to run massive-scale load tests across Web, Android, and iOS scenarios using remote VMs, or safely test locally via Dockerized Mock APIs. 
+Enterprise-grade **k6-based** performance testing suite for the Growin platform by Bank Mandiri Sekuritas. Designed to run load tests across Web, Android, and iOS scenarios against **Onprem** (SSH jump) and **Oncloud** (GCP IAP) production targets. Sandbox mode available for local demo/dry-run.
 
-Built on the **Kimi Enterprise Architecture RFC**, it features terminal-native authentication, RBAC, environment concurrency locking, metric parsing, AI agents integration, and a live NOC-style dashboard.
+Built on the **Kimi Enterprise Architecture RFC**, featuring terminal-native authentication, RBAC, environment concurrency locking, metric parsing, webhook notifications to Teams/Discord/Telegram/Brrr, and a live NOC-style dashboard.
 
-See [AGENTS.md](./AGENTS.md) for information regarding the autonomous agents framework and capabilities.
+See [AGENTS.md](./AGENTS.md) and [CLAUDE.md](./CLAUDE.md) for QA automation engineer context and agent instructions.
 
 ---
 
@@ -32,56 +32,44 @@ It will prompt for the username and force-reset the password or unlock the accou
 
 ## 🗺️ TUI Architecture & Navigation
 
-```mermaid
-flowchart TD
-    A(Login Gate) -->|Authenticate| B[Main Menu]
-    B --> C[1. Remote Runner]
-    B --> D[2. Local Runner]
-    B --> E[3. Cron Scheduler]
-    B --> F[4. AI Slope Scanner]
-    B --> G[5. ENV Editor]
-    B --> H[6. Docker Stack]
-    B --> I[7. Open Project Dir]
-    B --> J[8. User Management]
-    B --> L[9. Webhooks]
-    B --> K[D. Dashboard]
-
-    C --> C1{Pick Target}
-    C1 -->|Onprem| C2[SSH Jump]
-    C1 -->|Oncloud| C3[GCP IAP]
-    C1 -->|Local Sandbox| C4[Docker:2222]
-    C2 & C3 & C4 -->|Acquire Lock| C5[Execute via remote k6]
-
-    D --> D1{Pick Suite}
-    D1 -->|✓ MockReady| D2[Run via Mock API]
-    D1 -->|⚡ Direct| D3[Run via Host k6 binary]
-    D2 & D3 -->|Acquire Lock| D4[Generate Metric Summary Table]
-
-    E --> E1[Manage Jobs via SQLite]
-    G --> G1[Inline Edit w/ Secret Masking]
-    J --> J1[God/Admin: Users, Roles, Unlock]
-    L --> L1[Telegram / Discord / Teams / Brrr]
-    K --> K1[Live tput NOC: CPU, RAM, Active Locks, Audit Trail]
-    
-    Z[Emergency] -.->|python3 bin/pt-rescue| J1
 ```
+main_menu
+  [1] Run Test  (Onprem / Oncloud)
+       └─ Pick Target → Onprem (SSH jump) / Oncloud (GCP IAP) / Sandbox Demo
+          └─ Pick Script → Suite / Custom / Interactive Shell
+             └─ Pick File → .sh runner / .js + Platform + Scenario + VUs + Duration
+                └─ SSH execute → Webhook notify → Back to main
+  [2] Sandbox Demo  (Local Mock — k6 binary)
+       └─ Pick Suite → Mock API or Direct k6 → Summary table → Back to main
+  [3] Cron Scheduler  →  Add / Pause / Resume / Remove jobs
+  [4] AI Slope (Code Quality)  →  Scan scripts for issues
+  [5] ENV Editor  →  Inline edit configs/pt.env
+  [6] Docker Stack  →  Start / Stop / Logs
+  [7] Open Project Dir
+  [8] User Management  (god only)
+  [9] Webhooks  →  Set / Test / Toggle (Telegram, Discord, Teams, Brrr)
+  [D] Dashboard  →  Live CPU/RAM/Locks/Audit
+  [Q] Quit
+```
+
+**Navigation:** ↑↓ arrows, Enter to select, ESC/Backspace to go back, Ctrl-C to exit.
 
 ---
 
 ## 💻 Environment Capabilities
 
-### 1. Local Runner (Mock & Direct)
-Execute scripts directly from your host machine. Safely extracts and prints a tabulated **K6 Load Test Summary** (RPS, P95, Errors, etc.) at the end of each run.
-- **✓ MockReady Suites:** Scripts inside `Web/`, `iOS/`, `Android/` subdirectories (`BPxxx.js`). Run tests through the `docker-local-pt` stack against `http://mock-api:8080`.
-- **⚡ Direct Suites:** Scripts with flat structures or hardcoded environments (`ENV=INT`). Run via the native `./k6` binary from your host.
+### 1. Run Test — Onprem / Oncloud (Production Targets)
+Execute k6 scripts from `Script/` folder on remote VMs.
+- **Onprem:** SSH via bastion jump host (`10.82.15.72` → `10.184.120.48`) using automated `sshpass`.
+- **Oncloud:** GCP IAP tunnel to `vm-pt-ksix-0` (`asia-southeast2-c`, project `compute-pt`).
+- **Sandbox Demo:** Local `127.0.0.1:2222` SSH container — demo/dry-run only, not a production target.
 
-### 2. Remote Runner (SSH)
-Deploy load tests to high-capacity execution environments.
-- **Onprem:** Connects through bastion jump host to execution servers via automated `sshpass`.
-- **Oncloud:** Connects to GCP VMs via Google Cloud IAP tunneling.
-- **Local Sandbox:** SSH into an isolated Docker container (`127.0.0.1:2222`) that simulates a remote server environment.
+Scripts are sourced from `$PROJECT_DIR/Script/<suite>/` and run via `cd growin_performancetest && cd Script/<suite> && ../../k6 run <file>.js`.
 
-> **Remote Process Detection:** A background daemon (`pt-remote-daemon.sh`) polls target environments to detect if active `k6` processes are running independently of the TUI execution context. If an active remote test is detected, the TUI issues a warning and requires confirmation to avoid collisions.
+### 2. Sandbox Demo (Local Mock + Direct k6)
+Execute scripts directly from host machine. Prints tabulated **K6 Load Test Summary** (RPS, P95, Errors) at end of each run.
+- **✓ MockReady Suites:** Run through `docker-local-pt` stack against `http://mock-api:8080`.
+- **⚡ Direct Suites:** Run via native `./k6` binary from host.
 
 ### 3. Distributed Locking & Concurrency Protection
 Prevents QA engineers from overlapping test executions.
@@ -108,19 +96,42 @@ Integrated alerting and reporting.
 
 ```text
 growin_performancetest/
-├── bin/                       # 🌟 Kimi Architecture Python CLIs (pt-auth, pt-lock, pt-rescue, pt-dashboard)
-├── blueprint/                 # System architecture & component design blueprints
-├── docker-local-pt/           # Local mock PT environment (mock-api + k6 + observability)
-├── lib/                       # Python DB models and Bash auth clients
-├── scheduler_cli/             # Python Cron scheduler & AI scanner utilities
-├── Script/                    # Test suites by product (~28 products)
-│   ├── Growin_Calendar/       # Calendar module (Web/Android/iOS)
-│   ├── OMO_Android/           # Flat-structure android tests
-│   └── ... 
-├── pt-menu.sh                 # 🌟 Main entrypoint Bash TUI
-└── k6                         # Native k6 binary (compiled with custom extensions)
+├── pt-menu.sh                 ← Main TUI entrypoint
+├── k6                         ← k6 binary (compiled with custom extensions)
+├── configs/
+│   └── pt.env                 ← Primary config (targets, thresholds, webhooks)
+├── Script/                    ← ALL test scripts (run from here on remote)
+│   ├── <SuiteName>/
+│   │   ├── <SuiteName>.js     ← Main k6 script
+│   │   ├── <SuiteName>_LoadTest.sh
+│   │   ├── <SuiteName>_Regression.sh
+│   │   └── Web/Android/iOS/   ← Platform configs
+│   └── Template_Project/      ← Base template for new suites
+├── Report/                    ← HTML reports per suite/platform/bp/runby
+├── Helper/                    ← Shared k6 modules
+├── lib/
+│   ├── bash/pt_auth_client.sh ← Auth gate bash wrapper
+│   ├── python/db.py           ← SQLite schema (auth, locks, audit, scheduler)
+│   └── webhook/               ← Notifiers + log parser
+├── bin/                       ← Kimi Architecture Python CLIs
+│   ├── pt-auth, pt-rbac, pt-audit, pt-lock
+│   ├── pt-lock-status, pt-dashboard, pt-resmon
+│   ├── pt-scheduler, pt-usermgmt, pt-rescue
+│   └── pt-bootstrap-check, pt-remote-daemon.sh
+├── pt-data/                   ← User state, run state
+├── artifacts/results/         ← Latest summary.json
+├── scheduler_cli/             ← Python cron backend + AI slope validator
+├── docs/performance-audit/    ← CI/Grafana/Jenkins checklists
+├── blueprint/                 ← Architecture RFCs (Kimi, Manus, DeepSeek)
+├── docker-local-pt/           ← DEMO ONLY. Not production target.
+│   ├── docker-compose.yml
+│   ├── configs/local.env      ← Legacy config (fallback only)
+│   ├── jenkins/               ← CI pipeline definitions
+│   └── scripts/               ← Mock runner utilities
+├── AGENTS.md                  ← Global agent instructions + QA skills
+├── CLAUDE.md                  ← AI context + QA performance testing reference
+└── CHANGELOG.md
 ```
-*(Dynamic data like `~/.pt/var/pt.db`, session tokens, and audit logs are safely stored outside the git working tree in the user's home directory).*
 
 ---
 

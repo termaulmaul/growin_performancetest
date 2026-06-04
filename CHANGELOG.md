@@ -1,5 +1,30 @@
 # Changelog
 
+## [2.2.0] - 2026-06-04
+
+### Fixed — Webhook & Report Accuracy
+- **Webhook double-fire:** Test Webhook in `webhook_menu` no longer triggers `print_run_footer` webhook send (added `skip_webhook` flag).
+- **RPS/TPS wrong:** `parse-k6-log.py` now extracts `DURATION` and VUs from k6 stdout instead of hardcoded `30s`/`1VU`.
+- **Teams card typography:** `## ✅ PASSED` literal in Adaptive Card replaced with clean text. `send-summary-webhook.mjs` and `webhook-tester.mjs` now consistent.
+- **Webhook tester target:** Changed from hardcoded "Local Sandbox 127.0.0.1:2222" to "Onprem 10.82.15.72 → 10.184.120.48 [DEMO]".
+- **`send-summary-webhook.mjs` targetUrl:** Now mode-aware (Onprem/Oncloud fallback strings instead of "Local Sandbox").
+
+### Fixed — Navigation QA
+- **Docker menu `awk` ANSI break:** Replaced with `while IFS= read` loop — no more syntax error on container display.
+- **`ssh_menu` ESC navigation:** Added `while true` loop + `← Back` options at every level (Script → File → Platform → Scenario → RUNBY). ESC now goes back one level, not exit to main.
+- **File pick no exit:** Added `"← Back"` to files array + `"← Back"` check in scripts array.
+
+### Changed — Architecture
+- **Configs extracted:** New `configs/pt.env` as primary config (targets, thresholds, webhooks). Legacy fallback to `docker-local-pt/configs/local.env`.
+- **`ENV_FILE` resolution:** `pt-menu.sh` now reads `configs/pt.env` first, falls back to legacy path.
+- **`remote_base` path:** Canonical path is `growin_performancetest` (with `2>/dev/null` fallback chain).
+- **Target labels:** Release targets are Onprem and Oncloud. Sandbox/Docker is explicitly labeled `[demo only]`.
+- **Main menu labels:** `[1] Run Test (Onprem / Oncloud)`, `[2] Sandbox Demo (Local Mock — k6 binary)`.
+
+### Added
+- **QA Skills documentation:** Full 12-section QA Automation Engineer reference in both `AGENTS.md` (393 lines) and `CLAUDE.md` (109 lines). Covers 3S objectives, 7 test types, tool stack, CI/CD integration, version control, backend/frontend, test management, agent rules, folder structure, and metrics.
+- **`webhook-tester.mjs` full rewrite:** Card body now mirrors `send-summary-webhook.mjs` exactly — Adaptive Card structure, FactSet, ColumnSet, Per-API table. Status = ⚠️ WARNING (RPS < 381 demo).
+
 
 ## [2.1.2] - 2026-06-03
 
