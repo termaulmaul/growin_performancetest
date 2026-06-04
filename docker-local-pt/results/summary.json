@@ -1,13 +1,331 @@
 {
-  "mode": "Mock",
-  "suite": "ExaCC",
+  "mode": "LOCAL_DOCKER_MOCK",
+  "suite": "Growin_Auth_AdminPermission_Create",
   "scenario": "BP001",
-  "platform": "Web",
+  "platform": "iOS",
   "variant": "original",
-  "iterations": 0,
-  "http_reqs": 0,
-  "http_req_failed_rate": 0.0,
-  "http_req_duration_p95": 0.0,
-  "timestamp": "",
-  "base_url": "Local Docker Mock"
+  "module": "/workspace/Script/Growin_Auth_AdminPermission_Create/iOS/BP001.js",
+  "base_url": "http://mock-api:8080",
+  "metricCount": 146,
+  "iterations": 7,
+  "http_reqs": 182,
+  "http_req_failed_rate": 0,
+  "checks_passed": 0,
+  "checks_failed": 0,
+  "http_req_duration_p95": 57.33623605,
+  "custom_metrics": {
+    "duration_001_01_05_User_Banner_Promo": {
+      "count": 0,
+      "p95": 56.2032377
+    },
+    "duration_001_01_20_News_Category": {
+      "count": 0,
+      "p95": 55.6175704
+    },
+    "duration_001_01_02_User_Profile_Personal": {
+      "count": 0,
+      "p95": 56.9222213
+    },
+    "sample_001_01_02_User_Profile_Personal": {
+      "count": 7,
+      "p95": 0
+    },
+    "error_rate_001_01_13_Oaofinance_UserOpeningProgressSummary_Monitoring_Margin": {
+      "count": 0,
+      "p95": 0
+    },
+    "sample_001_01_23_Bond_Sbn_Client_Check_Status": {
+      "count": 7,
+      "p95": 0
+    },
+    "duration_001_01_01_User_Profile_Trading": {
+      "count": 0,
+      "p95": 56.9860001
+    },
+    "error_rate_001_01_25_User_UserSettings": {
+      "count": 0,
+      "p95": 0
+    },
+    "error_rate_001_01_11_News_Categories_2": {
+      "count": 0,
+      "p95": 0
+    },
+    "sample_001_01_15_Mutualfund_User_RiskProfile": {
+      "count": 7,
+      "p95": 0
+    },
+    "duration_001_01_18_Mutualfund_User_RiskProfile_2": {
+      "count": 0,
+      "p95": 56.3388251
+    },
+    "duration_001_01_13_Oaofinance_UserOpeningProgressSummary_Monitoring_Margin": {
+      "count": 0,
+      "p95": 56.1008625
+    },
+    "sample_001_01_14_Auth_Protected_AccountCenter_Switchables": {
+      "count": 7,
+      "p95": 0
+    },
+    "sample_001_01_05_User_Banner_Promo": {
+      "count": 7,
+      "p95": 0
+    },
+    "error_rate_001_01_12_Oaofinance_Quota_Status_Margin": {
+      "count": 0,
+      "p95": 0
+    },
+    "error_rate_001_01_16_Auth_Protected_AccountCenter_Status": {
+      "count": 0,
+      "p95": 0
+    },
+    "error_rate_001_01_19_Mutualfund_MutualFund_List": {
+      "count": 0,
+      "p95": 0
+    },
+    "duration_001_01_19_Mutualfund_MutualFund_List": {
+      "count": 0,
+      "p95": 54.9346536
+    },
+    "duration_001_01_14_Auth_Protected_AccountCenter_Switchables": {
+      "count": 0,
+      "p95": 57.1296627
+    },
+    "sample_001_01_09_News": {
+      "count": 7,
+      "p95": 0
+    },
+    "duration_001_01_24_Mutualfund_User_Filter": {
+      "count": 0,
+      "p95": 57.1131289
+    },
+    "error_rate_001_01_07_User_Watchlistgroup": {
+      "count": 0,
+      "p95": 0
+    },
+    "sample_001_01_19_Mutualfund_MutualFund_List": {
+      "count": 7,
+      "p95": 0
+    },
+    "duration_001_01_17_Bond_Sbn_Master_Strapi_Banner": {
+      "count": 0,
+      "p95": 55.211757899999995
+    },
+    "sample_001_01_03_Auth_Protected_PasswordReminder": {
+      "count": 7,
+      "p95": 0
+    },
+    "sample_001_01_25_User_UserSettings": {
+      "count": 7,
+      "p95": 0
+    },
+    "sample_001_01_10_News_Categories": {
+      "count": 7,
+      "p95": 0
+    },
+    "sample_001_01_01_User_Profile_Trading": {
+      "count": 7,
+      "p95": 0
+    },
+    "sample_001_01_07_User_Watchlistgroup": {
+      "count": 7,
+      "p95": 0
+    },
+    "error_rate_001_01_04_Auth_Protected_PasswordRemindLater": {
+      "count": 0,
+      "p95": 0
+    },
+    "duration_001_01_12_Oaofinance_Quota_Status_Margin": {
+      "count": 0,
+      "p95": 56.1534204
+    },
+    "error_rate_001_01_22_Auth_Protected_Client_Selected": {
+      "count": 0,
+      "p95": 0
+    },
+    "error_rate_001_01_03_Auth_Protected_PasswordReminder": {
+      "count": 0,
+      "p95": 0
+    },
+    "error_rate_001_01_24_Mutualfund_User_Filter": {
+      "count": 0,
+      "p95": 0
+    },
+    "sample_001_01_11_News_Categories_2": {
+      "count": 7,
+      "p95": 0
+    },
+    "duration_001_01_25_User_UserSettings": {
+      "count": 0,
+      "p95": 57.5892079
+    },
+    "sample_001_01_20_News_Category": {
+      "count": 7,
+      "p95": 0
+    },
+    "duration_001_01_03_Auth_Protected_PasswordReminder": {
+      "count": 0,
+      "p95": 56.7498126
+    },
+    "sample_001_01_24_Mutualfund_User_Filter": {
+      "count": 7,
+      "p95": 0
+    },
+    "error_rate_001_01_01_User_Profile_Trading": {
+      "count": 0,
+      "p95": 0
+    },
+    "error_rate_001_01_10_News_Categories": {
+      "count": 0,
+      "p95": 0
+    },
+    "error_rate_001_01_21_Auth_Protected_GetConfig": {
+      "count": 0,
+      "p95": 0
+    },
+    "error_rate_001_01_02_User_Profile_Personal": {
+      "count": 0,
+      "p95": 0
+    },
+    "duration_001_01_21_Auth_Protected_GetConfig": {
+      "count": 0,
+      "p95": 56.5359374
+    },
+    "error_rate_001_01_26_Order_OrderStatusActionMap": {
+      "count": 0,
+      "p95": 0
+    },
+    "error_rate_001_01_05_User_Banner_Promo": {
+      "count": 0,
+      "p95": 0
+    },
+    "duration_001_01_07_User_Watchlistgroup": {
+      "count": 0,
+      "p95": 58.3660918
+    },
+    "duration_001_01_09_News": {
+      "count": 0,
+      "p95": 58.033316899999996
+    },
+    "error_rate_001_01_23_Bond_Sbn_Client_Check_Status": {
+      "count": 0,
+      "p95": 0
+    },
+    "sample_001_01_21_Auth_Protected_GetConfig": {
+      "count": 7,
+      "p95": 0
+    },
+    "error_rate_001_01_17_Bond_Sbn_Master_Strapi_Banner": {
+      "count": 0,
+      "p95": 0
+    },
+    "duration_001_01_10_News_Categories": {
+      "count": 0,
+      "p95": 57.7988377
+    },
+    "sample_001_01_22_Auth_Protected_Client_Selected": {
+      "count": 7,
+      "p95": 0
+    },
+    "duration_001_01_15_Mutualfund_User_RiskProfile": {
+      "count": 0,
+      "p95": 56.9631545
+    },
+    "duration_001_01_08_User_WatchlistID": {
+      "count": 0,
+      "p95": 54.7733418
+    },
+    "sample_001_01_26_Order_OrderStatusActionMap": {
+      "count": 7,
+      "p95": 0
+    },
+    "sample_001_01_17_Bond_Sbn_Master_Strapi_Banner": {
+      "count": 7,
+      "p95": 0
+    },
+    "sample_001_01_04_Auth_Protected_PasswordRemindLater": {
+      "count": 7,
+      "p95": 0
+    },
+    "error_rate_001_01_14_Auth_Protected_AccountCenter_Switchables": {
+      "count": 0,
+      "p95": 0
+    },
+    "error_rate_001_01_18_Mutualfund_User_RiskProfile_2": {
+      "count": 0,
+      "p95": 0
+    },
+    "duration_001_01_06_Protected_Portfolio_Consolidated": {
+      "count": 0,
+      "p95": 56.5870045
+    },
+    "error_rate_001_01_20_News_Category": {
+      "count": 0,
+      "p95": 0
+    },
+    "duration_001_01_26_Order_OrderStatusActionMap": {
+      "count": 0,
+      "p95": 56.598833
+    },
+    "duration_001_01_22_Auth_Protected_Client_Selected": {
+      "count": 0,
+      "p95": 56.3951628
+    },
+    "error_rate_001_01_08_User_WatchlistID": {
+      "count": 0,
+      "p95": 0
+    },
+    "duration_001_01_16_Auth_Protected_AccountCenter_Status": {
+      "count": 0,
+      "p95": 54.726725099999996
+    },
+    "sample_001_01_18_Mutualfund_User_RiskProfile_2": {
+      "count": 7,
+      "p95": 0
+    },
+    "sample_001_01_06_Protected_Portfolio_Consolidated": {
+      "count": 7,
+      "p95": 0
+    },
+    "duration_001_01_11_News_Categories_2": {
+      "count": 0,
+      "p95": 57.0282124
+    },
+    "error_rate_001_01_06_Protected_Portfolio_Consolidated": {
+      "count": 0,
+      "p95": 0
+    },
+    "error_rate_001_01_15_Mutualfund_User_RiskProfile": {
+      "count": 0,
+      "p95": 0
+    },
+    "sample_001_01_08_User_WatchlistID": {
+      "count": 7,
+      "p95": 0
+    },
+    "sample_001_01_13_Oaofinance_UserOpeningProgressSummary_Monitoring_Margin": {
+      "count": 7,
+      "p95": 0
+    },
+    "error_rate_001_01_09_News": {
+      "count": 0,
+      "p95": 0
+    },
+    "sample_001_01_16_Auth_Protected_AccountCenter_Status": {
+      "count": 7,
+      "p95": 0
+    },
+    "duration_001_01_04_Auth_Protected_PasswordRemindLater": {
+      "count": 0,
+      "p95": 57.31495
+    },
+    "duration_001_01_23_Bond_Sbn_Client_Check_Status": {
+      "count": 0,
+      "p95": 56.0515795
+    },
+    "sample_001_01_12_Oaofinance_Quota_Status_Margin": {
+      "count": 7,
+      "p95": 0
+    }
+  },
+  "timestamp": "2026-06-04T11:58:07.672Z"
 }
