@@ -620,35 +620,160 @@ ls -d Script/'$suite_name' 2>&1 | head -1 || { echo "FATAL: Script/'$suite_name'
 
     case "$mode" in
       "Onprem")
-        if [[ -n "$ssh_cmd" ]]; then
+        if [[ "$suite_sel" == "Custom Command" || "$suite_sel" == "Only Connect"* ]]; then
+          # Custom command or interactive — no upload needed
+          if [[ "$suite_sel" == "Only Connect"* ]]; then
+            echo -e "\n${GRN}Connecting to Onprem-2 (interactive)...${RST}"
+            _sshpass_cmd "$pass" ssh -o StrictHostKeyChecking=no \
+              -o ProxyCommand="sshpass -p \"$pass\" ssh -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72" \
+              qa@10.184.120.48
+          else
+            print_run_header "$_run_label" "Onprem  10.82.15.72 → 10.184.120.48" "Onprem"
+            set +e
+            _sshpass_cmd "$pass" ssh -o StrictHostKeyChecking=no \
+              -o ProxyCommand="sshpass -p \"$pass\" ssh -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72" \
+              qa@10.184.120.48 "$run_cmd" 2>&1 | tee "$_run_log"
+            _run_rc=${PIPESTATUS[0]}; set -e
+            print_run_footer "$_run_rc" "$_run_log"
+          fi
+        else
+          # Suite run — UPLOAD script + Helper, then execute on remote
+          local _stamp=$$_$(date +%s)
+          local _tarball="/tmp/pt-upload-${_stamp}.tar.gz"
+          local _remote_dir="/tmp/pt-run-${_stamp}"
+
+          echo -e "${DIM}[local] Packing Script/$suite_name + Helper + k6 binary check...${RST}"
+          tar -czf "$_tarball" -C "$PROJECT_DIR" \
+            "Script/$suite_name" Helper 2>&1 || {
+              echo -e "${RED}FATAL: tar failed${RST}"
+              read -r -p $'\nPress Enter...'; continue;
+            }
+
           print_run_header "$_run_label" "Onprem  10.82.15.72 → 10.184.120.48" "Onprem"
+          echo -e "${DIM}[local] Uploading to qa@10.184.120.48:${_remote_dir}/...${RST}"
+
+          # Upload via scp through jump host
+          set +e
+          _sshpass_cmd "$pass" scp -o StrictHostKeyChecking=no \
+            -o ProxyCommand="sshpass -p \"$pass\" ssh -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72" \
+            "$_tarball" qa@10.184.120.48:/tmp/ 2>&1 | tail -3
+          local _scp_rc=${PIPESTATUS[0]}
+          set -e
+          if [[ $_scp_rc -ne 0 ]]; then
+            echo -e "${RED}FATAL: scp upload failed (rc=$_scp_rc)${RST}"
+            rm -f "$_tarball"
+            print_run_footer "$_scp_rc" "$_run_log"
+            read -r -p $'\nPress Enter...'; continue
+          fi
+
+          # Extract + run on remote
+          local _remote_cmd="set -e
+mkdir -p $_remote_dir
+cd $_remote_dir
+tar -xzf /tmp/$(basename $_tarball)
+echo '[remote] Extracted at:' \$(pwd)
+ls -la Script/ | head -5
+# Check k6 binary on remote
+if [ -x ./k6 ]; then K6_BIN=./k6
+elif [ -x ../k6 ]; then K6_BIN=../k6
+elif command -v k6 >/dev/null; then K6_BIN=\$(command -v k6)
+elif [ -x ~/k6 ]; then K6_BIN=~/k6
+elif [ -x /home/qa/growin_performancetest/k6 ]; then K6_BIN=/home/qa/growin_performancetest/k6
+elif [ -x /home/qa/mostng_performancetest_api/k6 ]; then K6_BIN=/home/qa/mostng_performancetest_api/k6
+else
+  echo 'FATAL: k6 binary not found on remote. Install or place at ~/k6'
+  exit 127
+fi
+echo '[remote] Using k6:' \$K6_BIN \"(\$(\$K6_BIN version | head -1))\"
+cd Script/$suite_name
+mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
+echo '[remote] Running k6...'
+\$K6_BIN run $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform --out dashboard=export=$report_file
+RC=\$?
+echo '[remote] k6 exit code:' \$RC
+# Download report back? Skipped here; user can scp manually if needed.
+cd /tmp && rm -rf $_remote_dir $(basename $_tarball)
+exit \$RC"
+
           set +e
           _sshpass_cmd "$pass" ssh -o StrictHostKeyChecking=no \
             -o ProxyCommand="sshpass -p \"$pass\" ssh -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72" \
-            qa@10.184.120.48 "$ssh_cmd" 2>&1 | tee "$_run_log"
+            qa@10.184.120.48 "$_remote_cmd" 2>&1 | tee "$_run_log"
           _run_rc=${PIPESTATUS[0]}; set -e
           print_run_footer "$_run_rc" "$_run_log"
-        else
-          echo -e "\n${GRN}Connecting to Onprem-2 (interactive)...${RST}"
-          _sshpass_cmd "$pass" ssh -o StrictHostKeyChecking=no \
-            -o ProxyCommand="sshpass -p \"$pass\" ssh -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72" \
-            qa@10.184.120.48
+          rm -f "$_tarball"
         fi
         ;;
 
       "Oncloud")
-        if [[ -n "$ssh_cmd" ]]; then
+        if [[ "$suite_sel" == "Custom Command" || "$suite_sel" == "Only Connect"* ]]; then
+          if [[ "$suite_sel" == "Only Connect"* ]]; then
+            echo -e "\n${GRN}Connecting to Oncloud VM (interactive)...${RST}\n"
+            gcloud compute ssh --zone "asia-southeast2-c" "vm-pt-ksix-0" \
+              --tunnel-through-iap --project "compute-pt"
+          else
+            print_run_header "$_run_label" "Oncloud  GCP IAP → vm-pt-ksix-0" "Oncloud"
+            set +e
+            gcloud compute ssh --zone "asia-southeast2-c" "vm-pt-ksix-0" \
+              --tunnel-through-iap --project "compute-pt" \
+              --command="$run_cmd" 2>&1 | tee "$_run_log"
+            _run_rc=${PIPESTATUS[0]}; set -e
+            print_run_footer "$_run_rc" "$_run_log"
+          fi
+        else
+          # Suite run — UPLOAD script + Helper, then execute via gcloud
+          local _stamp=$$_$(date +%s)
+          local _tarball="/tmp/pt-upload-${_stamp}.tar.gz"
+          local _remote_dir="/tmp/pt-run-${_stamp}"
+
+          echo -e "${DIM}[local] Packing Script/$suite_name + Helper...${RST}"
+          tar -czf "$_tarball" -C "$PROJECT_DIR" \
+            "Script/$suite_name" Helper 2>&1 || {
+              echo -e "${RED}FATAL: tar failed${RST}"
+              read -r -p $'\nPress Enter...'; continue;
+            }
+
           print_run_header "$_run_label" "Oncloud  GCP IAP → vm-pt-ksix-0" "Oncloud"
+          echo -e "${DIM}[local] Uploading via gcloud scp to vm-pt-ksix-0:/tmp/...${RST}"
+
+          set +e
+          gcloud compute scp --zone "asia-southeast2-c" \
+            --tunnel-through-iap --project "compute-pt" \
+            "$_tarball" "vm-pt-ksix-0:/tmp/" 2>&1 | tail -3
+          local _scp_rc=${PIPESTATUS[0]}
+          set -e
+          if [[ $_scp_rc -ne 0 ]]; then
+            echo -e "${RED}FATAL: gcloud scp upload failed (rc=$_scp_rc)${RST}"
+            rm -f "$_tarball"
+            print_run_footer "$_scp_rc" "$_run_log"
+            read -r -p $'\nPress Enter...'; continue
+          fi
+
+          local _remote_cmd="set -e
+mkdir -p $_remote_dir
+cd $_remote_dir
+tar -xzf /tmp/$(basename $_tarball)
+echo '[remote] Extracted at:' \$(pwd)
+if [ -x ~/k6 ]; then K6_BIN=~/k6
+elif command -v k6 >/dev/null; then K6_BIN=\$(command -v k6)
+elif [ -x /home/qa/growin_performancetest/k6 ]; then K6_BIN=/home/qa/growin_performancetest/k6
+else echo 'FATAL: k6 not found on remote'; exit 127
+fi
+echo '[remote] Using k6:' \$K6_BIN
+cd Script/$suite_name
+mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
+\$K6_BIN run $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform --out dashboard=export=$report_file
+RC=\$?
+cd /tmp && rm -rf $_remote_dir $(basename $_tarball)
+exit \$RC"
+
           set +e
           gcloud compute ssh --zone "asia-southeast2-c" "vm-pt-ksix-0" \
             --tunnel-through-iap --project "compute-pt" \
-            --command="$ssh_cmd" 2>&1 | tee "$_run_log"
+            --command="$_remote_cmd" 2>&1 | tee "$_run_log"
           _run_rc=${PIPESTATUS[0]}; set -e
           print_run_footer "$_run_rc" "$_run_log"
-        else
-          echo -e "\n${GRN}Connecting to Oncloud VM (interactive)...${RST}\n"
-          gcloud compute ssh --zone "asia-southeast2-c" "vm-pt-ksix-0" \
-            --tunnel-through-iap --project "compute-pt"
+          rm -f "$_tarball"
         fi
         ;;
 
