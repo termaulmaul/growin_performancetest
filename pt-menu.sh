@@ -595,7 +595,21 @@ ssh_menu() {
     esac
 
     # ── Remote execution (k6 runs on remote — repo + Helper resolve DNS there) ──
-    local remote_base="(cd growin_performancetest 2>/dev/null && git pull --ff-only origin main 2>/dev/null) || (cd mostng_performancetest_api 2>/dev/null && git pull --ff-only origin main 2>/dev/null) || cd /home/qa/growin_performancetest 2>/dev/null || { echo 'FATAL: repo not found on remote. Clone first.'; exit 1; }"
+    # Try canonical repo names in order; auto git-pull to sync latest scripts.
+    local remote_base='REPO_DIR=""
+for d in growin_performancetest mostng_performancetest_api /home/qa/growin_performancetest /home/qa/mostng_performancetest_api; do
+  if [ -d "$d" ]; then REPO_DIR="$d"; break; fi
+done
+if [ -z "$REPO_DIR" ]; then
+  echo "FATAL: repo not found. Clone first: git clone https://github.com/termaulmaul/growin_performancetest.git ~/growin_performancetest"
+  exit 1
+fi
+cd "$REPO_DIR" || { echo "FATAL: cannot cd $REPO_DIR"; exit 1; }
+echo "[remote] PWD: $(pwd)"
+echo "[remote] Pulling latest changes..."
+git pull --ff-only origin main 2>&1 | tail -5 || echo "[remote] WARN: git pull failed, continuing with existing files"
+echo "[remote] Script suite check:"
+ls -d Script/'$suite_name' 2>&1 | head -1 || { echo "FATAL: Script/'$suite_name' not in remote repo even after pull"; exit 1; }'
 
     local ssh_cmd=""
     [[ -n "$run_cmd" ]] && ssh_cmd="$remote_base && $run_cmd"
