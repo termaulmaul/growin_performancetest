@@ -88,6 +88,39 @@ python3 "$PROJECT_DIR/lib/python/db.py" && ok "SQLite DB initialized at ~/.pt/va
 chmod +x "$PROJECT_DIR/pt-menu.sh" "$PROJECT_DIR"/bin/pt-*
 ok "Executables: pt-menu.sh + bin/pt-*"
 
+# 12. Bootstrap configs/pt.env if missing
+if [[ ! -f "$PROJECT_DIR/configs/pt.env" ]]; then
+  warn "configs/pt.env missing — please create it from configs/ examples"
+fi
+
+# 13. Bootstrap docker-local-pt/configs/local.env from example if missing
+if [[ ! -f "$PROJECT_DIR/docker-local-pt/configs/local.env" ]]; then
+  cp "$PROJECT_DIR/docker-local-pt/configs/local.env.example" \
+     "$PROJECT_DIR/docker-local-pt/configs/local.env"
+  ok "Created docker-local-pt/configs/local.env from example"
+fi
+
+# 14. Start Docker sandbox stack (mock-api + sandbox-ssh + observability)
+echo -e "\n  Starting Docker sandbox stack..."
+if command -v docker &>/dev/null && docker info &>/dev/null; then
+  ( cd "$PROJECT_DIR/docker-local-pt" && \
+    docker compose --env-file configs/local.env \
+                   --profile observability \
+                   up -d --build mock-api sandbox-ssh influxdb grafana 2>&1 | tail -20 ) \
+    && ok "Sandbox stack up: mock-api, sandbox-ssh, influxdb, grafana"
+else
+  warn "Docker not running — skipping sandbox stack bootstrap"
+fi
+
+# 15. Final status
 echo -e "\n${BOLD}Setup complete!${RST}"
-echo -e "  Run: ${GRN}./pt-menu.sh${RST}"
-echo -e "  First boot will prompt you to create a God admin account.\n"
+echo -e "\n${BOLD}Sandbox endpoints:${RST}"
+echo -e "  Mock API     : ${GRN}http://localhost:18080${RST}      (HTTP target for k6)"
+echo -e "  Sandbox SSH  : ${GRN}qa@127.0.0.1:2222${RST}            (password: M@nsek.1234)"
+echo -e "  Grafana      : ${GRN}http://localhost:3000${RST}        (admin/admin)"
+echo -e "  InfluxDB     : ${GRN}http://localhost:18086${RST}"
+echo -e "\n${BOLD}Next steps:${RST}"
+echo -e "  1. Edit ${YLW}configs/pt.env${RST} — set webhooks, Onprem/Oncloud creds"
+echo -e "  2. Run: ${GRN}./pt-menu.sh${RST}"
+echo -e "  3. First boot creates a god admin account."
+echo -e ""
