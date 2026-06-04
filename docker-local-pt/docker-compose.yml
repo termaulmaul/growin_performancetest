@@ -95,7 +95,7 @@ services:
       - "2222:22"
     volumes:
       - ../..:/workspace:ro
-      - ./results:/workspace/artifacts/results
+      - ./results:/results
     networks: [pt]
     healthcheck:
       test: ["CMD","sh","-c","nc -z 127.0.0.1 22"]
