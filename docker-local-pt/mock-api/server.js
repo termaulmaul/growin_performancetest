@@ -32,7 +32,31 @@ const server = http.createServer((req, res) => {
       }
 
       if (req.url === '/login' || req.url.endsWith('/auth/api/v1/login')) {
-        return reply(res, 200, { token: 'mock-token-' + Date.now(), access_token: 'mock-token', expires_in: 3600 });
+        // Growin contract: { data: { token, userId, refreshToken } }
+        return reply(res, 200, {
+          status: 'success',
+          data: {
+            token: 'mock-token-' + Date.now() + '-' + Math.random().toString(36).slice(2,10),
+            userId: 'mock-userid-' + Date.now(),
+            refreshToken: 'mock-refresh-token',
+            access_token: 'mock-token',
+            expires_in: 3600
+          }
+        });
+      }
+      // PIN token: POST /api/auth/pin/<id>/tokens
+      if (/^\/api\/auth\/pin\/.+\/tokens$/.test(req.url)) {
+        return reply(res, 200, {
+          status: 'success',
+          data: { token: 'mock-pin-token-' + Date.now(), expiresIn: 3600 }
+        });
+      }
+      // User ID lookup
+      if (req.url.endsWith('/auth/api/v1/identity/userid')) {
+        return reply(res, 200, {
+          status: 'success',
+          data: { userId: 'mock-userid-' + Date.now() }
+        });
       }
       if (req.url.endsWith('/auth/api/v1/protected/pin-login')) {
         return reply(res, 200, { pin_token: 'mock-pin-token' });
