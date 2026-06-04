@@ -32,12 +32,16 @@ const server = http.createServer((req, res) => {
       }
 
       if (req.url === '/login' || req.url.endsWith('/auth/api/v1/login')) {
-        // Growin contract: { data: { token, userId, refreshToken } }
+        // Growin contract: { data: { token, userId, user_id, refreshToken } }
+        // Scripts use BOTH userId (camelCase) AND user_id (snake_case)
+        const uid = 'mock-userid-' + Date.now();
         return reply(res, 200, {
           status: 'success',
           data: {
             token: 'mock-token-' + Date.now() + '-' + Math.random().toString(36).slice(2,10),
-            userId: 'mock-userid-' + Date.now(),
+            userId: uid,
+            user_id: uid,           // snake_case for legacy scripts
+            id: uid,                // even more legacy compat
             refreshToken: 'mock-refresh-token',
             access_token: 'mock-token',
             expires_in: 3600
@@ -53,9 +57,10 @@ const server = http.createServer((req, res) => {
       }
       // User ID lookup
       if (req.url.endsWith('/auth/api/v1/identity/userid')) {
+        const uid = 'mock-userid-' + Date.now();
         return reply(res, 200, {
           status: 'success',
-          data: { userId: 'mock-userid-' + Date.now() }
+          data: { userId: uid, user_id: uid, id: uid }
         });
       }
       if (req.url.endsWith('/auth/api/v1/protected/pin-login')) {

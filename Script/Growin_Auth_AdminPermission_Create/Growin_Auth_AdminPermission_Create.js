@@ -295,6 +295,7 @@ function loginWithRetry(base_url, credentials, userKey, vuId) {
             return {
                 success: true,
                 token: loginRes.json().data.token,
+                data: loginRes.json().data,
                 attempts: attempt
             };
         }
