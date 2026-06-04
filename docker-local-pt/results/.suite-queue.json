@@ -1,12 +1,62 @@
 [
   {
-    "suite": "Growin_Data_Visualization",
+    "suite": "Growin_Auth_AdminPermission_Create",
     "runner": "docker-local-pt/scripts/k6-mock-runner.js",
     "platform": "Web",
     "scenario": "BP001",
     "variant": "original",
     "config": "-",
-    "script": "Script/Growin_Data_Visualization/Web/BP001.js",
+    "script": "Script/Growin_Auth_AdminPermission_Create/Web/BP001.js",
+    "mockReady": true
+  },
+  {
+    "suite": "Growin_Auth_AdminPermission_Create",
+    "runner": "docker-local-pt/scripts/k6-mock-runner.js",
+    "platform": "iOS",
+    "scenario": "BP001",
+    "variant": "original",
+    "config": "-",
+    "script": "Script/Growin_Auth_AdminPermission_Create/iOS/BP001.js",
+    "mockReady": true
+  },
+  {
+    "suite": "Growin_Auth_AdminPermission_Create",
+    "runner": "docker-local-pt/scripts/k6-mock-runner.js",
+    "platform": "Android",
+    "scenario": "BP001",
+    "variant": "original",
+    "config": "-",
+    "script": "Script/Growin_Auth_AdminPermission_Create/Android/BP001.js",
+    "mockReady": true
+  },
+  {
+    "suite": "Growin_Auth_AdminPermission_Create",
+    "runner": "docker-local-pt/scripts/k6-mock-runner.js",
+    "platform": "Web",
+    "scenario": "BP002",
+    "variant": "original",
+    "config": "-",
+    "script": "Script/Growin_Auth_AdminPermission_Create/Web/BP002.js",
+    "mockReady": true
+  },
+  {
+    "suite": "Growin_Auth_AdminPermission_Create",
+    "runner": "docker-local-pt/scripts/k6-mock-runner.js",
+    "platform": "Web",
+    "scenario": "BP003",
+    "variant": "original",
+    "config": "-",
+    "script": "Script/Growin_Auth_AdminPermission_Create/Web/BP003.js",
+    "mockReady": true
+  },
+  {
+    "suite": "Growin_Auth_AdminPermission_Create",
+    "runner": "docker-local-pt/scripts/k6-mock-runner.js",
+    "platform": "Web",
+    "scenario": "BP003 copy",
+    "variant": "original",
+    "config": "-",
+    "script": "Script/Growin_Auth_AdminPermission_Create/Web/BP003 copy.js",
     "mockReady": true
   }
 ]

@@ -6,7 +6,13 @@ set -euo pipefail
 trap '[[ -n "${_SPINNER_PID:-}" ]] && kill "$_SPINNER_PID" 2>/dev/null || true' EXIT
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ENV_FILE="$PROJECT_DIR/docker-local-pt/configs/local.env"
+# Primary config: configs/pt.env (top-level, target-agnostic)
+# Legacy fallback: docker-local-pt/configs/local.env (kept for backward compat)
+if [[ -f "$PROJECT_DIR/configs/pt.env" ]]; then
+  ENV_FILE="$PROJECT_DIR/configs/pt.env"
+else
+  ENV_FILE="$PROJECT_DIR/docker-local-pt/configs/local.env"
+fi
 
 # PT Auth Source
 if [[ -f "$PROJECT_DIR/lib/bash/pt_auth_client.sh" ]]; then
@@ -53,7 +59,7 @@ print_run_header() {
 }
 
 print_run_footer() {
-  local rc="$1" tmplog="${2:-}"
+  local rc="$1" tmplog="${2:-}" skip_webhook="${3:-false}"
   local elapsed=$(( $(date +%s) - _RUN_START ))
   local dur_str="${elapsed}s"
   [[ $elapsed -ge 60 ]] && dur_str="$(( elapsed/60 ))m $(( elapsed%60 ))s"
@@ -79,7 +85,7 @@ print_run_footer() {
   echo -e "${CYN}${BLD}└${bar}${RST}"
 
   # Webhook Summary Send
-  if [[ "$(env_val NOTIFY_TEAMS 'false')" == "true" || -n "$(env_val TELEGRAM_WEBHOOK '')" || -n "$(env_val DISCORD_WEBHOOK '')" || -n "$(env_val TEAMS_WEBHOOK '')" || -n "$(env_val BRRR_WEBHOOK '')" ]]; then
+  if [[ "$skip_webhook" != "true" ]] && [[ "$(env_val NOTIFY_TEAMS 'false')" == "true" || -n "$(env_val TELEGRAM_WEBHOOK '')" || -n "$(env_val DISCORD_WEBHOOK '')" || -n "$(env_val TEAMS_WEBHOOK '')" || -n "$(env_val BRRR_WEBHOOK '')" ]]; then
     local res="$PROJECT_DIR/artifacts/results/summary.json"
     if [[ -n "$tmplog" && -f "$tmplog" ]]; then
       python3 "$PROJECT_DIR/lib/webhook/parse-k6-log.py" "$tmplog" "$res" "${_RUN_LABEL:-Unknown}" "${_RUN_TARGET:-}" "${_RUN_MODE:-}" 2>/dev/null || true
@@ -463,12 +469,12 @@ _sshpass_cmd() {
 # ── SSH Section ──────────────────────────────────────────────────────────────
 ssh_menu() {
   banner
-  section_header "SSH — Select Target"
+  section_header "Run Test — Select Target"
 
   local choices=(
     "Onprem (Jump 10.82.15.72 -> 10.184.120.48)"
     "Oncloud (GCP IAP vm-pt-ksix-0)"
-    "Local Sandbox (Docker 127.0.0.1:2222)  [mock=host:18080]"
+    "Sandbox Demo (Local Mock 127.0.0.1:2222)  [demo only]"
     "← Back"
   )
 
@@ -476,18 +482,20 @@ ssh_menu() {
 
   [[ -z "$sel" || "$sel" == "← Back" ]] && return
 
+  while true; do
+
   section_header "Select Script / Command"
   local scripts=()
   while IFS= read -r s; do
     [[ -z "${s:-}" ]] && continue
     scripts+=("Suite: $s")
   done < <(find "$PROJECT_DIR/Script" -maxdepth 1 -mindepth 1 -type d -exec basename {} \; | sort)
-  scripts+=("Custom Command" "Only Connect (Interactive Shell)")
+  scripts+=("Custom Command" "Only Connect (Interactive Shell)" "← Back")
 
   local script_sel; script_sel=$(pick_fzf "Script>" "${scripts[@]}")
 
 
-  [[ -z "$script_sel" || "$script_sel" == "← Back" ]] && return
+  [[ -z "$script_sel" || "$script_sel" == "← Back" ]] && break
 
   local run_cmd=""
   local _run_label=""
@@ -502,16 +510,17 @@ ssh_menu() {
          [[ "$f" == *"copy"* || "$f" == *"?"* || "$f" == *"_enhance_log.md" ]] && continue
          files+=("$f")
        done < <(find "$suite_dir" -maxdepth 1 \( -name '*.sh' -o -name '*.js' \) -exec basename {} \; | sort)
+       files+=("← Back")
 
-       if [[ ${#files[@]} -eq 0 ]]; then
+       if [[ ${#files[@]} -eq 1 ]]; then
          echo -e "${RED}No .sh or .js scripts found in Script/$suite_name${RST}"
          read -r -p $'\nPress Enter...'
-         return
+         continue
        fi
 
        local file_sel; file_sel=$(pick_fzf "Select script file>" "${files[@]}")
 
-       [[ -z "$file_sel" ]] && { echo "Cancelled."; read -r -p $'\nPress Enter...'; return; }
+       [[ -z "$file_sel" || "$file_sel" == "← Back" ]] && continue
 
        if [[ "$file_sel" == *.sh ]]; then
          run_cmd="cd Script/$suite_name && bash $file_sel"
@@ -522,7 +531,7 @@ ssh_menu() {
          local plat_choices=("Web" "iOS" "Android")
          local platform; platform=$(pick_fzf "Platform>" "${plat_choices[@]}")
 
-         [[ -z "$platform" ]] && { echo "Cancelled."; read -r -p $'\nPress Enter...'; return; }
+         [[ -z "$platform" ]] && { echo "Cancelled."; read -r -p $'\nPress Enter...'; continue; }
 
          local bps=()
          while IFS= read -r line; do
@@ -535,7 +544,7 @@ ssh_menu() {
            local scenario_choices=("All" "${bps[@]}")
            local scenario_sel; scenario_sel=$(pick_fzf "Scenario (BP)>" "${scenario_choices[@]}")
 
-           [[ -z "$scenario_sel" ]] && { echo "Cancelled."; read -r -p $'\nPress Enter...'; return; }
+           [[ -z "$scenario_sel" ]] && { echo "Cancelled."; read -r -p $'\nPress Enter...'; continue; }
            if [[ "$scenario_sel" != "All" ]]; then
              scenario="$scenario_sel"
            fi
@@ -564,7 +573,7 @@ ssh_menu() {
          local runby_choices=("Manual" "Regression" "LoadTest")
          local runby; runby=$(pick_fzf "RUNBY>" "${runby_choices[@]}")
 
-         [[ -z "$runby" ]] && { echo "Cancelled."; read -r -p $'\nPress Enter...'; return; }
+         [[ -z "$runby" ]] && { echo "Cancelled."; read -r -p $'\nPress Enter...'; continue; }
 
          local scen_label="${scenario:-AllBP}"
          local report_file="../../Report/$suite_name/$platform/$scen_label/$runby/${runby}_DryRun_$(date +%m%d)_$(date +%H%M)_${scen_label}.html"
@@ -577,13 +586,13 @@ ssh_menu() {
     "Custom Command")
        printf "Command: "
        read -r run_cmd
-       [[ -z "$run_cmd" ]] && { echo "Cancelled."; read -r -p $'\nPress Enter...'; return; }
+       [[ -z "$run_cmd" ]] && { echo "Cancelled."; read -r -p $'\nPress Enter...'; continue; }
        _run_label="Custom: $run_cmd"
        ;;
   esac
 
-  # NOTE: mostng_performancetest_api is the complete repo; growin_performancetest is older/incomplete
-  local remote_base="cd mostng_performancetest_api || cd growin_performancetest || cd /home/qa/growin_performancetest || cd /data/qa/growin_performancetest || { echo 'Repo not found on remote!'; exit 1; }"
+  # Remote repo canonical path. Scripts live under Script/ inside repo root.
+  local remote_base="cd growin_performancetest 2>/dev/null || cd mostng_performancetest_api 2>/dev/null || cd /home/qa/growin_performancetest 2>/dev/null || { echo 'ERROR: repo not found on remote'; exit 1; }"
   local ssh_cmd=""
 
   if [[ -n "$run_cmd" ]]; then
@@ -626,21 +635,24 @@ ssh_menu() {
           --tunnel-through-iap --project "compute-pt"
       fi
       ;;
-    "Local Sandbox "*)
+    "Sandbox Demo "*)
       if [[ -n "$ssh_cmd" ]]; then
-        print_run_header "${_run_label:-cmd}" "Local Sandbox  127.0.0.1:2222" "Sandbox"
+        print_run_header "${_run_label:-cmd}" "Sandbox Demo  127.0.0.1:2222  [DEMO]" "Sandbox"
         set +e
         _sshpass_cmd "$pass" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
           -p 2222 qa@127.0.0.1 "$ssh_cmd" 2>&1 | tee "$_run_log"
         _run_rc=${PIPESTATUS[0]}; set -e
         print_run_footer "$_run_rc" "$_run_log"
       else
-        echo -e "\n${GRN}Connecting to Local SSH Sandbox (interactive)...${RST}"
+        echo -e "\n${GRN}Connecting to Sandbox Demo SSH (interactive)...${RST}"
         _sshpass_cmd "$pass" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
           -p 2222 qa@127.0.0.1
       fi
       ;;
   esac
+
+  break  # Back to main menu after SSH execution
+done
 
   rm -f "$_run_log"
   python3 "$PROJECT_DIR/pt-data/auth.py" clear_run "$PT_USER" 2>/dev/null || true
@@ -722,10 +734,11 @@ docker_menu() {
     local compose_env="$compose_dir/configs/local.env"
     echo -e "${CYN}${BLD}  Container         Status                  Ports${RST}"
     echo -e "  ${DIM}$(printf '─%.0s' $(seq 1 $(( ${COLUMNS:-$(tput cols 2>/dev/null || echo 80)} - 4 ))))${RST}"
-    local ct_lines; ct_lines=$(docker ps --format "  {{.Names}}	{{.Status}}	{{.Ports}}" 2>/dev/null | grep -E "pt-|k6" || true)
+    local ct_lines; ct_lines=$(docker ps --format "{{.Names}}	{{.Status}}	{{.Ports}}" 2>/dev/null | grep -E "pt-|k6" || true)
     if [[ -n "$ct_lines" ]]; then
-      echo -e "$ct_lines" | awk -F'	' '{printf "  '"${GRN}"'▶'"${RST}"'  %-18s  %-22s  '"${DIM}"'%s'"${RST}"'
-", $1, $2, $3}'
+      while IFS=$'\t' read -r name status ports; do
+        printf "  ${GRN}▶${RST}  %-18s  %-22s  ${DIM}%s${RST}\n" "$name" "$status" "$ports"
+      done <<< "$ct_lines"
     else
       echo -e "  ${DIM}(no pt/k6 containers running)${RST}"
     fi
@@ -790,10 +803,10 @@ Press Enter...' ;;
   done
 }
 
-# ── Local Run Test ──────────────────────────────────────────────────────────
+# ── Sandbox Demo Run ──────────────────────────────────────────────────────────
 run_test_menu() {
   banner
-  section_header "Run Test — Local Docker Mock"
+  section_header "Sandbox Demo — Local Mock k6 Runner"
 
   # Build mock-ready set from list-scenarios.mjs
   local mock_suites
@@ -839,12 +852,12 @@ for d in data:
       local platform_arg=""
       [[ "$platform" != "All" ]] && platform_arg="$platform"
 
-      print_run_header "$suite_name  [Mock Suite · $platform]" "Local Docker Mock" "Mock"
+      print_run_header "$suite_name  [Mock Suite · $platform · DEMO]" "Sandbox Demo  127.0.0.1:2222" "Sandbox"
       python3 "$PROJECT_DIR/pt-data/auth.py" set_run "$PT_USER" "MockSuite:$suite_name" "5m" 2>/dev/null || true
       set +e
       bash "$run_sh" "$suite_name" "$platform_arg" 2>&1 | tee "$_local_log"
       _local_rc=${PIPESTATUS[0]}; set -e
-      print_run_footer "$_local_rc" "$_local_log"
+      print_run_footer "$_local_rc" "$_local_log" "true"
       python3 "$PROJECT_DIR/docker-local-pt/scripts/print-summary-table.py" "$PROJECT_DIR/artifacts/results/summary.json" 2>/dev/null || true
       rm -f "$_local_log"
       python3 "$PROJECT_DIR/pt-data/auth.py" clear_run "$PT_USER" 2>/dev/null || true
@@ -892,7 +905,7 @@ for d in data:
         printf "  Use mock-api (%s)? (y/n): " "$mock_url"; read -r use_mock
       fi
 
-      print_run_header "$suite_name / $(basename "$js_sel")  [Direct · ${vus}VU · $dur]" "k6 binary"
+      print_run_header "$suite_name / $(basename "$js_sel")  [Sandbox · ${vus}VU · $dur · DEMO]" "k6 binary  (Sandbox Demo)"
       python3 "$PROJECT_DIR/pt-data/auth.py" set_run "$PT_USER" "$(basename "$js_sel")" "$dur" 2>/dev/null || true
       # Run from suite dir so script's relative ../../Report path resolves to repo root
       local _run_cwd="$PROJECT_DIR/Script/$suite_name"
@@ -908,7 +921,7 @@ for d in data:
           -e DURATION="$dur" ) 2>&1 | tee "$_local_log"
       fi
       _local_rc=${PIPESTATUS[0]}; set -e
-      print_run_footer "$_local_rc" "$_local_log"
+      print_run_footer "$_local_rc" "$_local_log" "true"
       python3 "$PROJECT_DIR/docker-local-pt/scripts/print-summary-table.py" "$PROJECT_DIR/artifacts/results/summary.json" 2>/dev/null || true
       rm -f "$_local_log"
       python3 "$PROJECT_DIR/pt-data/auth.py" clear_run "$PT_USER" 2>/dev/null || true
@@ -1138,37 +1151,20 @@ webhook_menu() {
       local target_sel; target_sel=$(pick_fzf "Select Target>" "${target_choices[@]}")
       [[ -z "$target_sel" || "$target_sel" == "← Back" ]] && continue
       
-      local wh
+      local wh _wh_type
       case "$target_sel" in
-        "Telegram")
-          wh=$(env_val TELEGRAM_WEBHOOK "")
-          print_run_header "Telegram Webhook Test" "Telegram"
-          set +e
-          node "$PROJECT_DIR/lib/webhook/webhook-tester.mjs" telegram "$wh" 2>&1
-          print_run_footer "$?"
-          ;;
-        "Discord")
-          wh=$(env_val DISCORD_WEBHOOK "")
-          print_run_header "Discord Webhook Test" "Discord"
-          set +e
-          node "$PROJECT_DIR/lib/webhook/webhook-tester.mjs" discord "$wh" 2>&1
-          print_run_footer "$?"
-          ;;
-        "Teams")
-          wh=$(env_val TEAMS_WEBHOOK "")
-          print_run_header "Teams Webhook Test" "Teams"
-          set +e
-          node "$PROJECT_DIR/lib/webhook/webhook-tester.mjs" teams "$wh" 2>&1
-          print_run_footer "$?"
-          ;;
-        "Brrr")
-          wh=$(env_val BRRR_WEBHOOK "")
-          print_run_header "Brrr Webhook Test" "Brrr"
-          set +e
-          node "$PROJECT_DIR/lib/webhook/webhook-tester.mjs" brrr "$wh" 2>&1
-          print_run_footer "$?"
-          ;;
+        "Telegram") wh=$(env_val TELEGRAM_WEBHOOK ""); _wh_type="telegram" ;;
+        "Discord")  wh=$(env_val DISCORD_WEBHOOK "");  _wh_type="discord"  ;;
+        "Teams")    wh=$(env_val TEAMS_WEBHOOK "");    _wh_type="teams"    ;;
+        "Brrr")     wh=$(env_val BRRR_WEBHOOK "");     _wh_type="brrr"     ;;
       esac
+
+      print_run_header "$target_sel Webhook Test [DEMO]" "$target_sel" "Demo"
+      set +e
+      node "$PROJECT_DIR/lib/webhook/webhook-tester.mjs" "$_wh_type" "$wh" 2>&1
+      local _wh_rc=$?
+      set -e
+      print_run_footer "$_wh_rc" "" "true"
       read -r -p $'\nPress Enter...'
       ;;
   esac
@@ -1183,8 +1179,8 @@ main_menu() {
     banner
 
     local choices=()
-    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" || "$PT_ROLE" == "tester" ]] && choices+=("[1] Remote Runner (SSH + Cloud/Onprem)")
-    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" || "$PT_ROLE" == "tester" ]] && choices+=("[2] Local Runner (Mock Docker K6)")
+    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" || "$PT_ROLE" == "tester" ]] && choices+=("[1] Run Test  (Onprem / Oncloud)")
+    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" || "$PT_ROLE" == "tester" ]] && choices+=("[2] Sandbox Demo  (Local Mock — k6 binary)")
     [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" ]] && choices+=("[3] Cron Scheduler")
     [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" || "$PT_ROLE" == "tester" ]] && choices+=("[4] AI Slope (Code Quality)")
     [[ "$PT_ROLE" != "viewer" ]] && choices+=("[5] ENV Editor")
@@ -1199,8 +1195,8 @@ main_menu() {
 
 
     case "$sel" in
-      "[1] Remote Runner"*) ssh_menu ;;
-      "[2] Local Runner"*) run_test_menu ;;
+      "[1] Run Test"*) ssh_menu ;;
+      "[2] Sandbox Demo"*) run_test_menu ;;
       "[3] Cron Scheduler"*) cron_scheduler_menu ;;
       "[4] AI Slope"*) ai_slope_menu ;;
       "[5] ENV Editor"*)  env_edit_menu ;;

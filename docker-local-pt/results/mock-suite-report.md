@@ -1,6 +1,6 @@
 # Mock Suite Report
 
-Generated: 2026-06-03T07:57:55.814Z
+Generated: 2026-06-04T09:43:25.635Z
 
 | Pass | Fail | Total |
 |---:|---:|---:|
@@ -8,4 +8,4 @@ Generated: 2026-06-03T07:57:55.814Z
 
 | Suite | Scenario | Platform | Variant | Status |
 |---|---|---|---|---|
-| Growin_Data_Visualization | BP001 | Web | original | fail |
+| Growin_Auth_AdminPermission_Create | BP001 | Web | original | fail |

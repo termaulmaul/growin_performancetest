@@ -40,6 +40,31 @@ m_fail = re.search(r'http_req_failed\.+:\s*([0-9\.]+)%', text)
 if m_fail:
     failed_rate = float(m_fail.group(1)) / 100.0
 
+# Extract duration from log (e.g., "default: 1 looping VUs for 30s" or "duration=30s")
+duration_str = "30s"
+m_dur_env = re.search(r'\bDURATION\s*[=:]\s*([0-9]+[smh])', text)
+if m_dur_env:
+    duration_str = m_dur_env.group(1)
+else:
+    m_dur_exec = re.search(r'for\s+([0-9]+[smh])\b', text)
+    if m_dur_exec:
+        duration_str = m_dur_exec.group(1)
+    else:
+        m_dur_flag = re.search(r'\-\-duration[= ]([0-9]+[smh])', text)
+        if m_dur_flag:
+            duration_str = m_dur_flag.group(1)
+
+# Extract VUs
+vus_str = "1"
+m_vus = re.search(r'\b(?:K6_USERS|USER|VUs?)[= ]+([0-9]+)', text, re.IGNORECASE)
+if m_vus:
+    vus_str = m_vus.group(1)
+else:
+    m_vus2 = re.search(r'(\d+)\s+looping VUs', text)
+    if m_vus2:
+        vus_str = m_vus2.group(1)
+
+import datetime
 summary = {
     "mode": mode or "Unknown",
     "suite": suite_name,
@@ -50,7 +75,9 @@ summary = {
     "http_reqs": http_reqs,
     "http_req_failed_rate": failed_rate,
     "http_req_duration_p95": p95,
-    "timestamp": ""
+    "duration": duration_str,
+    "vus": vus_str,
+    "timestamp": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 }
 if target:
     summary["base_url"] = target
