@@ -687,8 +687,8 @@ fi
 echo '[remote] Using k6:' \$K6_BIN \"(\$(\$K6_BIN version | head -1))\"
 cd Script/$suite_name
 mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
-echo '[remote] Running k6...'
-\$K6_BIN run $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform --out dashboard=export=$report_file
+echo '[remote] Running k6 with --compatibility-mode=experimental_enhanced (sobek runtime)...'
+\$K6_BIN run --compatibility-mode=experimental_enhanced $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform --out dashboard=export=$report_file
 RC=\$?
 echo '[remote] k6 exit code:' \$RC
 # Download report back? Skipped here; user can scp manually if needed.
@@ -762,7 +762,7 @@ fi
 echo '[remote] Using k6:' \$K6_BIN
 cd Script/$suite_name
 mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
-\$K6_BIN run $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform --out dashboard=export=$report_file
+\$K6_BIN run --compatibility-mode=experimental_enhanced $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform --out dashboard=export=$report_file
 RC=\$?
 cd /tmp && rm -rf $_remote_dir $(basename $_tarball)
 exit \$RC"
