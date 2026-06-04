@@ -472,21 +472,20 @@ ssh_menu() {
   section_header "Run Test — Select Target"
 
   local choices=(
-    "Onprem  (HTTPS API → Mandiri Sekuritas)"
-    "Oncloud (HTTPS API → GCP)"
-    "Sandbox Demo  (Local Mock 127.0.0.1:18080)  [demo only]"
+    "Onprem  (SSH qa@10.82.15.72 → qa@10.184.120.48)"
+    "Oncloud (gcloud IAP → vm-pt-ksix-0)"
+    "Sandbox Demo  (Local Mock — k6 di Mac)  [demo only]"
     "← Back"
   )
 
   local sel; sel=$(pick_fzf "Target>" "${choices[@]}")
   [[ -z "$sel" || "$sel" == "← Back" ]] && return
 
-  # Resolve BASE_URL from target
-  local base_url="" mode=""
+  local mode=""
   case "$sel" in
-    "Onprem"*)  base_url=$(env_val ONPREM_BASE_URL "https://int-api.onprem.growin.com");  mode="Onprem"  ;;
-    "Oncloud"*) base_url=$(env_val ONCLOUD_BASE_URL "https://int-api-oncloud.growin.com"); mode="Oncloud" ;;
-    "Sandbox"*) base_url="http://localhost:18080";                                          mode="Sandbox" ;;
+    "Onprem"*)   mode="Onprem"  ;;
+    "Oncloud"*)  mode="Oncloud" ;;
+    "Sandbox"*)  mode="Sandbox" ;;
   esac
 
   while true; do
@@ -496,108 +495,180 @@ ssh_menu() {
       [[ -z "$s" ]] && continue
       suites+=("$s")
     done < <(find "$PROJECT_DIR/Script" -maxdepth 1 -mindepth 1 -type d -exec basename {} \; | sort)
-    suites+=("← Back")
+    suites+=("Custom Command" "Only Connect (Interactive Shell)" "← Back")
 
     local suite_sel; suite_sel=$(pick_fzf "Suite>" "${suites[@]}")
     [[ -z "$suite_sel" || "$suite_sel" == "← Back" ]] && break
 
-    local suite_name="$suite_sel"
-    local suite_dir="$PROJECT_DIR/Script/$suite_name"
+    local run_cmd=""
+    local _run_label=""
 
-    # Collect .js files (skip copies + _enhance_log.md)
-    local files=()
-    while IFS= read -r f; do
-      [[ -z "$f" ]] && continue
-      [[ "$f" == *"copy"* || "$f" == *"?"* || "$f" == *"_enhance_log.md" ]] && continue
-      files+=("$(basename "$f")")
-    done < <(find "$suite_dir" -maxdepth 1 -name '*.js' | sort)
-    files+=("← Back")
+    case "$suite_sel" in
+      "Custom Command")
+        printf "  Command: "; read -r run_cmd
+        [[ -z "$run_cmd" ]] && continue
+        _run_label="Custom: $run_cmd"
+        ;;
 
-    if [[ ${#files[@]} -eq 1 ]]; then
-      echo -e "  ${RED}No .js scripts in Script/$suite_name${RST}"
-      read -r -p $'\nPress Enter...'
-      continue
-    fi
+      "Only Connect (Interactive Shell)")
+        # Drop to interactive shell, no script execution
+        run_cmd=""
+        _run_label="Interactive Shell"
+        ;;
 
-    local file_sel; file_sel=$(pick_fzf "Script file>" "${files[@]}")
-    [[ -z "$file_sel" || "$file_sel" == "← Back" ]] && continue
+      *)
+        # Suite selected — pick script file
+        local suite_name="$suite_sel"
+        local suite_dir="$PROJECT_DIR/Script/$suite_name"
 
-    local script_abs="$suite_dir/$file_sel"
-    if [[ ! -f "$script_abs" ]]; then
-      echo -e "  ${RED}Script not found: $script_abs${RST}"
-      read -r -p $'\nPress Enter...'
-      continue
-    fi
+        local files=()
+        while IFS= read -r f; do
+          [[ -z "$f" ]] && continue
+          [[ "$f" == *"copy"* || "$f" == *"?"* || "$f" == *"_enhance_log.md" ]] && continue
+          files+=("$f")
+        done < <(find "$suite_dir" -maxdepth 1 \( -name '*.sh' -o -name '*.js' \) -exec basename {} \; | sort)
+        files+=("← Back")
 
-    # K6 run params
-    echo -e "\n${CYN}${BLD}  ── K6 Run Configuration ──${RST}"
+        if [[ ${#files[@]} -eq 1 ]]; then
+          echo -e "  ${RED}No .sh or .js scripts in Script/$suite_name${RST}"
+          read -r -p $'\nPress Enter...'
+          continue
+        fi
 
-    local plat_choices=("Web" "iOS" "Android" "← Back")
-    local platform; platform=$(pick_fzf "Platform>" "${plat_choices[@]}")
-    [[ -z "$platform" || "$platform" == "← Back" ]] && continue
+        local file_sel; file_sel=$(pick_fzf "Script file>" "${files[@]}")
+        [[ -z "$file_sel" || "$file_sel" == "← Back" ]] && continue
 
-    # Extract BPs from script
-    local bps=()
-    while IFS= read -r line; do
-      [[ -z "$line" ]] && continue
-      bps+=("$line")
-    done < <(grep -E '^export function BP[0-9]+' "$script_abs" 2>/dev/null | awk '{print $3}' | cut -d'(' -f1 | sort -u)
+        if [[ "$file_sel" == *.sh ]]; then
+          run_cmd="cd Script/$suite_name && bash $file_sel"
+          _run_label="$suite_name / $file_sel"
 
-    local scenario=""
-    if [[ ${#bps[@]} -gt 0 ]]; then
-      local scenario_choices=("All" "${bps[@]}" "← Back")
-      local scenario_sel; scenario_sel=$(pick_fzf "Scenario (BP)>" "${scenario_choices[@]}")
-      [[ -z "$scenario_sel" || "$scenario_sel" == "← Back" ]] && continue
-      [[ "$scenario_sel" != "All" ]] && scenario="$scenario_sel"
-    fi
+        elif [[ "$file_sel" == *.js ]]; then
+          echo -e "\n${CYN}${BLD}  ── K6 Run Configuration ──${RST}"
 
-    local default_vus; default_vus=$(env_val K6_USERS 100)
-    printf "  VUs [%s]: " "$default_vus"; read -r vus
-    vus="${vus:-$default_vus}"
+          local plat_choices=("Web" "iOS" "Android" "← Back")
+          local platform; platform=$(pick_fzf "Platform>" "${plat_choices[@]}")
+          [[ -z "$platform" || "$platform" == "← Back" ]] && continue
 
-    local default_dur; default_dur=$(env_val DURATION 5m)
-    printf "  Duration [%s]: " "$default_dur"; read -r dur
-    dur="${dur:-$default_dur}"
-    dur=$(normalize_duration "$dur")
+          # Extract BPs from script
+          local bps=()
+          while IFS= read -r line; do
+            [[ -z "$line" ]] && continue
+            bps+=("$line")
+          done < <(grep -E '^export function BP[0-9]+' "$suite_dir/$file_sel" 2>/dev/null | awk '{print $3}' | cut -d'(' -f1 | sort -u)
 
-    local default_env; default_env=$(env_val ENV INT)
-    printf "  ENV [%s]: " "$default_env"; read -r env_name
-    env_name="${env_name:-$default_env}"
+          local scenario=""
+          if [[ ${#bps[@]} -gt 0 ]]; then
+            local scen_choices=("All" "${bps[@]}" "← Back")
+            local scen_sel; scen_sel=$(pick_fzf "Scenario (BP)>" "${scen_choices[@]}")
+            [[ -z "$scen_sel" || "$scen_sel" == "← Back" ]] && continue
+            [[ "$scen_sel" != "All" ]] && scenario="$scen_sel"
+          else
+            printf "  Scenario (BP) [BP001]: "; read -r scenario
+            scenario="${scenario:-BP001}"
+          fi
 
-    local runby_choices=("Manual" "Regression" "LoadTest" "← Back")
-    local runby; runby=$(pick_fzf "RUNBY>" "${runby_choices[@]}")
-    [[ -z "$runby" || "$runby" == "← Back" ]] && continue
+          local default_vus; default_vus=$(env_val K6_USERS 100)
+          printf "  VUs / Users [%s]: " "$default_vus"; read -r vus
+          vus="${vus:-$default_vus}"
 
-    # Report output path
-    local scen_label="${scenario:-AllBP}"
-    local report_dir="$PROJECT_DIR/Report/$suite_name/$platform/$scen_label/$runby"
-    mkdir -p "$report_dir"
-    local report_file="$report_dir/${runby}_${mode}_$(date +%m%d)_$(date +%H%M)_${scen_label}.html"
+          local default_dur; default_dur=$(env_val DURATION 5m)
+          printf "  Duration [%s]: " "$default_dur"; read -r dur
+          dur="${dur:-$default_dur}"
+          dur=$(normalize_duration "$dur")
 
-    local _run_label="$suite_name / $file_sel  [$mode · $platform · ${scenario:-AllBP} · ${vus}VU · $dur]"
+          local default_env; default_env=$(env_val ENV INT)
+          printf "  ENV [%s]: " "$default_env"; read -r env_name
+          env_name="${env_name:-$default_env}"
+
+          local runby_choices=("Manual" "Regression" "LoadTest" "← Back")
+          local runby; runby=$(pick_fzf "RUNBY>" "${runby_choices[@]}")
+          [[ -z "$runby" || "$runby" == "← Back" ]] && continue
+
+          local scen_label="${scenario:-AllBP}"
+          local report_file="../../Report/$suite_name/$platform/$scen_label/$runby/${runby}_${mode}_$(date +%m%d)_$(date +%H%M)_${scen_label}.html"
+
+          run_cmd="mkdir -p $(dirname "Report/$suite_name/$platform/$scen_label/$runby") && cd Script/$suite_name && ../../k6 run $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform --out dashboard=export=$report_file"
+          _run_label="$suite_name / $file_sel  [$mode · $platform · ${scenario:-AllBP} · ${vus}VU · $dur]"
+          python3 "$PROJECT_DIR/pt-data/auth.py" set_run "$PT_USER" "$file_sel" "$dur" 2>/dev/null || true
+        fi
+        ;;
+    esac
+
+    # ── Remote execution (k6 runs on remote — repo + Helper resolve DNS there) ──
+    local remote_base="(cd growin_performancetest 2>/dev/null && git pull --ff-only origin main 2>/dev/null) || (cd mostng_performancetest_api 2>/dev/null && git pull --ff-only origin main 2>/dev/null) || cd /home/qa/growin_performancetest 2>/dev/null || { echo 'FATAL: repo not found on remote. Clone first.'; exit 1; }"
+
+    local ssh_cmd=""
+    [[ -n "$run_cmd" ]] && ssh_cmd="$remote_base && $run_cmd"
+
     local _run_log; _run_log=$(mktemp)
     local _run_rc=0
-    local K6_BIN="$PROJECT_DIR/k6"
+    local pass; pass=$(_ssh_pass)
 
-    print_run_header "$_run_label" "$mode  →  $base_url" "$mode"
-    python3 "$PROJECT_DIR/pt-data/auth.py" set_run "$PT_USER" "$file_sel" "$dur" 2>/dev/null || true
+    case "$mode" in
+      "Onprem")
+        if [[ -n "$ssh_cmd" ]]; then
+          print_run_header "$_run_label" "Onprem  10.82.15.72 → 10.184.120.48" "Onprem"
+          set +e
+          _sshpass_cmd "$pass" ssh -o StrictHostKeyChecking=no \
+            -o ProxyCommand="sshpass -p \"$pass\" ssh -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72" \
+            qa@10.184.120.48 "$ssh_cmd" 2>&1 | tee "$_run_log"
+          _run_rc=${PIPESTATUS[0]}; set -e
+          print_run_footer "$_run_rc" "$_run_log"
+        else
+          echo -e "\n${GRN}Connecting to Onprem-2 (interactive)...${RST}"
+          _sshpass_cmd "$pass" ssh -o StrictHostKeyChecking=no \
+            -o ProxyCommand="sshpass -p \"$pass\" ssh -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72" \
+            qa@10.184.120.48
+        fi
+        ;;
 
-    # Run k6 LOCALLY — script + binary on this machine, target via BASE_URL
-    set +e
-    ( cd "$suite_dir" && "$K6_BIN" run "$script_abs" \
-        -e RUNBY="$runby" \
-        -e ENV="$env_name" \
-        -e USER="$vus" -e K6_USERS="$vus" \
-        -e DURATION="$dur" \
-        -e SCENARIO="$scenario" \
-        -e PLATFORM="$platform" \
-        -e BASE_URL="$base_url" \
-        --out "dashboard=export=$report_file" \
-    ) 2>&1 | tee "$_run_log"
-    _run_rc=${PIPESTATUS[0]}
-    set -e
+      "Oncloud")
+        if [[ -n "$ssh_cmd" ]]; then
+          print_run_header "$_run_label" "Oncloud  GCP IAP → vm-pt-ksix-0" "Oncloud"
+          set +e
+          gcloud compute ssh --zone "asia-southeast2-c" "vm-pt-ksix-0" \
+            --tunnel-through-iap --project "compute-pt" \
+            --command="$ssh_cmd" 2>&1 | tee "$_run_log"
+          _run_rc=${PIPESTATUS[0]}; set -e
+          print_run_footer "$_run_rc" "$_run_log"
+        else
+          echo -e "\n${GRN}Connecting to Oncloud VM (interactive)...${RST}\n"
+          gcloud compute ssh --zone "asia-southeast2-c" "vm-pt-ksix-0" \
+            --tunnel-through-iap --project "compute-pt"
+        fi
+        ;;
 
-    print_run_footer "$_run_rc" "$_run_log"
+      "Sandbox")
+        # Sandbox: run k6 LOCALLY (Mac) against mock-api. Demo only.
+        if [[ "$suite_sel" == "Custom Command" || "$suite_sel" == "Only Connect"* ]]; then
+          echo -e "  ${YLW}Sandbox doesn't support Custom/Interactive. Use Onprem/Oncloud.${RST}"
+          read -r -p $'\nPress Enter...'
+          continue
+        fi
+        # Re-derive paths for local run
+        local suite_name_sb="$suite_sel"
+        local local_suite_dir="$PROJECT_DIR/Script/$suite_name_sb"
+        local local_script="$local_suite_dir/$file_sel"
+        if [[ ! -f "$local_script" ]]; then
+          echo -e "  ${RED}Script not found locally: $local_script${RST}"
+          read -r -p $'\nPress Enter...'
+          continue
+        fi
+        print_run_header "$_run_label [DEMO]" "Sandbox  http://localhost:18080" "Sandbox"
+        set +e
+        ( cd "$local_suite_dir" && "$PROJECT_DIR/k6" run "$local_script" \
+            -e RUNBY="${runby:-Manual}" -e ENV="SANDBOX" \
+            -e USER="${vus:-1}" -e K6_USERS="${vus:-1}" \
+            -e DURATION="${dur:-30s}" \
+            -e SCENARIO="${scenario:-BP001}" \
+            -e PLATFORM="${platform:-Web}" \
+            -e BASE_URL="http://localhost:18080" \
+        ) 2>&1 | tee "$_run_log"
+        _run_rc=${PIPESTATUS[0]}; set -e
+        print_run_footer "$_run_rc" "$_run_log"
+        ;;
+    esac
+
     rm -f "$_run_log"
     python3 "$PROJECT_DIR/pt-data/auth.py" clear_run "$PT_USER" 2>/dev/null || true
     read -r -p $'\nPress Enter to continue...'

@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.4.0] - 2026-06-04
+
+### Fixed — Restore SSH Execution Architecture
+- **k6 executes on REMOTE** (Onprem-2 / Oncloud VM), not on local Mac.
+  - Onprem-2 (`10.184.120.48`) sudah dalam jaringan internal — DNS `internal-api-pt.growin.id` resolve dari sana.
+  - Oncloud VM (`vm-pt-ksix-0`) sudah punya IAP access ke internal API.
+- **Auto `git pull --ff-only origin main`** sebelum cd Script — remote selalu sync dengan latest commit.
+- Sandbox Demo tetap jalan **local** (Mac) terhadap mock-api `http://localhost:18080` via `BASE_URL` override.
+- `Helper/config.js` `getBaseUrl()` priority order kept:
+  - `BASE_URL` env wins → for Sandbox local mock
+  - `ENV=INT|DEV|QA|DRC` → for Onprem/Oncloud remote (where DNS works)
+
+### Reverted
+- v2.3.0 architecture (k6 local + BASE_URL only). Wrong assumption — dev Mac tidak punya VPN ke internal API.
+
 ## [2.3.0] - 2026-06-04
 
 ### Fixed — DNS / BASE_URL Override
