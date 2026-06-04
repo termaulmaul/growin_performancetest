@@ -639,31 +639,26 @@ ssh_menu() {
         ;;
 
       "Sandbox")
-        # Sandbox: run k6 LOCALLY (Mac) against mock-api. Demo only.
+        # Sandbox: SSH to pt-sandbox-ssh container, run k6 there (uses container's /usr/local/bin/k6).
+        # Mirrors Onprem/Oncloud flow exactly — only target + creds differ.
         if [[ "$suite_sel" == "Custom Command" || "$suite_sel" == "Only Connect"* ]]; then
-          echo -e "  ${YLW}Sandbox doesn't support Custom/Interactive. Use Onprem/Oncloud.${RST}"
-          read -r -p $'\nPress Enter...'
+          if [[ "$suite_sel" == "Only Connect"* ]]; then
+            echo -e "\n${GRN}Connecting to Sandbox SSH (interactive)...${RST}"
+            _sshpass_cmd "$pass" ssh -p 2222 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null qa@127.0.0.1
+          else
+            print_run_header "$_run_label" "Sandbox  127.0.0.1:2222  [DEMO]" "Sandbox"
+            set +e
+            _sshpass_cmd "$pass" ssh -p 2222 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null qa@127.0.0.1 "$run_cmd" 2>&1 | tee "$_run_log"
+            _run_rc=${PIPESTATUS[0]}; set -e
+            print_run_footer "$_run_rc" "$_run_log"
+          fi
           continue
         fi
-        # Re-derive paths for local run
-        local suite_name_sb="$suite_sel"
-        local local_suite_dir="$PROJECT_DIR/Script/$suite_name_sb"
-        local local_script="$local_suite_dir/$file_sel"
-        if [[ ! -f "$local_script" ]]; then
-          echo -e "  ${RED}Script not found locally: $local_script${RST}"
-          read -r -p $'\nPress Enter...'
-          continue
-        fi
-        print_run_header "$_run_label [DEMO]" "Sandbox  http://localhost:18080" "Sandbox"
+        # Build sandbox-aware command: use container's k6, override BASE_URL → mock-api
+        local sandbox_cmd="mkdir -p /tmp/Report/$suite_name/$platform/$scen_label/$runby 2>/dev/null; cd /workspace/Script/$suite_name && k6 run $file_sel -e RUNBY=${runby:-Manual} -e ENV=SANDBOX -e USER=${vus:-1} -e K6_USERS=${vus:-1} -e DURATION=${dur:-30s} -e SCENARIO=${scenario:-BP001} -e PLATFORM=${platform:-Web} -e BASE_URL=http://mock-api:8080 -e NUMSTART=1"
+        print_run_header "$_run_label [DEMO]" "Sandbox  127.0.0.1:2222 → http://mock-api:8080" "Sandbox"
         set +e
-        ( cd "$local_suite_dir" && "$PROJECT_DIR/k6" run "$local_script" \
-            -e RUNBY="${runby:-Manual}" -e ENV="SANDBOX" \
-            -e USER="${vus:-1}" -e K6_USERS="${vus:-1}" \
-            -e DURATION="${dur:-30s}" \
-            -e SCENARIO="${scenario:-BP001}" \
-            -e PLATFORM="${platform:-Web}" \
-            -e BASE_URL="http://localhost:18080" \
-        ) 2>&1 | tee "$_run_log"
+        _sshpass_cmd "$pass" ssh -p 2222 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null qa@127.0.0.1 "$sandbox_cmd" 2>&1 | tee "$_run_log"
         _run_rc=${PIPESTATUS[0]}; set -e
         print_run_footer "$_run_rc" "$_run_log"
         ;;
