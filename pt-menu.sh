@@ -642,9 +642,9 @@ ls -d Script/'$suite_name' 2>&1 | head -1 || { echo "FATAL: Script/'$suite_name'
           local _tarball="/tmp/pt-upload-${_stamp}.tar.gz"
           local _remote_dir="/tmp/pt-run-${_stamp}"
 
-          echo -e "${DIM}[local] Packing Script/$suite_name + Helper + k6 binary check...${RST}"
+          echo -e "${DIM}[local] Packing Script/$suite_name + Helper + k6-linux binaries...${RST}"
           tar -czf "$_tarball" -C "$PROJECT_DIR" \
-            "Script/$suite_name" Helper 2>&1 || {
+            "Script/$suite_name" Helper k6-linux-amd64 k6-linux-arm64 2>&1 || {
               echo -e "${RED}FATAL: tar failed${RST}"
               read -r -p $'\nPress Enter...'; continue;
             }
@@ -666,32 +666,34 @@ ls -d Script/'$suite_name' 2>&1 | head -1 || { echo "FATAL: Script/'$suite_name'
             read -r -p $'\nPress Enter...'; continue
           fi
 
-          # Extract + run on remote
+          # Extract + run on remote (uses bundled k6 v1.4.0 from tarball)
           local _remote_cmd="set -e
 mkdir -p $_remote_dir
 cd $_remote_dir
 tar -xzf /tmp/$(basename $_tarball)
 echo '[remote] Extracted at:' \$(pwd)
 ls -la Script/ | head -5
-# Check k6 binary on remote
-if [ -x ./k6 ]; then K6_BIN=./k6
-elif [ -x ../k6 ]; then K6_BIN=../k6
-elif command -v k6 >/dev/null; then K6_BIN=\$(command -v k6)
-elif [ -x ~/k6 ]; then K6_BIN=~/k6
-elif [ -x /home/qa/growin_performancetest/k6 ]; then K6_BIN=/home/qa/growin_performancetest/k6
-elif [ -x /home/qa/mostng_performancetest_api/k6 ]; then K6_BIN=/home/qa/mostng_performancetest_api/k6
+# Detect arch and pick bundled k6 binary (uploaded with tarball)
+ARCH=\$(uname -m)
+if [ \"\$ARCH\" = \"x86_64\" ] && [ -x ./k6-linux-amd64 ]; then
+  K6_BIN=./k6-linux-amd64
+elif [ \"\$ARCH\" = \"aarch64\" ] && [ -x ./k6-linux-arm64 ]; then
+  K6_BIN=./k6-linux-arm64
+elif command -v k6 >/dev/null; then
+  K6_BIN=\$(command -v k6)
+  echo '[remote] WARN: Using system k6 (may have outdated Babel). Bundled k6 not found for arch:' \$ARCH
 else
-  echo 'FATAL: k6 binary not found on remote. Install or place at ~/k6'
+  echo 'FATAL: No k6 binary available for arch:' \$ARCH
   exit 127
 fi
-echo '[remote] Using k6:' \$K6_BIN \"(\$(\$K6_BIN version | head -1))\"
+chmod +x \$K6_BIN 2>/dev/null || true
+echo '[remote] Arch:' \$ARCH ' | Using k6:' \$K6_BIN \"(\$(\$K6_BIN version | head -1))\"
 cd Script/$suite_name
 mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
-echo '[remote] Running k6 with --compatibility-mode=experimental_enhanced (sobek runtime)...'
-\$K6_BIN run --compatibility-mode=experimental_enhanced $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform --out dashboard=export=$report_file
+echo '[remote] Running k6...'
+\$K6_BIN run $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform --out dashboard=export=$report_file
 RC=\$?
 echo '[remote] k6 exit code:' \$RC
-# Download report back? Skipped here; user can scp manually if needed.
 cd /tmp && rm -rf $_remote_dir $(basename $_tarball)
 exit \$RC"
 
@@ -726,9 +728,9 @@ exit \$RC"
           local _tarball="/tmp/pt-upload-${_stamp}.tar.gz"
           local _remote_dir="/tmp/pt-run-${_stamp}"
 
-          echo -e "${DIM}[local] Packing Script/$suite_name + Helper...${RST}"
+          echo -e "${DIM}[local] Packing Script/$suite_name + Helper + k6-linux binaries...${RST}"
           tar -czf "$_tarball" -C "$PROJECT_DIR" \
-            "Script/$suite_name" Helper 2>&1 || {
+            "Script/$suite_name" Helper k6-linux-amd64 k6-linux-arm64 2>&1 || {
               echo -e "${RED}FATAL: tar failed${RST}"
               read -r -p $'\nPress Enter...'; continue;
             }
@@ -754,15 +756,17 @@ mkdir -p $_remote_dir
 cd $_remote_dir
 tar -xzf /tmp/$(basename $_tarball)
 echo '[remote] Extracted at:' \$(pwd)
-if [ -x ~/k6 ]; then K6_BIN=~/k6
+ARCH=\$(uname -m)
+if [ \"\$ARCH\" = \"x86_64\" ] && [ -x ./k6-linux-amd64 ]; then K6_BIN=./k6-linux-amd64
+elif [ \"\$ARCH\" = \"aarch64\" ] && [ -x ./k6-linux-arm64 ]; then K6_BIN=./k6-linux-arm64
 elif command -v k6 >/dev/null; then K6_BIN=\$(command -v k6)
-elif [ -x /home/qa/growin_performancetest/k6 ]; then K6_BIN=/home/qa/growin_performancetest/k6
-else echo 'FATAL: k6 not found on remote'; exit 127
+else echo 'FATAL: k6 not found for arch:' \$ARCH; exit 127
 fi
-echo '[remote] Using k6:' \$K6_BIN
+chmod +x \$K6_BIN 2>/dev/null || true
+echo '[remote] Arch:' \$ARCH ' | Using k6:' \$K6_BIN
 cd Script/$suite_name
 mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
-\$K6_BIN run --compatibility-mode=experimental_enhanced $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform --out dashboard=export=$report_file
+\$K6_BIN run $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform --out dashboard=export=$report_file
 RC=\$?
 cd /tmp && rm -rf $_remote_dir $(basename $_tarball)
 exit \$RC"
