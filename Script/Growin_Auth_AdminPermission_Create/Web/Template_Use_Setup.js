@@ -50,7 +50,7 @@ export function BP002(data) {
     const userTokenData = data.tokens[userKey];
     
     if (!userTokenData || !userTokenData.token || !userTokenData.pin_token) {
-        console.error(`❌ VU${vuId} (${userTokenData?.email}) - No valid tokens from setup, skipping iteration`);
+        console.error(`❌ VU${vuId} (${(userTokenData && userTokenData.email)}) - No valid tokens from setup, skipping iteration`);
         return;
     }
     
@@ -97,7 +97,7 @@ export function BP002(data) {
                 const responseData = response.json();
                 // console.log(`Response : Response: ${response.body}`)
                 
-                if (responseData?.data?.data && Array.isArray(responseData.data.data) && responseData.data.data.length > 0) {
+                if ((responseData && responseData.data ? responseData.data.data : null) && Array.isArray(responseData.data.data) && responseData.data.data.length > 0) {
                     const allDevices = responseData.data.data;
                     const allIds = allDevices.map(item => item.id);
                     

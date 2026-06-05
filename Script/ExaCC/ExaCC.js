@@ -356,7 +356,7 @@ export function setup() {
         const usersForThisBP = userDistribution[bp];
 
         // ✅ Ambil config per-BP
-        const bpConfig = BP_CONFIG[platform]?.[bp] ?? {};
+        const bpConfig = BP_CONFIG[platform]?.[bp] || {};
         const skipSetupLogin = bpConfig.skipSetupLogin === true;
 
         // ✅ Pakai BP_NUM_STARTS yang sudah dihitung di atas (kumulatif untuk multi-BP,
@@ -524,7 +524,7 @@ export function setup() {
     
     console.log(`\n📋 Per-BP Summary:`);
     selectedBPs.forEach(bp => {
-        const bpConfig = BP_CONFIG[platform]?.[bp] ?? {};
+        const bpConfig = BP_CONFIG[platform]?.[bp] || {};
         const skipSetupLogin = bpConfig.skipSetupLogin === true;
         const bpTokens = Object.values(tokens).filter(t => t.bp === bp);
 

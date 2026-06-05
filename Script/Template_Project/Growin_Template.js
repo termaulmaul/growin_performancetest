@@ -192,7 +192,7 @@ function resolveNumStarts(bps, platform, isMultiBP) {
     let   autoNextStart    = hasCLI ? CLI_NUMSTART : 1; // cursor for auto-continue
 
     bps.forEach(bp => {
-        const cfgNumStart    = BP_CONFIG[platform]?.[bp]?.numStart ?? null;
+        const cfgNumStart    = BP_CONFIG[platform]?.[bp]?.numStart || null;
         const hasCfg         = cfgNumStart !== null;
 
         let effectiveStart;
@@ -419,7 +419,7 @@ export function setup() {
     selectedBPs.forEach(bp => {
         const count          = userDistribution[bp] || 0;
         const startUser      = numStarts[bp];
-        const bpCfg          = BP_CONFIG[platform]?.[bp] ?? {};
+        const bpCfg          = BP_CONFIG[platform]?.[bp] || {};
         const skipLogin      = bpCfg.skipSetupLogin === true;
 
         console.log(`\n📦 [${bp}] ${count} users | VU ${globalVuOffset}–${globalVuOffset + count - 1} | numStart: ${startUser}`);
@@ -506,11 +506,11 @@ export function setup() {
                     bp,
                     token,
                     pin_token,
-                    user_id:      profile?.user_id      ?? null,
-                    client_id:    profile?.client_id    ?? null,
-                    SID:          profile?.SID          ?? null,
-                    ksei_acc_no:  profile?.ksei_acc_no  ?? null,
-                    account_name: profile?.account_name ?? null,
+                    user_id:      (profile && profile.user_id)      || null,
+                    client_id:    (profile && profile.client_id)    || null,
+                    SID:          (profile && profile.SID)          || null,
+                    ksei_acc_no:  (profile && profile.ksei_acc_no)  || null,
+                    account_name: (profile && profile.account_name) || null,
                 };
             }
 
@@ -541,7 +541,7 @@ export function setup() {
 
     console.log('\n📋 Per-BP Summary:');
     selectedBPs.forEach(bp => {
-        const bpCfg   = BP_CONFIG[platform]?.[bp] ?? {};
+        const bpCfg   = BP_CONFIG[platform]?.[bp] || {};
         const skipped = bpCfg.skipSetupLogin === true;
         const bpToks  = Object.values(tokens).filter(t => t.bp === bp);
 
@@ -598,7 +598,7 @@ export function handleSummary(data) {
             LoadTest:   `../../Report/[Template]/${platform}/LoadTest`,
         };
 
-        const dir      = reportDirs[runby] ?? reportDirs.Manual;
+        const dir      = reportDirs[runby] || reportDirs.Manual;
         const htmlPath = `${dir}/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
 
         console.log(`📄 Generating report: ${htmlPath}`);

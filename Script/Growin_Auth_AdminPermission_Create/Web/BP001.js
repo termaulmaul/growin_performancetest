@@ -476,7 +476,7 @@ export function BP001(data) {
             if (response.status === 200) {
                 try {
                     const body = JSON.parse(response.body);
-                    token = body?.data?.token ?? null; // assign ke outer variable
+                    token = (body && body.data ? body.data.token : null); // assign ke outer variable
                 } catch (e) {
                     console.error(`❌ VU${vuId} - Gagal parse login response: ${e}`);
                 }
@@ -545,7 +545,7 @@ export function BP001(data) {
             if (response.status === 200) {
                 try {
                     const body = JSON.parse(response.body);
-                    pinToken = body?.data?.pin_token ?? null; // assign ke outer variable
+                    pinToken = (body && body.data ? body.data.pin_token : null); // assign ke outer variable
                 } catch (e) {
                     console.error(`❌ VU${vuId} - Gagal parse pin login response: ${e}`);
                 }

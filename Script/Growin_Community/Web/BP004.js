@@ -198,7 +198,7 @@ export function BP004(data) {
         if (response.status === 200) {
             try {
                 const socialinvestingStockPick = response.json();
-                if (socialinvestingStockPick?.data?.length > 0) {
+                if ((socialinvestingStockPick && socialinvestingStockPick.data ? socialinvestingStockPick.data.length : null) > 0) {
                     const allIds = socialinvestingStockPick.data.map(item => item.id);
                     // console.log(`${email} ✅ All IDs (${allIds.length}):`, allIds);
 
