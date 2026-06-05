@@ -58,9 +58,8 @@ pt_auth_verify() {
 pt_require_auth() {
     # Fallback to legacy if DB not exists
     if [[ ! -f "$HOME/.pt/var/pt.db" ]]; then
-        # We actually WANT to init DB and bootstrap if it doesn't exist, not fall back to legacy immediately.
-        # But wait, pt-bootstrap-check does exactly that (runs init_db).
-        pass=1
+        # DB not initialized yet — bootstrap-check below will handle init
+        : # no-op, continue to bootstrap check
     fi
 
     # Try to verify existing session if PT_USER is set from env

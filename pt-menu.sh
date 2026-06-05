@@ -664,7 +664,7 @@ prompt_duration() {
     printf "  %s [%s] (e.g. 30s, 5m, 1h, 1h30m): " "$label" "$default" >&2
     read -r val
     val="${val:-$default}"
-    if [[ ! "$val" =~ ^[0-9]+(s|m|h)(\s*[0-9]+(s|m))?$ ]]; then
+    if [[ ! "$val" =~ ^[0-9]+(h|m|s)([0-9]+(m|s))?$ ]]; then
       echo -e "  ${RED}✘ invalid k6 duration format${RST}" >&2
       continue
     fi
@@ -925,6 +925,8 @@ ssh_menu() {
 
         elif [[ "$file_sel" == *.js ]]; then
           echo -e "\n${CYN}${BLD}  ── K6 Run Configuration ──${RST}"
+          # Declare all run vars local here to prevent scope leak between iterations
+          local vus="" dur="" env_name="" runby="" platform="" scenario=""
 
           local plat_choices=("Web" "iOS" "Android" "← Back")
           local platform; platform=$(pick_fzf "Platform>" "${plat_choices[@]}")
@@ -1043,7 +1045,7 @@ ls -d Script/'$suite_name' 2>&1 | head -1 || { echo "FATAL: Script/'$suite_name'
           fi
           recent_runs_add "Onprem · $suite_name · $platform · ${scenario:-AllBP} · ${vus}VU · $dur"
 
-          local _stamp=$$_$(date +%s)
+          local _stamp; _stamp="$(uuidgen 2>/dev/null || printf '%s_%s' "$$" "$(date +%s%N)")"
           local _tarball="/tmp/pt-upload-${_stamp}.tar.gz"
           local _remote_dir="/tmp/pt-run-${_stamp}"
 
@@ -1129,7 +1131,7 @@ exit \$RC"
           fi
         else
           # Suite run — UPLOAD script + Helper, then execute via gcloud
-          local _stamp=$$_$(date +%s)
+          local _stamp; _stamp="$(uuidgen 2>/dev/null || printf '%s_%s' "$$" "$(date +%s%N)")"
           local _tarball="/tmp/pt-upload-${_stamp}.tar.gz"
           local _remote_dir="/tmp/pt-run-${_stamp}"
 
