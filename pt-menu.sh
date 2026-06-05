@@ -1138,7 +1138,9 @@ echo '[remote] Arch:' \$ARCH ' | Using k6:' \$K6_BIN \"(\$(\$K6_BIN version | he
 cd Script/$suite_name
 mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
 echo '[remote] Running k6...'
-\$K6_BIN run --compatibility-mode=extended $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=$_test_pwd -e TEST_PIN=$_test_pin --out dashboard=export=$report_file
+set -o pipefail
+echo '[remote] Running k6...'
+\$K6_BIN run --compatibility-mode=extended $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=$_test_pwd -e TEST_PIN=$_test_pin --out dashboard=export=$report_file 2>&1 | sed -E 's/^time="[^"]*" level=error msg="(.*)" source=console$/  \x1b[31m✘  \1\x1b[0m/;s/^time="[^"]*" level=warning msg="(.*)" source=console$/  \x1b[33m⚠  \1\x1b[0m/;s/^time="[^"]*" level=info msg="(.*)" source=console$/  \1/'
 RC=\$?
 echo '[remote] k6 exit code:' \$RC
 cd /tmp && rm -rf $_remote_dir $(basename $_tarball)
@@ -1224,7 +1226,8 @@ chmod +x \$K6_BIN 2>/dev/null || true
 echo '[remote] Arch:' \$ARCH '| k6:' \$K6_BIN
 cd Script/$suite_name
 mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
-\$K6_BIN run --compatibility-mode=extended $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=$_test_pwd -e TEST_PIN=$_test_pin --out dashboard=export=$report_file
+set -o pipefail
+\$K6_BIN run --compatibility-mode=extended $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=$_test_pwd -e TEST_PIN=$_test_pin --out dashboard=export=$report_file 2>&1 | sed -E 's/^time="[^"]*" level=error msg="(.*)" source=console$/  \x1b[31m✘  \1\x1b[0m/;s/^time="[^"]*" level=warning msg="(.*)" source=console$/  \x1b[33m⚠  \1\x1b[0m/;s/^time="[^"]*" level=info msg="(.*)" source=console$/  \1/'
 RC=\$?
 cd /tmp && rm -rf $_remote_dir $(basename $_tarball)
 exit \$RC"
@@ -2004,6 +2007,7 @@ tools_menu() {
       "[5] Audit Log Tail (pt-audit — last 20 entries)"
       "[6] Lock Status (pt-lock-status — env locks)"
       "[7] Show Recent Runs"
+      "[S] Skip Auth (15 min)"
       "[?] Help / Keymap"
       "[0] Back"
     )
@@ -2047,6 +2051,18 @@ tools_menu() {
         else
           echo "$recent" | while IFS= read -r ln; do echo -e "  ${YLW}$ln${RST}"; done
         fi
+        read -r -p $'\nPress Enter...'
+        ;;
+      "[S] Skip Auth (15 min)")
+        if [[ "$PT_ROLE" != "god" ]]; then
+          echo -e "  ${RED}God-only command.${RST}"; read -r -p $'\nPress Enter...'; continue
+        fi
+        local _expiry; _expiry=$(( $(date +%s) + 900 ))
+        mkdir -p "$HOME/.pt/var"
+        echo "${PT_USER}:${PT_ROLE}:${_expiry}" > "$HOME/.pt/var/skip_auth.flag"
+        local _until; _until=$(date -d "@${_expiry}" '+%H:%M:%S' 2>/dev/null || date -r "${_expiry}" '+%H:%M:%S' 2>/dev/null || echo "15min")
+        echo -e "  ${GRN}✓ Auth skip enabled until ${_until} (15 min).${RST}"
+        echo -e "  ${DIM}pt-menu.sh will not ask for password until then.${RST}"
         read -r -p $'\nPress Enter...'
         ;;
       "[?] Help / Keymap")

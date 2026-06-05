@@ -56,6 +56,24 @@ pt_auth_verify() {
 }
 
 pt_require_auth() {
+    # ── 15-min god skip (set via pt-menu.sh Tools → Skip Auth) ──────────────
+    local _skip_flag="$HOME/.pt/var/skip_auth.flag"
+    if [[ -f "$_skip_flag" ]]; then
+        local _line; _line=$(cat "$_skip_flag" 2>/dev/null)
+        local _s_user="${_line%%:*}"; local _rest="${_line#*:}"
+        local _s_role="${_rest%%:*}"; local _s_expiry="${_rest#*:}"
+        local _now; _now=$(date +%s)
+        if [[ -n "$_s_expiry" && "$_now" -lt "$_s_expiry" ]]; then
+            export PT_USER="$_s_user"
+            export PT_ROLE="$_s_role"
+            local _rem=$(( _s_expiry - _now ))
+            echo -e "\033[2m[auth] Skip mode active — ${_rem}s remaining\033[0m" >&2
+            return 0
+        else
+            rm -f "$_skip_flag"
+        fi
+    fi
+
     # Fallback to legacy if DB not exists
     if [[ ! -f "$HOME/.pt/var/pt.db" ]]; then
         # DB not initialized yet — bootstrap-check below will handle init
