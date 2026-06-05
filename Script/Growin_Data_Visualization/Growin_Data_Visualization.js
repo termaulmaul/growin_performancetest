@@ -3,7 +3,7 @@
 // ../../../k6 run Growin_Data_Visualization_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 -e PLATFORM=Web  --out dashboard=export=../../../Report/Growin_Data_Visualization/Web/LoadTest/Manual_LoadTest_0519_1459.html
 
 // Run Single BP Web
-// ../../k6 run Growin_Data_Visualization.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Data_Visualization/Web/BP001/Manual/Manual_DryRun_0602_1033_BP001.html
+// ../../k6 run Growin_Data_Visualization.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Data_Visualization/Web/BP001/Manual/Manual_DryRun_0603_1035_BP001.html
 
 // Run Single BP iOS
 // ../../k6 run Growin_Data_Visualization.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Data_Visualization/iOS/BP001/Manual/Manual_DryRun_0428_1403_BP001.html
@@ -27,6 +27,7 @@ import { BP001 as BP001_Web } from "./Web/BP001.js";
 // import { BP002 as BP002_Android } from "./Android/BP002.js";
 
 import http from "k6/http";
+http.setResponseCallback(http.expectedStatuses(200, 201, 400, 401, 403, 404, 500));
 import { sleep } from "k6";
 import { Rate } from "k6/metrics";
 
@@ -77,7 +78,7 @@ const BP_MAP = Object.fromEntries(
 
 // ─── DISPATCHER ───────────────────────────────────────────────────────────────
 function dispatch(bpName, data) {
-    // const fn = (BP_MAP[platform] && BP_MAP[platform][bpName]);
+    // const fn = BP_MAP[platform]?.[bpName];
     const fn = BP_MAP[platform] && BP_MAP[platform][bpName];
     if (!fn) throw new Error(`❌ ${bpName} not found for platform: ${platform}`);
     return fn(data);
@@ -143,22 +144,12 @@ if (SCENARIO) {
 
 const userDistribution = calculateUserDistribution(TOTAL_USER, selectedBPs);
 
-let __summaryShown = false;
-if (!__summaryShown) {
-  __summaryShown = true;
-  console.log('📊 User Distribution:');
-}
+console.log('📊 User Distribution:');
 Object.keys(userDistribution).forEach(bp => {
     console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
 });
-if (!__summaryShown) {
-  __summaryShown = true;
-  console.log(`   TOTAL: ${TOTAL_USER} users`);
-}
-if (!__summaryShown) {
-  __summaryShown = true;
-  console.log(`   PLATFORM: ${platform}`);
-}
+console.log(`   TOTAL: ${TOTAL_USER} users`);
+console.log(`   PLATFORM: ${platform}`);
 
 const scenarios = {};
 selectedBPs.forEach(bp => {
@@ -306,7 +297,7 @@ export function setup() {
         const usersForThisBP = userDistribution[bp];
 
         // ✅ Ambil config per-BP
-        // const bpConfig = (BP_CONFIG[platform] && BP_CONFIG[platform][bp]) || {};
+        // const bpConfig = BP_CONFIG[platform]?.[bp] ?? {};
         const bpConfig = (BP_CONFIG[platform] && BP_CONFIG[platform][bp]) || {};
         const skipSetupLogin = bpConfig.skipSetupLogin === true;
 
@@ -324,10 +315,7 @@ export function setup() {
             : 0;                             // ✅ single BP: offset 0, NUMSTART env langsung dipakai
 
         console.log(`\n📦 Processing ${bp} on ${platform} - ${usersForThisBP} users (VU ${globalVuOffset} to ${globalVuOffset + usersForThisBP - 1})...`);
-        if (!__summaryShown) {
-          __summaryShown = true;
-          console.log(`   🔢 numStart efektif: ${NUMSTART_env + globalUserOffset} (globalUserOffset: ${globalUserOffset})`);
-        }
+        console.log(`   🔢 numStart efektif: ${NUMSTART_env + globalUserOffset} (globalUserOffset: ${globalUserOffset})`);
 
         if (skipSetupLogin) {
             console.log(`   ⏩ skipSetupLogin=true: setup login di-skip untuk ${bp}, BP akan login sendiri per-iterasi`);
@@ -482,7 +470,7 @@ export function setup() {
     
     console.log(`\n📋 Per-BP Summary:`);
     selectedBPs.forEach(bp => {
-        // const bpConfig = (BP_CONFIG[platform] && BP_CONFIG[platform][bp]) || {};
+        // const bpConfig = BP_CONFIG[platform]?.[bp] ?? {};
         const bpConfig = (BP_CONFIG[platform] && BP_CONFIG[platform][bp]) || {};
         const skipSetupLogin = bpConfig.skipSetupLogin === true;
         const bpTokens = Object.values(tokens).filter(t => t.bp === bp);
@@ -559,19 +547,13 @@ export function handleSummary(data) {
         } else if (runby === 'LoadTest') {
             const htmlPath = `../../Report/Growin_Data_Visualization/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
-
+            
             return {
                 [htmlPath]: htmlReport(data),
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         }
-
-        // BUG FIX 3: Default fallback for unknown RUNBY values
-        console.warn(`⚠️  Unknown RUNBY="${runby}" — no HTML report generated, outputting to stdout only`);
-        return {
-            'stdout': textSummary(data, { indent: ' ', enableColors: true }),
-        };
-
+        
     } catch (error) {
         console.error(`❌ handleSummary error: ${error.message}`);
         console.error(`Stack: ${error.stack}`);

@@ -4,40 +4,24 @@
 // ============================================================
 
 /**
- * Returns the base URL.
- *
- * Resolution priority:
- *   1. BASE_URL env var (set by pt-menu.sh from configs/pt.env per target)
- *   2. ENV=ONPREM | ONCLOUD | SANDBOX  (target aliases)
- *   3. ENV=DEV | QA | DRC | INT        (legacy environment mapping)
- *   4. Fallback to placeholder
- *
+ * Returns the base URL based on the ENV environment variable.
  * Usage: import { getBaseUrl } from '../../Helper/config.js';
  */
 export function getBaseUrl() {
-    // 1. Highest priority: BASE_URL passed via -e BASE_URL=... (from pt-menu.sh)
-    if (__ENV.BASE_URL && __ENV.BASE_URL.length > 0) {
-        return __ENV.BASE_URL;
-    }
-
     const env = `${__ENV.ENV}`;
     const urlMap = {
-        // Target aliases (pt-menu.sh selection)
-        ONPREM:  __ENV.ONPREM_BASE_URL  || 'https://int-api.onprem.growin.com',
-        ONCLOUD: __ENV.ONCLOUD_BASE_URL || 'https://int-api-oncloud.growin.com',
-        SANDBOX: 'http://localhost:18080',
-        // Legacy environment mapping (backward compat)
-        DEV:  'https://api-dev.growin.id',
-        QA:   'https://api-qa.growin.id',
-        DRC:  'https://drc-api.growin.id',
-        INT:  'https://internal-api-pt.growin.id',
+        DEV: 'https://api-dev.growin.id',
+        QA:  'https://api-qa.growin.id',
+        DRC: 'https://drc-api.growin.id',
+        INT: 'https://internal-api-pt.growin.id',
+        // INT: 'https://api-pt.growin.id',
     };
 
     if (!urlMap[env]) {
-        console.warn(`⚠️  ENV="${env}" not recognized and no BASE_URL provided. Falling back to INT.`);
+        console.warn(`⚠️  ENV="${env}" is not recognized. Falling back to INT base URL.`);
     }
 
-    return urlMap[env] || urlMap.INT;
+    return urlMap[env] || 'https://internal-api-pt.growin.id';
 }
 
 /**
@@ -58,19 +42,14 @@ export function getUserCredentials(userNum, bpOffset = 0) {
     } else if (env === 'DRC') {
         const formatted = String(startNum + actualNum - 1); // padStart(0) = no padding
         email = `MOSTNG${formatted}@guysmail.com`;
-    } else if (env === 'INT' || env === 'SANDBOX') {
+    } else if (env === 'INT') {
         const formatted = String(startNum + actualNum - 1).padStart(2, '0');
         email = `TESTMON${formatted}@guysmail.com`;
     } else {
         console.error(`❌ getUserCredentials: ENV="${env}" is not handled. Email will be empty.`);
     }
 
-    // Password from env var — never hardcode credentials in source
-    const password = __ENV.TEST_PASSWORD || '';
-    if (!password) {
-        console.error(`❌ getUserCredentials: TEST_PASSWORD env var not set. Pass via -e TEST_PASSWORD=... or set in pt.env`);
-    }
-    return { email: email, password: password };
+    return { email: email, password: 'M@nsek.123' };
 }
 
 /**

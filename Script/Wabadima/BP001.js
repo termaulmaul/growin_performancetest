@@ -26,14 +26,10 @@ import { SharedArray } from 'k6/data';
 export const options = {
   scenarios: {
     contacts: {
-      executor: 'constant-vus',
-      vus: parseInt(__ENV.USER) || 1,
-      duration: `${__ENV.DURATION || '30s'}`,
-      gracefulStop: '30s',
-      // executor: 'per-vu-iterations',
-      // vus: 3,
-      // iterations: 1,
-      // maxDuration: '1h',
+      executor: 'per-vu-iterations',
+      vus: 3,
+      iterations: 1,
+      maxDuration: '1h',
     },
   },
   noConnectionReuse: false,

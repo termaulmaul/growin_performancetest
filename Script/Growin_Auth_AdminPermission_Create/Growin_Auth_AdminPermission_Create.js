@@ -31,6 +31,7 @@ import { BP001 as BP001_Android } from "./Android/BP001.js";
 // import { BP002 as BP002_Android } from "./Android/BP002.js";
 
 import http from "k6/http";
+http.setResponseCallback(http.expectedStatuses(200, 201, 400, 401, 403, 404, 500));
 import { sleep } from "k6";
 import { Rate } from "k6/metrics";
 
@@ -83,7 +84,7 @@ const BP_MAP = Object.fromEntries(
 
 // ─── DISPATCHER ───────────────────────────────────────────────────────────────
 function dispatch(bpName, data) {
-    const fn = (BP_MAP[platform] && BP_MAP[platform][bpName]);
+    const fn = BP_MAP[platform]?.[bpName];
     if (!fn) throw new Error(`❌ ${bpName} not found for platform: ${platform}`);
     return fn(data);
 }
@@ -175,7 +176,15 @@ const BP_NUM_STARTS = isMultiBP
     ? calculateNumStarts(selectedBPs, userDistribution, NUMSTART_env)
     : Object.fromEntries(selectedBPs.map(bp => [bp, NUMSTART_env]));
 
-// Distribution logged once inside setup() — module scope would repeat per VU
+console.log('📊 User Distribution:');
+Object.keys(userDistribution).forEach(bp => {
+    const start = BP_NUM_STARTS[bp];
+    const count = userDistribution[bp];
+    console.log(`   ${bp}: ${count} users (${BP_USER_PERCENTAGE[bp]}%) → user #${start} to #${start + count - 1}`);
+});
+console.log(`   TOTAL: ${TOTAL_USER} users`);
+console.log(`   PLATFORM: ${platform}`);
+console.log(`   MODE: ${isMultiBP ? 'Multi-BP (LoadTest) — numStart kumulatif per BP' : 'Single BP (Manual) — NUMSTART dari env'}`);
 
 const scenarios = {};
 selectedBPs.forEach(bp => {
@@ -274,7 +283,6 @@ function loginWithRetry(base_url, credentials, userKey, vuId) {
             return {
                 success: true,
                 token: loginRes.json().data.token,
-                data: loginRes.json().data,
                 attempts: attempt
             };
         }
@@ -294,16 +302,7 @@ export function setup() {
     const base_url = getBaseUrl();
     const tokens = {};
     const vuMapping = {};
-
-    // Log distribution once — runs only in setup() not per-VU
-    console.log('📊 User Distribution:');
-    Object.keys(userDistribution).forEach(bp => {
-        const start = BP_NUM_STARTS[bp];
-        const count = userDistribution[bp];
-        console.log(`   ${bp}: ${count} users (${BP_USER_PERCENTAGE[bp]}%) → user #${start} to #${start + count - 1}`);
-    });
-    console.log(`   TOTAL: ${TOTAL_USER} users | PLATFORM: ${platform} | MODE: ${isMultiBP ? 'Multi-BP' : 'Single-BP'}`);
-
+    
     console.log(`🔐 Starting login for ${TOTAL_USER} users distributed across ${selectedBPs.length} BPs...`);
     console.log(`📦 Batch processing: ${BATCH_SIZE} users per batch, ${BATCH_DELAY}s delay`);
     console.log(`🔁 Retry enabled: Max ${MAX_RETRY_ATTEMPTS} attempts per login`);
@@ -327,7 +326,7 @@ export function setup() {
         const usersForThisBP = userDistribution[bp];
 
         // ✅ Ambil config per-BP
-        const bpConfig = (BP_CONFIG[platform] && BP_CONFIG[platform][bp]) || {};
+        const bpConfig = BP_CONFIG[platform]?.[bp] ?? {};
         const skipSetupLogin = bpConfig.skipSetupLogin === true;
 
         // ✅ Pakai BP_NUM_STARTS yang sudah dihitung di atas (kumulatif untuk multi-BP,
@@ -409,16 +408,16 @@ export function setup() {
  
                     if (profileResponses[0].status == 200) {
                         totalUserIdSuccess++;
-                        const tradingData = profileResponses[0].json().data || {};
+                        const tradingData = profileResponses[0].json().data;
                         
                         if (!tokens[userKey]) tokens[userKey] = {};
                         
                         // ✅ FIX: assign dulu, baru log
-                        tokens[userKey].user_id      = tradingData.user_id || null;
-                        tokens[userKey].client_id    = tradingData.client_id || null;
-                        tokens[userKey].SID          = tradingData.sid || null;
-                        tokens[userKey].ksei_acc_no  = tradingData.ksei_acc_no || null;
-                        tokens[userKey].account_name = tradingData.account_name || null;
+                        tokens[userKey].user_id      = tradingData.user_id;
+                        tokens[userKey].client_id    = tradingData.client_id;
+                        tokens[userKey].SID          = tradingData.sid;
+                        tokens[userKey].ksei_acc_no  = tradingData.ksei_acc_no;
+                        tokens[userKey].account_name = tradingData.account_name;
 
                         // const tradingData = profileResponses[0].json().data;
                         // console.log(`🔍 tradingData RAW: ${JSON.stringify(tradingData)}`);
@@ -443,7 +442,7 @@ export function setup() {
  
                     if (pinRes.status === 200) {
                         totalPinSuccess++;
-                        tokens[userKey].pin_token = (pinRes.json().data && pinRes.json().data.pin_token) || null;
+                        tokens[userKey].pin_token = pinRes.json().data.pin_token;
                     } else {
                         totalPinFailed++;
                         if (i === batchStart || totalPinFailed <= 5) {
@@ -495,7 +494,7 @@ export function setup() {
     
     console.log(`\n📋 Per-BP Summary:`);
     selectedBPs.forEach(bp => {
-        const bpConfig = (BP_CONFIG[platform] && BP_CONFIG[platform][bp]) || {};
+        const bpConfig = BP_CONFIG[platform]?.[bp] ?? {};
         const skipSetupLogin = bpConfig.skipSetupLogin === true;
         const bpTokens = Object.values(tokens).filter(t => t.bp === bp);
 
@@ -552,19 +551,9 @@ export function handleSummary(data) {
         }
         
         console.log(`[${dateStr}_${timeStr}] Starting report generation for ${bp_name} on ${platform}...`);
-
-        // SANDBOX_REPORT_DIR is injected by pt-menu.sh for Sandbox runs.
-        // In sandbox, ../../Report resolves via symlink to /workspace/Report (read-only).
-        // Use absolute path when running in sandbox.
-        const sandboxDir = __ENV.SANDBOX_REPORT_DIR || '';
-        const reportBase = sandboxDir
-            ? `${sandboxDir}`
-            : `../../Report/Growin_Auth_AdminPermission_Create/${platform}`;
-
+        
         if (runby === 'Manual') {
-            const htmlPath = sandboxDir
-                ? `${sandboxDir}/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`
-                : `../../Report/Growin_Auth_AdminPermission_Create/${platform}/${bp_name}/Manual/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../Report/Growin_Auth_AdminPermission_Create/${platform}/${bp_name}/Manual/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -572,9 +561,7 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if (runby === 'Regression') {
-            const htmlPath = sandboxDir
-                ? `${sandboxDir}/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`
-                : `../../Report/Growin_Auth_AdminPermission_Create/${platform}/${bp_name}/Regression/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../Report/Growin_Auth_AdminPermission_Create/${platform}/${bp_name}/Regression/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -582,23 +569,15 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if (runby === 'LoadTest') {
-            const htmlPath = sandboxDir
-                ? `${sandboxDir}/${runby}_${dateStr}_${timeStr}.html`
-                : `../../Report/Growin_Auth_AdminPermission_Create/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
+            const htmlPath = `../../Report/Growin_Auth_AdminPermission_Create/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
-
+            
             return {
                 [htmlPath]: htmlReport(data),
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         }
-
-        // BUG FIX 3: Default fallback for unknown RUNBY values
-        console.warn(`⚠️  Unknown RUNBY="${runby}" — no HTML report generated, outputting to stdout only`);
-        return {
-            'stdout': textSummary(data, { indent: ' ', enableColors: true }),
-        };
-
+        
     } catch (error) {
         console.error(`❌ handleSummary error: ${error.message}`);
         console.error(`Stack: ${error.stack}`);

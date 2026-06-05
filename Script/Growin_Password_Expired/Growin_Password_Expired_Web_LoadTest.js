@@ -476,6 +476,7 @@ import { BP002 as BP002_Web } from "./iOS/BP002.js";
 // import { BP009 as BP009_Web } from "./iOS/BP009.js";
 
 import http from "k6/http";
+http.setResponseCallback(http.expectedStatuses(200, 201, 400, 401, 403, 404, 500));
 import { sleep } from "k6";
 import { Rate } from "k6/metrics";
 
@@ -525,7 +526,7 @@ function calculateUserDistribution(totalUsers, selectedBPs) {
     let totalPercentage = 0;
     
     selectedBPs.forEach(bp => {
-        totalPercentage += (BP_CONFIG[bp] && BP_CONFIG[bp].percentage) || 0;
+        totalPercentage += BP_CONFIG[bp]?.percentage || 0;
     });
     
     if (totalPercentage === 0) {
@@ -561,25 +562,12 @@ if (SCENARIO) {
 
 const userDistribution = calculateUserDistribution(TOTAL_USER, selectedBPs);
 
-let __summaryShown = false;
-if (!__summaryShown) {
-  __summaryShown = true;
-  console.log('📊 User Distribution:');
-}
+console.log('📊 User Distribution:');
 Object.keys(userDistribution).forEach(bp => {
-    if (!__summaryShown) {
-      __summaryShown = true;
-      console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_CONFIG[bp].percentage}%)`);
-    }
+    console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_CONFIG[bp].percentage}%)`);
 });
-if (!__summaryShown) {
-  __summaryShown = true;
-  console.log(`   TOTAL: ${TOTAL_USER} users`);
-}
-if (!__summaryShown) {
-  __summaryShown = true;
-  console.log(`   PLATFORM: ${platform}`);
-}
+console.log(`   TOTAL: ${TOTAL_USER} users`);
+console.log(`   PLATFORM: ${platform}`);
 
 const scenarios = {};
 
@@ -673,21 +661,6 @@ function batchLoginWithRetry(base_url, batchCredentialsList) {
                 } else {
                     console.error(`   ❌ User ${item.userKey} (${item.credentials.email}, VU${item.vuId}) LOGIN FAILED after ${MAX_RETRY_ATTEMPTS} attempts - Status: ${res.status}`);
                 }
-
-                // BUG FIX 1: Rate-limit detection — body says "wait X minutes", retry is futile
-                const resBody = typeof res.body === 'string' ? res.body : '';
-                if (resBody.includes('wait') && resBody.includes('minutes')) {
-                    console.error(`   🔴 RATE LIMIT — User ${item.userKey} (${item.credentials.email}, VU${item.vuId}) permanently failed, skipping retry`);
-                    results[item.userKey] = {
-                        success: false,
-                        token: null,
-                        attempts: attempt,
-                        credentials: item.credentials,
-                        vuId: item.vuId,
-                    };
-                    return; // skip stillFailing
-                }
-
                 stillFailing.push(item);
             }
         });
@@ -1006,12 +979,6 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         }
-
-        // BUG FIX 3: Default fallback for unknown RUNBY values
-        console.warn(`⚠️  Unknown RUNBY="${runby}" — no HTML report generated, outputting to stdout only`);
-        return {
-            'stdout': textSummary(data, { indent: ' ', enableColors: true }),
-        };
 
     } catch (error) {
         console.error(`❌ handleSummary error: ${error.message}`);

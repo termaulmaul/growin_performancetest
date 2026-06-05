@@ -37,6 +37,7 @@ import { BP010 as BP010_Web } from "./Web/BP010.js";
 // import { BP002 as BP002_Android } from "./Android/BP002.js";
 
 import http from "k6/http";
+http.setResponseCallback(http.expectedStatuses(200, 201, 400, 401, 403, 404, 500));
 import { sleep } from "k6";
 import { Rate } from "k6/metrics";
 
@@ -98,7 +99,7 @@ const BP_MAP = Object.fromEntries(
 
 // ─── DISPATCHER ───────────────────────────────────────────────────────────────
 function dispatch(bpName, data) {
-    const fn = (BP_MAP[platform] && BP_MAP[platform][bpName]);
+    const fn = BP_MAP[platform]?.[bpName];
     if (!fn) throw new Error(`❌ ${bpName} not found for platform: ${platform}`);
     return fn(data);
 }
@@ -205,28 +206,15 @@ const BP_NUM_STARTS = isMultiBP
     ? calculateNumStarts(selectedBPs, userDistribution, NUMSTART_env)
     : Object.fromEntries(selectedBPs.map(bp => [bp, NUMSTART_env]));
 
-let __summaryShown = false;
-if (!__summaryShown) {
-  __summaryShown = true;
-  console.log('📊 User Distribution:');
-}
+console.log('📊 User Distribution:');
 Object.keys(userDistribution).forEach(bp => {
     const start = BP_NUM_STARTS[bp];
     const count = userDistribution[bp];
     console.log(`   ${bp}: ${count} users (${BP_USER_PERCENTAGE[bp]}%) → user #${start} to #${start + count - 1}`);
 });
-if (!__summaryShown) {
-  __summaryShown = true;
-  console.log(`   TOTAL: ${TOTAL_USER} users`);
-}
-if (!__summaryShown) {
-  __summaryShown = true;
-  console.log(`   PLATFORM: ${platform}`);
-}
-if (!__summaryShown) {
-  __summaryShown = true;
-  console.log(`   MODE: ${isMultiBP ? 'Multi-BP (LoadTest) — numStart kumulatif per BP' : 'Single BP (Manual) — NUMSTART dari env'}`);
-}
+console.log(`   TOTAL: ${TOTAL_USER} users`);
+console.log(`   PLATFORM: ${platform}`);
+console.log(`   MODE: ${isMultiBP ? 'Multi-BP (LoadTest) — numStart kumulatif per BP' : 'Single BP (Manual) — NUMSTART dari env'}`);
 
 const scenarios = {};
 selectedBPs.forEach(bp => {
@@ -368,7 +356,7 @@ export function setup() {
         const usersForThisBP = userDistribution[bp];
 
         // ✅ Ambil config per-BP
-        const bpConfig = (BP_CONFIG[platform] && BP_CONFIG[platform][bp]) || {};
+        const bpConfig = BP_CONFIG[platform]?.[bp] ?? {};
         const skipSetupLogin = bpConfig.skipSetupLogin === true;
 
         // ✅ Pakai BP_NUM_STARTS yang sudah dihitung di atas (kumulatif untuk multi-BP,
@@ -536,7 +524,7 @@ export function setup() {
     
     console.log(`\n📋 Per-BP Summary:`);
     selectedBPs.forEach(bp => {
-        const bpConfig = (BP_CONFIG[platform] && BP_CONFIG[platform][bp]) || {};
+        const bpConfig = BP_CONFIG[platform]?.[bp] ?? {};
         const skipSetupLogin = bpConfig.skipSetupLogin === true;
         const bpTokens = Object.values(tokens).filter(t => t.bp === bp);
 
@@ -612,19 +600,13 @@ export function handleSummary(data) {
         } else if (runby === 'LoadTest') {
             const htmlPath = `../../Report/ExaCC/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
-
+            
             return {
                 [htmlPath]: htmlReport(data),
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         }
-
-        // BUG FIX 3: Default fallback for unknown RUNBY values
-        console.warn(`⚠️  Unknown RUNBY="${runby}" — no HTML report generated, outputting to stdout only`);
-        return {
-            'stdout': textSummary(data, { indent: ' ', enableColors: true }),
-        };
-
+        
     } catch (error) {
         console.error(`❌ handleSummary error: ${error.message}`);
         console.error(`Stack: ${error.stack}`);

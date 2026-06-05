@@ -101,34 +101,20 @@ if (SCENARIO) {
 
 const userDistribution = calculateUserDistribution(TOTAL_USER, selectedBPs);
 
-let __summaryShown = false;
-if (!__summaryShown) {
-  __summaryShown = true;
-  console.log('📊 User Distribution:');
-}
+console.log('📊 User Distribution:');
 Object.keys(userDistribution).forEach(bp => {
     console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
 });
-if (!__summaryShown) {
-  __summaryShown = true;
-  console.log(`   TOTAL: ${TOTAL_USER} users`);
-}
-if (!__summaryShown) {
-  __summaryShown = true;
-  console.log(`   PLATFORM: ${platform}`);
-}
+console.log(`   TOTAL: ${TOTAL_USER} users`);
+console.log(`   PLATFORM: ${platform}`);
 
 const scenarios = {};
 selectedBPs.forEach(bp => {
     scenarios[bp] = {
-        executor: 'constant-vus',
-        vus: userDistribution[bp] || 1,
-        duration: `${__ENV.DURATION}`,
-
-        // executor: 'per-vu-iterations',
-        // vus: 1,
-        // iterations: 1,
-        // maxDuration: '1h',
+        executor: 'per-vu-iterations',
+        vus: 1,
+        iterations: 1,
+        maxDuration: '1h',
 
         // executor: 'ramping-vus',
         // startVUs: 0,
@@ -493,14 +479,8 @@ export function handleSummary(data) {
                 [htmlPath]: htmlReport(data),
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
-        } else {
-
-            console.warn(`⚠️  Unknown RUNBY: ${runby}, using stdout-only`);
-
-            return { 'stdout': textSummary(data, { indent: ' ', enableColors: true }) };
-
         }
-
+        
     } catch (error) {
         console.error(`❌ handleSummary error: ${error.message}`);
         console.error(`Stack: ${error.stack}`);

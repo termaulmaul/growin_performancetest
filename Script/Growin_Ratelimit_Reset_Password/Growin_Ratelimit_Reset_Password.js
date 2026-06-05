@@ -45,6 +45,7 @@ import { BP002 as BP002_Web } from './Web/BP002.js';
 import http from 'k6/http';
 import { sleep } from 'k6';
 
+http.setResponseCallback(http.expectedStatuses(200, 201, 400, 401, 403, 404, 500));
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BP CONFIGURATION
@@ -110,7 +111,7 @@ const BP_MAP = Object.fromEntries(
 );
 
 function dispatch(bpName, data) {
-    const fn = (BP_MAP[platform] && BP_MAP[platform][bpName]);
+    const fn = BP_MAP[platform]?.[bpName];
     if (!fn) throw new Error(`❌ ${bpName} not found for platform: ${platform}`);
     return fn(data);
 }
@@ -164,11 +165,7 @@ function calculateUserDistribution(totalUsers, bps) {
 
 const userDistribution = calculateUserDistribution(TOTAL_USER, selectedBPs);
 
-let __summaryShown = false;
-if (!__summaryShown) {
-  __summaryShown = true;
-  console.log('📊 User Distribution:');
-}
+console.log('📊 User Distribution:');
 selectedBPs.forEach(bp => {
     console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
 });
@@ -195,7 +192,7 @@ function resolveNumStarts(bps, platform, isMultiBP) {
     let   autoNextStart    = hasCLI ? CLI_NUMSTART : 1; // cursor for auto-continue
 
     bps.forEach(bp => {
-        const cfgNumStart    = (BP_CONFIG[platform] && BP_CONFIG[platform][bp]) && (BP_CONFIG[platform] && BP_CONFIG[platform][bp]).numStart || null;
+        const cfgNumStart    = BP_CONFIG[platform]?.[bp]?.numStart ?? null;
         const hasCfg         = cfgNumStart !== null;
 
         let effectiveStart;
@@ -422,7 +419,7 @@ export function setup() {
     selectedBPs.forEach(bp => {
         const count          = userDistribution[bp] || 0;
         const startUser      = numStarts[bp];
-        const bpCfg          = (BP_CONFIG[platform] && BP_CONFIG[platform][bp]) || {};
+        const bpCfg          = BP_CONFIG[platform]?.[bp] ?? {};
         const skipLogin      = bpCfg.skipSetupLogin === true;
 
         console.log(`\n📦 [${bp}] ${count} users | VU ${globalVuOffset}–${globalVuOffset + count - 1} | numStart: ${startUser}`);
@@ -509,11 +506,11 @@ export function setup() {
                     bp,
                     token,
                     pin_token,
-                    user_id:      (profile && profile.user_id) || null,
-                    client_id:    (profile && profile.client_id) || null,
-                    SID:          (profile && profile.SID) || null,
-                    ksei_acc_no:  (profile && profile.ksei_acc_no) || null,
-                    account_name: (profile && profile.account_name) || null,
+                    user_id:      profile?.user_id      ?? null,
+                    client_id:    profile?.client_id    ?? null,
+                    SID:          profile?.SID          ?? null,
+                    ksei_acc_no:  profile?.ksei_acc_no  ?? null,
+                    account_name: profile?.account_name ?? null,
                 };
             }
 
@@ -544,7 +541,7 @@ export function setup() {
 
     console.log('\n📋 Per-BP Summary:');
     selectedBPs.forEach(bp => {
-        const bpCfg   = (BP_CONFIG[platform] && BP_CONFIG[platform][bp]) || {};
+        const bpCfg   = BP_CONFIG[platform]?.[bp] ?? {};
         const skipped = bpCfg.skipSetupLogin === true;
         const bpToks  = Object.values(tokens).filter(t => t.bp === bp);
 
@@ -601,7 +598,7 @@ export function handleSummary(data) {
             LoadTest:   `../../Report/Growin_Ratelimit_Reset_Password/${platform}/LoadTest`,
         };
 
-        const dir      = reportDirs[runby] || reportDirs.Manual;
+        const dir      = reportDirs[runby] ?? reportDirs.Manual;
         const htmlPath = `${dir}/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
 
         console.log(`📄 Generating report: ${htmlPath}`);

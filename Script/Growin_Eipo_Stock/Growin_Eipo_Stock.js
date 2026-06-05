@@ -9,7 +9,7 @@
 // ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP004 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP004/Manual/Manual_DryRun_1113_1708_BP004_Local.html
 // ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP005 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP005/Manual/Manual_DryRun_1113_1708_BP005_Local.html
 // ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP006 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP006/Manual/Manual_DryRun_1209_1406_BP006_Local.html
-// ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP007 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP007/Manual/Manual_DryRun_0529_1356_BP007_Local.html
+// ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP007 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP007/Manual/Manual_DryRun_0603_1321_BP007_Local.html
 // ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP008 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP007/Manual/Manual_DryRun_0421_1152_BP008_Local.html
 // ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP009 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP009/Manual/Manual_DryRun_1120_1347_BP009_Local.html
 
@@ -27,6 +27,7 @@ import { BP008 as BP008_Web } from "./iOS/BP008.js";
 import { BP009 as BP009_Web } from "./iOS/BP009.js";
 
 import http from "k6/http";
+http.setResponseCallback(http.expectedStatuses(200, 201, 400, 401, 403, 404, 500));
 import { sleep } from "k6";
 import { Rate } from "k6/metrics";
 
@@ -82,7 +83,7 @@ function calculateUserDistribution(totalUsers, selectedBPs) {
     let totalPercentage = 0;
     
     selectedBPs.forEach(bp => {
-        totalPercentage += (BP_CONFIG[bp] && BP_CONFIG[bp].percentage) || 0;
+        totalPercentage += BP_CONFIG[bp]?.percentage || 0;
     });
     
     if (totalPercentage === 0) {
@@ -120,25 +121,12 @@ if (SCENARIO) {
 
 const userDistribution = calculateUserDistribution(TOTAL_USER, selectedBPs);
 
-let __summaryShown = false;
-if (!__summaryShown) {
-  __summaryShown = true;
-  console.log('📊 User Distribution:');
-}
+console.log('📊 User Distribution:');
 Object.keys(userDistribution).forEach(bp => {
-    if (!__summaryShown) {
-      __summaryShown = true;
-      console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_CONFIG[bp].percentage}%)`);
-    }
+    console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_CONFIG[bp].percentage}%)`);
 });
-if (!__summaryShown) {
-  __summaryShown = true;
-  console.log(`   TOTAL: ${TOTAL_USER} users`);
-}
-if (!__summaryShown) {
-  __summaryShown = true;
-  console.log(`   PLATFORM: ${platform}`);
-}
+console.log(`   TOTAL: ${TOTAL_USER} users`);
+console.log(`   PLATFORM: ${platform}`);
 
 const scenarios = {};
 // selectedBPs.forEach(bp => {
@@ -497,14 +485,8 @@ export function handleSummary(data) {
                 [htmlPath]: htmlReport(data),
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
-        } else {
-
-            console.warn(`⚠️  Unknown RUNBY: ${runby}, using stdout-only`);
-
-            return { 'stdout': textSummary(data, { indent: ' ', enableColors: true }) };
-
         }
-
+        
     } catch (error) {
         console.error(`❌ handleSummary error: ${error.message}`);
         console.error(`Stack: ${error.stack}`);

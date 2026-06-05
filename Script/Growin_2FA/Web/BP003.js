@@ -431,7 +431,7 @@ export function BP003(data) {
             if (response.status === 200) {
                 try {
                     const responseData = response.json();
-                    if ((responseData && responseData.data ? responseData.data.data : null) && Array.isArray(responseData.data.data) && responseData.data.data.length > 0) {
+                    if (responseData?.data?.data && Array.isArray(responseData.data.data) && responseData.data.data.length > 0) {
                         const allIds = responseData.data.data.map(item => item.id);
                         deviceIdToDelete = allIds[4];
                     }

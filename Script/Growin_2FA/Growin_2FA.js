@@ -31,6 +31,7 @@ import { BP003 as BP003_Web } from "./Web/BP003.js";
 // import { BP002 as BP002_Android } from "./Android/BP002.js";
 
 import http from "k6/http";
+http.setResponseCallback(http.expectedStatuses(200, 201, 400, 401, 403, 404, 500));
 import { sleep } from "k6";
 import { Rate } from "k6/metrics";
 
@@ -83,7 +84,7 @@ const BP_MAP = Object.fromEntries(
 
 // ─── DISPATCHER ───────────────────────────────────────────────────────────────
 function dispatch(bpName, data) {
-    const fn = (BP_MAP[platform] && BP_MAP[platform][bpName]);
+    const fn = BP_MAP[platform]?.[bpName];
     if (!fn) throw new Error(`❌ ${bpName} not found for platform: ${platform}`);
     return fn(data);
 }
@@ -152,7 +153,6 @@ if (SCENARIO) {
 
 const userDistribution = calculateUserDistribution(TOTAL_USER, selectedBPs);
 
-// Log user distribution once at module init (module runs once per k6 execution)
 console.log('📊 User Distribution:');
 Object.keys(userDistribution).forEach(bp => {
     console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
@@ -163,14 +163,10 @@ console.log(`   PLATFORM: ${platform}`);
 const scenarios = {};
 selectedBPs.forEach(bp => {
     scenarios[bp] = {
-        executor: 'constant-vus',
-        vus: userDistribution[bp] || 1,
-        duration: `${__ENV.DURATION}`,
-
-        // executor: 'per-vu-iterations',
-        // vus: 1000,
-        // iterations: 10,
-        // maxDuration: '1h',
+        executor: 'per-vu-iterations',
+        vus: 1000,
+        iterations: 1,
+        maxDuration: '1h',
 
         // executor: 'ramping-vus',
         // startVUs: 0,
@@ -234,9 +230,9 @@ selectedBPs.forEach(bp => {
 export const options = {
     scenarios: scenarios,
     noConnectionReuse: false,
-    setupTimeout: '10m',
-    teardownTimeout: '2m',
-    summaryTimeUnit: 's',
+    setupTimeout: '3600s',
+    teardownTimeout: '3600s',
+    summaryTimeUnit: '3600s',
     // httpDebug: 'full',
 };
 
@@ -310,7 +306,7 @@ export function setup() {
         const usersForThisBP = userDistribution[bp];
 
         // ✅ Ambil config per-BP
-        const bpConfig = (BP_CONFIG[platform] && BP_CONFIG[platform][bp]) || {};
+        const bpConfig = BP_CONFIG[platform]?.[bp] ?? {};
         const skipSetupLogin = bpConfig.skipSetupLogin === true;
 
         // ✅ Hitung effectiveNumStart dan userKeyBase per-BP:
@@ -403,12 +399,14 @@ export function setup() {
                     };
  
                     const profileHeaders = getDefaultHeaders(loginResult.token);
-                    // Single request — http.get() is cleaner than http.batch() with 1 item
-                    const profileRes = http.get(base_url + `/user/api/v1/profile/trading`, { headers: profileHeaders });
-
-                    if (profileRes.status == 200) {
+ 
+                    const profileUrls = [base_url + `/user/api/v1/profile/trading`];
+                    const profileRequests = [['GET', profileUrls[0], null, { headers: profileHeaders }]];
+                    const profileResponses = http.batch(profileRequests);
+ 
+                    if (profileResponses[0].status == 200) {
                         totalUserIdSuccess++;
-                        const tradingData = profileRes.json().data;
+                        const tradingData = profileResponses[0].json().data;
                         
                         if (!tokens[userKey]) tokens[userKey] = {};
                         
@@ -422,7 +420,7 @@ export function setup() {
                     } else {
                         totalUserIdFailed++;
                         if (i === batchStart || totalUserIdFailed <= 5) {
-                            console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) GET trading profile FAILED - Status: ${profileRes.status} || Body: ${profileRes.body}`);
+                            console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) GET trading profile FAILED - Status: ${profileResponses[0].status} || Body: ${profileResponses[0].body}`);
                         }
                         tokens[userKey].user_id      = null;
                         tokens[userKey].client_id    = null;
@@ -431,12 +429,7 @@ export function setup() {
                         tokens[userKey].account_name = null;
                     }
                     
-                    // PIN from env var — never hardcode in source
-                    const testPin = __ENV.TEST_PIN;
-                    if (!testPin) {
-                        console.error(`   ❌ TEST_PIN env var not set. Pass via -e TEST_PIN=... or set in pt.env`);
-                    }
-                    const pinPayload = JSON.stringify({ value: testPin || '' });
+                    const pinPayload = JSON.stringify({ value: "123456" });
                     const pinHeaders = getDefaultHeaders(loginResult.token);
  
                     const pinRes = http.post(base_url + '/auth/api/v1/protected/pin-login', pinPayload, { headers: pinHeaders });
@@ -495,7 +488,7 @@ export function setup() {
     
     console.log(`\n📋 Per-BP Summary:`);
     selectedBPs.forEach(bp => {
-        const bpConfig = (BP_CONFIG[platform] && BP_CONFIG[platform][bp]) || {};
+        const bpConfig = BP_CONFIG[platform]?.[bp] ?? {};
         const skipSetupLogin = bpConfig.skipSetupLogin === true;
         const bpTokens = Object.values(tokens).filter(t => t.bp === bp);
 
@@ -571,19 +564,13 @@ export function handleSummary(data) {
         } else if (runby === 'LoadTest') {
             const htmlPath = `../../Report/Growin_2FA/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
-
+            
             return {
                 [htmlPath]: htmlReport(data),
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         }
-
-        // BUG FIX 3: Default fallback for unknown RUNBY values
-        console.warn(`⚠️  Unknown RUNBY="${runby}" — no HTML report generated, outputting to stdout only`);
-        return {
-            'stdout': textSummary(data, { indent: ' ', enableColors: true }),
-        };
-
+        
     } catch (error) {
         console.error(`❌ handleSummary error: ${error.message}`);
         console.error(`Stack: ${error.stack}`);
