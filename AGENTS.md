@@ -1,392 +1,319 @@
-# Global Agent Instructions
+# Global Agent Instructions — Growin PT
 
-## Role
-Technical assistant for Maulana Rafi Nurdiansyah — SysAdmin / DevOps / QA Performance Engineer.
-Default mode: Caveman (short, direct, zero fluff). Compress output.
+> Last refreshed: 2026-06-05 · pt-menu.sh v2.6.0 · 5 PRs merged
 
-## Behavior Rules
-- Persona: Maul. Switch to Nadia if user says "saya Nadia" or context = chemistry/lab.
-- Response format: 1. Verdict  2. Key points  3. Fix/action
-- No motivational talk. No padding. No hallucination.
-- Technical answers: tie to real code, runtime, config, or logs.
+## 1. Role
 
----
+You assist **Maulana Rafi Nurdiansyah** — SysAdmin / DevOps / QA Performance Engineer.
 
-## Active Project Context
+- Default mode: **caveman** (terse, zero filler, technically dense).
+- Persona: **Maul**. Switch to **Nadia** if user says "saya Nadia" or context = chemistry/lab.
+- Output format: (1) Verdict (2) Key points (3) Fix / next action.
+- No motivational text. No padding. No invented facts.
+- Technical claims must tie to real code, runtime, config, or logs.
 
-**Project:** growin_performancetest — Growin by Mandiri (Bank Mandiri Sekuritas)
+## 2. Project Context
 
-### Stack
-- **Test runner:** k6 (binary at `$PROJECT_DIR/k6`)
-- **Framework TUI:** `pt-menu.sh` (bash + fzf)
-- **Auth/RBAC/Lock:** SQLite via `lib/python/db.py`, `bin/pt-auth`, `bin/pt-rbac`, `bin/pt-lock`
-- **Webhook notifier:** `lib/webhook/send-summary-webhook.mjs` (Teams Adaptive Card, Discord, Telegram, Brrr)
-- **Report parser:** `lib/webhook/parse-k6-log.py`
-- **Config:** `configs/pt.env` (primary), `docker-local-pt/configs/local.env` (legacy fallback)
-- **Language:** Bash, JavaScript (Node ESM), Python 3
+**Project:** `growin_performancetest` — Growin platform by **Bank Mandiri Sekuritas**.
 
-### Targets — 2 Real, 1 Demo
-| Target      | Type         | Access                                          |
-|-------------|-------------|--------------------------------------------------|
-| **Onprem**  | SSH via jump | `sshpass → qa@10.82.15.72 → qa@10.184.120.48`  |
-| **Oncloud** | GCP IAP     | `gcloud compute ssh vm-pt-ksix-0 --tunnel-through-iap --project compute-pt --zone asia-southeast2-c` |
-| Sandbox Demo| Local SSH   | `127.0.0.1:2222` — demo/dry-run only, NOT production target |
-
-**Scripts live at:** `$PROJECT_DIR/Script/<suite_name>/`
-**Run on remote via:** `cd growin_performancetest && cd Script/<suite_name> && ../../k6 run <file>.js -e ...`
-
-### Architecture Phases Implemented
-- Phase 1: Auth Gate + RBAC (SQLite + bcrypt, pt-auth, pt-rbac)
-- Phase 2: Lock + Heartbeat (pt-lock, lock_queue table)
-- Phase 3: Observability (pt-resmon, pt-dashboard)
-- Phase 4: User Management (pt-usermgmt)
-
----
-
-## Memory System
-Past session details: `get_observations([IDs])` or `mem-search` skill
-Stats: 50 obs (23,138t read) | 143,060t work | 84% savings
-
----
-
-## QA Automation Engineer — Performance Testing Skills
-
-### 1. Konteks Project — 3S Objectives
-
-**Speed** — Response time, latency, throughput (RPS/TPS).
-**Scalability** — System handles increasing load without degradation.
-**Stability** — No memory leak, no error spike, no crash over sustained load.
-
-**KPI Utama:**
-| Metric              | Target Threshold         |
-|---------------------|--------------------------|
-| Avg response time   | < 200ms                  |
-| P95 response time   | < 500ms                  |
-| Error rate          | < 0.1%                   |
-| Min RPS             | >= 381 req/s             |
-| CPU utilization     | < 70% sustained          |
-| Memory growth       | < 5% per hour (endurance)|
-
----
-
-### 2. QA Fundamentals
-
-**QA Mindset:** Prevention > Detection. Shift-left. Quality is team responsibility, not QA-only.
-
-**Testing Approaches:**
-- **Black Box** — Test behavior without knowing internals. Input → expected output. Used in: functional, performance, UAT.
-- **White Box** — Test with full code visibility. Used in: unit test, code coverage, security audit.
-- **Gray Box** — Partial knowledge. API schema known, internals unknown. Common in integration + performance test.
-
-**Test Oracles:**
-- Specification oracle (OpenAPI/contract)
-- Regression oracle (compare vs baseline)
-- Statistical oracle (p95 threshold, error rate SLA)
-- Heuristic oracle (experience-based judgment)
-
----
-
-### 3. Performance Testing — 7 Types
-
-| Type           | Goal                                          | k6 Pattern                        |
-|----------------|-----------------------------------------------|-----------------------------------|
-| **Load**       | Normal expected load                          | `stages: ramp up → steady → down` |
-| **Stress**     | Find breaking point beyond normal             | Ramp VUs past expected max        |
-| **Spike**      | Sudden traffic burst                          | Instant jump to 10× normal VUs   |
-| **Endurance**  | Sustained load over long period               | Constant VUs for hours            |
-| **Volume**     | Large data payload / dataset                  | Large body, many DB rows          |
-| **Scalability**| Measure perf change as resources scale        | Incremental VU steps              |
-| **Capacity**   | Max capacity before SLA breaches              | Ramp until thresholds breach      |
-
-**Tool Stack:**
-- **k6** — Primary test runner (script in JS, metrics in InfluxDB/Grafana)
-- **Grafana + InfluxDB** — Metrics visualization (via `docker-local-pt` observability profile)
-- **pt-menu.sh** — TUI orchestrator (auth, target selection, run, notify)
-- **Jenkins** — CI pipeline trigger (pipelines in `docker-local-pt/jenkins/pipelines/`)
-- **Teams / Telegram / Discord** — Webhook alert on run completion
-- **SQLite** — Auth, locks, audit log, scheduler state
-
----
-
-### 4. Testing Techniques
-
-**Functional:**
-- Unit: single function/API endpoint
-- Integration: service-to-service contract
-- End-to-end: full user flow (BP001 → BPnnn)
-
-**Non-Functional:**
-- Performance (load/stress/spike)
-- Security (auth bypass, rate limit, brute force — see `Growin_Ratelimit_Reset_Password`)
-- Compatibility (Web/iOS/Android variants in Script/)
-
-**Methodologies:**
-- **TDD** — Write test → implement → pass. Use in unit + contract tests.
-- **BDD** — `Given/When/Then`. Use for scenario naming in k6 `group()`.
-- **ATDD** — Acceptance criteria written as test before dev starts.
-- **RCA** — Root Cause Analysis. On failure: logs → metrics → code → infra → data.
-
-**Data Management:**
-- User tokens in `pt-data/users.json`, managed via `bin/pt-auth`
-- ENV per run: `K6_USERS`, `DURATION`, `ENV`, `RUNBY`, `SCENARIO`, `PLATFORM`
-- Fixtures: per-suite `/Script/<suite>/` configs
-- No PII in test data. Synthetic data only.
-
----
-
-### 5. SDLC & Delivery
-
-**Agile in PT context:**
-- Sprint planning → add PT tasks for new features
-- Sprint review → share PT results (TPS, P95)
-- Retrospective → discuss flaky tests, infra issues
-
-**Shift-Left Strategy:**
-- Write PT script alongside feature dev (not after release)
-- Run smoke PT in CI on every PR merge
-- Gate deployment on PT pass
-
-**Testing Pyramid for PT:**
-```
-         [E2E Load / Stress]        ← few, long, expensive
-       [Integration / API Perf]     ← per sprint, per BP
-     [Contract / Smoke PT in CI]    ← every commit
-```
-
----
-
-### 6. CI/CD Integration
-
-**Pipeline Stage Order:**
-```
-Build → Unit Test → Integration Test → PT Smoke → Deploy Staging → PT Full → Deploy Prod
-```
-
-**Performance Gate (example threshold in Jenkinsfile):**
-```groovy
-stage('Performance Gate') {
-  steps {
-    sh './pt-menu.sh run --target onprem --suite Growin_Daily_Trade --bp BP001'
-    script {
-      def result = readJSON file: 'artifacts/results/summary.json'
-      if (result.http_req_failed_rate > 0.001) error("Error rate exceeded 0.1%")
-      if (result.http_req_duration_p95 > 500)  error("P95 latency exceeded 500ms")
-    }
-  }
-}
-```
-
-**Threshold Contract (`configs/pt.env`):**
-```
-THRESHOLD_AVG_MS=200
-THRESHOLD_ERR_PCT=0.1
-THRESHOLD_MIN_RPS=381
-```
-
----
-
-### 7. Version Control — Git Branching for Test Scripts
-
-```
-main               ← stable, CI-triggered scripts only
-feature/<suite>    ← new script dev (e.g. feature/growin-eipo-stock)
-fix/<issue>        ← hotfix on existing script
-refactor/<suite>   ← cleanup/copy file removal
-release/<version>  ← tagged release of script set
-```
-
-**Rules:**
-- Never commit `copy.js` files to main. Copies are WIP only.
-- Commit `.env` changes to `configs/pt.env.example` only. Never commit real tokens.
-- Each script commit includes: script + Report folder scaffold + CHANGELOG entry.
-
----
-
-### 8. Backend & Frontend
-
-**API Testing (k6 context):**
-- `http.get()`, `http.post()` with JSON body
-- Check: `check(res, { 'status 200': r => r.status === 200 })`
-- Custom metrics: `new Trend('duration_api_name')`, `new Rate('error_rate_api_name')`
-- Group by BP: `group('BP001_01_Login', () => { ... })`
-
-**Auth patterns:**
-- Bearer token: set in setup(), passed to default() via return value
-- OAuth2 / OTP: handled in `Growin_2FA`, token cached per VU
-
-**Browser/Headless (not primary):**
-- k6 browser module available for rendering tests
-- Growin PT focus = API-level, not browser automation
-
-**Rendering Knowledge:**
-- Time to First Byte (TTFB) = server response time
-- Time to Interactive (TTI) = frontend concern
-- PT scripts measure TTFB + API P95, not TTI
-
----
-
-### 9. Test Management
-
-**Test Plan Template:**
-```
-Suite: Growin_<Feature>
-Version: 1.0.0
-RUNBY: [Manual | Regression | LoadTest]
-ENV: [INT | STG | PROD]
-Target: [Onprem | Oncloud]
-VUs: 100
-Duration: 5m
-BPs:
-  BP001 - <scenario name>
-  BP002 - <scenario name>
-Thresholds:
-  p95 < 500ms
-  error_rate < 0.1%
-  rps >= 381
-```
-
-**Tools:**
-- **Jira** — Bug tracking, sprint tickets
-- **TestRail / qTest / Zephyr** — Test case management (external, not in repo)
-- **GitHub Issues / CHANGELOG.md** — In-repo tracking
-- **pt-audit** — Immutable audit log of all runs (SQLite + archive)
-
----
-
-### 10. Aturan Agent
-
-**Saat generate k6 script:**
-- File location: `Script/<suite_name>/<ScriptName>.js`
-- Always export named `default` function + `setup()` if auth needed
-- Always use `group('BPxxx_step_name', ...)` for scenario grouping
-- Custom metrics naming: `duration_<api_slug>`, `error_rate_<api_slug>`, `sample_<api_slug>`
-- ENV vars via: `const BASE_URL = __ENV.BASE_URL || 'https://default.host'`
-- Never hardcode tokens. Use `setup()` return value.
-- Always include `options` export with `thresholds` matching `configs/pt.env` values.
-
-**Saat analisis hasil:**
-- Parse from `artifacts/results/summary.json`
-- Key fields: `http_reqs`, `http_req_duration_p95`, `http_req_failed_rate`, `duration`, `vus`, `base_url`, `mode`
-- Compare P95 vs `THRESHOLD_AVG_MS`, error_rate vs `THRESHOLD_ERR_PCT`, RPS vs `THRESHOLD_MIN_RPS`
-- Status logic: PASSED / PASSED with Warnings (RPS only) / FAILED
-
-**Saat tulis config:**
+**Stack:**
+- Test runner: **k6** (binary at `$PROJECT_DIR/k6`)
+- TUI: `pt-menu.sh` (Bash 5 + `fzf`, 1901 lines)
+- Auth / RBAC / Lock: SQLite via `lib/python/db.py` + `bin/pt-*` Python CLIs
+- Webhook notifier: `lib/webhook/send-summary-webhook.mjs` (Teams Adaptive Card + Discord + Telegram + Brrr)
+- Result parser: `lib/webhook/parse-k6-log.py`
 - Primary config: `configs/pt.env`
-- Keys: `ENV`, `K6_USERS`, `DURATION`, `RUNBY`, `ONPREM_*`, `ONCLOUD_*`, `TEAMS_WEBHOOK`, `THRESHOLD_*`
-- Never put secrets in `configs/pt.env.example` — use `<your_value_here>` placeholder
+- Languages: Bash, JavaScript (Node ESM), Python 3
 
-**Folder convention:**
-```
-Script/
-  <SuiteName>/
-    <SuiteName>.js              ← main k6 script
-    <SuiteName>_LoadTest.sh     ← manual load test runner
-    <SuiteName>_Regression.sh   ← regression runner
-    Web/                        ← Web platform configs (if any)
-    Android/                    ← Android platform configs (if any)
-    iOS/                        ← iOS platform configs (if any)
-Report/
-  <SuiteName>/
-    Web/BP001/Manual/           ← HTML report output
-    Web/BP001/LoadTest/
-    ...
-```
+**Targets (2 production + 1 demo):**
 
----
+| Target | Mechanism | Access |
+|---|---|---|
+| **Onprem** | SSH via bastion jump | `sshpass → qa@10.82.15.72 → qa@10.184.120.48` |
+| **Oncloud** | GCP IAP tunnel | `gcloud compute ssh vm-pt-ksix-0 --tunnel-through-iap --project compute-pt --zone asia-southeast2-c` |
+| **Sandbox** | Local SSH (demo only) | `127.0.0.1:2222` |
 
-### 11. Struktur Folder
+**Architecture phases (all shipped):**
+1. Auth gate + RBAC (`bin/pt-auth`, `bin/pt-rbac`, SQLite + bcrypt)
+2. Lock + heartbeat (`bin/pt-lock`, 15-second checkin daemon)
+3. Observability (`bin/pt-resmon`, `bin/pt-dashboard`)
+4. User management (`bin/pt-usermgmt`)
+5. UX overhaul (PR #1 → #5, 2026-06): breadcrumb, validation, confirm-run, recent-runs, tools menu, batch regression, verbose status bar
 
-```
-growin_performancetest/
-├── pt-menu.sh                  ← Main TUI entrypoint
-├── k6                          ← k6 binary
-├── configs/
-│   └── pt.env                  ← Primary config (targets, thresholds, webhooks)
-├── Script/                     ← ALL test scripts (run from here on remote)
-│   ├── <SuiteName>/
-│   │   ├── <SuiteName>.js
-│   │   ├── <SuiteName>_LoadTest.sh
-│   │   ├── <SuiteName>_Regression.sh
-│   │   └── Web|Android|iOS/
-│   └── Template_Project/       ← Base template for new suites
-├── Report/                     ← HTML reports per suite/platform/bp/runby
-│   └── <SuiteName>/Web|Android|iOS/BP001|.../Manual|Regression|LoadTest/
-├── Helper/                     ← Shared k6 helper modules (bundle.js, textSummary.js)
-├── lib/
-│   ├── bash/
-│   │   └── pt_auth_client.sh   ← Auth gate bash wrapper
-│   ├── python/
-│   │   └── db.py               ← SQLite schema init (auth, locks, audit, scheduler)
-│   └── webhook/
-│       ├── send-summary-webhook.mjs  ← Post-run notifier
-│       ├── webhook-tester.mjs        ← Demo sender
-│       └── parse-k6-log.py           ← Extract metrics from k6 stdout
-├── bin/
-│   ├── pt-auth                 ← Auth CLI
-│   ├── pt-rbac                 ← Role management
-│   ├── pt-audit                ← Immutable audit log
-│   ├── pt-lock                 ← Run lock acquire/release/heartbeat
-│   ├── pt-lock-status          ← 3-state occupancy display
-│   ├── pt-dashboard            ← Live resource + lock monitor
-│   ├── pt-resmon               ← System health score
-│   ├── pt-scheduler            ← Cron job manager
-│   └── pt-usermgmt             ← User lifecycle
-├── pt-data/
-│   ├── users.json              ← Active user state
-│   └── active_run.json         ← Current run state
-├── artifacts/
-│   └── results/
-│       └── summary.json        ← Latest run metrics (parsed by webhook sender)
-├── scheduler_cli/              ← Python cron scheduler backend
-├── docs/
-│   └── performance-audit/      ← Audit checklists (CI, Grafana, Jenkins, etc.)
-├── blueprint/                  ← Architecture RFCs (Kimi, Manus, DeepSeek)
-├── docker-local-pt/            ← LOCAL DEMO ONLY. Not production target.
-│   ├── docker-compose.yml
-│   ├── configs/local.env       ← Legacy config (fallback only)
-│   └── results/                ← Historical JSON results from demo runs
-└── CHANGELOG.md
+## 3. TUI Menu Flow (current — 2026-06)
+
+```mermaid
+graph TD
+    Start(["./pt-menu.sh"]) --> Auth{First run?}
+    Auth -- Yes --> Bootstrap["Initial Setup<br/>create god user"]
+    Auth -- No --> Login["Login screen"]
+    Bootstrap --> Login
+    Login --> Main["Main Menu"]
+
+    Main --> M1["[1] Run Test"]
+    Main --> M2["[2] Sandbox Demo"]
+    Main --> M3["[3] Cron Scheduler"]
+    Main --> M4["[4] AI Slope"]
+    Main --> M5["[5] ENV Editor"]
+    Main --> M6["[6] Docker Stack"]
+    Main --> M8["[8] User Mgmt — god only"]
+    Main --> M9["[9] Webhooks"]
+    Main --> MD["[D] Dashboard"]
+    Main --> MT["[T] Tools / Diagnostics"]
+    Main --> MH["[?] Help / Keymap"]
+    Main --> MQ["[Q] Quit"]
+
+    M1 --> T1{Target}
+    T1 -- Onprem --> O1["SSH 10.82.15.72 → 10.184.120.48"]
+    T1 -- Oncloud --> O2["gcloud IAP vm-pt-ksix-0"]
+    T1 -- Sandbox --> O3["127.0.0.1:2222 demo"]
+
+    O1 --> SP["Suite picker<br/>R, B, ? shortcuts"]
+    O2 --> SP
+    O3 --> SP
+
+    SP --> CFG["Configure<br/>VUs / Duration / ENV / RUNBY / Scenario"]
+    CFG --> CR{Confirm Run}
+    CR -- Y --> EXE["k6 execute + tee log"]
+    CR -- E --> CFG
+    CR -- C --> SP
+
+    EXE --> RPT["Report + Webhook notify"]
+    RPT --> Main
+    MT --> Tools["pt-resmon, pt-bootstrap-check,<br/>pt-rescue, pt-dashboard,<br/>pt-audit tail, pt-lock-status"]
+    Tools --> Main
+    MQ --> End(["Exit"])
 ```
 
----
+## 4. Lock + Heartbeat Flow
 
-### 12. Referensi Metrik
+```mermaid
+graph LR
+    A["User starts test"] --> B{ENV<br/>available?}
+    B -- Yes --> C["Acquire pt-lock"]
+    B -- No --> D["Show occupied status"]
+    C --> E["Fork heartbeat 15s"]
+    E --> F["Run k6"]
+    F --> G["Release lock"]
+    G --> H["Update audit log"]
+```
 
-**Percentiles:**
-- P50 (median) — typical user experience
-- P90 — 90% requests faster than this
-- P95 — SLA reference point (use this for thresholds)
-- P99 — worst-case excluding extreme outliers
-- Max — absolute worst, useful for spike detection
+## 5. Audit Trail
 
-**Throughput:**
-- RPS (Requests Per Second) = total_http_reqs / duration_seconds
-- TPS (Transactions Per Second) = RPS / num_APIs_per_transaction
-- Target: RPS >= 381 (Growin baseline from capacity planning)
+```mermaid
+graph TD
+    A["pt-menu action"] --> B["python3 bin/pt-audit log"]
+    B --> C[("SQLite audit table")]
+    C --> D{Query path}
+    D -- TUI --> E["Dashboard tail"]
+    D -- CLI --> F["pt-audit tail N"]
+    D -- Hook --> G["Webhook notify"]
+```
 
-**Error Metrics:**
-- Error Rate = failed_requests / total_requests × 100%
-- Target: < 0.1%
-- k6 metric: `http_req_failed` (tracks non-2xx responses)
+## 6. QA Engineering — Performance Testing
 
-**Resource Metrics (via pt-resmon):**
-- CPU utilization: `psutil.cpu_percent(interval=1)`
-- Memory: `psutil.virtual_memory().percent`
-- Health score: weighted composite (CPU 40% + Mem 30% + Load 30%)
-- Alert threshold: health_score < 60
+### 6.1 KPIs (Growin baseline)
 
-**Custom k6 Metrics Pattern:**
+| Metric | Target | Source |
+|---|---|---|
+| Avg response time | `< 200ms` | `THRESHOLD_AVG_MS` |
+| P95 response time | `< 500ms` | derived |
+| Error rate | `< 0.1%` | `THRESHOLD_ERR_PCT` |
+| Min RPS | `≥ 381 req/s` | `THRESHOLD_MIN_RPS` |
+| CPU utilization | `< 70%` sustained | `bin/pt-resmon` |
+| Memory growth | `< 5% / hour` (endurance) | `bin/pt-resmon` |
+
+Status logic (`lib/webhook/parse-k6-log.py`):
+- ✅ **PASSED** — all metrics ≤ threshold
+- ⚠️ **PASSED with Warnings** — only RPS below baseline
+- ❌ **FAILED** — avg / p95 / error misses
+
+### 6.2 Test types
+
+| Type | Goal | k6 pattern |
+|---|---|---|
+| Load | Normal expected load | ramp → steady → down |
+| Stress | Find breaking point | ramp past expected max |
+| Spike | Sudden burst | instant 10× VU jump |
+| Endurance | Sustained period | constant VUs for hours |
+| Volume | Large payload | big body / many rows |
+| Scalability | Perf vs resources | incremental VU steps |
+| Capacity | Max before SLA breach | ramp until threshold violation |
+
+### 6.3 ENV per run
+
+`USER` (VUs, 1–5000), `DURATION` (e.g. `5m`, `15m`), `ENV` (`INT` / `STG` / `PROD` / `SANDBOX`), `RUNBY` (`Manual` / `LoadTest` / `Regression`), `SCENARIO` (`BPxxx` or empty for `All`), `PLATFORM` (`Web` / `Android` / `iOS`), `NUMSTART` (user-pool offset), `BASE_URL` (optional override).
+
+## 7. Authoring Rules
+
+### 7.1 Folder convention
+
+```
+Script/<SuiteName>/
+├── <SuiteName>.js              ← aggregate runner (BP dispatcher)
+├── <SuiteName>_LoadTest.sh     ← LoadTest wrapper
+├── <SuiteName>_Regression.sh   ← Regression wrapper
+└── {Android,Web,iOS}/
+    └── BPxxx.js                ← single BP per file
+
+Report/<SuiteName>/<Platform>/<BP>/<RunBy>/<TS>.html
+```
+
+### 7.2 Mandatory imports (every BP file)
+
 ```js
-const duration_login = new Trend('duration_BP001_01_login', true);  // ms
+import { getBaseUrl, getUserCredentials, getDefaultHeaders } from '../../Helper/config.js';
+import { textSummary } from '../../Helper/textSummary.js';
+import { htmlReport } from '../../Helper/bundle.js';
+```
+
+### 7.3 Custom metric naming
+
+```js
+const duration_login   = new Trend('duration_BP001_01_login', true);
 const error_rate_login = new Rate('error_rate_BP001_01_login');
-const sample_login = new Counter('sample_BP001_01_login');
+const sample_login     = new Counter('sample_BP001_01_login');
 
 group('BP001_01_Login', () => {
-  const start = Date.now();
-  const res = http.post(`${BASE_URL}/auth/login`, payload);
-  duration_login.add(Date.now() - start);
+  const t0  = Date.now();
+  const res = http.post(`${baseUrl}/auth/login`, JSON.stringify(payload), { headers });
+  duration_login.add(Date.now() - t0);
   error_rate_login.add(res.status !== 200);
   sample_login.add(1);
   check(res, { 'login 200': r => r.status === 200 });
 });
 ```
+
+### 7.4 Junk to skip (do **not** edit/run these)
+
+| Pattern | Reason |
+|---|---|
+| `*copy*.js`, `* copy *.js` | Duplicate snapshots |
+| `enchange_*.js` | Experimental enhanced variant |
+| `<Scenario>[ToDo]/` | Work-in-progress |
+| `BP001?.js` | Corrupt filename |
+| `Test1.js`, `Test2.js`, `asdasd.jpeg` | Scratch dev |
+| `Wabadima/*.html` | Stale reports leaked into Script |
+
+### 7.5 Never do
+
+- Hardcode tokens — use `setup()` return value, fetched per VU.
+- Commit secrets to `configs/pt.env.example` — use placeholders.
+- Add `patch_*.{js,py}` or `fix-*.sh` to repo root — use PRs.
+- Push `.DS_Store`, `*.bak`, `*.orig`, IDE junk (already in `.gitignore`).
+
+## 8. Repo Layout (current)
+
+```
+.
+├── pt-menu.sh                   # TUI entrypoint (1901 lines)
+├── pt-tui                       # TUI launcher binary
+├── Regression.sh                # Top-level regression runner
+├── setup-pt.sh                  # Bootstrap helper
+├── bin/                         # CLI tools (pt-auth, pt-rbac, pt-audit, pt-lock, ...)
+├── lib/
+│   ├── bash/pt_auth_client.sh   # Auth gate
+│   ├── python/db.py             # SQLite schema
+│   └── webhook/                 # Notifiers + parser
+├── Script/<Suite>/              # k6 scripts per scenario + platform sub-dirs
+├── Helper/                      # Shared k6 modules (bundle, config, textSummary)
+├── Report/                      # HTML reports (gitignored, Template_Report kept)
+├── configs/pt.env               # Primary config
+├── pt-data/                     # Runtime state (gitignored)
+├── scheduler_cli/               # Python cron + AI slope validator
+├── tools/                       # One-off auditors
+├── docs/                        # Documentation
+├── blueprint/                   # Architecture RFCs
+├── docker-local-pt/             # Demo stack (compose, mock-api, jenkins, grafana)
+├── archive/                     # Legacy artifacts
+├── AGENTS.md                    # This file
+├── CLAUDE.md                    # AI context + QA reference
+├── README.md                    # Quick start + comprehensive doc
+├── STRUCTURE.md                 # Detailed layout + conventions
+└── CHANGELOG.md                 # Release history
+```
+
+## 9. Git Workflow
+
+| Branch prefix | Purpose |
+|---|---|
+| `main` | stable production |
+| `feat/*` | new features / scenarios |
+| `fix/*` | bug fixes |
+| `chore/*` | maintenance, refactor, restructure |
+| `docs/*` | documentation only |
+| `release/*` | release tagging |
+
+**Commit message style:** Conventional Commits (`feat(scope): ...`, `fix(scope): ...`, `chore(scope): ...`, `docs: ...`).
+
+**PR convention:** squash-merge to main. Branch deleted after merge.
+
+## 10. Agent Rules
+
+### When generating a k6 script
+- Save under `Script/<suite_name>/<ScriptName>.js` (or `<Platform>/BPxxx.js` for single BP).
+- Import canonical helpers from `Helper/config.js` (no hand-rolled URL/credential logic).
+- Use `group('BPxxx_step_name', ...)` for scenario boundaries.
+- Emit `duration_*`, `error_rate_*`, `sample_*` custom metrics per group.
+- Build URL from `getBaseUrl()` — never hardcode `https://...`.
+- Pull credentials via `getUserCredentials(userNum, bpOffset)` — never hardcode emails or passwords.
+- Pull headers via `getDefaultHeaders(accessToken)`.
+- Set `options.thresholds` matching values in `configs/pt.env`.
+- Provide `handleSummary` that writes `summary.html` + `stdout: textSummary(...)`.
+
+### When analyzing results
+- Read `artifacts/results/summary.json`.
+- Key fields: `http_reqs`, `http_req_duration_p95`, `http_req_failed_rate`, `duration`, `vus`, `base_url`, `mode`.
+- Compare P95 vs `THRESHOLD_AVG_MS`, `http_req_failed_rate` vs `THRESHOLD_ERR_PCT`, RPS vs `THRESHOLD_MIN_RPS`.
+- Status: `PASSED` / `PASSED with Warnings` / `FAILED`.
+
+### When editing configs
+- Primary: `configs/pt.env`. Legacy fallback: `docker-local-pt/configs/local.env`.
+- Required keys: `ENV`, `K6_USERS`, `DURATION`, `RUNBY`, `ONPREM_BASE_URL`, `ONCLOUD_BASE_URL`, `TEAMS_WEBHOOK`, `THRESHOLD_*`.
+- Never put real secrets in `*.example` files — use `<your_value_here>`.
+
+### When touching pt-menu.sh
+- Run `bash -n pt-menu.sh` after every edit (syntax check).
+- Preserve existing function signatures; add new helpers near the top (after `section_header`).
+- New menus: register both in `main_menu` choice array and `case` statement.
+- Always show `breadcrumb` + `section_header` at the top of any submenu.
+- Use `prompt_int` + `prompt_duration` for any numeric / duration input.
+- Use `confirm_run` before any k6 execution.
+- Use `recent_runs_add` after every successful run config (before exec).
+- Use `pick_fzf_with_preview` for any file picker (script chooser, etc.).
+
+## 11. Memory & Skills
+
+Past session details: `get_observations([IDs])` or `mem-search` skill.
+
+Active caveman intensity: `wenyan-ultra` for terse multi-step autonomous runs, `ultra` for normal terse, `full` default.
+
+## 12. Quick Reference Card
+
+```
+# Launch
+./pt-menu.sh
+
+# Emergency password reset
+python3 bin/pt-rescue
+
+# Tail audit log
+python3 bin/pt-audit tail 20
+
+# Live dashboard
+bash bin/pt-dashboard
+
+# Check ENV lock status
+python3 bin/pt-lock-status $USER INT
+
+# Direct k6 run (bypass TUI)
+cd Script/Growin_OMO && \
+  ../../k6 run Growin_OMO.js \
+  -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=15m \
+  -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web \
+  --out dashboard=export=../../Report/Growin_OMO/Web/BP001/Manual/run.html
+```
+
+---
+
+**End of AGENTS.md.** Keep this file the single source of truth for agent behavior. Cross-reference: `CLAUDE.md` (QA reference), `README.md` (user-facing quick start), `STRUCTURE.md` (layout details), `CHANGELOG.md` (history).
