@@ -350,21 +350,21 @@ export function handleSummary(data) {
         }
 
         // ── RPS + PASS/FAIL Verdict per API ───────────────────────────────
-        const thresholdConfig = BP_CONFIG?.thresholds || {};
+        const thresholdConfig = (BP_CONFIG && BP_CONFIG.thresholds) || {};
         const minRps          = thresholdConfig.min_rps || 400;
         const maxAvgRespTime  = thresholdConfig.avg_response_time_ms || 200;
         const maxErrorRate    = (thresholdConfig.error_rate_percent || 0.1) / 100;
 
         // Total test duration in seconds (from k6 data)
-        const testDurationSec = data.state?.testRunDurationMs
+        const testDurationSec = data.(state && state.testRunDurationMs)
             ? data.state.testRunDurationMs / 1000
             : parseFloat(`${__ENV.DURATION}`) || 300;
 
         const apiResults = [];
-        const apis = BP_CONFIG?.apis || [];
+        const apis = (BP_CONFIG && BP_CONFIG.apis) || [];
 
         apis.forEach(apiDef => {
-            const bpId     = BP_CONFIG?.bp_id || 'BP001';
+            const bpId     = (BP_CONFIG && BP_CONFIG.bp_id) || 'BP001';
             const safeId   = String(bpId).replace(/[^a-zA-Z0-9]/g, '_');
             const safeApiId = String(apiDef.id).replace(/[^a-zA-Z0-9]/g, '_');
             const safeName  = String(apiDef.name).replace(/[^a-zA-Z0-9]/g, '_');
@@ -376,10 +376,10 @@ export function handleSummary(data) {
 
             if (!durationMetric) return; // API might not have been reached
 
-            const avgRespTime = durationMetric.values?.med          || 0;
+            const avgRespTime = durationMetric.(values && values.med)          || 0;
             const p95RespTime = durationMetric.values?.['p(95)']    || 0;
-            const errorRate   = errorRateMetric?.values?.rate        || 0;
-            const totalReqs   = sampleMetric?.values?.count          || 0;
+            const errorRate   = (errorRateMetric && errorRateMetric.values)?.rate        || 0;
+            const totalReqs   = (sampleMetric && sampleMetric.values)?.count          || 0;
             const actualRps   = totalReqs / testDurationSec;
 
             const passRespTime  = p95RespTime < maxAvgRespTime;
