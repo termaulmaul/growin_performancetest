@@ -1112,20 +1112,42 @@ tar -xzf /tmp/$(basename $_tarball)
 echo '[remote] Extracted at:' \$(pwd)
 ls -la Script/ | head -5
 # Detect arch and pick bundled k6 binary (uploaded with tarball)
+REPO_K6=''
+for _d in ~/growin_performancetest ~/mostng_performancetest_api /home/qa/growin_performancetest /home/qa/mostng_performancetest_api; do
+  if [ -x "\$_d/k6" ]; then REPO_K6="\$_d/k6"; break; fi
+done
+if [ -n "\$REPO_K6" ]; then
+  K6_BIN="\$REPO_K6"
+else
+REPO_K6=''
+for _d in ~/growin_performancetest ~/mostng_performancetest_api /home/qa/growin_performancetest /home/qa/mostng_performancetest_api; do
+  if [ -x "\$_d/k6" ]; then REPO_K6="\$_d/k6"; break; fi
+done
+if [ -n "\$REPO_K6" ]; then
+  K6_BIN="\$REPO_K6"
+else
 ARCH=\$(uname -m)
-if [ \"\$ARCH\" = \"x86_64\" ] && [ -x ./k6-linux-amd64 ]; then
+REPO_K6=''
+for _d in ~/growin_performancetest ~/mostng_performancetest_api /home/qa/growin_performancetest /home/qa/mostng_performancetest_api; do
+  if [ -x \"\$_d/k6\" ]; then REPO_K6=\"\$_d/k6\"; break; fi
+done
+if [ -n \"\$REPO_K6\" ]; then
+  K6_BIN=\"\$REPO_K6\"
+  echo \"[remote] Using repo k6: \$K6_BIN (\$(\$K6_BIN version | head -1))\"
+elif [ \"\$ARCH\" = \"x86_64\" ] && [ -x ./k6-linux-amd64 ]; then
   K6_BIN=./k6-linux-amd64
 elif [ \"\$ARCH\" = \"aarch64\" ] && [ -x ./k6-linux-arm64 ]; then
   K6_BIN=./k6-linux-arm64
+fi
 elif command -v k6 >/dev/null; then
   K6_BIN=\$(command -v k6)
-  echo '[remote] WARN: Using system k6 (may have outdated Babel). Bundled k6 not found for arch:' \$ARCH
+  echo '[remote] WARN: Using system k6 (may be outdated).'
 else
-  echo 'FATAL: No k6 binary available for arch:' \$ARCH
-  exit 127
+  echo 'FATAL: k6 not found'; exit 127
 fi
 chmod +x \$K6_BIN 2>/dev/null || true
-echo '[remote] Arch:' \$ARCH ' | Using k6:' \$K6_BIN \"(\$(\$K6_BIN version | head -1))\"
+fi
+echo \"[remote] Arch: \$ARCH | k6: \$K6_BIN (\$(\$K6_BIN version | head -1))\"
 cd Script/$suite_name
 mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
 echo '[remote] Running k6...'
@@ -1198,14 +1220,27 @@ mkdir -p $_remote_dir
 cd $_remote_dir
 tar -xzf /tmp/$(basename $_tarball)
 echo '[remote] Extracted at:' \$(pwd)
+REPO_K6=''
+for _d in ~/growin_performancetest ~/mostng_performancetest_api /home/qa/growin_performancetest /home/qa/mostng_performancetest_api; do
+  if [ -x "\$_d/k6" ]; then REPO_K6="\$_d/k6"; break; fi
+done
+if [ -n "\$REPO_K6" ]; then
+  K6_BIN="\$REPO_K6"
+else
 ARCH=\$(uname -m)
-if [ \"\$ARCH\" = \"x86_64\" ] && [ -x ./k6-linux-amd64 ]; then K6_BIN=./k6-linux-amd64
+REPO_K6=''
+for _d in ~/growin_performancetest ~/mostng_performancetest_api /home/qa/growin_performancetest /home/qa/mostng_performancetest_api; do
+  if [ -x \"\$_d/k6\" ]; then REPO_K6=\"\$_d/k6\"; break; fi
+done
+if [ -n \"\$REPO_K6\" ]; then K6_BIN=\"\$REPO_K6\"
+elif [ \"\$ARCH\" = \"x86_64\" ] && [ -x ./k6-linux-amd64 ]; then K6_BIN=./k6-linux-amd64
 elif [ \"\$ARCH\" = \"aarch64\" ] && [ -x ./k6-linux-arm64 ]; then K6_BIN=./k6-linux-arm64
 elif command -v k6 >/dev/null; then K6_BIN=\$(command -v k6)
-else echo 'FATAL: k6 not found for arch:' \$ARCH; exit 127
+else echo 'FATAL: k6 not found'; exit 127
 fi
 chmod +x \$K6_BIN 2>/dev/null || true
-echo '[remote] Arch:' \$ARCH ' | Using k6:' \$K6_BIN
+fi
+echo '[remote] Arch:' \$ARCH '| k6:' \$K6_BIN
 cd Script/$suite_name
 mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
 \$K6_BIN run --compatibility-mode=extended $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform --out dashboard=export=$report_file
