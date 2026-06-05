@@ -175,28 +175,7 @@ const BP_NUM_STARTS = isMultiBP
     ? calculateNumStarts(selectedBPs, userDistribution, NUMSTART_env)
     : Object.fromEntries(selectedBPs.map(bp => [bp, NUMSTART_env]));
 
-let __summaryShown = false;
-if (!__summaryShown) {
-  __summaryShown = true;
-  console.log('📊 User Distribution:');
-}
-Object.keys(userDistribution).forEach(bp => {
-    const start = BP_NUM_STARTS[bp];
-    const count = userDistribution[bp];
-    console.log(`   ${bp}: ${count} users (${BP_USER_PERCENTAGE[bp]}%) → user #${start} to #${start + count - 1}`);
-});
-if (!__summaryShown) {
-  __summaryShown = true;
-  console.log(`   TOTAL: ${TOTAL_USER} users`);
-}
-if (!__summaryShown) {
-  __summaryShown = true;
-  console.log(`   PLATFORM: ${platform}`);
-}
-if (!__summaryShown) {
-  __summaryShown = true;
-  console.log(`   MODE: ${isMultiBP ? 'Multi-BP (LoadTest) — numStart kumulatif per BP' : 'Single BP (Manual) — NUMSTART dari env'}`);
-}
+// Distribution logged once inside setup() — module scope would repeat per VU
 
 const scenarios = {};
 selectedBPs.forEach(bp => {
@@ -315,7 +294,16 @@ export function setup() {
     const base_url = getBaseUrl();
     const tokens = {};
     const vuMapping = {};
-    
+
+    // Log distribution once — runs only in setup() not per-VU
+    console.log('📊 User Distribution:');
+    Object.keys(userDistribution).forEach(bp => {
+        const start = BP_NUM_STARTS[bp];
+        const count = userDistribution[bp];
+        console.log(`   ${bp}: ${count} users (${BP_USER_PERCENTAGE[bp]}%) → user #${start} to #${start + count - 1}`);
+    });
+    console.log(`   TOTAL: ${TOTAL_USER} users | PLATFORM: ${platform} | MODE: ${isMultiBP ? 'Multi-BP' : 'Single-BP'}`);
+
     console.log(`🔐 Starting login for ${TOTAL_USER} users distributed across ${selectedBPs.length} BPs...`);
     console.log(`📦 Batch processing: ${BATCH_SIZE} users per batch, ${BATCH_DELAY}s delay`);
     console.log(`🔁 Retry enabled: Max ${MAX_RETRY_ATTEMPTS} attempts per login`);
