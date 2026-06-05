@@ -942,12 +942,24 @@ ssh_menu() {
           local platform; platform=$(pick_fzf "Platform>" "${plat_choices[@]}")
           [[ -z "$platform" || "$platform" == "← Back" ]] && continue
 
-          # Extract BPs from script
+          # Extract BPs from platform subfolder first (accurate)
+          # Falls back to grep on script exports if folder has no BP files
           local bps=()
-          while IFS= read -r line; do
-            [[ -z "$line" ]] && continue
-            bps+=("$line")
-          done < <(grep -E '^export function BP[0-9]+' "$suite_dir/$file_sel" 2>/dev/null | awk '{print $3}' | cut -d'(' -f1 | sort -u)
+          local platform_bp_dir="$suite_dir/$platform"
+          if [[ -d "$platform_bp_dir" ]]; then
+            while IFS= read -r f; do
+              [[ -z "$f" ]] && continue
+              bp_name=$(basename "$f" .js)
+              [[ "$bp_name" =~ ^BP[0-9]+$ ]] && bps+=("$bp_name")
+            done < <(find "$platform_bp_dir" -maxdepth 1 -name 'BP[0-9]*.js' | sort)
+          fi
+          # fallback: grep exports if platform folder empty
+          if [[ ${#bps[@]} -eq 0 ]]; then
+            while IFS= read -r line; do
+              [[ -z "$line" ]] && continue
+              bps+=("$line")
+            done < <(grep -E '^export function BP[0-9]+' "$suite_dir/$file_sel" 2>/dev/null | awk '{print $3}' | cut -d'(' -f1 | sort -u)
+          fi
 
           local scenario=""
           if [[ ${#bps[@]} -gt 0 ]]; then
