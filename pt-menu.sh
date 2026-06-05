@@ -263,17 +263,6 @@ Press Enter...'
         fi
         read -r -p $'\nPress Enter...'
         ;;
-users = d.get('data', {}).get('users', [])
-print(f"  {'Username':<12} {'Role':<10} {'Locked':<8} {'Last Login'}")
-print('  ' + '-'*55)
-for u in users:
-    locked = 'YES' if u['is_locked'] else 'no'
-    ll = (u.get('last_login') or 'never')[:19]
-    print(f"  {u['username']:<12} {u['role']:<10} {locked:<8} {ll}")
-"
-        read -r -p $'
-Press Enter...'
-        ;;
       "[2] Create User")
         if [[ "$PT_ROLE" != "god" ]]; then
           echo -e "  ${RED}Only god can create users.${RST}"
@@ -312,8 +301,19 @@ Press Enter...'
         printf "
   Username : "; read -r t_user
         [[ -z "$t_user" ]] && continue
+        local pw1 pw2
+        printf "  New password (min 8): "; read -rs pw1; echo ""
+        if [[ ${#pw1} -lt 8 ]]; then
+          echo -e "  ${RED}✘ Password too short${RST}"
+          read -r -p $'\nPress Enter...'; continue
+        fi
+        printf "  Confirm            : "; read -rs pw2; echo ""
+        if [[ "$pw1" != "$pw2" ]]; then
+          echo -e "  ${RED}✘ Passwords do not match${RST}"
+          read -r -p $'\nPress Enter...'; continue
+        fi
         local raw
-        raw=$(python3 "$PROJECT_DIR/bin/pt-usermgmt" reset-password --by "$PT_USER" --username "$t_user" 2>&1)
+        raw=$(echo "$pw1" | python3 "$PROJECT_DIR/bin/pt-usermgmt" reset-password --by "$PT_USER" --username "$t_user" 2>&1)
         parse_cli_json "$raw"
         if [[ "$CLI_OK" == "true" ]]; then
           echo -e "  ${GRN}✓ ${CLI_MSG:-Password reset}${RST}"
@@ -357,7 +357,7 @@ Press Enter...'; continue
         [[ "$confirm" != "yes" ]] && { echo "Cancelled."; read -r -p $'
 Press Enter...'; continue; }
         local raw
-        raw=$(python3 "$PROJECT_DIR/bin/pt-usermgmt" delete --by "$PT_USER" --username "$t_user" --force 2>&1)
+        raw=$(python3 "$PROJECT_DIR/bin/pt-usermgmt" delete --by "$PT_USER" --username "$t_user" 2>&1)
         parse_cli_json "$raw"
         if [[ "$CLI_OK" == "true" ]]; then
           echo -e "  ${GRN}✓ ${CLI_MSG:-User deleted}${RST}"
@@ -567,7 +567,8 @@ try:
     d = json.loads(raw[:end])
 except Exception as e:
     sys.exit(1)
-ok = d.get("ok", False)
+# pt-usermgmt uses {"status": "ok", ...}; others may use {"ok": true, ...}
+ok = d.get("ok", False) or (d.get("status") == "ok")
 code = d.get("code", "")
 msg = d.get("message", d.get("error", ""))
 data = d.get("data", {})
@@ -608,15 +609,15 @@ if not users:
     print("  (no users found)")
     sys.exit(0)
 # Header
-print(f"  {'USERNAME':<20} {'ROLE':<10} {'STATUS':<10} {'CREATED':<20}")
-print(f"  {'-'*20} {'-'*10} {'-'*10} {'-'*20}")
+print(f"  {'USERNAME':<20} {'ROLE':<10} {'LOCKED':<8} {'FAILED':<8} {'LAST LOGIN':<20}")
+print(f"  {'-'*20} {'-'*10} {'-'*8} {'-'*8} {'-'*20}")
 for u in users:
-    name = str(u.get("username", "?"))[:20]
-    role = str(u.get("role", "?"))[:10]
-    locked = u.get("locked", False)
-    status = "LOCKED" if locked else "active"
-    created = str(u.get("created_at", u.get("created", "")))[:20]
-    print(f"  {name:<20} {role:<10} {status:<10} {created:<20}")
+    name    = str(u.get("username", "?"))[:20]
+    role    = str(u.get("role", "?"))[:10]
+    locked  = "YES" if u.get("is_locked") else "no"
+    failed  = str(u.get("failed_attempts", 0))[:8]
+    last_ln = str(u.get("last_login") or "never")[:20]
+    print(f"  {name:<20} {role:<10} {locked:<8} {failed:<8} {last_ln:<20}")
 print(f"\\n  Total: {len(users)} user(s)")
 PYEOF
 }
