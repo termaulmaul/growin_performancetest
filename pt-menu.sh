@@ -813,12 +813,13 @@ spinner_stop() {
 
 # ── SSH helpers ──────────────────────────────────────────────────────────────
 _ssh_pass() {
-  # Require PT_SSH_PASS to be explicitly set — no hardcoded fallback
-  if [[ -z "${PT_SSH_PASS:-}" ]]; then
+  # Read from shell env first, then fall back to configs/pt.env via env_val
+  local pass="${PT_SSH_PASS:-$(env_val PT_SSH_PASS '')}"
+  if [[ -z "$pass" ]]; then
     echo -e "  ${RED}[SECURITY] PT_SSH_PASS not set in configs/pt.env. Cannot connect.${RST}" >&2
     return 1
   fi
-  echo "$PT_SSH_PASS"
+  echo "$pass"
 }
 
 _sshpass_cmd() {
