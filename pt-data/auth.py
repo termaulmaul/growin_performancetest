@@ -1,6 +1,12 @@
 import sys, json, hashlib, os, time
 from datetime import datetime
 
+try:
+    import bcrypt
+    _BCRYPT_AVAILABLE = True
+except ImportError:
+    _BCRYPT_AVAILABLE = False
+
 USERS_FILE = 'pt-data/users.json'
 RUN_FILE = 'pt-data/active_run.json'
 
@@ -15,7 +21,25 @@ def save_users(data):
         json.dump(data, f, indent=2)
 
 def hash_pwd(pwd):
+    """Hash password with bcrypt (salted). Falls back to sha256 only if bcrypt unavailable."""
+    if _BCRYPT_AVAILABLE:
+        return bcrypt.hashpw(pwd.encode(), bcrypt.gensalt(12)).decode()
+    # Fallback: sha256 (no salt) — legacy only, not recommended
     return hashlib.sha256(pwd.encode()).hexdigest()
+
+def _sha256_hash(pwd):
+    return hashlib.sha256(pwd.encode()).hexdigest()
+
+def verify_pwd(pwd, stored_hash):
+    """Verify password against stored hash. Handles both bcrypt and legacy sha256."""
+    if _BCRYPT_AVAILABLE:
+        try:
+            # Try bcrypt first
+            return bcrypt.checkpw(pwd.encode(), stored_hash.encode())
+        except Exception:
+            # Fall back to sha256 for legacy hashes (migration path)
+            return _sha256_hash(pwd) == stored_hash
+    return _sha256_hash(pwd) == stored_hash
 
 def do_login(username, pwd):
     data = load_users()
@@ -23,7 +47,7 @@ def do_login(username, pwd):
     usr = users.get(username.lower())
     if not usr:
         return False, "User not found"
-    if usr.get("password_hash") != hash_pwd(pwd):
+    if not verify_pwd(pwd, usr.get("password_hash", "")):
         return False, "Wrong password"
     return True, f"{usr.get('display_name')}|{usr.get('role')}"
 

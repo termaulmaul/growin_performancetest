@@ -56,12 +56,6 @@ pt_auth_verify() {
 }
 
 pt_require_auth() {
-    if [[ "${PT_AUTH_BYPASS:-0}" == "1" ]]; then
-        export PT_USER="bypass_user"
-        export PT_ROLE="god"
-        return 0
-    fi
-    
     # Fallback to legacy if DB not exists
     if [[ ! -f "$HOME/.pt/var/pt.db" ]]; then
         # We actually WANT to init DB and bootstrap if it doesn't exist, not fall back to legacy immediately.

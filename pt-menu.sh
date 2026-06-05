@@ -804,8 +804,12 @@ spinner_stop() {
 
 # ── SSH helpers ──────────────────────────────────────────────────────────────
 _ssh_pass() {
-  # Always read from env var; fall back to default only if not set
-  echo "${PT_SSH_PASS:-M@nsek.1234}"
+  # Require PT_SSH_PASS to be explicitly set — no hardcoded fallback
+  if [[ -z "${PT_SSH_PASS:-}" ]]; then
+    echo -e "  ${RED}[SECURITY] PT_SSH_PASS not set in configs/pt.env. Cannot connect.${RST}" >&2
+    return 1
+  fi
+  echo "$PT_SSH_PASS"
 }
 
 _sshpass_cmd() {
@@ -1992,10 +1996,10 @@ main_menu() {
     banner
 
     local choices=()
-    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" || "$PT_ROLE" == "tester" ]] && choices+=("[1] Run Test  (Onprem / Oncloud)")
-    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" || "$PT_ROLE" == "tester" ]] && choices+=("[2] Sandbox Demo  (Local Mock — k6 binary)")
+    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" || "$PT_ROLE" == "operator" ]] && choices+=("[1] Run Test  (Onprem / Oncloud)")
+    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" || "$PT_ROLE" == "operator" ]] && choices+=("[2] Sandbox Demo  (Local Mock — k6 binary)")
     [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" ]] && choices+=("[3] Cron Scheduler")
-    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" || "$PT_ROLE" == "tester" ]] && choices+=("[4] AI Slope (Code Quality)")
+    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" || "$PT_ROLE" == "operator" ]] && choices+=("[4] AI Slope (Code Quality)")
     [[ "$PT_ROLE" != "viewer" ]] && choices+=("[5] ENV Editor")
     [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" ]] && choices+=("[6] Docker Stack")
     choices+=("[7] Open Project Dir")

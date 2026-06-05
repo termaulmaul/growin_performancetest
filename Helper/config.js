@@ -65,7 +65,12 @@ export function getUserCredentials(userNum, bpOffset = 0) {
         console.error(`❌ getUserCredentials: ENV="${env}" is not handled. Email will be empty.`);
     }
 
-    return { email: email, password: 'M@nsek.123' };
+    // Password from env var — never hardcode credentials in source
+    const password = __ENV.TEST_PASSWORD || '';
+    if (!password) {
+        console.error(`❌ getUserCredentials: TEST_PASSWORD env var not set. Pass via -e TEST_PASSWORD=... or set in pt.env`);
+    }
+    return { email: email, password: password };
 }
 
 /**
