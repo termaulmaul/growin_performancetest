@@ -100,6 +100,8 @@ def init_db():
     );
     """)
     c.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_locks_env_active ON locks(env) WHERE status = 'active';")
+    # Performance: index for login lookups (called on every auth)
+    c.execute("CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);")
     
     # Lock Queue
     c.execute("""
