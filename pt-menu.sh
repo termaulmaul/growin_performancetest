@@ -1053,10 +1053,23 @@ ssh_menu() {
 
           local scenario=""
           if [[ ${#bps[@]} -gt 0 ]]; then
-            local scen_choices=("All" "${bps[@]}" "← Back")
-            local scen_sel; scen_sel=$(pick_fzf "Scenario (BP)>" "${scen_choices[@]}")
-            [[ -z "$scen_sel" || "$scen_sel" == "← Back" ]] && continue
-            [[ "$scen_sel" != "All" ]] && scenario="$scen_sel"
+            local scen_choices=("All" "${bps[@]}")
+            echo -e "  ${DIM}TAB=mark multiple  ENTER=confirm  All=run every BP${RST}"
+            local scen_raw
+            scen_raw=$(pick_fzf_multi "Scenario (BP)>" "${scen_choices[@]}")
+            [[ -z "$scen_raw" ]] && continue
+
+            # Parse multi-select: one per line → comma-separated
+            local -a scen_arr=()
+            while IFS= read -r bp_line; do
+              [[ -z "$bp_line" ]] && continue
+              [[ "$bp_line" == "All" ]] && { scen_arr=(); break; }
+              scen_arr+=("$bp_line")
+            done <<< "$scen_raw"
+
+            if [[ ${#scen_arr[@]} -gt 0 ]]; then
+              scenario=$(IFS=,; echo "${scen_arr[*]}")
+            fi
           else
             printf "  Scenario (BP) [BP001]: "; read -r scenario
             scenario="${scenario:-BP001}"
@@ -1078,6 +1091,8 @@ ssh_menu() {
           [[ -z "$runby" || "$runby" == "← Back" ]] && continue
 
           local scen_label="${scenario:-AllBP}"
+          # For report path: replace commas with dashes (BP001,BP002 → BP001-BP002)
+          scen_label="${scen_label//,/-}"
           local report_file="../../Report/$suite_name/$platform/$scen_label/$runby/${runby}_${mode}_$(date +%m%d)_$(date +%H%M)_${scen_label}.html"
 
           run_cmd="mkdir -p $(dirname "Report/$suite_name/$platform/$scen_label/$runby") && cd Script/$suite_name && ../../k6 run $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform --out dashboard=export=$report_file"
