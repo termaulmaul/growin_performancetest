@@ -70,5 +70,34 @@ def log(user, action, resource, detail):
         
     output_json("ok")
 
+
+@cli.command()
+@click.option('--limit', default=20, type=int, help='Number of recent entries to show')
+def tail(limit):
+    """Show the last N audit log entries (default 20)."""
+    conn = get_conn()
+    c = conn.cursor()
+    rows = c.execute("""
+        SELECT timestamp, user, action, resource, detail
+        FROM audit_log
+        ORDER BY id DESC
+        LIMIT ?
+    """, (limit,)).fetchall()
+
+    if not rows:
+        print("(no audit entries)")
+        return
+
+    print(f"{'TIMESTAMP':<28} {'USER':<25} {'ACTION':<14} {'RESOURCE':<18} DETAIL")
+    print("-" * 110)
+    for r in rows:
+        ts = (r['timestamp'] or '')[:26]
+        u = (r['user'] or '')[:24]
+        a = (r['action'] or '')[:13]
+        res = (r['resource'] or '')[:17]
+        d = (r['detail'] or '')[:40]
+        print(f"{ts:<28} {u:<25} {a:<14} {res:<18} {d}")
+
+
 if __name__ == '__main__':
     cli()

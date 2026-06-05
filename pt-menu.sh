@@ -259,20 +259,15 @@ Press Enter...'
         if [[ "$CLI_OK" == "true" ]]; then
           print_user_list_table "$CLI_DATA"
         else
-          echo -e "  ${RED}✘ ${CLI_CODE:+[$CLI_CODE] }${CLI_MSG:-Failed to list users}${RST}"
+          if [[ "$CLI_CODE" == "denied" ]]; then
+            echo -e "  ${YLW}⚠ Permission denied for role '${PT_ROLE:-unknown}'.${RST}"
+            echo -e "  ${DIM}Only god or admin can list users.${RST}"
+            echo -e "  ${DIM}Login as a god account to manage users.${RST}"
+          else
+            echo -e "  ${RED}✘ ${CLI_CODE:+[$CLI_CODE] }${CLI_MSG:-Failed to list users}${RST}"
+          fi
         fi
         read -r -p $'\nPress Enter...'
-        ;;
-users = d.get('data', {}).get('users', [])
-print(f"  {'Username':<12} {'Role':<10} {'Locked':<8} {'Last Login'}")
-print('  ' + '-'*55)
-for u in users:
-    locked = 'YES' if u['is_locked'] else 'no'
-    ll = (u.get('last_login') or 'never')[:19]
-    print(f"  {u['username']:<12} {u['role']:<10} {locked:<8} {ll}")
-"
-        read -r -p $'
-Press Enter...'
         ;;
       "[2] Create User")
         if [[ "$PT_ROLE" != "god" ]]; then
