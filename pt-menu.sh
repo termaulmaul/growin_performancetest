@@ -1140,7 +1140,7 @@ mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
 echo '[remote] Running k6...'
 set -o pipefail
 echo '[remote] Running k6...'
-\$K6_BIN run --compatibility-mode=extended $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=$_test_pwd -e TEST_PIN=$_test_pin --out dashboard=export=$report_file 2>&1 | sed -E 's/^time="[^"]*" level=error msg="(.*)" source=console$/  \x1b[31m✘  \1\x1b[0m/;s/^time="[^"]*" level=warning msg="(.*)" source=console$/  \x1b[33m⚠  \1\x1b[0m/;s/^time="[^"]*" level=info msg="(.*)" source=console$/  \1/'
+\$K6_BIN run --compatibility-mode=extended $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=$_test_pwd -e TEST_PIN=$_test_pin --out dashboard=export=$report_file 2>&1 | grep -v "source=console"
 RC=\$?
 echo '[remote] k6 exit code:' \$RC
 cd /tmp && rm -rf $_remote_dir $(basename $_tarball)
@@ -1227,7 +1227,7 @@ echo '[remote] Arch:' \$ARCH '| k6:' \$K6_BIN
 cd Script/$suite_name
 mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
 set -o pipefail
-\$K6_BIN run --compatibility-mode=extended $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=$_test_pwd -e TEST_PIN=$_test_pin --out dashboard=export=$report_file 2>&1 | sed -E 's/^time="[^"]*" level=error msg="(.*)" source=console$/  \x1b[31m✘  \1\x1b[0m/;s/^time="[^"]*" level=warning msg="(.*)" source=console$/  \x1b[33m⚠  \1\x1b[0m/;s/^time="[^"]*" level=info msg="(.*)" source=console$/  \1/'
+\$K6_BIN run --compatibility-mode=extended $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=$_test_pwd -e TEST_PIN=$_test_pin --out dashboard=export=$report_file 2>&1 | grep -v "source=console"
 RC=\$?
 cd /tmp && rm -rf $_remote_dir $(basename $_tarball)
 exit \$RC"
