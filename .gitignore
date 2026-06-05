@@ -36,6 +36,9 @@ desktop.ini
 TEST*.xml
 results/
 artifacts/results/
+docker-local-pt/results/*.json
+docker-local-pt/results/*.md
+!docker-local-pt/results/.gitkeep
 .audit_guard_report.md
 .audit_guard_report.json
 .check_syntax_report.json
