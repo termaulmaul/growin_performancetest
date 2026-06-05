@@ -554,6 +554,35 @@ brew install python  # macOS
 sudo apt install python3 python3-pip  # Linux
 ```
 
+### `User Management → List Users` shows "Permission denied"
+The user account you logged in as has a role below `admin`/`god` precedence. Only `god` or `admin` can list/manage users.
+- Login as a `god` account (e.g. `MaulanaRafiNurdiansyah`) instead.
+- Check current user roles:
+  ```bash
+  python3 -c "import sys; sys.path.append('lib/python'); from db import get_conn;
+  c=get_conn().cursor();
+  c.execute('SELECT u.username, r.name as role, r.precedence FROM users u JOIN roles r ON u.role_id=r.id');
+  [print(dict(r)) for r in c.fetchall()]"
+  ```
+
+### Tools menu — `pt-resmon` / `pt-rescue` shows help instead of running
+This was fixed in PR #8. If you see this on an old checkout, run:
+```bash
+git pull origin main
+```
+
+### Missing Python packages (`psutil`, `apscheduler`, `validators`, `bcrypt`)
+Install the full dependency set:
+```bash
+pip install -r requirements.txt
+```
+
+Affected menus when missing:
+- `psutil` → `[D] Dashboard`, `[T] Tools → Resource Monitor`
+- `apscheduler` → `[3] Cron Scheduler`
+- `validators` → `[4] AI Slope`
+- `bcrypt` → `pt-auth` login, `pt-rescue` password reset
+
 ---
 
 ## Contributing

@@ -263,17 +263,6 @@ Press Enter...'
         fi
         read -r -p $'\nPress Enter...'
         ;;
-users = d.get('data', {}).get('users', [])
-print(f"  {'Username':<12} {'Role':<10} {'Locked':<8} {'Last Login'}")
-print('  ' + '-'*55)
-for u in users:
-    locked = 'YES' if u['is_locked'] else 'no'
-    ll = (u.get('last_login') or 'never')[:19]
-    print(f"  {u['username']:<12} {u['role']:<10} {locked:<8} {ll}")
-"
-        read -r -p $'
-Press Enter...'
-        ;;
       "[2] Create User")
         if [[ "$PT_ROLE" != "god" ]]; then
           echo -e "  ${RED}Only god can create users.${RST}"
@@ -567,7 +556,8 @@ try:
     d = json.loads(raw[:end])
 except Exception as e:
     sys.exit(1)
-ok = d.get("ok", False)
+# pt-usermgmt uses {"status": "ok", ...}; others may use {"ok": true, ...}
+ok = d.get("ok", False) or (d.get("status") == "ok")
 code = d.get("code", "")
 msg = d.get("message", d.get("error", ""))
 data = d.get("data", {})
@@ -1945,7 +1935,7 @@ tools_menu() {
 
     case "$sel" in
       "[1] Resource Monitor"*)
-        python3 "$PROJECT_DIR/bin/pt-resmon" 2>/dev/null || echo -e "  ${YLW}pt-resmon not available${RST}"
+        python3 "$PROJECT_DIR/bin/pt-resmon" snapshot --user "${PT_USER:-maul}" 2>/dev/null || echo -e "  ${YLW}pt-resmon not available (try: pip install psutil)${RST}"
         read -r -p $'\nPress Enter...'
         ;;
       "[2] Bootstrap Check"*)
@@ -1956,7 +1946,7 @@ tools_menu() {
         if [[ "$PT_ROLE" != "god" ]]; then
           echo -e "  ${RED}God-only command.${RST}"; read -r -p $'\nPress Enter...'; continue
         fi
-        python3 "$PROJECT_DIR/bin/pt-rescue" 2>/dev/null || echo -e "  ${YLW}pt-rescue not available${RST}"
+        python3 "$PROJECT_DIR/bin/pt-rescue" interactive 2>/dev/null || echo -e "  ${YLW}pt-rescue not available (try: pip install bcrypt)${RST}"
         read -r -p $'\nPress Enter...'
         ;;
       "[4] Live Dashboard"*)
@@ -1964,7 +1954,7 @@ tools_menu() {
         ;;
       "[5] Audit Log Tail"*)
         echo -e "\n${CYN}${BLD}  ── Audit Log (last 20) ──${RST}\n"
-        python3 "$PROJECT_DIR/bin/pt-audit" tail 20 2>/dev/null || echo -e "  ${YLW}pt-audit not available${RST}"
+        python3 "$PROJECT_DIR/bin/pt-audit" tail --limit 20 2>/dev/null || echo -e "  ${YLW}pt-audit not available${RST}"
         read -r -p $'\nPress Enter...'
         ;;
       "[6] Lock Status"*)

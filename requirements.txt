@@ -1,0 +1,23 @@
+# Python dependencies for Growin PT framework
+#
+# Install: pip install -r requirements.txt
+#
+# Tested with Python 3.9+
+
+# Authentication / passwords
+bcrypt>=4.0.0
+
+# CLI framework
+click>=8.0.0
+
+# Resource monitoring (pt-resmon, pt-dashboard)
+psutil>=5.9.0
+
+# Cron scheduler (pt-scheduler, [3] Cron Scheduler menu)
+apscheduler>=3.10.0
+
+# URL validation (pt-bootstrap-check, [4] AI Slope menu)
+validators>=0.20.0
+
+# YAML config loading
+pyyaml>=6.0
