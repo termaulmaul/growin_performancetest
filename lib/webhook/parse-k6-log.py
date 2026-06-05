@@ -91,6 +91,49 @@ if m_scen: summary["scenario"] = m_scen.group(1).strip()
 m_plat = re.search(r'PLATFORM\s*:\s*([^\n]+)', text)
 if m_plat: summary["platform"] = m_plat.group(1).strip()
 
+# ── Extract k6 summary export (custom metrics) from log markers ─────────
+import json as _json
+k6_start = text.find('K6_SUMMARY_JSON_START')
+k6_end = text.find('K6_SUMMARY_JSON_END')
+if k6_start != -1 and k6_end != -1:
+    try:
+        json_str = text[k6_start + len('K6_SUMMARY_JSON_START'):k6_end].strip()
+        k6_data = _json.loads(json_str)
+        # Extract custom metrics (duration_*, error_rate_*, sample_*)
+        raw_metrics = k6_data.get('metrics', {})
+        custom = {}
+        for key, val in raw_metrics.items():
+            for prefix in ('duration_', 'error_rate_', 'error_count_', 'sample_', 'waiting_'):
+                if key.startswith(prefix):
+                    vals = val.get('values', val) if isinstance(val, dict) else {}
+                    custom[key] = {
+                        'avg': vals.get('avg', 0),
+                        'min': vals.get('min', 0),
+                        'max': vals.get('max', 0),
+                        'med': vals.get('med', 0),
+                        'p95': vals.get('p(95)', vals.get('p95', 0)),
+                        'count': vals.get('count', 0),
+                        'rate': vals.get('rate', 0),
+                    }
+                    break
+        if custom:
+            summary['custom_metrics'] = custom
+        # Also update aggregate metrics from export if available
+        if 'http_req_duration' in raw_metrics:
+            dur_vals = raw_metrics['http_req_duration'].get('values', {})
+            if dur_vals.get('p(95)', 0) > 0:
+                summary['http_req_duration_p95'] = dur_vals['p(95)']
+                summary['http_req_duration_avg'] = dur_vals.get('avg', 0)
+        if 'http_reqs' in raw_metrics:
+            req_vals = raw_metrics['http_reqs'].get('values', {})
+            if req_vals.get('count', 0) > 0:
+                summary['http_reqs'] = req_vals['count']
+        if 'http_req_failed' in raw_metrics:
+            fail_vals = raw_metrics['http_req_failed'].get('values', {})
+            summary['http_req_failed_rate'] = fail_vals.get('rate', 0)
+    except Exception as e:
+        print(f"[parse-k6-log] Warning: Failed to parse k6 export JSON: {e}", file=sys.stderr)
+
 # ── Extract top HTTP errors from log ─────────────────────────────────────
 from collections import defaultdict
 error_counts = defaultdict(lambda: {"count": 0, "status": "", "endpoint": ""})
