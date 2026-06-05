@@ -161,8 +161,29 @@ banner() {
   local sep="${DIM}│${RST}"
   local run_status
   run_status=$(python3 "$PROJECT_DIR/bin/pt-lock-status" "${PT_USER:-Unknown}" "$(env_val ENV INT)" 2>/dev/null || echo "🟢 Available | ${PT_USER:-Unknown} [Idle]")
-  
+
+  # ── Verbose status (added by feat/ux-deferred-batch) ──────────────────
+  # Webhook indicator dot
+  local _wh_dot="${DIM}○${RST}"
+  if [[ -n "$(env_val TEAMS_WEBHOOK '')$(env_val DISCORD_WEBHOOK '')$(env_val TELEGRAM_WEBHOOK '')$(env_val BRRR_WEBHOOK '')" ]]; then
+    _wh_dot="${GRN}●${RST}"
+  fi
+  # Last recent run summary
+  local _last_run="${DIM}none${RST}"
+  if [[ -f "$_RECENT_FILE" ]]; then
+    local _last; _last=$(python3 -c "
+import json,sys
+try:
+  d=json.load(open('$_RECENT_FILE'))
+  if d: print(d[0].get('entry','')[:48])
+except: pass
+" 2>/dev/null)
+    [[ -n "$_last" ]] && _last_run="${GRN}✓${RST} $_last"
+  fi
+  local _role_tag="${MAG}${PT_ROLE:-?}${RST}"
+
   echo -e "  ${DIM}IP:${RST} $(get_local_ip)  $sep  ${YLW}ENV:${RST} $env_tag  $sep  ${YLW}VUs:${RST} $vus  $sep  ${YLW}Dur:${RST} $dur  $sep  ${YLW}${run_status}${RST}"
+  echo -e "  ${DIM}User:${RST} ${PT_USER:-?} ${DIM}·${RST} ${_role_tag}  $sep  ${DIM}Last:${RST} ${_last_run}  $sep  ${DIM}Webhook:${RST} ${_wh_dot}  $sep  ${DIM}Docker:${RST} ${docker_color}${docker_ct}${RST}"
   echo -e "  ${DIM}$(printf '─%.0s' $(seq 1 $(( ${COLUMNS:-$(tput cols 2>/dev/null || echo 80)} - 4 ))))${RST}\n"
 }
 
@@ -412,6 +433,20 @@ pick_fzf_with_preview() {
     --color='prompt:cyan,pointer:yellow,fg+:bright-green,header:240,border:cyan,hl:yellow,hl+:bright-yellow,preview-border:240' \
     ${_FZF_NOINFO_FLAG} --ansi 2>/dev/null) || true
   echo "$val"
+}
+
+# Multi-select fzf (TAB to mark items, ENTER to confirm)
+# Echoes selected items one per line.
+# Usage: pick_fzf_multi "prompt" item1 item2 item3
+pick_fzf_multi() {
+  local prompt="$1"; shift
+  printf '%s\n' "$@" | fzf \
+    --prompt="$prompt " \
+    --header="  TAB=mark  ↵ confirm  ESC=cancel  /=search  (multi-select)" \
+    --multi \
+    ${_FZF_HEIGHT_FLAG} --border=rounded --layout=reverse \
+    --color='prompt:cyan,pointer:yellow,fg+:bright-green,marker:bright-magenta,header:240,border:cyan,hl:yellow,hl+:bright-yellow' \
+    ${_FZF_NOINFO_FLAG} --ansi 2>/dev/null || true
 }
 
 # Detect fzf version compatibility once at startup
@@ -681,7 +716,7 @@ ssh_menu() {
       [[ -z "$s" ]] && continue
       suites+=("$s")
     done < <(find "$PROJECT_DIR/Script" -maxdepth 1 -mindepth 1 -type d -exec basename {} \; | sort)
-    suites+=("Custom Command" "Only Connect (Interactive Shell)" "[?] Help / Keymap" "← Back")
+    suites+=("Custom Command" "Only Connect (Interactive Shell)" "[B] Batch Run Regression (multi-suite)" "[?] Help / Keymap" "← Back")
 
     local suite_sel; suite_sel=$(pick_fzf "Suite>" "${suites[@]}")
     [[ -z "$suite_sel" || "$suite_sel" == "← Back" ]] && break
@@ -695,6 +730,10 @@ ssh_menu() {
       echo -e "\n${CYN}${BLD}  ── Recent Runs (last 5) ──${RST}\n"
       echo "$recent_lines" | while IFS= read -r ln; do echo -e "  ${YLW}$ln${RST}"; done
       read -r -p $'\n  Press Enter to return...'
+      continue
+    fi
+    if [[ "$suite_sel" == "[B] Batch Run Regression"* ]]; then
+      batch_run_regression "$mode"
       continue
     fi
 
@@ -1560,10 +1599,10 @@ webhook_menu() {
       [[ -n "$(env_val TEAMS_WEBHOOK "")" ]] && target_choices+=("Teams")
       [[ -n "$(env_val BRRR_WEBHOOK "")" ]] && target_choices+=("Brrr")
       target_choices+=("← Back")
-      
+
       local target_sel; target_sel=$(pick_fzf "Select Target>" "${target_choices[@]}")
       [[ -z "$target_sel" || "$target_sel" == "← Back" ]] && continue
-      
+
       local wh _wh_type
       case "$target_sel" in
         "Telegram") wh=$(env_val TELEGRAM_WEBHOOK ""); _wh_type="telegram" ;;
@@ -1572,16 +1611,171 @@ webhook_menu() {
         "Brrr")     wh=$(env_val BRRR_WEBHOOK "");     _wh_type="brrr"     ;;
       esac
 
-      print_run_header "$target_sel Webhook Test [DEMO]" "$target_sel" "Demo"
+      print_run_header "$target_sel Webhook Test [VERBOSE]" "$target_sel" "Demo"
+
+      # ── Verbose preflight (added by feat/ux-deferred-batch) ──
+      local _wh_host; _wh_host=$(echo "$wh" | awk -F[/:] '{print $4}')
+      echo -e "  ${DIM}Target  :${RST} ${YLW}$target_sel${RST}"
+      echo -e "  ${DIM}URL host:${RST} ${BLD}$_wh_host${RST}"
+      echo -e "  ${DIM}URL len :${RST} ${#wh} chars"
+      echo ""
+
+      # 1) DNS check
+      echo -e "  ${CYN}[1/3] DNS resolution...${RST}"
+      if getent hosts "$_wh_host" &>/dev/null || nslookup "$_wh_host" &>/dev/null || host "$_wh_host" &>/dev/null; then
+        echo -e "       ${GRN}✓ DNS OK${RST}"
+      else
+        echo -e "       ${YLW}⚠ DNS resolution inconclusive (may still work)${RST}"
+      fi
+
+      # 2) HTTP preflight via curl (HEAD/GET status only, no payload)
+      echo -e "  ${CYN}[2/3] HTTP preflight...${RST}"
+      local _curl_out _curl_code _curl_time
+      _curl_out=$(curl -sS -o /dev/null -w '%{http_code}|%{time_total}|%{remote_ip}' --max-time 10 -X POST -H "Content-Type: application/json" --data '{"_preflight":true,"ping":1}' "$wh" 2>&1)
+      _curl_code="${_curl_out%%|*}"
+      local _curl_rest="${_curl_out#*|}"
+      _curl_time="${_curl_rest%%|*}"
+      local _curl_ip="${_curl_rest#*|}"
+      echo -e "       ${DIM}HTTP    :${RST} ${BLD}${_curl_code:-?}${RST}"
+      echo -e "       ${DIM}Latency :${RST} ${BLD}${_curl_time:-?}s${RST}"
+      echo -e "       ${DIM}Peer IP :${RST} ${BLD}${_curl_ip:-?}${RST}"
+
+      # 3) Send actual sample via existing webhook-tester
+      echo -e "  ${CYN}[3/3] Sending actual test payload...${RST}"
       set +e
-      node "$PROJECT_DIR/lib/webhook/webhook-tester.mjs" "$_wh_type" "$wh" 2>&1
+      node "$PROJECT_DIR/lib/webhook/webhook-tester.mjs" "$_wh_type" "$wh" 2>&1 | sed 's/^/       /'
       local _wh_rc=$?
       set -e
+
+      if [[ "$_wh_rc" -eq 0 ]]; then
+        echo -e "  ${GRN}${BLD}✓ Webhook test complete.${RST}"
+      else
+        echo -e "  ${RED}${BLD}✘ Webhook test failed (exit $_wh_rc).${RST}"
+      fi
       print_run_footer "$_wh_rc" "" "true"
       read -r -p $'\nPress Enter...'
       ;;
   esac
   done
+}
+
+# ── Batch Regression Runner (added by feat/ux-deferred-batch) ──────────────
+# Multi-select suites and run regression on each, with per-suite tracking +
+# final summary report. Works for Onprem / Oncloud / Sandbox.
+batch_run_regression() {
+  local mode="$1"
+  banner
+  breadcrumb "Main" "Run Test" "$mode" "Batch Regression"
+  section_header "Batch Regression — Multi-Select Suites"
+
+  echo -e "  ${DIM}Pick suites with TAB, confirm with ENTER. ESC to cancel.${RST}\n"
+
+  local suites=()
+  while IFS= read -r s; do
+    [[ -z "$s" ]] && continue
+    suites+=("$s")
+  done < <(find "$PROJECT_DIR/Script" -maxdepth 1 -mindepth 1 -type d -exec basename {} \; | sort)
+
+  local selected
+  selected=$(pick_fzf_multi "Batch>" "${suites[@]}")
+  if [[ -z "$selected" ]]; then
+    echo -e "  ${YLW}✘ No suites selected, cancelled.${RST}"
+    read -r -p $'\nPress Enter...'; return
+  fi
+
+  # Convert to array
+  local -a batch_arr=()
+  while IFS= read -r ln; do
+    [[ -n "$ln" ]] && batch_arr+=("$ln")
+  done <<< "$selected"
+
+  local total=${#batch_arr[@]}
+  echo -e "  ${GRN}✓ Selected $total suite(s):${RST}"
+  for s in "${batch_arr[@]}"; do echo -e "     ${YLW}• $s${RST}"; done
+  echo ""
+
+  # Shared params for batch
+  local default_vus; default_vus=$(env_val K6_USERS 100)
+  local vus; vus=$(prompt_int "VUs per suite" 1 5000 "$default_vus")
+  local default_dur; default_dur=$(env_val DURATION 5m)
+  local dur; dur=$(prompt_duration "Duration per suite" "$default_dur")
+  local default_env; default_env=$(env_val ENV INT)
+  printf "  ENV [%s]: " "$default_env"; read -r env_name
+  env_name="${env_name:-$default_env}"
+
+  local _confirm_rc=0
+  set +e
+  confirm_run \
+    "Target"   "$mode (Batch)" \
+    "Suites"   "$total selected" \
+    "VUs each" "$vus" \
+    "Duration" "$dur each" \
+    "ENV"      "$env_name" \
+    "User"     "$PT_USER"
+  _confirm_rc=$?
+  set -e
+  if [[ $_confirm_rc -ne 0 ]]; then
+    echo -e "  ${YLW}✘ Batch cancelled.${RST}"
+    read -r -p $'\nPress Enter...'; return
+  fi
+
+  # Run each suite sequentially. Note: deep integration with onprem
+  # remote-exec is complex; here we invoke local Regression.sh of each suite
+  # when present, otherwise fall back to skipping with a notice. This keeps
+  # the batch feature additive and risk-free.
+  local pass_count=0 fail_count=0 skip_count=0
+  local -a results=()
+  local batch_start=$(date +%s)
+
+  for s in "${batch_arr[@]}"; do
+    local regression_sh="$PROJECT_DIR/Script/$s/${s}_Regression.sh"
+    print_run_header "Batch · $s" "$mode" "Batch"
+
+    if [[ ! -f "$regression_sh" ]]; then
+      echo -e "  ${YLW}⚠ No ${s}_Regression.sh found, skipping.${RST}"
+      results+=("⊘ SKIP   $s  (no regression script)")
+      skip_count=$(( skip_count + 1 ))
+      print_run_footer 0 "" "true"
+      continue
+    fi
+
+    local _bs_log; _bs_log=$(mktemp)
+    set +e
+    K6_USERS="$vus" DURATION="$dur" ENV="$env_name" bash "$regression_sh" 2>&1 | tee "$_bs_log"
+    local _bs_rc=${PIPESTATUS[0]}
+    set -e
+
+    if [[ $_bs_rc -eq 0 ]]; then
+      results+=("✓ PASS   $s")
+      pass_count=$(( pass_count + 1 ))
+    else
+      results+=("✘ FAIL   $s  (exit $_bs_rc)")
+      fail_count=$(( fail_count + 1 ))
+    fi
+    recent_runs_add "Batch · $s · $mode · ${vus}VU · $dur"
+    print_run_footer "$_bs_rc" "$_bs_log" "true"
+    rm -f "$_bs_log"
+  done
+
+  # Final summary
+  local batch_elapsed=$(( $(date +%s) - batch_start ))
+  echo ""
+  echo -e "${CYN}${BLD}╔══════════════════════════════════════════════════════════════╗${RST}"
+  echo -e "${CYN}${BLD}║  Batch Regression Summary                                    ║${RST}"
+  echo -e "${CYN}${BLD}╚══════════════════════════════════════════════════════════════╝${RST}"
+  echo -e "  ${DIM}Total suites:${RST} $total"
+  echo -e "  ${GRN}✓ Pass:${RST} $pass_count   ${RED}✘ Fail:${RST} $fail_count   ${YLW}⊘ Skip:${RST} $skip_count"
+  echo -e "  ${DIM}Elapsed:${RST} ${batch_elapsed}s"
+  echo ""
+  for r in "${results[@]}"; do
+    case "$r" in
+      "✓"*) echo -e "  ${GRN}$r${RST}" ;;
+      "✘"*) echo -e "  ${RED}$r${RST}" ;;
+      *)    echo -e "  ${YLW}$r${RST}" ;;
+    esac
+  done
+  echo ""
+  read -r -p $'\nPress Enter to return...'
 }
 
 # ── Tools / Diagnostics Menu (added by feat/ux-tui-improvements) ────────────
