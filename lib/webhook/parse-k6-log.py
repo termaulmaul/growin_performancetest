@@ -106,7 +106,7 @@ for line in text.split("\n"):
         error_counts[key]["endpoint"] = endpoint
         continue
     # Pattern: FAILED - Status: NNN || Body
-    m = _re.search(r'FAILED.*?Status:\s*(\d{3}).*?(/[^\s"'|\\]+)', line)
+    m = _re.search(r"FAILED.*?Status:[\s]*(\d{3}).*?(/[^\s|]+)", line)
     if m and int(m.group(1)) >= 400:
         endpoint, status = m.group(2).split("?")[0], m.group(1)
         key = status + ":" + endpoint
