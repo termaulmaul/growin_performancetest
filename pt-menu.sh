@@ -1105,6 +1105,8 @@ ls -d Script/'$suite_name' 2>&1 | head -1 || { echo "FATAL: Script/'$suite_name'
           fi
 
           # Extract + run on remote (uses bundled k6 v1.4.0 from tarball)
+          local _test_pwd; _test_pwd=$(env_val TEST_PASSWORD '')
+          local _test_pin; _test_pin=$(env_val TEST_PIN '')
           local _remote_cmd="set -e
 mkdir -p $_remote_dir
 cd $_remote_dir
@@ -1136,7 +1138,7 @@ echo '[remote] Arch:' \$ARCH ' | Using k6:' \$K6_BIN \"(\$(\$K6_BIN version | he
 cd Script/$suite_name
 mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
 echo '[remote] Running k6...'
-\$K6_BIN run --compatibility-mode=extended $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform --out dashboard=export=$report_file
+\$K6_BIN run --compatibility-mode=extended $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=$_test_pwd -e TEST_PIN=$_test_pin --out dashboard=export=$report_file
 RC=\$?
 echo '[remote] k6 exit code:' \$RC
 cd /tmp && rm -rf $_remote_dir $(basename $_tarball)
@@ -1200,6 +1202,8 @@ exit \$RC"
             read -r -p $'\nPress Enter...'; continue
           fi
 
+          local _test_pwd; _test_pwd=$(env_val TEST_PASSWORD '')
+          local _test_pin; _test_pin=$(env_val TEST_PIN '')
           local _remote_cmd="set -e
 mkdir -p $_remote_dir
 cd $_remote_dir
@@ -1220,7 +1224,7 @@ chmod +x \$K6_BIN 2>/dev/null || true
 echo '[remote] Arch:' \$ARCH '| k6:' \$K6_BIN
 cd Script/$suite_name
 mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
-\$K6_BIN run --compatibility-mode=extended $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform --out dashboard=export=$report_file
+\$K6_BIN run --compatibility-mode=extended $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=$_test_pwd -e TEST_PIN=$_test_pin --out dashboard=export=$report_file
 RC=\$?
 cd /tmp && rm -rf $_remote_dir $(basename $_tarball)
 exit \$RC"
