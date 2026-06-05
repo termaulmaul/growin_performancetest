@@ -389,11 +389,28 @@ pick_fzf() {
   local val
   val=$(printf '%s\n' "$@" | fzf \
     --prompt="$prompt " \
-    --header="  ↑↓ navigate  ↵ select  ESC=back  Ctrl-C=exit" \
+    --header="  ↑↓ navigate  ↵ select  ESC=back  Ctrl-C=exit  ?=help" \
     ${_FZF_HEIGHT_FLAG} --border=rounded --layout=reverse \
     --color='prompt:cyan,pointer:yellow,fg+:bright-green,header:240,border:cyan,hl:yellow,hl+:bright-yellow' \
     ${_FZF_NOINFO_FLAG} --ansi 2>/dev/null) || true
   _FZF_KEY=""
+  echo "$val"
+}
+
+# fzf with preview window (for script picker)
+# Usage: pick_fzf_with_preview "prompt" "preview-cmd-template-with-{}" item1 item2 ...
+pick_fzf_with_preview() {
+  local prompt="$1"; shift
+  local preview_cmd="$1"; shift
+  local val
+  val=$(printf '%s\n' "$@" | fzf \
+    --prompt="$prompt " \
+    --header="  ↑↓ navigate  ↵ select  ESC=back  /=search  →←=preview-scroll" \
+    ${_FZF_HEIGHT_FLAG} --border=rounded --layout=reverse \
+    --preview="$preview_cmd" \
+    --preview-window='right:50%:wrap' \
+    --color='prompt:cyan,pointer:yellow,fg+:bright-green,header:240,border:cyan,hl:yellow,hl+:bright-yellow,preview-border:240' \
+    ${_FZF_NOINFO_FLAG} --ansi 2>/dev/null) || true
   echo "$val"
 }
 
@@ -425,6 +442,167 @@ section_header() {
   printf "${CYN}${BLD}║ ${BLD}%-$(( w - 2 ))s ${CYN}${BLD}║${RST}\n" "$title"
   echo -e "${CYN}${BLD}╚${bar}╝${RST}\n"
 }
+
+# ── UX Helpers (added by feat/ux-tui-improvements) ──────────────────────────
+# Breadcrumb display: breadcrumb "Main" "Run Test" "Onprem"
+breadcrumb() {
+  local sep="${DIM} ▸ ${RST}"
+  local out=""
+  local first=1
+  for crumb in "$@"; do
+    if [[ $first -eq 1 ]]; then
+      out="${CYN}${BLD}${crumb}${RST}"
+      first=0
+    else
+      out="${out}${sep}${YLW}${crumb}${RST}"
+    fi
+  done
+  echo -e "  ${DIM}📍${RST} ${out}\n"
+}
+
+# Validated integer prompt with min/max/default + retry on invalid
+# Usage: prompt_int "VUs" 1 5000 100  →  echoes valid int to stdout
+prompt_int() {
+  local label="$1" min="$2" max="$3" default="$4"
+  local val=""
+  while true; do
+    printf "  %s [%s] (range %s-%s): " "$label" "$default" "$min" "$max" >&2
+    read -r val
+    val="${val:-$default}"
+    if [[ ! "$val" =~ ^[0-9]+$ ]]; then
+      echo -e "  ${RED}✘ must be a positive integer${RST}" >&2
+      continue
+    fi
+    if (( val < min || val > max )); then
+      echo -e "  ${RED}✘ out of range ($min - $max)${RST}" >&2
+      continue
+    fi
+    echo "$val"
+    return 0
+  done
+}
+
+# Duration validator (k6 format: 30s, 5m, 1h, 1h30m)
+prompt_duration() {
+  local label="$1" default="$2"
+  local val=""
+  while true; do
+    printf "  %s [%s] (e.g. 30s, 5m, 1h, 1h30m): " "$label" "$default" >&2
+    read -r val
+    val="${val:-$default}"
+    if [[ ! "$val" =~ ^[0-9]+(s|m|h)(\s*[0-9]+(s|m))?$ ]]; then
+      echo -e "  ${RED}✘ invalid k6 duration format${RST}" >&2
+      continue
+    fi
+    echo "$val"
+    return 0
+  done
+}
+
+# Pre-execution confirmation summary. Returns 0=run, 1=cancel
+# Usage: confirm_run "Suite" "Growin_OMO" "Platform" "Web" "VUs" "335" ...
+confirm_run() {
+  local term_w; term_w="${COLUMNS:-$(tput cols 2>/dev/null || echo 80)}"
+  local w=$(( term_w - 4 ))
+  local bar; bar=$(printf '─%.0s' $(seq 1 $w))
+  echo -e "\n${YLW}${BLD}┌─ About to run${RST}"
+  echo -e "${YLW}${BLD}│${RST}"
+  while [[ $# -gt 0 ]]; do
+    local k="$1" v="${2:-}"
+    shift 2 2>/dev/null || shift
+    printf "${YLW}${BLD}│${RST}   ${DIM}%-12s${RST} ${BLD}%s${RST}\n" "$k:" "$v"
+  done
+  echo -e "${YLW}${BLD}│${RST}"
+  echo -e "${YLW}${BLD}└${bar}${RST}"
+  printf "  ${GRN}[Y]${RST} Run   ${YLW}[E]${RST} Edit   ${RED}[C]${RST} Cancel  : "
+  local ans
+  read -rn1 ans
+  echo ""
+  case "$ans" in
+    [Yy]|"") return 0 ;;
+    [Ee])    return 2 ;;
+    *)       return 1 ;;
+  esac
+}
+
+# Recent runs tracking (~/.pt/var/recent_runs.json, last 5)
+_RECENT_FILE="${HOME}/.pt/var/recent_runs.json"
+recent_runs_add() {
+  mkdir -p "$(dirname "$_RECENT_FILE")"
+  local entry="$1"
+  local now; now=$(date '+%Y-%m-%d %H:%M')
+  python3 - "$_RECENT_FILE" "$entry" "$now" <<'PYEOF' 2>/dev/null || true
+import json, sys, os
+f, entry, ts = sys.argv[1], sys.argv[2], sys.argv[3]
+data = []
+if os.path.exists(f):
+    try: data = json.load(open(f))
+    except: data = []
+# Remove duplicates of same entry, prepend new
+data = [d for d in data if d.get("entry") != entry]
+data.insert(0, {"entry": entry, "ts": ts})
+data = data[:5]
+json.dump(data, open(f, "w"), indent=2)
+PYEOF
+}
+
+recent_runs_list() {
+  [[ ! -f "$_RECENT_FILE" ]] && return
+  python3 - "$_RECENT_FILE" <<'PYEOF' 2>/dev/null
+import json, sys
+try:
+    data = json.load(open(sys.argv[1]))
+    for i, d in enumerate(data, 1):
+        print(f"[R{i}] {d['ts']}  ·  {d['entry']}")
+except: pass
+PYEOF
+}
+
+# Global help / keymap overlay
+help_keymap() {
+  clear
+  section_header "Help — Keymap"
+  cat <<'EOF'
+
+  Navigation:
+    ↑ ↓ / j k        Move selection
+    Enter            Select / Confirm
+    ESC              Back to previous menu
+    Ctrl+C           Quit immediately
+    /                Search within fzf list
+    q / Q            Quit (from main menu)
+
+  Run prompts:
+    Y / Enter        Confirm and run
+    E                Edit parameters
+    C                Cancel run
+
+  Global:
+    ?                Show this help
+    [R1]–[R5]        Re-run from recent history
+    [T]              Tools / Diagnostics menu
+
+  Color legend:
+    🟢 Available    🟡 Occupied    🔴 Active run
+
+EOF
+  read -r -p $'  Press Enter to return...'
+}
+
+# Spinner with countdown and cancellable wait
+# Usage: spinner_with_timeout 30 "Connecting to onprem"
+spinner_with_timeout() {
+  local timeout="${1:-30}" msg="${2:-Working}"
+  local sp='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+  local i=0 t=0
+  while (( t < timeout )); do
+    printf "\r  \033[36m${sp:i++%${#sp}:1}\033[0m  %s... %ds / %ds  ${DIM}(ESC to cancel)${RST}" "$msg" "$t" "$timeout" >&2
+    sleep 1
+    t=$(( t + 1 ))
+  done
+  printf "\r\033[K" >&2
+}
+# ── /UX Helpers ─────────────────────────────────────────────────────────────
 
 _SPINNER_PID=""
 
@@ -469,6 +647,7 @@ _sshpass_cmd() {
 # ── Run Test Section ────────────────────────────────────────────────────────
 ssh_menu() {
   banner
+  breadcrumb "Main" "Run Test"
   section_header "Run Test — Select Target"
 
   local choices=(
@@ -489,16 +668,35 @@ ssh_menu() {
   esac
 
   while true; do
+    banner
+    breadcrumb "Main" "Run Test" "$mode"
     section_header "Select Suite"
     local suites=()
+    # Recent runs shortcut (added by feat/ux-tui-improvements)
+    local recent_lines; recent_lines=$(recent_runs_list 2>/dev/null || true)
+    if [[ -n "$recent_lines" ]]; then
+      suites+=("[R] Show Recent Runs")
+    fi
     while IFS= read -r s; do
       [[ -z "$s" ]] && continue
       suites+=("$s")
     done < <(find "$PROJECT_DIR/Script" -maxdepth 1 -mindepth 1 -type d -exec basename {} \; | sort)
-    suites+=("Custom Command" "Only Connect (Interactive Shell)" "← Back")
+    suites+=("Custom Command" "Only Connect (Interactive Shell)" "[?] Help / Keymap" "← Back")
 
     local suite_sel; suite_sel=$(pick_fzf "Suite>" "${suites[@]}")
     [[ -z "$suite_sel" || "$suite_sel" == "← Back" ]] && break
+
+    # Handle shortcuts before normal flow
+    if [[ "$suite_sel" == "[?] Help / Keymap" ]]; then
+      help_keymap
+      continue
+    fi
+    if [[ "$suite_sel" == "[R] Show Recent Runs" ]]; then
+      echo -e "\n${CYN}${BLD}  ── Recent Runs (last 5) ──${RST}\n"
+      echo "$recent_lines" | while IFS= read -r ln; do echo -e "  ${YLW}$ln${RST}"; done
+      read -r -p $'\n  Press Enter to return...'
+      continue
+    fi
 
     local run_cmd=""
     local _run_label=""
@@ -535,7 +733,8 @@ ssh_menu() {
           continue
         fi
 
-        local file_sel; file_sel=$(pick_fzf "Script file>" "${files[@]}")
+        local file_sel
+        file_sel=$(pick_fzf_with_preview "Script file>" "head -40 $suite_dir/{} 2>/dev/null" "${files[@]}")
         [[ -z "$file_sel" || "$file_sel" == "← Back" ]] && continue
 
         if [[ "$file_sel" == *.sh ]]; then
@@ -568,12 +767,10 @@ ssh_menu() {
           fi
 
           local default_vus; default_vus=$(env_val K6_USERS 100)
-          printf "  VUs / Users [%s]: " "$default_vus"; read -r vus
-          vus="${vus:-$default_vus}"
+          vus=$(prompt_int "VUs / Users" 1 5000 "$default_vus")
 
           local default_dur; default_dur=$(env_val DURATION 5m)
-          printf "  Duration [%s]: " "$default_dur"; read -r dur
-          dur="${dur:-$default_dur}"
+          dur=$(prompt_duration "Duration" "$default_dur")
           dur=$(normalize_duration "$dur")
 
           local default_env; default_env=$(env_val ENV INT)
@@ -638,6 +835,32 @@ ls -d Script/'$suite_name' 2>&1 | head -1 || { echo "FATAL: Script/'$suite_name'
           fi
         else
           # Suite run — UPLOAD script + Helper, then execute on remote
+
+          # ── Pre-run confirmation summary (added by feat/ux-tui-improvements) ──
+          local _confirm_rc=0
+          set +e
+          confirm_run \
+            "Target"   "Onprem (qa@10.184.120.48 via 10.82.15.72)" \
+            "Suite"    "$suite_name" \
+            "Script"   "$file_sel" \
+            "Platform" "$platform" \
+            "Scenario" "${scenario:-AllBP}" \
+            "VUs"      "$vus" \
+            "Duration" "$dur" \
+            "ENV"      "$env_name" \
+            "RUNBY"    "$runby" \
+            "User"     "$PT_USER"
+          _confirm_rc=$?
+          set -e
+          if [[ $_confirm_rc -eq 1 ]]; then
+            echo -e "  ${YLW}✘ Cancelled.${RST}"
+            read -r -p $'\nPress Enter...'; continue
+          elif [[ $_confirm_rc -eq 2 ]]; then
+            echo -e "  ${DIM}↩ Re-prompting parameters...${RST}"
+            continue
+          fi
+          recent_runs_add "Onprem · $suite_name · $platform · ${scenario:-AllBP} · ${vus}VU · $dur"
+
           local _stamp=$$_$(date +%s)
           local _tarball="/tmp/pt-upload-${_stamp}.tar.gz"
           local _remote_dir="/tmp/pt-run-${_stamp}"
@@ -1046,18 +1269,17 @@ for d in data:
         read -r -p $'\nPress Enter...'; rm -f "$_local_log"; return
       fi
 
-      local js_sel; js_sel=$(pick_fzf "Script>" "${js_files[@]}")
+      local js_sel
+      js_sel=$(pick_fzf_with_preview "Script>" "head -40 $PROJECT_DIR/{} 2>/dev/null" "${js_files[@]}")
       [[ -z "$js_sel" ]] && { rm -f "$_local_log"; return; }
 
       # Config
       local default_vus; default_vus=$(env_val K6_USERS 1)
-      printf "  VUs [%s]: " "$default_vus"; read -r vus
-      vus="${vus:-$default_vus}"
+      vus=$(prompt_int "VUs" 1 5000 "$default_vus")
 
       local default_dur; default_dur=$(env_val DURATION 30s)
-      printf "  Duration [%s]: " "$default_dur"; read -r dur
-      dur="${dur:-$default_dur}"
-	      dur=$(normalize_duration "$dur")
+      dur=$(prompt_duration "Duration" "$default_dur")
+      dur=$(normalize_duration "$dur")
 
       local default_env; default_env=$(env_val ENV INT)
       printf "  ENV [%s]: " "$default_env"; read -r env_name
@@ -1070,6 +1292,31 @@ for d in data:
       else
         printf "  Use mock-api (%s)? (y/n): " "$mock_url"; read -r use_mock
       fi
+
+      # ── Pre-run confirmation summary ───────────────────────────────────────
+      local _confirm_rc=0
+      set +e
+      confirm_run \
+        "Target"   "Sandbox (Local k6 binary) [DEMO]" \
+        "Suite"    "$suite_name" \
+        "Script"   "$(basename "$js_sel")" \
+        "VUs"      "$vus" \
+        "Duration" "$dur" \
+        "ENV"      "$env_name" \
+        "Mock API" "$([[ "$use_mock" == "y" ]] && echo "$mock_url" || echo "none")" \
+        "User"     "$PT_USER"
+      _confirm_rc=$?
+      set -e
+      if [[ $_confirm_rc -eq 1 ]]; then
+        echo -e "  ${YLW}✘ Cancelled.${RST}"
+        rm -f "$_local_log"
+        read -r -p $'\nPress Enter...'; return
+      elif [[ $_confirm_rc -eq 2 ]]; then
+        echo -e "  ${DIM}↩ Re-prompting...${RST}"
+        rm -f "$_local_log"
+        return
+      fi
+      recent_runs_add "Sandbox · $suite_name · $(basename "$js_sel") · ${vus}VU · $dur"
 
       print_run_header "$suite_name / $(basename "$js_sel")  [Sandbox · ${vus}VU · $dur · DEMO]" "k6 binary  (Sandbox Demo)"
       python3 "$PROJECT_DIR/pt-data/auth.py" set_run "$PT_USER" "$(basename "$js_sel")" "$dur" 2>/dev/null || true
@@ -1337,6 +1584,73 @@ webhook_menu() {
   done
 }
 
+# ── Tools / Diagnostics Menu (added by feat/ux-tui-improvements) ────────────
+tools_menu() {
+  while true; do
+    banner
+    breadcrumb "Main" "Tools / Diagnostics"
+    section_header "Tools / Diagnostics"
+
+    local choices=(
+      "[1] Resource Monitor (pt-resmon — CPU/Mem/Load)"
+      "[2] Bootstrap Check (pt-bootstrap-check — verify install)"
+      "[3] Emergency Rescue (pt-rescue — reset god password)"
+      "[4] Live Dashboard (pt-dashboard — NOC view)"
+      "[5] Audit Log Tail (pt-audit — last 20 entries)"
+      "[6] Lock Status (pt-lock-status — env locks)"
+      "[7] Show Recent Runs"
+      "[?] Help / Keymap"
+      "[0] Back"
+    )
+    local sel; sel=$(pick_fzf "Tool>" "${choices[@]}")
+    [[ -z "$sel" || "$sel" == "[0] Back" ]] && return 0
+
+    case "$sel" in
+      "[1] Resource Monitor"*)
+        python3 "$PROJECT_DIR/bin/pt-resmon" 2>/dev/null || echo -e "  ${YLW}pt-resmon not available${RST}"
+        read -r -p $'\nPress Enter...'
+        ;;
+      "[2] Bootstrap Check"*)
+        python3 "$PROJECT_DIR/bin/pt-bootstrap-check" 2>/dev/null || echo -e "  ${YLW}pt-bootstrap-check not available${RST}"
+        read -r -p $'\nPress Enter...'
+        ;;
+      "[3] Emergency Rescue"*)
+        if [[ "$PT_ROLE" != "god" ]]; then
+          echo -e "  ${RED}God-only command.${RST}"; read -r -p $'\nPress Enter...'; continue
+        fi
+        python3 "$PROJECT_DIR/bin/pt-rescue" 2>/dev/null || echo -e "  ${YLW}pt-rescue not available${RST}"
+        read -r -p $'\nPress Enter...'
+        ;;
+      "[4] Live Dashboard"*)
+        bash "$PROJECT_DIR/bin/pt-dashboard" 2>/dev/null || echo -e "  ${YLW}pt-dashboard not available${RST}"
+        ;;
+      "[5] Audit Log Tail"*)
+        echo -e "\n${CYN}${BLD}  ── Audit Log (last 20) ──${RST}\n"
+        python3 "$PROJECT_DIR/bin/pt-audit" tail 20 2>/dev/null || echo -e "  ${YLW}pt-audit not available${RST}"
+        read -r -p $'\nPress Enter...'
+        ;;
+      "[6] Lock Status"*)
+        echo -e "\n${CYN}${BLD}  ── Active Locks ──${RST}\n"
+        python3 "$PROJECT_DIR/bin/pt-lock-status" "${PT_USER:-unknown}" "$(env_val ENV INT)" 2>/dev/null || echo -e "  ${YLW}pt-lock-status not available${RST}"
+        read -r -p $'\nPress Enter...'
+        ;;
+      "[7] Show Recent Runs")
+        echo -e "\n${CYN}${BLD}  ── Recent Runs (last 5) ──${RST}\n"
+        local recent; recent=$(recent_runs_list)
+        if [[ -z "$recent" ]]; then
+          echo -e "  ${DIM}No recent runs yet.${RST}"
+        else
+          echo "$recent" | while IFS= read -r ln; do echo -e "  ${YLW}$ln${RST}"; done
+        fi
+        read -r -p $'\nPress Enter...'
+        ;;
+      "[?] Help / Keymap")
+        help_keymap
+        ;;
+    esac
+  done
+}
+
 # ── Main Menu ───────────────────────────────────────────────────────────────
 main_menu() {
   pt_require_auth
@@ -1355,6 +1669,8 @@ main_menu() {
     [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" ]] && choices+=("[9] Webhooks")
     [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" ]] && choices+=("[D] Dashboard (Live Monitor)")
     [[ "$PT_ROLE" == "god" ]] && choices+=("[8] User Management")
+    choices+=("[T] Tools / Diagnostics")
+    choices+=("[?] Help / Keymap")
     choices+=("[Q] Quit")
 
     local sel; sel=$(pick_fzf "Action>" "${choices[@]}")
@@ -1371,6 +1687,8 @@ main_menu() {
       "[9] Webhooks"*) webhook_menu ;;
       "[8] User Management"*) user_mgmt_menu ;;
       "[D] Dashboard"*) bash "$PROJECT_DIR/bin/pt-dashboard" ;;
+      "[T] Tools"*) tools_menu ;;
+      "[?] Help"*) help_keymap ;;
       "[Q] Quit"|"") echo -e "\n${GRN}bye.${RST}\n"; exit 0 ;;
     esac
   done
