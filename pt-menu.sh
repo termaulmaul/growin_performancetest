@@ -1112,8 +1112,15 @@ tar -xzf /tmp/$(basename $_tarball)
 echo '[remote] Extracted at:' \$(pwd)
 ls -la Script/ | head -5
 # Detect arch and pick bundled k6 binary (uploaded with tarball)
+REPO_K6=''
+for _d in ~/growin_performancetest ~/mostng_performancetest_api /home/qa/growin_performancetest /home/qa/mostng_performancetest_api; do
+  if [ -x \"\$_d/k6\" ]; then REPO_K6=\"\$_d/k6\"; break; fi
+done
 ARCH=\$(uname -m)
-if [ \"\$ARCH\" = \"x86_64\" ] && [ -x ./k6-linux-amd64 ]; then
+if [ -n \"\$REPO_K6\" ]; then
+  K6_BIN=\"\$REPO_K6\"
+  echo \"[remote] Using repo k6: \$K6_BIN (\$(\$K6_BIN version | head -1))\"
+elif [ \"\$ARCH\" = \"x86_64\" ] && [ -x ./k6-linux-amd64 ]; then
   K6_BIN=./k6-linux-amd64
 elif [ \"\$ARCH\" = \"aarch64\" ] && [ -x ./k6-linux-arm64 ]; then
   K6_BIN=./k6-linux-arm64
