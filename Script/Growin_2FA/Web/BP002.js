@@ -97,7 +97,7 @@ export function BP002(data) {
                 const responseData = response.json();
                 // console.log(`Response : Response: ${response.body}`)
                 
-                if ((responseData && responseData.data)?.data && Array.isArray(responseData.data.data) && responseData.data.data.length > 0) {
+                if ((responseData && responseData.data ? responseData.data.data : null) && Array.isArray(responseData.data.data) && responseData.data.data.length > 0) {
                     const allDevices = responseData.data.data;
                     const allIds = allDevices.map(item => item.id);
                     

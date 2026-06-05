@@ -391,9 +391,9 @@ export function handleSummary(data) {
             if (!durationMetric) return; // API might not have been reached
 
             const avgRespTime = durationMetric.(values && values.med)          || 0;
-            const p95RespTime = durationMetric.values?.['p(95)']    || 0;
-            const errorRate   = (errorRateMetric && errorRateMetric.values)?.rate        || 0;
-            const totalReqs   = (sampleMetric && sampleMetric.values)?.count          || 0;
+            const p95RespTime = (durationMetric.values && durationMetric.values['p(95)'])    || 0;
+            const errorRate   = (errorRateMetric && errorRateMetric.values ? errorRateMetric.values.rate : null)        || 0;
+            const totalReqs   = (sampleMetric && sampleMetric.values ? sampleMetric.values.count : null)          || 0;
             const actualRps   = totalReqs / testDurationSec;
 
             const passRespTime  = p95RespTime < maxAvgRespTime;
