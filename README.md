@@ -4,7 +4,30 @@ Enterprise-grade **k6-based** performance testing suite for the Growin platform 
 
 Built on the **Kimi Enterprise Architecture RFC**, featuring terminal-native authentication, RBAC, environment concurrency locking, metric parsing, webhook notifications to Teams/Discord/Telegram/Brrr, and a live NOC-style dashboard.
 
-See [AGENTS.md](./AGENTS.md) and [CLAUDE.md](./CLAUDE.md) for QA automation engineer context and agent instructions.
+See [AGENTS.md](./AGENTS.md) and [CLAUDE.md](./CLAUDE.md) for QA automation engineer context and agent instructions. See [STRUCTURE.md](./STRUCTURE.md) for repository layout and [CHANGELOG.md](./CHANGELOG.md) for release history.
+
+---
+
+## 🆕 Recent Changes (v2.6.0 — 2026-06)
+
+Major UX overhaul completed across PRs #1–#5. Highlights:
+
+| Area | Improvement |
+|---|---|
+| Repo hygiene | 270 `.DS_Store` cleaned, k6 binaries untracked (-183MB), 78 `* copy*.js` purged, `.gitignore` hardened |
+| Navigation | Breadcrumb headers (`Main ▸ Run Test ▸ Onprem`), `?` global help keymap overlay |
+| Input validation | `prompt_int` (range + retry), `prompt_duration` (k6 format check) |
+| Pre-execution | `confirm_run` summary card with `[Y] Run · [E] Edit · [C] Cancel` |
+| Discovery | `[T] Tools / Diagnostics` menu exposes pt-resmon, pt-rescue, pt-dashboard, pt-audit, pt-lock-status |
+| Recent runs | Last 5 tracked in `~/.pt/var/recent_runs.json`, `[R] Recent` shortcut in suite picker |
+| Script picker | fzf preview window (`head -40` of file) |
+| Multi-suite | `[B] Batch Run Regression` — TAB to mark, ENTER to confirm, per-suite tracking + summary |
+| Webhook test | 3-step verbose (DNS → HTTP preflight → actual payload) with latency + peer IP |
+| ENV editor | Hybrid: inline key-value prompt, $EDITOR fallback, RBAC-aware summary |
+| Status bar | 2-line: User/Role · Last run · Webhook indicator · Docker count |
+| Docs | mermaid flowcharts fixed + updated to reflect current menu structure |
+
+`pt-menu.sh`: **1389 → 1901 lines** (+37%) — all additive, zero breaking changes.
 
 ---
 
@@ -36,23 +59,27 @@ It will prompt for the username and force-reset the password or unlock the accou
 main_menu
   [1] Run Test  (Onprem / Oncloud)
        └─ Pick Target → Onprem (SSH jump) / Oncloud (GCP IAP) / Sandbox Demo
-          └─ Pick Script → Suite / Custom / Interactive Shell
-             └─ Pick File → .sh runner / .js + Platform + Scenario + VUs + Duration
-                └─ SSH execute → Webhook notify → Back to main
+          └─ Pick Suite (with [R] Recent · [B] Batch · [?] Help shortcuts)
+             └─ Pick File (fzf preview window)
+                └─ Configure VUs / Duration / ENV / RUNBY
+                   └─ Confirm Run [Y]es · [E]dit · [C]ancel
+                      └─ k6 execute → Report → Webhook notify
   [2] Sandbox Demo  (Local Mock — k6 binary)
-       └─ Pick Suite → Mock API or Direct k6 → Summary table → Back to main
+       └─ Mock-API stack or Direct k6
   [3] Cron Scheduler  →  Add / Pause / Resume / Remove jobs
   [4] AI Slope (Code Quality)  →  Scan scripts for issues
-  [5] ENV Editor  →  Inline edit configs/pt.env
+  [5] ENV Editor  →  Inline edit · $EDITOR · Show summary
   [6] Docker Stack  →  Start / Stop / Logs
   [7] Open Project Dir
   [8] User Management  (god only)
-  [9] Webhooks  →  Set / Test / Toggle (Telegram, Discord, Teams, Brrr)
+  [9] Webhooks  →  Set / Verbose Test / Toggle / Clear
   [D] Dashboard  →  Live CPU/RAM/Locks/Audit
+  [T] Tools / Diagnostics  →  pt-resmon · pt-rescue · pt-bootstrap · pt-audit · pt-lock-status
+  [?] Help / Keymap  →  Global keybind reference
   [Q] Quit
 ```
 
-**Navigation:** ↑↓ arrows, Enter to select, ESC/Backspace to go back, Ctrl-C to exit.
+**Navigation:** ↑↓ arrows, Enter to select, ESC/Backspace to go back, Ctrl-C to exit, TAB to mark (in batch mode), `/` to search within fzf lists.
 
 ---
 
