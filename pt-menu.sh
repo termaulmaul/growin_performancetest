@@ -191,8 +191,9 @@ except: pass
   fi
   local _role_tag="${MAG}${PT_ROLE:-?}${RST}"
 
-  echo -e "  ${DIM}IP:${RST} $(get_local_ip)  $sep  ${YLW}ENV:${RST} $env_tag  $sep  ${YLW}VUs:${RST} $vus  $sep  ${YLW}Dur:${RST} $dur  $sep  ${YLW}${run_status}${RST}"
-  echo -e "  ${DIM}User:${RST} ${PT_USER:-?} ${DIM}·${RST} ${_role_tag}  $sep  ${DIM}Last:${RST} ${_last_run}  $sep  ${DIM}Webhook:${RST} ${_wh_dot}  $sep  ${DIM}Docker:${RST} ${docker_color}${docker_ct}${RST}"
+  echo -e "  ${DIM}IP${RST} $(get_local_ip)  $sep  ${YLW}ENV${RST} $env_tag  $sep  ${YLW}VUs${RST} $vus  $sep  ${YLW}Dur${RST} $dur"
+  echo -e "  ${DIM}User${RST} ${PT_USER:-?} ${DIM}·${RST} ${_role_tag}  $sep  ${DIM}Webhook${RST} ${_wh_dot}  $sep  ${DIM}Docker${RST} ${docker_color}${docker_ct}${RST}  $sep  ${YLW}${run_status}${RST}"
+  [[ "$_last_run" != *"none"* ]] && echo -e "  ${DIM}Last${RST} ${_last_run}"
   echo -e "  ${DIM}$(printf '─%.0s' $(seq 1 $(( ${COLUMNS:-$(tput cols 2>/dev/null || echo 80)} - 4 ))))${RST}\n"
 }
 
