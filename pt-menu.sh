@@ -253,12 +253,16 @@ Press Enter...'
     case "$sel" in
       "[1] List Users")
         echo ""
-        python3 "$PROJECT_DIR/bin/pt-usermgmt" list-users --by "$PT_USER" 2>&1 | python3 -c "
-import json, sys
-raw = sys.stdin.read().strip()
-if not raw.startswith('{'): raw = raw[raw.find('{'):]
-try: d = json.loads(raw)
-except: d = {}
+        local raw
+        raw=$(python3 "$PROJECT_DIR/bin/pt-usermgmt" list-users --by "$PT_USER" 2>&1)
+        parse_cli_json "$raw"
+        if [[ "$CLI_OK" == "true" ]]; then
+          print_user_list_table "$CLI_DATA"
+        else
+          echo -e "  ${RED}✘ ${CLI_CODE:+[$CLI_CODE] }${CLI_MSG:-Failed to list users}${RST}"
+        fi
+        read -r -p $'\nPress Enter...'
+        ;;
 users = d.get('data', {}).get('users', [])
 print(f"  {'Username':<12} {'Role':<10} {'Locked':<8} {'Last Login'}")
 print('  ' + '-'*55)
@@ -293,7 +297,14 @@ Press Enter...'
         local la_choices=("lock" "unlock")
         local la; la=$(pick_fzf "Action>" "${la_choices[@]}")
         [[ -z "$la" ]] && continue
-        python3 "$PROJECT_DIR/bin/pt-usermgmt" "${la}-user" --by "$PT_USER" --username "$t_user" 2>&1 | python3 -c "import json,sys; raw=sys.stdin.read().strip(); raw=raw[raw.find('{'):] if '{' in raw else '{}'; d=json.loads(raw) if raw else {}; print(d.get('message', d.get('error','?')))"
+        local raw
+        raw=$(python3 "$PROJECT_DIR/bin/pt-usermgmt" "${la}-user" --by "$PT_USER" --username "$t_user" 2>&1)
+        parse_cli_json "$raw"
+        if [[ "$CLI_OK" == "true" ]]; then
+          echo -e "  ${GRN}✓ ${CLI_MSG:-User ${la}ed}${RST}"
+        else
+          echo -e "  ${RED}✘ ${CLI_CODE:+[$CLI_CODE] }${CLI_MSG:-Action failed}${RST}"
+        fi
         read -r -p $'
 Press Enter...'
         ;;
@@ -301,7 +312,14 @@ Press Enter...'
         printf "
   Username : "; read -r t_user
         [[ -z "$t_user" ]] && continue
-        python3 "$PROJECT_DIR/bin/pt-usermgmt" reset-password --by "$PT_USER" --username "$t_user" 2>&1 | python3 -c "import json,sys; raw=sys.stdin.read().strip(); raw=raw[raw.find('{'):] if '{' in raw else '{}'; d=json.loads(raw) if raw else {}; print(d.get('message', d.get('error','?')))"
+        local raw
+        raw=$(python3 "$PROJECT_DIR/bin/pt-usermgmt" reset-password --by "$PT_USER" --username "$t_user" 2>&1)
+        parse_cli_json "$raw"
+        if [[ "$CLI_OK" == "true" ]]; then
+          echo -e "  ${GRN}✓ ${CLI_MSG:-Password reset}${RST}"
+        else
+          echo -e "  ${RED}✘ ${CLI_CODE:+[$CLI_CODE] }${CLI_MSG:-Reset failed}${RST}"
+        fi
         read -r -p $'
 Press Enter...'
         ;;
@@ -316,7 +334,14 @@ Press Enter...'; continue
         local r2_choices=("operator" "admin" "readonly" "guest" "god")
         local n_role2; n_role2=$(pick_fzf "New Role>" "${r2_choices[@]}")
         [[ -z "$n_role2" ]] && continue
-        python3 "$PROJECT_DIR/bin/pt-usermgmt" assign-role --by "$PT_USER" --username "$t_user" --role "$n_role2" 2>&1 | python3 -c "import json,sys; raw=sys.stdin.read().strip(); raw=raw[raw.find('{'):] if '{' in raw else '{}'; d=json.loads(raw) if raw else {}; print(d.get('message', d.get('error','?')))"
+        local raw
+        raw=$(python3 "$PROJECT_DIR/bin/pt-usermgmt" assign-role --by "$PT_USER" --username "$t_user" --role "$n_role2" 2>&1)
+        parse_cli_json "$raw"
+        if [[ "$CLI_OK" == "true" ]]; then
+          echo -e "  ${GRN}✓ ${CLI_MSG:-Role assigned}${RST}"
+        else
+          echo -e "  ${RED}✘ ${CLI_CODE:+[$CLI_CODE] }${CLI_MSG:-Assign failed}${RST}"
+        fi
         read -r -p $'
 Press Enter...'
         ;;
@@ -331,7 +356,14 @@ Press Enter...'; continue
         printf "  Confirm delete '%s'? (yes/no): " "$t_user"; read -r confirm
         [[ "$confirm" != "yes" ]] && { echo "Cancelled."; read -r -p $'
 Press Enter...'; continue; }
-        python3 "$PROJECT_DIR/bin/pt-usermgmt" delete --by "$PT_USER" --username "$t_user" 2>&1 | python3 -c "import json,sys; raw=sys.stdin.read().strip(); raw=raw[raw.find('{'):] if '{' in raw else '{}'; d=json.loads(raw) if raw else {}; print(d.get('message', d.get('error','?')))"
+        local raw
+        raw=$(python3 "$PROJECT_DIR/bin/pt-usermgmt" delete --by "$PT_USER" --username "$t_user" --force 2>&1)
+        parse_cli_json "$raw"
+        if [[ "$CLI_OK" == "true" ]]; then
+          echo -e "  ${GRN}✓ ${CLI_MSG:-User deleted}${RST}"
+        else
+          echo -e "  ${RED}✘ ${CLI_CODE:+[$CLI_CODE] }${CLI_MSG:-Delete failed}${RST}"
+        fi
         read -r -p $'
 Press Enter...'
         ;;
@@ -477,6 +509,118 @@ section_header() {
   printf "${CYN}${BLD}║ ${BLD}%-$(( w - 2 ))s ${CYN}${BLD}║${RST}\n" "$title"
   echo -e "${CYN}${BLD}╚${bar}╝${RST}\n"
 }
+
+# ── CLI JSON parser (added by fix/menu-audit-user-mgmt) ─────────────────────
+# Parses JSON output from bin/pt-* CLIs robustly.
+# Strips any prefix noise before '{', then exports:
+#   CLI_OK      = "true" | "false"
+#   CLI_CODE    = error_code or ""
+#   CLI_MSG     = message or ""
+#   CLI_DATA    = sub-object JSON string or "{}"
+# Usage:
+#   local raw
+#   raw=$(python3 "$PROJECT_DIR/bin/pt-usermgmt" list-users --by "$PT_USER" 2>&1)
+#   parse_cli_json "$raw"
+#   if [[ "$CLI_OK" == "true" ]]; then ...
+parse_cli_json() {
+  local raw="${1:-}"
+  CLI_OK="false"; CLI_CODE=""; CLI_MSG=""; CLI_DATA="{}"
+  # Trim and isolate JSON
+  local trimmed; trimmed=$(echo "$raw" | tr -d '\r')
+  # Find first '{' or fall back to whole string
+  local idx; idx=$(echo "$trimmed" | grep -bo '{' | head -1 | cut -d: -f1)
+  local body
+  if [[ -n "$idx" && "$idx" -ge 0 ]]; then
+    body="${trimmed:$idx}"
+  else
+    CLI_MSG="$trimmed"
+    return 1
+  fi
+  # Parse via python (resilient to trailing noise)
+  local out
+  out=$(python3 - <<PYEOF 2>/dev/null
+import json, sys
+raw = """$body"""
+# Find balanced JSON object
+depth = 0
+end = -1
+in_str = False
+esc = False
+for i, c in enumerate(raw):
+    if esc:
+        esc = False; continue
+    if c == '\\\\':
+        esc = True; continue
+    if c == '"':
+        in_str = not in_str; continue
+    if in_str: continue
+    if c == '{':
+        depth += 1
+    elif c == '}':
+        depth -= 1
+        if depth == 0:
+            end = i + 1
+            break
+if end == -1:
+    sys.exit(1)
+try:
+    d = json.loads(raw[:end])
+except Exception as e:
+    sys.exit(1)
+ok = d.get("ok", False)
+code = d.get("code", "")
+msg = d.get("message", d.get("error", ""))
+data = d.get("data", {})
+print("OK=" + ("true" if ok else "false"))
+print("CODE=" + str(code))
+print("MSG=" + str(msg).replace("\\n", " "))
+import json as _j
+print("DATA=" + _j.dumps(data))
+PYEOF
+)
+  if [[ -z "$out" ]]; then
+    CLI_MSG="$trimmed"
+    return 1
+  fi
+  while IFS= read -r line; do
+    case "$line" in
+      OK=*)   CLI_OK="${line#OK=}" ;;
+      CODE=*) CLI_CODE="${line#CODE=}" ;;
+      MSG=*)  CLI_MSG="${line#MSG=}" ;;
+      DATA=*) CLI_DATA="${line#DATA=}" ;;
+    esac
+  done <<< "$out"
+  return 0
+}
+
+# Pretty-print user list table from CLI_DATA (after parse_cli_json on list-users)
+print_user_list_table() {
+  local data="${1:-{\}}"
+  python3 - <<PYEOF
+import json, sys
+try:
+    d = json.loads('''$data''')
+except Exception as e:
+    print(f"  (failed to parse data: {e})")
+    sys.exit(0)
+users = d.get("users", [])
+if not users:
+    print("  (no users found)")
+    sys.exit(0)
+# Header
+print(f"  {'USERNAME':<20} {'ROLE':<10} {'STATUS':<10} {'CREATED':<20}")
+print(f"  {'-'*20} {'-'*10} {'-'*10} {'-'*20}")
+for u in users:
+    name = str(u.get("username", "?"))[:20]
+    role = str(u.get("role", "?"))[:10]
+    locked = u.get("locked", False)
+    status = "LOCKED" if locked else "active"
+    created = str(u.get("created_at", u.get("created", "")))[:20]
+    print(f"  {name:<20} {role:<10} {status:<10} {created:<20}")
+print(f"\\n  Total: {len(users)} user(s)")
+PYEOF
+}
+# ── /CLI JSON parser ────────────────────────────────────────────────────────
 
 # ── UX Helpers (added by feat/ux-tui-improvements) ──────────────────────────
 # Breadcrumb display: breadcrumb "Main" "Run Test" "Onprem"
