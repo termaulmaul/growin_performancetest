@@ -1235,12 +1235,11 @@ exit \$RC"
         local _test_pwd; _test_pwd=$(env_val TEST_PASSWORD '')
         local _test_pin; _test_pin=$(env_val TEST_PIN '')
         local sandbox_cmd="set -e
-mkdir -p /tmp/sandbox-report/${suite_name}/${platform}/${scen_label}/${runby} 2>/dev/null
-mkdir -p /tmp/sandbox-report/${suite_name}/${platform}/LoadTest 2>/dev/null
-mkdir -p /tmp/sandbox-report/${suite_name}/${platform}/AllBP/${runby} 2>/dev/null
+mkdir -p /tmp/Report/${suite_name}/${platform}/${scen_label}/${runby} 2>/dev/null || true
+mkdir -p /tmp/Report/${suite_name}/${platform}/LoadTest 2>/dev/null || true
+mkdir -p /tmp/Report/${suite_name}/${platform}/AllBP/${runby} 2>/dev/null || true
 cd /tmp
 ln -sfn /workspace/Script Script 2>/dev/null || true
-ln -sfn /tmp/sandbox-report Report 2>/dev/null || true
 ln -sfn /workspace/Helper Helper 2>/dev/null || true
 ln -sfn /usr/local/bin/k6 k6 2>/dev/null || true
 cd /tmp/Script/${suite_name}

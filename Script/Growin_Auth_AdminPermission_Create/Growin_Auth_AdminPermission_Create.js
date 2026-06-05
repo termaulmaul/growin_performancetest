@@ -409,16 +409,16 @@ export function setup() {
  
                     if (profileResponses[0].status == 200) {
                         totalUserIdSuccess++;
-                        const tradingData = profileResponses[0].json().data;
+                        const tradingData = profileResponses[0].json()?.data ?? {};
                         
                         if (!tokens[userKey]) tokens[userKey] = {};
                         
                         // ✅ FIX: assign dulu, baru log
-                        tokens[userKey].user_id      = tradingData.user_id;
-                        tokens[userKey].client_id    = tradingData.client_id;
-                        tokens[userKey].SID          = tradingData.sid;
-                        tokens[userKey].ksei_acc_no  = tradingData.ksei_acc_no;
-                        tokens[userKey].account_name = tradingData.account_name;
+                        tokens[userKey].user_id      = tradingData.user_id      ?? null;
+                        tokens[userKey].client_id    = tradingData.client_id    ?? null;
+                        tokens[userKey].SID          = tradingData.sid          ?? null;
+                        tokens[userKey].ksei_acc_no  = tradingData.ksei_acc_no  ?? null;
+                        tokens[userKey].account_name = tradingData.account_name ?? null;
 
                         // const tradingData = profileResponses[0].json().data;
                         // console.log(`🔍 tradingData RAW: ${JSON.stringify(tradingData)}`);
