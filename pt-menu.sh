@@ -1065,8 +1065,12 @@ ls -d Script/'$suite_name' 2>&1 | head -1 || { echo "FATAL: Script/'$suite_name'
           local _remote_dir="/tmp/pt-run-${_stamp}"
 
           echo -e "${DIM}[local] Packing Script/$suite_name + Helper + k6-linux binaries...${RST}"
+          local _tar_k6=()
+          [[ -f "$PROJECT_DIR/k6-linux-amd64" ]] && _tar_k6+=("k6-linux-amd64")
+          [[ -f "$PROJECT_DIR/k6-linux-arm64" ]] && _tar_k6+=("k6-linux-arm64")
+          [[ ${#_tar_k6[@]} -eq 0 ]] && echo -e "${DIM}[local] k6 binaries not found locally — remote will use system k6${RST}"
           tar -czf "$_tarball" -C "$PROJECT_DIR" \
-            "Script/$suite_name" Helper k6-linux-amd64 k6-linux-arm64 2>&1 || {
+            "Script/$suite_name" Helper "${_tar_k6[@]}" 2>&1 || {
               echo -e "${RED}FATAL: tar failed${RST}"
               read -r -p $'\nPress Enter...'; continue;
             }
@@ -1151,8 +1155,12 @@ exit \$RC"
           local _remote_dir="/tmp/pt-run-${_stamp}"
 
           echo -e "${DIM}[local] Packing Script/$suite_name + Helper + k6-linux binaries...${RST}"
+          local _tar_k6=()
+          [[ -f "$PROJECT_DIR/k6-linux-amd64" ]] && _tar_k6+=("k6-linux-amd64")
+          [[ -f "$PROJECT_DIR/k6-linux-arm64" ]] && _tar_k6+=("k6-linux-arm64")
+          [[ ${#_tar_k6[@]} -eq 0 ]] && echo -e "${DIM}[local] k6 binaries not found locally — remote will use system k6${RST}"
           tar -czf "$_tarball" -C "$PROJECT_DIR" \
-            "Script/$suite_name" Helper k6-linux-amd64 k6-linux-arm64 2>&1 || {
+            "Script/$suite_name" Helper "${_tar_k6[@]}" 2>&1 || {
               echo -e "${RED}FATAL: tar failed${RST}"
               read -r -p $'\nPress Enter...'; continue;
             }
