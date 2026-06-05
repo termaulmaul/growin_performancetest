@@ -6,6 +6,15 @@ set -euo pipefail
 trap '[[ -n "${_SPINNER_PID:-}" ]] && kill "$_SPINNER_PID" 2>/dev/null || true' EXIT
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# ── Auto-bootstrap pt.env from example on first run ─────────────────────────
+# configs/pt.env is gitignored — auto-copy from example if not present locally
+if [[ ! -f "$PROJECT_DIR/configs/pt.env" ]] && [[ -f "$PROJECT_DIR/configs/pt.env.example" ]]; then
+  mkdir -p "$PROJECT_DIR/configs"
+  cp "$PROJECT_DIR/configs/pt.env.example" "$PROJECT_DIR/configs/pt.env"
+  echo -e "\033[1;33m[bootstrap] configs/pt.env created from pt.env.example\033[0m" >&2
+fi
+
 # Primary config: configs/pt.env (top-level, target-agnostic)
 # Legacy fallback: docker-local-pt/configs/local.env (kept for backward compat)
 if [[ -f "$PROJECT_DIR/configs/pt.env" ]]; then
