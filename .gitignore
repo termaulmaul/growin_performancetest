@@ -54,6 +54,7 @@ Report/*
 *.token
 *.env.local
 configs/*.local.env
+configs/pt.env
 pt-data/active_run.json
 pt-data/users.json
 security.db

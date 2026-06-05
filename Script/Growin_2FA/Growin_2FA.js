@@ -442,7 +442,12 @@ export function setup() {
                         tokens[userKey].account_name = null;
                     }
                     
-                    const pinPayload = JSON.stringify({ value: "123456" });
+                    // PIN from env var — never hardcode in source
+                    const testPin = __ENV.TEST_PIN;
+                    if (!testPin) {
+                        console.error(`   ❌ TEST_PIN env var not set. Pass via -e TEST_PIN=... or set in pt.env`);
+                    }
+                    const pinPayload = JSON.stringify({ value: testPin || '' });
                     const pinHeaders = getDefaultHeaders(loginResult.token);
  
                     const pinRes = http.post(base_url + '/auth/api/v1/protected/pin-login', pinPayload, { headers: pinHeaders });
