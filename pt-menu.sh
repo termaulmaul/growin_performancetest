@@ -989,6 +989,11 @@ cd "$REPO_DIR" || { echo "FATAL: cannot cd $REPO_DIR"; exit 1; }
 echo "[remote] PWD: $(pwd)"
 echo "[remote] Pulling latest changes..."
 git pull --ff-only origin main 2>&1 | tail -5 || echo "[remote] WARN: git pull failed, continuing with existing files"
+# Auto-bootstrap pt.env from example if not present (runs on every connect)
+if [ ! -f configs/pt.env ] && [ -f configs/pt.env.example ]; then
+  cp configs/pt.env.example configs/pt.env
+  echo "[remote] Bootstrap: configs/pt.env created from pt.env.example"
+fi
 echo "[remote] Script suite check:"
 ls -d Script/'$suite_name' 2>&1 | head -1 || { echo "FATAL: Script/'$suite_name' not in remote repo even after pull"; exit 1; }'
 
