@@ -13,261 +13,198 @@ Built on the **Kimi Enterprise Architecture RFC**: terminal-native auth (bcrypt 
 
 ## Quick Start
 
-### Prerequisites
-
-| Tool | Why | Install |
-|---|---|---|
-| `bash` ≥ 4 | TUI runtime | macOS: `brew install bash` · Linux: built-in |
-| `fzf` | Menu picker | `brew install fzf` / `apt install fzf` |
-| `python3` ≥ 3.9 | Auth / scheduler / audit | `brew install python` / built-in |
-| `node` ≥ 18 | Webhook senders | `brew install node` |
-| `jq` | JSON parsing in TUI | `brew install jq` / `apt install jq` |
-| `sshpass` | Onprem jump host | `brew install sshpass` |
-| `gcloud` | Oncloud IAP | [gcloud SDK](https://cloud.google.com/sdk/docs/install) |
-| `docker` | Local sandbox stack | [Docker Desktop](https://www.docker.com/products/docker-desktop) |
-
-### One-Command Setup
-
 ```bash
 git clone https://github.com/termaulmaul/growin_performancetest.git
 cd growin_performancetest
-bash setup-pt.sh     # Checks & installs all deps, inits DB, starts Docker
+bash setup-pt.sh     # Check & install all deps, init DB, start Docker
 ./pt-menu.sh         # Launch TUI — first run creates god admin account
 ```
 
 `setup-pt.sh` is idempotent — safe to re-run. Shows `✓ [already installed]` for existing deps.
 
-### Configuration
+### Configuration (`configs/pt.env`)
 
-```bash
-# Auto-created on first ./pt-menu.sh from pt.env.example
-configs/pt.env        # Primary config (gitignored — never committed)
-configs/pt.env.example  # Template with all keys (committed)
-```
-
-Key variables in `configs/pt.env`:
+Auto-created on first `./pt-menu.sh` from `pt.env.example`. Key variables:
 
 | Variable | Purpose |
 |----------|---------|
 | `ENV` | Target environment: `INT`, `DEV`, `QA`, `DRC`, `SANDBOX` |
-| `K6_USERS` | Default VUs per run |
-| `DURATION` | Default duration (e.g. `5m`, `60s`) |
+| `K6_USERS` / `DURATION` | Default VUs and duration |
 | `PT_SSH_PASS` | SSH password for Onprem jump host |
-| `TEST_PASSWORD` | k6 test account password |
-| `TEST_PIN` | 2FA PIN for login flow |
+| `TEST_PASSWORD` / `TEST_PIN` | k6 test account credentials |
 | `TEAMS_WEBHOOK` | Power Automate webhook URL |
-| `THRESHOLD_AVG_MS` | P95 threshold (default: 200ms) |
-| `THRESHOLD_ERR_PCT` | Error rate threshold (default: 0.1%) |
-| `THRESHOLD_MIN_RPS` | Min RPS threshold (default: 381) |
+| `THRESHOLD_AVG_MS` / `THRESHOLD_ERR_PCT` / `THRESHOLD_MIN_RPS` | Pass/fail thresholds |
 
 ---
 
-## TUI Menu (`pt-menu.sh`)
-
-Interactive fzf-based menu. All operations accessible from one entry point.
-
-```
-┏━╸┏━┓┏━┓╻ ╻╻┏┓╻   ┏━┓╺┳╸   ┏━╸┏━┓┏━┓┏┳┓┏━╸╻ ╻┏━┓┏━┓╻┏
-┃╺┓┣┳┛┃ ┃┃╻┃┃┃┗┫   ┣━┛ ┃    ┣╸ ┣┳┛┣━┫┃┃┃┣╸ ┃╻┃┃ ┃┣┳┛┣┻┓
-┗━┛╹┗╸┗━┛┗┻┛╹╹ ╹   ╹   ╹    ╹  ╹┗╸╹ ╹╹ ╹┗━╸┗┻┛┗━┛╹┗╸╹ ╹
-```
+## TUI Menu
 
 | Key | Menu | Access |
 |-----|------|--------|
 | `[1]` | **Run Test** (Onprem / Oncloud / Sandbox) | god, admin, operator |
 | `[2]` | **Sandbox Demo** (Local Docker mock) | god, admin, operator |
-| `[3]` | **Cron Scheduler** (SQLite-backed) | god, admin |
-| `[4]` | **AI Slope** (Code quality scanner) | god, admin, operator |
+| `[3]` | **Cron Scheduler** | god, admin |
+| `[4]` | **AI Slope** (Code quality) | god, admin, operator |
 | `[5]` | **ENV Editor** | all except viewer |
-| `[6]` | **Docker Stack** (start/stop/logs) | god, admin |
-| `[7]` | **Open Project Dir** | all |
+| `[6]` | **Docker Stack** | god, admin |
 | `[8]` | **User Management** | god only |
 | `[9]` | **Webhooks** (set/test/toggle) | god, admin |
-| `[D]` | **Live Dashboard** (NOC view) | god, admin |
 | `[T]` | **Tools / Diagnostics** | all |
-| `[?]` | **Help / Keymap** | all |
-| `[Q]` | **Quit** | — |
 
 ### Run Test Flow
 
 ```
-Select Target → Select Suite → Pick Script (.js) → Choose Platform
-→ Select BP (filtered by platform folder) → Set VUs/Duration/ENV
-→ Confirm → Upload + Execute on Remote → Live Output → Report + Webhook
+Select Target → Suite → Script (.js) → Platform → Select BP(s)
+→ VUs / Duration / ENV → Confirm → Execute on Remote → Webhook
 ```
 
-**Recent Runs:** `[R]` in suite picker → select previous run → re-execute with same params.
+**Multi-BP Select:** TAB to mark multiple BPs, ENTER to confirm. Creates `-e SCENARIO=BP001,BP002`.
 
-**Batch Regression:** `[B]` → multi-select suites with TAB → run all sequentially.
+**Recent Runs:** `[R]` → pick previous run → re-execute with same params.
 
-### Skip Auth (15 min)
+**Batch Regression:** `[B]` → multi-select suites → run all sequentially.
 
-God users can temporarily bypass login via `Tools → [S] Skip Auth (15 min)`.
+### Skip Auth (god only)
+
+`Tools → [S] Skip Auth` → choose:
+- **15 minutes** — temporary, auto-expires
+- **Permanent** — login skipped until manually disabled
+- **Disable skip** — re-enable login requirement
 
 ---
 
 ## Execution Targets
 
-### Onprem
+| Target | Connection | k6 Binary |
+|--------|-----------|-----------|
+| **Onprem** | SSH `qa@10.82.15.72` → `qa@10.184.120.48` | Repo k6 (`~/growin_performancetest/k6`) first, then system |
+| **Oncloud** | `gcloud compute ssh vm-pt-ksix-0 --tunnel-through-iap` | Same priority |
+| **Sandbox** | SSH `qa@127.0.0.1:2222` (Docker) | Container k6 |
 
-```
-PT Machine → SSH qa@10.82.15.72 (jump) → SSH qa@10.184.120.48 (runner)
-```
-
-- Scripts uploaded as tarball, extracted to `/tmp/pt-run-UUID/`
-- k6 uses **repo-level binary** first (`~/growin_performancetest/k6`), falls back to system k6
-- Reports saved to `Report/<Suite>/<Platform>/<BP>/<RunBy>/`
-
-### Oncloud (GCP)
-
-```
-PT Machine → gcloud compute ssh vm-pt-ksix-0 --tunnel-through-iap
-```
-
-Same tarball upload flow. IAP handles authentication (no password needed).
-
-### Sandbox (Docker)
-
-```
-PT Machine → SSH qa@127.0.0.1:2222 (Docker container) → mock-api:8080
-```
-
-- `pt-mock-api` container serves mock HTTP endpoints
-- `pt-sandbox-ssh` container mimics remote runner
-- `configs/pt.env` auto-bootstrapped from `pt.env.example`
-- Reports written to `/tmp/Report/` inside container
+Scripts uploaded as tarball, extracted to `/tmp/pt-run-UUID/`. Reports saved to `Report/<Suite>/<Platform>/<BP>/<RunBy>/`.
 
 ---
 
 ## Test Suites
 
-| Suite | Description | Platforms |
-|-------|-------------|-----------|
-| `Growin_Auth_AdminPermission_Create` | Admin permission CRUD | Web, iOS, Android |
-| `Growin_2FA` | Two-factor auth login flow | Web |
-| `Growin_Calendar` | Calendar/scheduling | Web, Android, iOS |
-| `Growin_Community` | Social features | Web |
-| `Growin_Banner_Promo` | Banner/promo display | Web, Android, iOS |
-| `Growin_Daily_Trade` | Daily trade operations | Web |
-| `Growin_Data_Visualization` | Data viz endpoints | Web |
-| `Growin_Eipo_Stock` | eIPO stock operations | Web, iOS |
-| `Growin_News` | News feed | Web |
-| `Growin_OMO` | OMO trading flow | iOS |
-| `Growin_Password_Expired` | Password expiry | Android |
-| `Growin_Ratelimit_Reset_Password` | Rate limit + reset | Web |
-| `Growin_Rewards` | Rewards/loyalty | Web |
-| `Growin_UUPDP` | UUPDP flow | Web, Android, iOS |
-| `ExaCC` | ExaCC operations | Web, Android, iOS |
-| `Template_Project` | Skeleton for new suites | Web |
-| `Sandbox_Demo` | Framework validation (mock) | Web |
+| Suite | Platforms |
+|-------|-----------|
+| `Growin_Auth_AdminPermission_Create` | Web, iOS, Android |
+| `Growin_2FA` | Web |
+| `Growin_Calendar` | Web, Android, iOS |
+| `Growin_Community` | Web |
+| `Growin_Banner_Promo` | Web, Android, iOS |
+| `Growin_Daily_Trade` | Web |
+| `Growin_Data_Visualization` | Web |
+| `Growin_Eipo_Stock` | Web, iOS |
+| `Growin_News` | Web |
+| `Growin_OMO` | iOS |
+| `Growin_Password_Expired` | Android |
+| `Growin_Ratelimit_Reset_Password` | Web |
+| `ExaCC` | Web, Android, iOS |
+| `Template_Project` | Web |
+| `Sandbox_Demo` | Web (mock only) |
 
 ### Suite Structure
 
 ```
 Script/<Suite>/
-├── <Suite>.js                    # Main dispatcher (BP routing + setup/teardown)
-├── <Suite>_LoadTest.sh           # LoadTest wrapper script
-├── <Suite>_Regression.sh         # Regression wrapper script
-├── Web/
-│   ├── BP001.js                  # Business process 001
-│   ├── BP002.js
-│   ├── Template_ByPass_Setup.js  # Login-per-iteration pattern
-│   └── Template_Use_Setup.js     # Use setup() token pattern
-├── iOS/
-│   └── BP001.js
-└── Android/
-    └── BP001.js
+├── <Suite>.js              # Dispatcher (BP routing + setup/teardown)
+├── <Suite>_LoadTest.sh     # LoadTest wrapper
+├── <Suite>_Regression.sh   # Regression wrapper
+├── Web/BP001.js            # Platform-specific BPs
+├── iOS/BP001.js
+└── Android/BP001.js
 ```
 
-### Running a Script (Manual)
+### Manual Run
 
 ```bash
-# From Script/<Suite>/ directory:
+cd Script/<Suite>
 ../../k6 run <Suite>.js \
-  -e RUNBY=Manual \
-  -e ENV=INT \
-  -e USER=335 \
-  -e DURATION=5m \
-  -e NUMSTART=1 \
-  -e SCENARIO=BP001 \
-  -e PLATFORM=iOS \
+  -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m \
+  -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS \
   --out dashboard=export=../../Report/<Suite>/iOS/BP001/Manual/report.html
 ```
 
-Or use `./pt-menu.sh` → Run Test for interactive selection.
-
 ---
 
-## Webhooks
+## Webhooks — Teams Card Output
 
-Multi-channel notifications after each run. Configured in `configs/pt.env`.
+Multi-channel notifications sent after each run. Teams uses full-width Adaptive Card.
 
-| Channel | Variable | Format |
-|---------|----------|--------|
-| **Teams** | `TEAMS_WEBHOOK` | Adaptive Card (full-width) |
-| **Discord** | `DISCORD_WEBHOOK` | Markdown table |
-| **Telegram** | `TELEGRAM_WEBHOOK` | Markdown table |
-| **Brrr** | `BRRR_WEBHOOK` | Plain text |
-
-### Teams Card Features
-
-- ✅/⚠️/❌ Status with threshold comparison
-- Global summary: Samples, P95, Error Rate, RPS
-- Per-API performance table (monospace, full-width)
-- **Top Errors section** — e.g. `[500] /user/api/v2/watchlistgroup — 39×`
-- Full-width card via `msteams.width: Full`
-
-### Test Webhook
+### Example Card (Multi-BP Run)
 
 ```
-pt-menu.sh → Webhooks → Test Webhook (Send Sample)
+📊 PT Run Report
+
+Suite       ExaCC / ExaCC.js [Onprem · Web · BP001,BP002,BP003 · 100VU · 30s]
+Target      Onprem 10.82.15.72 → 10.184.120.48
+Run by      qacentral
+Execution   30s duration
+Start       2026-06-05 10:06:41
+End         2026-06-05 10:07:11
+
+✅ PASSED
+Reason: All metrics meet thresholds.
+
+📈 Global Summary vs Thresholds
+┌──────────┬────────────┬────────────┬────────────┬───────────┬──────────┐
+│ Samples  │ Avg        │ Avg (p95)  │ Error Rate │ Total RPS │ TPS      │
+├──────────┼────────────┼────────────┼────────────┼───────────┼──────────┤
+│ 11755    │ 22.73 ms ✓ │ 22.73 ms ✓ │ 0.00% ✓    │ 391.83 ✓  │ 391.83 ✓ │
+└──────────┴────────────┴────────────┴────────────┴───────────┴──────────┘
+
+📋 Per-API Performance
+┌───┬────────────────────────────────────────────┬──────────┬────────┬────────┬───────┬────────┬─────┐
+│ # │ API                                        │ Samp     │ Avg    │ P95    │ Err%  │ RPS    │ Err │
+├───┼────────────────────────────────────────────┼──────────┼────────┼────────┼───────┼────────┼─────┤
+│ 1 │ BP001 01 01 Udf Indicators COMPOSITE D IDX │ 2773080  │ 144.52 │ 901.99 │ 0.00% │ 384.33 │ 1   │
+│ 2 │ BP001 01 02 Udf Indicators IDXBASIC D IDX  │ 2773080  │ 144.60 │ 902.30 │ 0.00% │ 384.33 │ 0   │
+│ 3 │ BP001 01 03 Udf Indicators IDXCYCLIC D IDX │ 2773080  │ 148.31 │ 908.38 │ 0.00% │ 384.33 │ 0   │
+│...│ ...                                        │ ...      │ ...    │ ...    │ ...   │ ...    │ ... │
+├───┼────────────────────────────────────────────┼──────────┼────────┼────────┼───────┼────────┼─────┤
+│   │ TOTAL                                      │ 38823120 │ 100.47 │ 912.58 │ 0.00% │5380.62 │ 3   │
+└───┴────────────────────────────────────────────┴──────────┴────────┴────────┴───────┴────────┴─────┘
+
+❌ Top Errors (1)
+• [500] /user/api/v2/watchlistgroup — 1×
 ```
 
-Runs DNS check → HTTP preflight → actual payload send with verbose output.
+Table data sourced from k6 `--summary-export` (custom metrics per BP). Full-width via `msteams.width: Full`.
 
 ---
 
 ## Auth & RBAC
 
-SQLite-backed authentication with bcrypt password hashing.
-
-| Role | Run Test | Sandbox | Scheduler | Docker | User Mgmt | Webhooks |
-|------|----------|---------|-----------|--------|-----------|----------|
-| **god** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| **admin** | ✓ | ✓ | ✓ | ✓ | — | ✓ |
-| **operator** | ✓ | ✓ | — | — | — | — |
-| **readonly** | — | — | — | — | — | — |
-| **guest** | — | — | — | — | — | — |
+| Role | Run Test | Scheduler | Docker | User Mgmt | Webhooks |
+|------|----------|-----------|--------|-----------|----------|
+| **god** | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **admin** | ✓ | ✓ | ✓ | — | ✓ |
+| **operator** | ✓ | — | — | — | — |
+| **readonly** | — | — | — | — | — |
 
 ### First Boot
 
 ```bash
-./pt-menu.sh
-# → "No God user found" → create god username + password
+./pt-menu.sh  # → "No God user found" → create god username + password
 ```
 
 ### Emergency Rescue
 
 ```bash
-python3 bin/pt-rescue   # Force-reset god password (bypasses normal auth)
+python3 bin/pt-rescue   # Force-reset god password
 ```
 
 ---
 
 ## Observability (Docker)
 
-```bash
-# Start with observability profile
-cd docker-local-pt
-docker compose --env-file configs/local.env --profile observability up -d
-```
-
 | Service | URL | Credentials |
 |---------|-----|-------------|
 | **Grafana** | http://localhost:3000 | admin / admin |
 | **InfluxDB** | http://localhost:18086 | — |
 | **Mock API** | http://localhost:18080 | — |
-| **Jenkins** | http://localhost:18081 | (initial password in container) |
 
 ---
 
@@ -275,55 +212,22 @@ docker compose --env-file configs/local.env --profile observability up -d
 
 ```
 growin_performancetest/
-├── pt-menu.sh              # Main TUI (2100+ lines, fzf-based)
-├── setup-pt.sh             # Bootstrap: check deps, init DB, start Docker
-├── configs/
-│   ├── pt.env              # Primary config (gitignored)
-│   └── pt.env.example      # Template (committed)
-├── bin/                    # CLI tools (Kimi Architecture)
-│   ├── pt-auth             # Login, sessions, bootstrap (bcrypt)
-│   ├── pt-rbac             # Permission checks
-│   ├── pt-audit            # Immutable audit log
-│   ├── pt-lock             # Environment concurrency locking
-│   ├── pt-usermgmt         # User CRUD (god only)
-│   ├── pt-scheduler        # Cron job management
-│   ├── pt-dashboard        # NOC-style live monitor
-│   ├── pt-resmon           # CPU/Mem/Load snapshot
-│   └── pt-rescue           # Emergency god password reset
-├── lib/
-│   ├── bash/pt_auth_client.sh  # Auth wrapper (session verify, skip-auth)
-│   ├── python/db.py            # SQLite schema (WAL mode)
-│   └── webhook/
-│       ├── send-summary-webhook.mjs  # Teams/Discord/Telegram sender
-│       ├── parse-k6-log.py           # Extract metrics + errors from log
-│       └── webhook-tester.mjs        # Verbose webhook test
+├── pt-menu.sh              # Main TUI (2200+ lines)
+├── setup-pt.sh             # One-command bootstrap
+├── configs/pt.env          # Primary config (gitignored)
+├── configs/pt.env.example  # Template (committed)
+├── bin/                    # pt-auth, pt-rbac, pt-audit, pt-lock, pt-usermgmt, pt-scheduler, etc.
+├── lib/bash/               # pt_auth_client.sh (session + skip-auth)
+├── lib/python/db.py        # SQLite schema (WAL mode)
+├── lib/webhook/            # send-summary-webhook.mjs, parse-k6-log.py
 ├── Script/                 # k6 test suites (~27 suites)
-│   ├── <Suite>/<Suite>.js  # Dispatcher + setup/teardown
-│   ├── <Suite>/Web/BP*.js  # Platform-specific BPs
-│   └── Template_Project/   # Skeleton for new suites
-├── Helper/
-│   ├── config.js           # getBaseUrl, getUserCredentials, headers
-│   ├── bundle.js           # k6 polyfills
-│   └── textSummary.js      # Terminal summary formatter
-├── Report/                 # HTML reports (gitignored except template)
-├── docker-local-pt/        # Docker stack (mock-api, sandbox-ssh, grafana, influx, jenkins)
+├── Helper/                 # config.js, bundle.js, textSummary.js
+├── Report/                 # HTML reports (gitignored)
+├── docker-local-pt/        # Docker stack (mock-api, sandbox-ssh, grafana, influx)
 ├── scheduler_cli/          # Python cron backend + AI slope validator
-├── blueprint/              # Architecture RFCs (Kimi, Manus, DeepSeek)
-├── docs/                   # Audit checklists, UX docs
-├── tools/                  # One-off audit scripts
-└── archive/                # Legacy files (do not extend)
+├── blueprint/              # Architecture RFCs
+└── docs/                   # Audit checklists
 ```
-
----
-
-## Security (v2.7.0+)
-
-- **No hardcoded passwords** — all credentials via `configs/pt.env` (gitignored)
-- **bcrypt** password hashing (migration from SHA-256)
-- **No auth bypass** — `PT_AUTH_BYPASS` removed
-- **Webhook URL purged** from git history via `filter-branch`
-- **Session-based auth** with configurable expiry
-- **RBAC** enforced on all menu items
 
 ---
 
@@ -333,47 +237,13 @@ growin_performancetest/
 |--------|-----------|------------|
 | P95 Response Time | < 200ms | `THRESHOLD_AVG_MS` |
 | Error Rate | < 0.1% | `THRESHOLD_ERR_PCT` |
-| Min RPS | ≥ 381 | `THRESHOLD_MIN_RPS` |
-| CPU Usage | < 70% | (Grafana alert) |
-
----
-
-## New Team Member Onboarding
-
-```bash
-# 1. Clone
-git clone https://github.com/termaulmaul/growin_performancetest.git
-cd growin_performancetest
-
-# 2. Setup (installs deps, creates pt.env, starts Docker)
-bash setup-pt.sh
-
-# 3. Launch
-./pt-menu.sh
-# First boot → create god account → login → ready
-
-# 4. Run a test
-# Menu → [1] Run Test → Onprem → Select Suite → Configure → Run
-```
-
----
-
-## Documentation
-
-- [`CHANGELOG.md`](./CHANGELOG.md) — Release history
-- [`STRUCTURE.md`](./STRUCTURE.md) — Detailed repo map
-- [`CLAUDE.md`](./CLAUDE.md) — AI agent context + QA reference
-- [`READMOCKDOCK.md`](./READMOCKDOCK.md) — Docker mock operator guide
-- [`docs/`](./docs/) — Audit checklists, UX improvement logs
-- [`blueprint/`](./blueprint/) — Architecture RFCs
+| Min RPS | >= 381 | `THRESHOLD_MIN_RPS` |
 
 ---
 
 ## Contributing
 
-1. Branch from `main`: `feat/<suite>`, `fix/<issue>`, `refactor/<area>`
-2. No `copy.js` files in main
+1. Branch: `feat/<suite>`, `fix/<issue>`, `refactor/<area>`
+2. **ES5 only** in k6 scripts — no `?.` or `??` (remote k6 v0.51.0 fallback)
 3. No secrets in commits — use `configs/pt.env` (gitignored)
-4. Script commit = script + Report scaffold + CHANGELOG entry
-5. All k6 scripts must be ES5-compatible (no `?.` or `??` — remote k6 v0.51.0)
-6. Test in Sandbox before pushing to Onprem/Oncloud
+4. Test in Sandbox before Onprem/Oncloud

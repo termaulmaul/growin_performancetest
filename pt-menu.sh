@@ -2174,12 +2174,27 @@ tools_menu() {
         if [[ "$PT_ROLE" != "god" ]]; then
           echo -e "  ${RED}God-only command.${RST}"; read -r -p $'\nPress Enter...'; continue
         fi
-        local _expiry; _expiry=$(( $(date +%s) + 900 ))
-        mkdir -p "$HOME/.pt/var"
-        echo "${PT_USER}:${PT_ROLE}:${_expiry}" > "$HOME/.pt/var/skip_auth.flag"
-        local _until; _until=$(date -d "@${_expiry}" '+%H:%M:%S' 2>/dev/null || date -r "${_expiry}" '+%H:%M:%S' 2>/dev/null || echo "15min")
-        echo -e "  ${GRN}✓ Auth skip enabled until ${_until} (15 min).${RST}"
-        echo -e "  ${DIM}pt-menu.sh will not ask for password until then.${RST}"
+        local _skip_choices=("15 minutes" "Permanent (until disabled)" "Disable skip (re-enable login)" "← Cancel")
+        local _skip_sel; _skip_sel=$(pick_fzf "Skip Auth>" "${_skip_choices[@]}")
+        [[ -z "$_skip_sel" || "$_skip_sel" == "← Cancel" ]] && continue
+        case "$_skip_sel" in
+          "15 minutes")
+            local _expiry; _expiry=$(( $(date +%s) + 900 ))
+            mkdir -p "$HOME/.pt/var"
+            echo "${PT_USER}:${PT_ROLE}:${_expiry}" > "$HOME/.pt/var/skip_auth.flag"
+            local _until; _until=$(date -d "@${_expiry}" '+%H:%M:%S' 2>/dev/null || date -r "${_expiry}" '+%H:%M:%S' 2>/dev/null || echo "15min")
+            echo -e "  ${GRN}✓ Auth skip enabled until ${_until} (15 min).${RST}"
+            ;;
+          "Permanent"*)
+            mkdir -p "$HOME/.pt/var"
+            echo "${PT_USER}:${PT_ROLE}:0" > "$HOME/.pt/var/skip_auth.flag"
+            echo -e "  ${GRN}✓ Auth skip enabled permanently. Use 'Disable skip' to re-enable login.${RST}"
+            ;;
+          "Disable"*)
+            rm -f "$HOME/.pt/var/skip_auth.flag"
+            echo -e "  ${GRN}✓ Auth skip disabled. Login required on next launch.${RST}"
+            ;;
+        esac
         read -r -p $'\nPress Enter...'
         ;;
       "[?] Help / Keymap")
