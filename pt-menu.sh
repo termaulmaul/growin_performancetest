@@ -1070,7 +1070,7 @@ ls -d Script/'$suite_name' 2>&1 | head -1 || { echo "FATAL: Script/'$suite_name'
           [[ -f "$PROJECT_DIR/k6-linux-arm64" ]] && _tar_k6+=("k6-linux-arm64")
           [[ ${#_tar_k6[@]} -eq 0 ]] && echo -e "${DIM}[local] k6 binaries not found locally — remote will use system k6${RST}"
           tar -czf "$_tarball" -C "$PROJECT_DIR" \
-            "Script/$suite_name" Helper "${_tar_k6[@]}" 2>&1 || {
+            "Script/$suite_name" Helper ${_tar_k6[@]+"${_tar_k6[@]}"} 2>&1 || {
               echo -e "${RED}FATAL: tar failed${RST}"
               read -r -p $'\nPress Enter...'; continue;
             }
@@ -1160,7 +1160,7 @@ exit \$RC"
           [[ -f "$PROJECT_DIR/k6-linux-arm64" ]] && _tar_k6+=("k6-linux-arm64")
           [[ ${#_tar_k6[@]} -eq 0 ]] && echo -e "${DIM}[local] k6 binaries not found locally — remote will use system k6${RST}"
           tar -czf "$_tarball" -C "$PROJECT_DIR" \
-            "Script/$suite_name" Helper "${_tar_k6[@]}" 2>&1 || {
+            "Script/$suite_name" Helper ${_tar_k6[@]+"${_tar_k6[@]}"} 2>&1 || {
               echo -e "${RED}FATAL: tar failed${RST}"
               read -r -p $'\nPress Enter...'; continue;
             }
