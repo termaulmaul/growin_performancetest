@@ -152,22 +152,13 @@ if (SCENARIO) {
 
 const userDistribution = calculateUserDistribution(TOTAL_USER, selectedBPs);
 
-let __summaryShown = false;
-if (!__summaryShown) {
-  __summaryShown = true;
-  console.log('📊 User Distribution:');
-}
+// Log user distribution once at module init (module runs once per k6 execution)
+console.log('📊 User Distribution:');
 Object.keys(userDistribution).forEach(bp => {
     console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
 });
-if (!__summaryShown) {
-  __summaryShown = true;
-  console.log(`   TOTAL: ${TOTAL_USER} users`);
-}
-if (!__summaryShown) {
-  __summaryShown = true;
-  console.log(`   PLATFORM: ${platform}`);
-}
+console.log(`   TOTAL: ${TOTAL_USER} users`);
+console.log(`   PLATFORM: ${platform}`);
 
 const scenarios = {};
 selectedBPs.forEach(bp => {
@@ -243,9 +234,9 @@ selectedBPs.forEach(bp => {
 export const options = {
     scenarios: scenarios,
     noConnectionReuse: false,
-    setupTimeout: '3600s',
-    teardownTimeout: '3600s',
-    summaryTimeUnit: '3600s',
+    setupTimeout: '10m',
+    teardownTimeout: '2m',
+    summaryTimeUnit: 's',
     // httpDebug: 'full',
 };
 
@@ -412,14 +403,12 @@ export function setup() {
                     };
  
                     const profileHeaders = getDefaultHeaders(loginResult.token);
- 
-                    const profileUrls = [base_url + `/user/api/v1/profile/trading`];
-                    const profileRequests = [['GET', profileUrls[0], null, { headers: profileHeaders }]];
-                    const profileResponses = http.batch(profileRequests);
- 
-                    if (profileResponses[0].status == 200) {
+                    // Single request — http.get() is cleaner than http.batch() with 1 item
+                    const profileRes = http.get(base_url + `/user/api/v1/profile/trading`, { headers: profileHeaders });
+
+                    if (profileRes.status == 200) {
                         totalUserIdSuccess++;
-                        const tradingData = profileResponses[0].json().data;
+                        const tradingData = profileRes.json().data;
                         
                         if (!tokens[userKey]) tokens[userKey] = {};
                         
@@ -433,7 +422,7 @@ export function setup() {
                     } else {
                         totalUserIdFailed++;
                         if (i === batchStart || totalUserIdFailed <= 5) {
-                            console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) GET trading profile FAILED - Status: ${profileResponses[0].status} || Body: ${profileResponses[0].body}`);
+                            console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) GET trading profile FAILED - Status: ${profileRes.status} || Body: ${profileRes.body}`);
                         }
                         tokens[userKey].user_id      = null;
                         tokens[userKey].client_id    = null;
