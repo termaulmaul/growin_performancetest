@@ -526,7 +526,7 @@ function calculateUserDistribution(totalUsers, selectedBPs) {
     let totalPercentage = 0;
     
     selectedBPs.forEach(bp => {
-        totalPercentage += BP_CONFIG[bp]?.percentage || 0;
+        totalPercentage += (BP_CONFIG[bp] && BP_CONFIG[bp].percentage) || 0;
     });
     
     if (totalPercentage === 0) {

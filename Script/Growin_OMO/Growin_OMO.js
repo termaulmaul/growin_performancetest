@@ -81,7 +81,7 @@ const BP_MAP = Object.fromEntries(
 
 // ─── DISPATCHER ───────────────────────────────────────────────────────────────
 function dispatch(bpName, data) {
-    // const fn = BP_MAP[platform]?.[bpName];
+    // const fn = (BP_MAP[platform] && BP_MAP[platform][bpName]);
     const fn = BP_MAP[platform] && BP_MAP[platform][bpName];
     if (!fn) throw new Error(`❌ ${bpName} not found for platform: ${platform}`);
     return fn(data);
@@ -294,7 +294,7 @@ export function setup() {
         const usersForThisBP = userDistribution[bp];
 
         // ✅ Ambil config per-BP
-        const bpConfig = BP_CONFIG[platform]?.[bp] || {};
+        const bpConfig = (BP_CONFIG[platform] && BP_CONFIG[platform][bp]) || {};
         const skipSetupLogin = bpConfig.skipSetupLogin === true;
 
         // ✅ Hitung globalUserOffset per-BP berdasarkan mode run:
@@ -466,7 +466,7 @@ export function setup() {
     
     console.log(`\n📋 Per-BP Summary:`);
     selectedBPs.forEach(bp => {
-        const bpConfig = BP_CONFIG[platform]?.[bp] || {};
+        const bpConfig = (BP_CONFIG[platform] && BP_CONFIG[platform][bp]) || {};
         const skipSetupLogin = bpConfig.skipSetupLogin === true;
         const bpTokens = Object.values(tokens).filter(t => t.bp === bp);
 

@@ -104,7 +104,7 @@ const BP_MAP = {
 
 // ─── DISPATCHER ───────────────────────────────────────────────────────────────
 function dispatch(bpName, data) {
-    // const fn = BP_MAP[platform]?.[bpName];
+    // const fn = (BP_MAP[platform] && BP_MAP[platform][bpName]);
     const fn = BP_MAP[platform] && BP_MAP[platform][bpName];
     if (!fn) throw new Error(`❌ ${bpName} not found for platform: ${platform}`);
     return fn(data);

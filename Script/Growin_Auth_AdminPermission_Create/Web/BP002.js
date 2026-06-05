@@ -41,7 +41,7 @@ export function BP002(data) {
     const userTokenData = data.tokens[userKey];
     
     // if (!userTokenData || !userTokenData.token || !userTokenData.pin_token) {
-    //     console.error(`❌ VU${vuId} (${userTokenData?.email}) - No valid tokens from setup, skipping iteration`);
+    //     console.error(`❌ VU${vuId} (${(userTokenData && userTokenData.email)}) - No valid tokens from setup, skipping iteration`);
     //     return;
     // }
     
