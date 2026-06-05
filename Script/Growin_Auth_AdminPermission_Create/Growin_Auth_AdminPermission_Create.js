@@ -83,7 +83,7 @@ const BP_MAP = Object.fromEntries(
 
 // ─── DISPATCHER ───────────────────────────────────────────────────────────────
 function dispatch(bpName, data) {
-    const fn = BP_MAP[platform]?.[bpName];
+    const fn = (BP_MAP[platform] && BP_MAP[platform][bpName]);
     if (!fn) throw new Error(`❌ ${bpName} not found for platform: ${platform}`);
     return fn(data);
 }
@@ -327,7 +327,7 @@ export function setup() {
         const usersForThisBP = userDistribution[bp];
 
         // ✅ Ambil config per-BP
-        const bpConfig = BP_CONFIG[platform]?.[bp] ?? {};
+        const bpConfig = (BP_CONFIG[platform] && BP_CONFIG[platform][bp]) || {};
         const skipSetupLogin = bpConfig.skipSetupLogin === true;
 
         // ✅ Pakai BP_NUM_STARTS yang sudah dihitung di atas (kumulatif untuk multi-BP,
@@ -409,16 +409,16 @@ export function setup() {
  
                     if (profileResponses[0].status == 200) {
                         totalUserIdSuccess++;
-                        const tradingData = profileResponses[0].json()?.data ?? {};
+                        const tradingData = profileResponses[0].json().data || {};
                         
                         if (!tokens[userKey]) tokens[userKey] = {};
                         
                         // ✅ FIX: assign dulu, baru log
-                        tokens[userKey].user_id      = tradingData.user_id      ?? null;
-                        tokens[userKey].client_id    = tradingData.client_id    ?? null;
-                        tokens[userKey].SID          = tradingData.sid          ?? null;
-                        tokens[userKey].ksei_acc_no  = tradingData.ksei_acc_no  ?? null;
-                        tokens[userKey].account_name = tradingData.account_name ?? null;
+                        tokens[userKey].user_id      = tradingData.user_id || null;
+                        tokens[userKey].client_id    = tradingData.client_id || null;
+                        tokens[userKey].SID          = tradingData.sid || null;
+                        tokens[userKey].ksei_acc_no  = tradingData.ksei_acc_no || null;
+                        tokens[userKey].account_name = tradingData.account_name || null;
 
                         // const tradingData = profileResponses[0].json().data;
                         // console.log(`🔍 tradingData RAW: ${JSON.stringify(tradingData)}`);
@@ -443,7 +443,7 @@ export function setup() {
  
                     if (pinRes.status === 200) {
                         totalPinSuccess++;
-                        tokens[userKey].pin_token = pinRes.json()?.data?.pin_token ?? null;
+                        tokens[userKey].pin_token = (pinRes.json().data && pinRes.json().data.pin_token) || null;
                     } else {
                         totalPinFailed++;
                         if (i === batchStart || totalPinFailed <= 5) {
@@ -495,7 +495,7 @@ export function setup() {
     
     console.log(`\n📋 Per-BP Summary:`);
     selectedBPs.forEach(bp => {
-        const bpConfig = BP_CONFIG[platform]?.[bp] ?? {};
+        const bpConfig = (BP_CONFIG[platform] && BP_CONFIG[platform][bp]) || {};
         const skipSetupLogin = bpConfig.skipSetupLogin === true;
         const bpTokens = Object.values(tokens).filter(t => t.bp === bp);
 
