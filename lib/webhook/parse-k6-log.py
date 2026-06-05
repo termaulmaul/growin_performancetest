@@ -91,6 +91,35 @@ if m_scen: summary["scenario"] = m_scen.group(1).strip()
 m_plat = re.search(r'PLATFORM\s*:\s*([^\n]+)', text)
 if m_plat: summary["platform"] = m_plat.group(1).strip()
 
+# ── Extract top HTTP errors from log ─────────────────────────────────────
+from collections import defaultdict
+error_counts = defaultdict(lambda: {"count": 0, "status": "", "endpoint": ""})
+for line in text.split("\n"):
+    # Pattern: ✘ ERROR https://host/path || Status: NNN
+    import re as _re
+    m = _re.search(r'ERROR\s+https?://[^/]+(/[^\s|]+)\s*\|\|\s*Status:\s*(\d+)', line)
+    if m:
+        endpoint, status = m.group(1).split("?")[0], m.group(2)
+        key = status + ":" + endpoint
+        error_counts[key]["count"] += 1
+        error_counts[key]["status"] = status
+        error_counts[key]["endpoint"] = endpoint
+        continue
+    # Pattern: FAILED - Status: NNN || Body
+    m = _re.search(r'FAILED.*?Status:\s*(\d{3}).*?(/[^\s"'|\\]+)', line)
+    if m and int(m.group(1)) >= 400:
+        endpoint, status = m.group(2).split("?")[0], m.group(1)
+        key = status + ":" + endpoint
+        error_counts[key]["count"] += 1
+        error_counts[key]["status"] = status
+        error_counts[key]["endpoint"] = endpoint
+
+top_errors = sorted(error_counts.values(), key=lambda x: x["count"], reverse=True)[:5]
+summary["errors"] = [
+    {"status": e["status"], "endpoint": e["endpoint"], "count": e["count"]}
+    for e in top_errors if e["count"] > 0
+]
+
 with open(out_path, 'w') as f:
     json.dump(summary, f, indent=2)
 print("Parsed summary from log")
