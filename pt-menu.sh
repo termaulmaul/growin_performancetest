@@ -880,10 +880,99 @@ ssh_menu() {
       continue
     fi
     if [[ "$suite_sel" == "[R] Show Recent Runs" ]]; then
-      echo -e "\n${CYN}${BLD}  ── Recent Runs (last 5) ──${RST}\n"
-      echo "$recent_lines" | while IFS= read -r ln; do echo -e "  ${YLW}$ln${RST}"; done
-      read -r -p $'\n  Press Enter to return...'
-      continue
+      # Show recent runs and allow re-run selection
+      local recent_entries=()
+      while IFS= read -r ln; do
+        [[ -n "$ln" ]] && recent_entries+=("$ln")
+      done < <(recent_runs_list 2>/dev/null || true)
+
+      if [[ ${#recent_entries[@]} -eq 0 ]]; then
+        echo -e "\n  ${DIM}No recent runs yet.${RST}"
+        read -r -p $'\nPress Enter...'; continue
+      fi
+
+      echo -e "\n${CYN}${BLD}  ── Recent Runs — select to re-run ──${RST}\n"
+      local picked_recent
+      picked_recent=$(printf '%s\n' "${recent_entries[@]}" | fzf \
+        --prompt="Re-run> " \
+        --header="  ↑↓ navigate  ↵ re-run  ESC=back" \
+        ${_FZF_HEIGHT_FLAG} --border=rounded --layout=reverse \
+        --color='prompt:cyan,pointer:yellow,fg+:bright-green,header:240,border:cyan' \
+        ${_FZF_NOINFO_FLAG} --ansi 2>/dev/null) || true
+
+      [[ -z "$picked_recent" ]] && continue
+
+      # Parse: [R1] 2026-06-05 14:00  ·  Mode · Suite · Platform · Scenario · NVU · Dur
+      # Strip leading [Rx] timestamp prefix
+      local _entry; _entry=$(echo "$picked_recent" | sed 's/^\[R[0-9]*\] [0-9-]* [0-9:]*  ·  //')
+      # Format: Mode · Suite · Platform · Scenario · NVU · Dur
+      # e.g.: Onprem · Growin_Auth_AdminPermission_Create · iOS · BP001 · 335VU · 60s
+      local _mode _suite _plat _scen _vus_raw _dur_raw
+      IFS=' · ' read -r _mode _suite _plat _scen _vus_raw _dur_raw <<< "$_entry"
+      _mode="${_mode# }"; _mode="${_mode% }"
+      _suite="${_suite# }"; _suite="${_suite% }"
+      _plat="${_plat# }"; _plat="${_plat% }"
+      _scen="${_scen# }"; _scen="${_scen% }"
+      _vus_raw="${_vus_raw# }"; _vus_raw="${_vus_raw% }"
+      _dur_raw="${_dur_raw# }"; _dur_raw="${_dur_raw% }"
+      local _vus_re="${_vus_raw%VU*}"  # strip VU suffix
+      _vus_re="${_vus_re//[^0-9]/}"
+      [[ -z "$_vus_re" ]] && _vus_re=$(env_val K6_USERS 100)
+      [[ -z "$_dur_raw" ]] && _dur_raw=$(env_val DURATION 5m)
+      [[ -z "$_scen" ]] && _scen="BP001"
+
+      # Validate suite exists
+      local _suite_dir="$PROJECT_DIR/Script/$_suite"
+      if [[ ! -d "$_suite_dir" ]]; then
+        echo -e "  ${RED}Suite '$_suite' not found in Script/. Skipping.${RST}"
+        read -r -p $'\nPress Enter...'; continue
+      fi
+
+      # Build run command same as normal flow
+      local _js_file="${_suite}.js"
+      if [[ ! -f "$_suite_dir/$_js_file" ]]; then
+        # Try to find any .js in suite dir
+        _js_file=$(find "$_suite_dir" -maxdepth 1 -name '*.js' ! -name '*copy*' | head -1 | xargs basename 2>/dev/null)
+      fi
+      [[ -z "$_js_file" ]] && { echo -e "  ${RED}No .js script found for $_suite${RST}"; read -r -p $'\nPress Enter...'; continue; }
+
+      local _env_name; _env_name=$(env_val ENV INT)
+      local _scen_label="${_scen:-AllBP}"
+      local _runby="Manual"
+      local _report_file="../../Report/$_suite/$_plat/$_scen_label/$_runby/${_runby}_${mode}_$(date +%m%d)_$(date +%H%M)_${_scen_label}.html"
+
+      # Confirm before re-run
+      local _confirm_rc=0
+      set +e
+      confirm_run \
+        "Target"   "$mode" \
+        "Suite"    "$_suite" \
+        "Script"   "$_js_file" \
+        "Platform" "$_plat" \
+        "Scenario" "$_scen_label" \
+        "VUs"      "$_vus_re" \
+        "Duration" "$_dur_raw" \
+        "ENV"      "$_env_name" \
+        "RUNBY"    "$_runby" \
+        "User"     "$PT_USER"
+      _confirm_rc=$?
+      set -e
+      [[ $_confirm_rc -ne 0 ]] && continue
+
+      # Set vars for the execution block below
+      suite_name="$_suite"
+      file_sel="$_js_file"
+      platform="$_plat"
+      scenario="$_scen"
+      scen_label="$_scen_label"
+      vus="$_vus_re"
+      dur="$_dur_raw"
+      env_name="$_env_name"
+      runby="$_runby"
+      report_file="$_report_file"
+      suite_dir="$_suite_dir"
+      _run_label="$_suite / $_js_file  [$mode · $_plat · $_scen_label · ${_vus_re}VU · $_dur_raw]"
+      recent_runs_add "$mode · $_suite · $_plat · $_scen_label · ${_vus_re}VU · $_dur_raw"
     fi
     if [[ "$suite_sel" == "[B] Batch Run Regression"* ]]; then
       batch_run_regression "$mode"
