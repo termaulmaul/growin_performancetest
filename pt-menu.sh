@@ -1245,9 +1245,15 @@ mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
 echo '[remote] Running k6...'
 set -o pipefail
 echo '[remote] Running k6...'
-\$K6_BIN run --compatibility-mode=extended $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=$_test_pwd -e TEST_PIN=$_test_pin --out dashboard=export=$report_file 2>&1
+\$K6_BIN run --compatibility-mode=extended --summary-export=/tmp/k6-export-\$\$.json $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=$_test_pwd -e TEST_PIN=$_test_pin --out dashboard=export=$report_file 2>&1
 RC=\$?
 echo '[remote] k6 exit code:' \$RC
+if [ -f /tmp/k6-export-\$\$.json ]; then
+  echo 'K6_SUMMARY_JSON_START'
+  cat /tmp/k6-export-\$\$.json
+  echo 'K6_SUMMARY_JSON_END'
+  rm -f /tmp/k6-export-\$\$.json
+fi
 cd /tmp && rm -rf $_remote_dir $(basename $_tarball)
 exit \$RC"
 
