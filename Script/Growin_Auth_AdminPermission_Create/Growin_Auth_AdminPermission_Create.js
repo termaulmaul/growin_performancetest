@@ -443,7 +443,7 @@ export function setup() {
  
                     if (pinRes.status === 200) {
                         totalPinSuccess++;
-                        tokens[userKey].pin_token = pinRes.json().data.pin_token;
+                        tokens[userKey].pin_token = pinRes.json()?.data?.pin_token ?? null;
                     } else {
                         totalPinFailed++;
                         if (i === batchStart || totalPinFailed <= 5) {
@@ -552,9 +552,19 @@ export function handleSummary(data) {
         }
         
         console.log(`[${dateStr}_${timeStr}] Starting report generation for ${bp_name} on ${platform}...`);
-        
+
+        // SANDBOX_REPORT_DIR is injected by pt-menu.sh for Sandbox runs.
+        // In sandbox, ../../Report resolves via symlink to /workspace/Report (read-only).
+        // Use absolute path when running in sandbox.
+        const sandboxDir = __ENV.SANDBOX_REPORT_DIR || '';
+        const reportBase = sandboxDir
+            ? `${sandboxDir}`
+            : `../../Report/Growin_Auth_AdminPermission_Create/${platform}`;
+
         if (runby === 'Manual') {
-            const htmlPath = `../../Report/Growin_Auth_AdminPermission_Create/${platform}/${bp_name}/Manual/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
+            const htmlPath = sandboxDir
+                ? `${sandboxDir}/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`
+                : `../../Report/Growin_Auth_AdminPermission_Create/${platform}/${bp_name}/Manual/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -562,7 +572,9 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if (runby === 'Regression') {
-            const htmlPath = `../../Report/Growin_Auth_AdminPermission_Create/${platform}/${bp_name}/Regression/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
+            const htmlPath = sandboxDir
+                ? `${sandboxDir}/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`
+                : `../../Report/Growin_Auth_AdminPermission_Create/${platform}/${bp_name}/Regression/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
             
             return {
@@ -570,7 +582,9 @@ export function handleSummary(data) {
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if (runby === 'LoadTest') {
-            const htmlPath = `../../Report/Growin_Auth_AdminPermission_Create/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
+            const htmlPath = sandboxDir
+                ? `${sandboxDir}/${runby}_${dateStr}_${timeStr}.html`
+                : `../../Report/Growin_Auth_AdminPermission_Create/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
             console.log(`Generating HTML: ${htmlPath}`);
 
             return {

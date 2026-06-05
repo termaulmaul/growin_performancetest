@@ -1234,16 +1234,20 @@ exit \$RC"
         #   - mkdir -p Report dirs BEFORE k6 start (script's k6-reporter writes there)
         local _test_pwd; _test_pwd=$(env_val TEST_PASSWORD '')
         local _test_pin; _test_pin=$(env_val TEST_PIN '')
+        # Sandbox: k6 runs in container. Script dir is /workspace/Script (symlink CWD).
+        # ../../Report from symlink resolves to /workspace/Report (read-only).
+        # Fix: use absolute /tmp/Report path for report output, not relative ../../Report.
+        local sandbox_report_dir="/tmp/Report/${suite_name}/${platform}/${scen_label}/${runby}"
+        local sandbox_report_file="/tmp/Report/${suite_name}/${platform}/${scen_label}/${runby}/${runby}_Detail_${scen_label}_\$(date +%m%d%Y_%H%M%S).html"
         local sandbox_cmd="set -e
 mkdir -p /tmp/Report/${suite_name}/${platform}/${scen_label}/${runby} 2>/dev/null || true
 mkdir -p /tmp/Report/${suite_name}/${platform}/LoadTest 2>/dev/null || true
-mkdir -p /tmp/Report/${suite_name}/${platform}/AllBP/${runby} 2>/dev/null || true
 cd /tmp
 ln -sfn /workspace/Script Script 2>/dev/null || true
 ln -sfn /workspace/Helper Helper 2>/dev/null || true
 ln -sfn /usr/local/bin/k6 k6 2>/dev/null || true
 cd /tmp/Script/${suite_name}
-k6 run --compatibility-mode=experimental_enhanced ${file_sel} -e RUNBY=${runby:-Manual} -e ENV=SANDBOX -e USER=${vus:-1} -e K6_USERS=${vus:-1} -e DURATION=${dur:-30s} -e SCENARIO=${scenario:-BP001} -e PLATFORM=${platform:-Web} -e BASE_URL=http://mock-api:8080 -e NUMSTART=1 -e TEST_PASSWORD=${_test_pwd} -e TEST_PIN=${_test_pin}"
+REPORT_DIR=/tmp/Report/${suite_name}/${platform}/${scen_label}/${runby} k6 run --compatibility-mode=experimental_enhanced ${file_sel} -e RUNBY=${runby:-Manual} -e ENV=SANDBOX -e USER=${vus:-1} -e K6_USERS=${vus:-1} -e DURATION=${dur:-30s} -e SCENARIO=${scenario:-BP001} -e PLATFORM=${platform:-Web} -e BASE_URL=http://mock-api:8080 -e NUMSTART=1 -e TEST_PASSWORD=${_test_pwd} -e TEST_PIN=${_test_pin} -e SANDBOX_REPORT_DIR=/tmp/Report/${suite_name}/${platform}/${scen_label}/${runby}"
         print_run_header "$_run_label [DEMO]" "Sandbox  127.0.0.1:2222 → http://mock-api:8080" "Sandbox"
         set +e
         _sshpass_cmd "$pass" ssh -p 2222 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null qa@127.0.0.1 "$sandbox_cmd" 2>&1 | tee "$_run_log"
