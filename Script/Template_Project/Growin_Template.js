@@ -192,7 +192,7 @@ function resolveNumStarts(bps, platform, isMultiBP) {
     let   autoNextStart    = hasCLI ? CLI_NUMSTART : 1; // cursor for auto-continue
 
     bps.forEach(bp => {
-        const cfgNumStart    = (BP_CONFIG[platform] && BP_CONFIG[platform][bp])?.numStart || null;
+        const cfgNumStart    = (BP_CONFIG[platform] && BP_CONFIG[platform][bp] ? BP_CONFIG[platform][bp].numStart : null) || null;
         const hasCfg         = cfgNumStart !== null;
 
         let effectiveStart;
