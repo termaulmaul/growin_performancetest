@@ -1,5 +1,52 @@
 # Changelog
 
+## [2.7.0] - 2026-06-05
+
+### Security — CRITICAL fixes
+- **[CRITICAL] Remove hardcoded SSH password fallback** — `_ssh_pass()` no longer has
+  `M@nsek.1234` as default. `PT_SSH_PASS` must now be explicitly set in `configs/pt.env`.
+  Prevents password exposure via `ps aux` on shared machines.
+- **[CRITICAL] Remove `PT_AUTH_BYPASS` auth bypass** — `lib/bash/pt_auth_client.sh`
+  no longer accepts `PT_AUTH_BYPASS=1` as instant god-role bypass vector.
+- **[CRITICAL] bcrypt migration for `pt-data/auth.py`** — replaces SHA-256 no-salt
+  hashing with bcrypt (gensalt 12). Backward-compatible: verifies legacy sha256 hashes
+  and auto-migrates on next write. Prevents rainbow table attacks on users.json.
+- **[CRITICAL] Externalize hardcoded test credentials** — `Helper/config.js` password
+  and `Growin_2FA.js` PIN now read from `TEST_PASSWORD` / `TEST_PIN` env vars.
+  Both are required — scripts log an error if not set.
+- **[CRITICAL] Purge `configs/pt.env` from git history** — Teams webhook URL was
+  committed in 14 commits. `git filter-branch` removed it from all 85 commits.
+  File is now gitignored. Use `configs/pt.env.example` as template.
+- **[CRITICAL] Fix `bin/pt-rbac` missing `import sqlite3`** — `grant` command was
+  crashing with `NameError` on duplicate permission inserts instead of clean error.
+
+### Bug Fixes — HIGH
+- **[HIGH] Fix `operator` role locked out of Run Test** — `main_menu` RBAC check
+  used undefined role `tester` instead of `operator`. All three run-related menu items
+  now check `operator` correctly.
+- **[HIGH] Fix `_stamp` race condition** — tarball name now uses `uuidgen` (falls
+  back to PID+nanosecond). Prevents `/tmp/pt-upload-*.tar.gz` collision on concurrent runs.
+- **[HIGH] Fix `prompt_duration` regex** — removed `\s*` that allowed `"1h 30m"` to
+  pass validation; k6 rejects space-separated durations.
+- **[HIGH] Fix `vus`/`dur` scope leak** — declared `local vus="" dur="" env_name=""
+  runby="" platform="" scenario=""` at start of `.js` block in `ssh_menu`. Prevents
+  stale values from previous run leaking into next suite selection.
+- **[HIGH] Add `CREATE INDEX idx_users_username`** — `lib/python/db.py` now creates
+  an index on `users.username` for login lookup performance.
+- **[HIGH] Fix `pass=1` dead code** — replaced unreferenced variable with explicit
+  no-op comment in `pt_auth_client.sh`.
+
+### Bug Fixes — MEDIUM (Growin_2FA.js)
+- **[MEDIUM] Fix invalid `summaryTimeUnit: '3600s'`** → `'s'` (valid k6 values: ms/s/m).
+- **[MEDIUM] Fix excessive timeouts** — `setupTimeout`/`teardownTimeout` `'3600s'` → `'10m'`/`'2m'`.
+- **[MEDIUM] Fix `http.batch()` single-item** → `http.get()` (cleaner, no overhead).
+- **[MEDIUM] Fix broken `__summaryShown` flag** — replaced with clean unconditional
+  log block (flag was set immediately then checked again, always false).
+
+### New Files
+- `configs/pt.env.example` — safe-to-commit template with all required keys documented.
+  Copy to `configs/pt.env` and fill in real values on each machine.
+
 ## [2.5.0] - 2026-06-04
 
 ### Added — Sandbox_Demo Suite
