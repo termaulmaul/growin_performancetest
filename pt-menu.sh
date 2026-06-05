@@ -1140,7 +1140,7 @@ mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
 echo '[remote] Running k6...'
 set -o pipefail
 echo '[remote] Running k6...'
-\$K6_BIN run --compatibility-mode=extended $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=$_test_pwd -e TEST_PIN=$_test_pin --out dashboard=export=$report_file 2>&1 | grep -v "source=console"
+\$K6_BIN run --compatibility-mode=extended $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=$_test_pwd -e TEST_PIN=$_test_pin --out dashboard=export=$report_file 2>&1 | awk '{if(match($0,/level=([a-z]+) msg=\"(.*)\" source=console/,a)){if(a[1]==\"error\")print \"  \033[31mFAIL  \"a[2]\"\033[0m\";else if(a[1]==\"warning\")print \"  \033[33mWARN  \"a[2]\"\033[0m\";else print \"  \"a[2]}else print}'
 RC=\$?
 echo '[remote] k6 exit code:' \$RC
 cd /tmp && rm -rf $_remote_dir $(basename $_tarball)
@@ -1227,7 +1227,7 @@ echo '[remote] Arch:' \$ARCH '| k6:' \$K6_BIN
 cd Script/$suite_name
 mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
 set -o pipefail
-\$K6_BIN run --compatibility-mode=extended $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=$_test_pwd -e TEST_PIN=$_test_pin --out dashboard=export=$report_file 2>&1 | grep -v "source=console"
+\$K6_BIN run --compatibility-mode=extended $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=$_test_pwd -e TEST_PIN=$_test_pin --out dashboard=export=$report_file 2>&1 | awk '{if(match($0,/level=([a-z]+) msg=\"(.*)\" source=console/,a)){if(a[1]==\"error\")print \"  \033[31mFAIL  \"a[2]\"\033[0m\";else if(a[1]==\"warning\")print \"  \033[33mWARN  \"a[2]\"\033[0m\";else print \"  \"a[2]}else print}'
 RC=\$?
 cd /tmp && rm -rf $_remote_dir $(basename $_tarball)
 exit \$RC"
