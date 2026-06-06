@@ -39,6 +39,17 @@ if [[ -f "$PROJECT_DIR/lib/bash/pt_profiles.sh" ]]; then
   source "$PROJECT_DIR/lib/bash/pt_profiles.sh"
 fi
 
+# PT Remote Exec (H1): unified remote run helpers
+# Provides: pt_pack_run_tarball, pt_build_k6_remote_cmd,
+#           pt_transport_upload, pt_transport_ssh,
+#           pt_transport_download_report, pt_transport_cleanup,
+#           pt_remote_run (high-level).
+# Inline ssh_menu blocks remain unchanged for backward-compat; new run
+# flows can opt into pt_remote_run for cleaner code.
+if [[ -f "$PROJECT_DIR/lib/bash/pt_remote_exec.sh" ]]; then
+  source "$PROJECT_DIR/lib/bash/pt_remote_exec.sh"
+fi
+
 
 # ── Colors ─────────────────────────────────────────────────────────────────
 RED='\033[0;31m'; GRN='\033[0;32m'; YLW='\033[1;33m'
