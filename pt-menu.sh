@@ -1272,7 +1272,8 @@ if [ -f /tmp/k6-export-\$\$.json ]; then
   echo 'K6_SUMMARY_JSON_END'
   rm -f /tmp/k6-export-\$\$.json
 fi
-cd /tmp && rm -rf $_remote_dir $(basename $_tarball)
+# M7: Don't auto-clean _remote_dir — local side will scp Report/ then clean
+cd /tmp && rm -f $(basename $_tarball)
 exit \$RC"
 
           set +e
@@ -1281,6 +1282,22 @@ exit \$RC"
             qa@10.184.120.48 "$_remote_cmd" 2>&1 | tee "$_run_log"
           _run_rc=${PIPESTATUS[0]}; set -e
           _print_k6_summary "$_run_log"
+          # MEDIUM FIX (M7): Auto-download HTML report from Onprem, then clean
+          if [[ "$(env_val DOWNLOAD_REPORT 'true')" == "true" ]]; then
+            local _local_report_dir="$PROJECT_DIR/Report/${suite_name}/${platform}/${scen_label}/${runby}"
+            mkdir -p "$_local_report_dir" 2>/dev/null || true
+            echo -e "${DIM}[local] Downloading Onprem report...${RST}"
+            _sshpass_cmd "$pass" scp $_SSH_ALIVE_OPTS -o StrictHostKeyChecking=no \
+              -o ProxyCommand="sshpass -p \"$pass\" ssh $_SSH_ALIVE_OPTS -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72" \
+              "qa@10.184.120.48:${_remote_dir}/Report/${suite_name}/${platform}/${scen_label}/${runby}/*.html" \
+              "$_local_report_dir/" 2>/dev/null && \
+              echo -e "${GRN}  ✓ Report saved to Report/${suite_name}/${platform}/${scen_label}/${runby}/${RST}" || \
+              echo -e "${DIM}  (no HTML reports — k6 may have failed before generating report)${RST}"
+            # Clean remote workspace after download
+            _sshpass_cmd "$pass" ssh $_SSH_ALIVE_OPTS -o StrictHostKeyChecking=no \
+              -o ProxyCommand="sshpass -p \"$pass\" ssh $_SSH_ALIVE_OPTS -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72" \
+              qa@10.184.120.48 "rm -rf ${_remote_dir}" 2>/dev/null || true
+          fi
           print_run_footer "$_run_rc" "$_run_log"
           rm -f "$_tarball"
         fi
@@ -1366,7 +1383,8 @@ if [ -f /tmp/k6-export-\$\$.json ]; then
   echo 'K6_SUMMARY_JSON_END'
   rm -f /tmp/k6-export-\$\$.json
 fi
-cd /tmp && rm -rf $_remote_dir $(basename $_tarball)
+# M7: Keep _remote_dir until local scp finishes
+cd /tmp && rm -f $(basename $_tarball)
 exit \$RC"
 
           set +e
@@ -1376,6 +1394,22 @@ exit \$RC"
             --command="$_remote_cmd" 2>&1 | tee "$_run_log"
           _run_rc=${PIPESTATUS[0]}; set -e
           _print_k6_summary "$_run_log"
+          # MEDIUM FIX (M7): Auto-download HTML report from Oncloud, then clean
+          if [[ "$(env_val DOWNLOAD_REPORT 'true')" == "true" ]]; then
+            local _local_report_dir="$PROJECT_DIR/Report/${suite_name}/${platform}/${scen_label}/${runby}"
+            mkdir -p "$_local_report_dir" 2>/dev/null || true
+            echo -e "${DIM}[local] Downloading Oncloud report...${RST}"
+            gcloud compute scp --zone "asia-southeast2-c" \
+              --tunnel-through-iap --project "compute-pt" \
+              "vm-pt-ksix-0:${_remote_dir}/Report/${suite_name}/${platform}/${scen_label}/${runby}/*.html" \
+              "$_local_report_dir/" 2>/dev/null && \
+              echo -e "${GRN}  ✓ Report saved to Report/${suite_name}/${platform}/${scen_label}/${runby}/${RST}" || \
+              echo -e "${DIM}  (no HTML reports — k6 may have failed before generating report)${RST}"
+            # Clean remote workspace
+            gcloud compute ssh --zone "asia-southeast2-c" "vm-pt-ksix-0" \
+              --tunnel-through-iap --project "compute-pt" \
+              --command="rm -rf ${_remote_dir}" 2>/dev/null || true
+          fi
           print_run_footer "$_run_rc" "$_run_log"
           rm -f "$_tarball"
         fi
@@ -1427,9 +1461,24 @@ ln -sfn /usr/local/bin/k6 k6 2>/dev/null || true
 cd /tmp/Script/${suite_name}
 REPORT_DIR=/tmp/Report/${suite_name}/${platform}/${scen_label}/${runby} k6 run --compatibility-mode=experimental_enhanced ${file_sel} -e RUNBY=${runby:-Manual} -e ENV=SANDBOX -e USER=${vus:-1} -e K6_USERS=${vus:-1} -e DURATION=${dur:-30s} -e SCENARIO=${scenario:-BP001} -e PLATFORM=${platform:-Web} -e BASE_URL=http://mock-api:8080 -e NUMSTART=1 -e TEST_PASSWORD=\"${_test_pwd}\" -e TEST_PIN=\"${_test_pin}\" -e SANDBOX_REPORT_DIR=/tmp/Report/${suite_name}/${platform}/${scen_label}/${runby}"
         print_run_header "$_run_label [DEMO]" "Sandbox  127.0.0.1:2222 → http://mock-api:8080" "Sandbox"
+        # MEDIUM FIX (M6): Track sandbox runs in recent_runs
+        recent_runs_add "Sandbox · ${suite_name} · ${platform} · ${scen_label} · ${vus}VU · ${dur}"
         set +e
         _sshpass_cmd "$pass" ssh -p 2222 $_SSH_ALIVE_OPTS -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null qa@127.0.0.1 "$sandbox_cmd" 2>&1 | tee "$_run_log"
         _run_rc=${PIPESTATUS[0]}; set -e
+        _print_k6_summary "$_run_log"
+        # MEDIUM FIX (M7): Auto-download report from sandbox container
+        if [[ "$_run_rc" -eq 0 && "$(env_val DOWNLOAD_REPORT 'true')" == "true" ]]; then
+          local _local_report_dir="$PROJECT_DIR/Report/${suite_name}/${platform}/${scen_label}/${runby}"
+          mkdir -p "$_local_report_dir" 2>/dev/null || true
+          echo -e "${DIM}[local] Downloading sandbox report...${RST}"
+          _sshpass_cmd "$pass" scp -P 2222 $_SSH_ALIVE_OPTS \
+            -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+            "qa@127.0.0.1:/tmp/Report/${suite_name}/${platform}/${scen_label}/${runby}/*.html" \
+            "$_local_report_dir/" 2>/dev/null && \
+            echo -e "${GRN}  ✓ Report saved to Report/${suite_name}/${platform}/${scen_label}/${runby}/${RST}" || \
+            echo -e "${DIM}  (no HTML reports to download)${RST}"
+        fi
         print_run_footer "$_run_rc" "$_run_log"
         ;;
     esac
