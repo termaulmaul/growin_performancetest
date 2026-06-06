@@ -1095,7 +1095,7 @@ ssh_menu() {
           scen_label="${scen_label//,/-}"
           local report_file="../../Report/$suite_name/$platform/$scen_label/$runby/${runby}_${mode}_$(date +%m%d)_$(date +%H%M)_${scen_label}.html"
 
-          run_cmd="mkdir -p $(dirname "Report/$suite_name/$platform/$scen_label/$runby") && cd Script/$suite_name && ../../k6 run $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform --out dashboard=export=$report_file"
+          run_cmd="mkdir -p $(dirname "Report/$suite_name/$platform/$scen_label/$runby") && cd Script/$suite_name && ../../k6 run $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform --out web-dashboard=export=$report_file"
           _run_label="$suite_name / $file_sel  [$mode · $platform · ${scenario:-AllBP} · ${vus}VU · $dur]"
           python3 "$PROJECT_DIR/pt-data/auth.py" set_run "$PT_USER" "$file_sel" "$dur" 2>/dev/null || true
         fi
