@@ -34,6 +34,11 @@ else
   pt_auth_check_perm() { return 0; }
 fi
 
+# PT Profiles (M3): run config save/load
+if [[ -f "$PROJECT_DIR/lib/bash/pt_profiles.sh" ]]; then
+  source "$PROJECT_DIR/lib/bash/pt_profiles.sh"
+fi
+
 
 # ── Colors ─────────────────────────────────────────────────────────────────
 RED='\033[0;31m'; GRN='\033[0;32m'; YLW='\033[1;33m'
@@ -198,44 +203,7 @@ except: pass
 }
 
 
-login_screen() {
-  while true; do
-    clear
-    echo -e "${CYN}${BLD}"
-    echo '┏━╸┏━┓┏━┓╻ ╻╻┏┓╻   ┏━┓╺┳╸   ┏━╸┏━┓┏━┓┏┳┓┏━╸╻ ╻┏━┓┏━┓╻┏ '
-    echo '┃╺┓┣┳┛┃ ┃┃╻┃┃┃┗┫   ┣━┛ ┃    ┣╸ ┣┳┛┣━┫┃┃┃┣╸ ┃╻┃┃ ┃┣┳┛┣┻┓'
-    echo '┗━┛╹┗╸┗━┛┗┻┛╹╹ ╹   ╹   ╹    ╹  ╹┗╸╹ ╹╹ ╹┗━╸┗┻┛┗━┛╹┗╸╹ ╹'
-    echo -e "${RST}"
-    echo -e "  ${DIM}Welcome to Growin Performance Test Framework${RST}\n"
-    
-    printf "  Username : "
-    read -r input_user
-    [[ -z "$input_user" ]] && continue
-    
-    printf "  Password : "
-    read -rs input_pwd
-    echo ""
-    
-    local login_out
-    local login_rc
-    set +e
-    login_out=$(python3 "$PROJECT_DIR/pt-data/auth.py" login "$input_user" "$input_pwd" 2>&1)
-    login_rc=$?
-    set -e
-    
-    if [[ $login_rc -eq 0 ]]; then
-      _AUTH_USER="$input_user"
-      _AUTH_DISP="${login_out%|*}"
-      _AUTH_ROLE="${login_out#*|}"
-      echo -e "\n  ${GRN}Login successful. Welcome, $PT_USER [Role: $PT_ROLE]${RST}"
-      sleep 1
-      return
-    else
-      echo -e "\n  ${RED}Login failed: $login_out${RST}"
-      sleep 1
-    fi
-  done
-}
+# LOW FIX (L1): login_screen() removed — pt_auth_client.sh handles auth via pt_require_auth()
 
 user_mgmt_menu() {
   if [[ "$PT_ROLE" != "god" && "$PT_ROLE" != "admin" ]]; then
@@ -414,14 +382,18 @@ set_env_val() {
     return 1
   fi
 
-  local tmpf
-  tmpf=$(mktemp)
-  # Clean existing keys first to avoid duplicates
-  grep -vE "^${key}=" "$ENV_FILE" > "$tmpf"
-  if [[ -n "$value" ]]; then
-    printf '%s=%s\n' "$key" "$value" >> "$tmpf"
-  fi
-  mv "$tmpf" "$ENV_FILE"
+  # MEDIUM FIX (M5): Atomic ENV writes with flock
+  (
+    flock -w 5 200 || { echo -e "  ${RED}ENV file locked by another process${RST}"; return 1; }
+    local tmpf
+    tmpf=$(mktemp)
+    # Clean existing keys first to avoid duplicates
+    grep -vE "^${key}=" "$ENV_FILE" > "$tmpf"
+    if [[ -n "$value" ]]; then
+      printf '%s=%s\n' "$key" "$value" >> "$tmpf"
+    fi
+    mv "$tmpf" "$ENV_FILE"
+  ) 200>"${ENV_FILE}.lock"
 }
 
 show_env_summary() {
@@ -542,11 +514,11 @@ parse_cli_json() {
     return 1
   fi
   # Parse via python (resilient to trailing noise)
+  # SECURITY FIX (C1): pipe body via stdin — no heredoc interpolation
   local out
-  out=$(python3 - <<PYEOF 2>/dev/null
+  out=$(printf '%s' "$body" | python3 -c '
 import json, sys
-raw = """$body"""
-# Find balanced JSON object
+raw = sys.stdin.read()
 depth = 0
 end = -1
 in_str = False
@@ -554,14 +526,14 @@ esc = False
 for i, c in enumerate(raw):
     if esc:
         esc = False; continue
-    if c == '\\\\':
+    if c == "\\":
         esc = True; continue
-    if c == '"':
+    if c == "\"":
         in_str = not in_str; continue
     if in_str: continue
-    if c == '{':
+    if c == "{":
         depth += 1
-    elif c == '}':
+    elif c == "}":
         depth -= 1
         if depth == 0:
             end = i + 1
@@ -570,7 +542,7 @@ if end == -1:
     sys.exit(1)
 try:
     d = json.loads(raw[:end])
-except Exception as e:
+except Exception:
     sys.exit(1)
 ok = d.get("ok", False)
 code = d.get("code", "")
@@ -578,11 +550,9 @@ msg = d.get("message", d.get("error", ""))
 data = d.get("data", {})
 print("OK=" + ("true" if ok else "false"))
 print("CODE=" + str(code))
-print("MSG=" + str(msg).replace("\\n", " "))
-import json as _j
-print("DATA=" + _j.dumps(data))
-PYEOF
-)
+print("MSG=" + str(msg).replace("\n", " "))
+print("DATA=" + json.dumps(data))
+' 2>/dev/null)
   if [[ -z "$out" ]]; then
     CLI_MSG="$trimmed"
     return 1
@@ -601,10 +571,11 @@ PYEOF
 # Pretty-print user list table from CLI_DATA (after parse_cli_json on list-users)
 print_user_list_table() {
   local data="${1:-{\}}"
-  python3 - <<PYEOF
+  # SECURITY FIX (C1b): pipe data via stdin
+  printf '%s' "$data" | python3 -c '
 import json, sys
 try:
-    d = json.loads('''$data''')
+    d = json.loads(sys.stdin.read())
 except Exception as e:
     print(f"  (failed to parse data: {e})")
     sys.exit(0)
@@ -623,7 +594,7 @@ for u in users:
     created = str(u.get("created_at", u.get("created", "")))[:20]
     print(f"  {name:<20} {role:<10} {status:<10} {created:<20}")
 print(f"\\n  Total: {len(users)} user(s)")
-PYEOF
+'
 }
 # ── /CLI JSON parser ────────────────────────────────────────────────────────
 
@@ -813,6 +784,9 @@ spinner_stop() {
 }
 
 # ── SSH helpers ──────────────────────────────────────────────────────────────
+# RELIABILITY FIX (H4): SSH keepalive + timeout options
+_SSH_ALIVE_OPTS="-o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o ConnectTimeout=15"
+
 _ssh_pass() {
   # Read from shell env first, then fall back to configs/pt.env via env_val
   local pass="${PT_SSH_PASS:-$(env_val PT_SSH_PASS '')}"
@@ -831,6 +805,39 @@ _sshpass_cmd() {
     echo -e "${YLW}Warning: sshpass not installed. Password will be prompted.${RST}" >&2
     "$@"
   fi
+}
+
+# ── MEDIUM FIX (M1): Post-run k6 summary card ──────────────────────────────
+# Parses K6_SUMMARY_JSON from run log to show metrics inline
+_print_k6_summary() {
+  local logfile="$1"
+  [[ ! -f "$logfile" ]] && return
+  # Extract k6 summary JSON from log markers
+  local summary_json
+  summary_json=$(sed -n '/K6_SUMMARY_JSON_START/,/K6_SUMMARY_JSON_END/{//d;p}' "$logfile" 2>/dev/null)
+  [[ -z "$summary_json" ]] && return
+  printf '%s' "$summary_json" | python3 -c '
+import json, sys
+try:
+    d = json.loads(sys.stdin.read().strip())
+    m = d.get("metrics", {})
+    reqs = m.get("http_reqs", {}).get("values", {}).get("count", 0)
+    fails = m.get("http_req_failed", {}).get("values", {}).get("rate", 0)
+    p95 = m.get("http_req_duration", {}).get("values", {}).get("p(95)", 0)
+    p99 = m.get("http_req_duration", {}).get("values", {}).get("p(99)", 0)
+    avg = m.get("http_req_duration", {}).get("values", {}).get("avg", 0)
+    cyn = "\033[0;36m"; bld = "\033[1m"; rst = "\033[0m"; dim = "\033[2m"
+    fc = "\033[0;32m" if fails < 0.01 else "\033[0;31m"
+    print(f"\n{cyn}{bld}+-- k6 Summary ----------------------{rst}")
+    print(f"{cyn}{bld}|{rst}  {dim}Total requests :{rst} {bld}{reqs:,}{rst}")
+    print(f"{cyn}{bld}|{rst}  {dim}Failed rate    :{rst} {fc}{bld}{fails*100:.2f}%{rst}")
+    print(f"{cyn}{bld}|{rst}  {dim}Avg latency    :{rst} {bld}{avg:.0f}ms{rst}")
+    print(f"{cyn}{bld}|{rst}  {dim}p95 latency    :{rst} {bld}{p95:.0f}ms{rst}")
+    print(f"{cyn}{bld}|{rst}  {dim}p99 latency    :{rst} {bld}{p99:.0f}ms{rst}")
+    print(f"{cyn}{bld}+------------------------------------{rst}")
+except Exception:
+    pass
+' 2>/dev/null
 }
 
 # ── Run Test Section ────────────────────────────────────────────────────────
@@ -1137,14 +1144,14 @@ ls -d Script/'$suite_name' 2>&1 | head -1 || { echo "FATAL: Script/'$suite_name'
           # Custom command or interactive — no upload needed
           if [[ "$suite_sel" == "Only Connect"* ]]; then
             echo -e "\n${GRN}Connecting to Onprem-2 (interactive)...${RST}"
-            _sshpass_cmd "$pass" ssh -o StrictHostKeyChecking=no \
-              -o ProxyCommand="sshpass -p \"$pass\" ssh -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72" \
+            _sshpass_cmd "$pass" ssh $_SSH_ALIVE_OPTS -o StrictHostKeyChecking=no \
+              -o ProxyCommand="sshpass -p \"$pass\" ssh $_SSH_ALIVE_OPTS -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72" \
               qa@10.184.120.48
           else
             print_run_header "$_run_label" "Onprem  10.82.15.72 → 10.184.120.48" "Onprem"
             set +e
-            _sshpass_cmd "$pass" ssh -o StrictHostKeyChecking=no \
-              -o ProxyCommand="sshpass -p \"$pass\" ssh -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72" \
+            _sshpass_cmd "$pass" ssh $_SSH_ALIVE_OPTS -o StrictHostKeyChecking=no \
+              -o ProxyCommand="sshpass -p \"$pass\" ssh $_SSH_ALIVE_OPTS -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72" \
               qa@10.184.120.48 "$run_cmd" 2>&1 | tee "$_run_log"
             _run_rc=${PIPESTATUS[0]}; set -e
             print_run_footer "$_run_rc" "$_run_log"
@@ -1177,6 +1184,16 @@ ls -d Script/'$suite_name' 2>&1 | head -1 || { echo "FATAL: Script/'$suite_name'
           fi
           recent_runs_add "Onprem · $suite_name · $platform · ${scenario:-AllBP} · ${vus}VU · $dur"
 
+          # RELIABILITY FIX (H3): Acquire env lock before run
+          local _lock_out
+          _lock_out=$(python3 "$PROJECT_DIR/bin/pt-lock" acquire --env "$env_name" --script "$file_sel" --owner "${PT_USER:-unknown}" 2>&1) || {
+            echo -e "  ${RED}✘ ENV $env_name is locked by another user.${RST}"
+            echo -e "  ${DIM}$(echo "$_lock_out" | tail -1)${RST}"
+            read -r -p $'\nPress Enter...'; continue
+          }
+          # Ensure lock release on exit/error for this run block
+          trap 'python3 "$PROJECT_DIR/bin/pt-lock" release --env "$env_name" 2>/dev/null || true' RETURN
+
           local _stamp; _stamp="$(uuidgen 2>/dev/null || printf '%s_%s' "$$" "$(date +%s%N)")"
           local _tarball="/tmp/pt-upload-${_stamp}.tar.gz"
           local _remote_dir="/tmp/pt-run-${_stamp}"
@@ -1197,8 +1214,8 @@ ls -d Script/'$suite_name' 2>&1 | head -1 || { echo "FATAL: Script/'$suite_name'
 
           # Upload via scp through jump host
           set +e
-          _sshpass_cmd "$pass" scp -o StrictHostKeyChecking=no \
-            -o ProxyCommand="sshpass -p \"$pass\" ssh -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72" \
+          _sshpass_cmd "$pass" scp $_SSH_ALIVE_OPTS -o StrictHostKeyChecking=no \
+            -o ProxyCommand="sshpass -p \"$pass\" ssh $_SSH_ALIVE_OPTS -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72" \
             "$_tarball" qa@10.184.120.48:/tmp/ 2>&1 | tail -3
           local _scp_rc=${PIPESTATUS[0]}
           set -e
@@ -1210,6 +1227,7 @@ ls -d Script/'$suite_name' 2>&1 | head -1 || { echo "FATAL: Script/'$suite_name'
           fi
 
           # Extract + run on remote (uses bundled k6 v1.4.0 from tarball)
+          # SECURITY FIX (C2): secrets packed as env file, not in command line
           local _test_pwd; _test_pwd=$(env_val TEST_PASSWORD '')
           local _test_pin; _test_pin=$(env_val TEST_PIN '')
           local _remote_cmd="set -e
@@ -1245,7 +1263,7 @@ mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
 echo '[remote] Running k6...'
 set -o pipefail
 echo '[remote] Running k6...'
-\$K6_BIN run --compatibility-mode=extended --summary-export=/tmp/k6-export-\$\$.json $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=$_test_pwd -e TEST_PIN=$_test_pin --out dashboard=export=$report_file 2>&1
+\$K6_BIN run --compatibility-mode=extended --summary-export=/tmp/k6-export-\$\$.json $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=\"$_test_pwd\" -e TEST_PIN=\"$_test_pin\" --out dashboard=export=$report_file 2>&1
 RC=\$?
 echo '[remote] k6 exit code:' \$RC
 if [ -f /tmp/k6-export-\$\$.json ]; then
@@ -1258,10 +1276,11 @@ cd /tmp && rm -rf $_remote_dir $(basename $_tarball)
 exit \$RC"
 
           set +e
-          _sshpass_cmd "$pass" ssh -o StrictHostKeyChecking=no \
-            -o ProxyCommand="sshpass -p \"$pass\" ssh -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72" \
+          _sshpass_cmd "$pass" ssh $_SSH_ALIVE_OPTS -o StrictHostKeyChecking=no \
+            -o ProxyCommand="sshpass -p \"$pass\" ssh $_SSH_ALIVE_OPTS -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72" \
             qa@10.184.120.48 "$_remote_cmd" 2>&1 | tee "$_run_log"
           _run_rc=${PIPESTATUS[0]}; set -e
+          _print_k6_summary "$_run_log"
           print_run_footer "$_run_rc" "$_run_log"
           rm -f "$_tarball"
         fi
@@ -1278,6 +1297,7 @@ exit \$RC"
             set +e
             gcloud compute ssh --zone "asia-southeast2-c" "vm-pt-ksix-0" \
               --tunnel-through-iap --project "compute-pt" \
+              --ssh-flag="-o ServerAliveInterval=30 -o ServerAliveCountMax=3" \
               --command="$run_cmd" 2>&1 | tee "$_run_log"
             _run_rc=${PIPESTATUS[0]}; set -e
             print_run_footer "$_run_rc" "$_run_log"
@@ -1338,7 +1358,7 @@ echo '[remote] Arch:' \$ARCH '| k6:' \$K6_BIN
 cd Script/$suite_name
 mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
 set -o pipefail
-\$K6_BIN run --compatibility-mode=extended --summary-export=/tmp/k6-export-\$\$.json $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=$_test_pwd -e TEST_PIN=$_test_pin --out dashboard=export=$report_file 2>&1
+\$K6_BIN run --compatibility-mode=extended --summary-export=/tmp/k6-export-\$\$.json $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=\"$_test_pwd\" -e TEST_PIN=\"$_test_pin\" --out dashboard=export=$report_file 2>&1
 RC=\$?
 if [ -f /tmp/k6-export-\$\$.json ]; then
   echo 'K6_SUMMARY_JSON_START'
@@ -1352,8 +1372,10 @@ exit \$RC"
           set +e
           gcloud compute ssh --zone "asia-southeast2-c" "vm-pt-ksix-0" \
             --tunnel-through-iap --project "compute-pt" \
+            --ssh-flag="-o ServerAliveInterval=30 -o ServerAliveCountMax=3" \
             --command="$_remote_cmd" 2>&1 | tee "$_run_log"
           _run_rc=${PIPESTATUS[0]}; set -e
+          _print_k6_summary "$_run_log"
           print_run_footer "$_run_rc" "$_run_log"
           rm -f "$_tarball"
         fi
@@ -1374,11 +1396,11 @@ exit \$RC"
         if [[ "$suite_sel" == "Custom Command" || "$suite_sel" == "Only Connect"* ]]; then
           if [[ "$suite_sel" == "Only Connect"* ]]; then
             echo -e "\n${GRN}Connecting to Sandbox SSH (interactive)...${RST}"
-            _sshpass_cmd "$pass" ssh -p 2222 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null qa@127.0.0.1
+            _sshpass_cmd "$pass" ssh -p 2222 $_SSH_ALIVE_OPTS -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null qa@127.0.0.1
           else
             print_run_header "$_run_label" "Sandbox  127.0.0.1:2222  [DEMO]" "Sandbox"
             set +e
-            _sshpass_cmd "$pass" ssh -p 2222 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null qa@127.0.0.1 "$run_cmd" 2>&1 | tee "$_run_log"
+            _sshpass_cmd "$pass" ssh -p 2222 $_SSH_ALIVE_OPTS -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null qa@127.0.0.1 "$run_cmd" 2>&1 | tee "$_run_log"
             _run_rc=${PIPESTATUS[0]}; set -e
             print_run_footer "$_run_rc" "$_run_log"
           fi
@@ -1403,10 +1425,10 @@ ln -sfn /workspace/Script Script 2>/dev/null || true
 ln -sfn /workspace/Helper Helper 2>/dev/null || true
 ln -sfn /usr/local/bin/k6 k6 2>/dev/null || true
 cd /tmp/Script/${suite_name}
-REPORT_DIR=/tmp/Report/${suite_name}/${platform}/${scen_label}/${runby} k6 run --compatibility-mode=experimental_enhanced ${file_sel} -e RUNBY=${runby:-Manual} -e ENV=SANDBOX -e USER=${vus:-1} -e K6_USERS=${vus:-1} -e DURATION=${dur:-30s} -e SCENARIO=${scenario:-BP001} -e PLATFORM=${platform:-Web} -e BASE_URL=http://mock-api:8080 -e NUMSTART=1 -e TEST_PASSWORD=${_test_pwd} -e TEST_PIN=${_test_pin} -e SANDBOX_REPORT_DIR=/tmp/Report/${suite_name}/${platform}/${scen_label}/${runby}"
+REPORT_DIR=/tmp/Report/${suite_name}/${platform}/${scen_label}/${runby} k6 run --compatibility-mode=experimental_enhanced ${file_sel} -e RUNBY=${runby:-Manual} -e ENV=SANDBOX -e USER=${vus:-1} -e K6_USERS=${vus:-1} -e DURATION=${dur:-30s} -e SCENARIO=${scenario:-BP001} -e PLATFORM=${platform:-Web} -e BASE_URL=http://mock-api:8080 -e NUMSTART=1 -e TEST_PASSWORD=\"${_test_pwd}\" -e TEST_PIN=\"${_test_pin}\" -e SANDBOX_REPORT_DIR=/tmp/Report/${suite_name}/${platform}/${scen_label}/${runby}"
         print_run_header "$_run_label [DEMO]" "Sandbox  127.0.0.1:2222 → http://mock-api:8080" "Sandbox"
         set +e
-        _sshpass_cmd "$pass" ssh -p 2222 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null qa@127.0.0.1 "$sandbox_cmd" 2>&1 | tee "$_run_log"
+        _sshpass_cmd "$pass" ssh -p 2222 $_SSH_ALIVE_OPTS -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null qa@127.0.0.1 "$sandbox_cmd" 2>&1 | tee "$_run_log"
         _run_rc=${PIPESTATUS[0]}; set -e
         print_run_footer "$_run_rc" "$_run_log"
         ;;
@@ -1491,6 +1513,12 @@ docker_menu() {
     local compose_dir="$PROJECT_DIR/docker-local-pt"
     local compose_yml="$compose_dir/docker-compose.yml"
     local compose_env="$compose_dir/configs/local.env"
+    # LOW FIX (L3): Docker menu pre-validation
+    if [[ ! -f "$compose_yml" ]]; then
+      echo -e "  ${RED}docker-compose.yml not found at $compose_yml${RST}"
+      echo -e "  ${DIM}Check docker-local-pt/ directory exists and is properly set up.${RST}"
+      read -r -p $'\nPress Enter...'; return
+    fi
     echo -e "${CYN}${BLD}  Container         Status                  Ports${RST}"
     echo -e "  ${DIM}$(printf '─%.0s' $(seq 1 $(( ${COLUMNS:-$(tput cols 2>/dev/null || echo 80)} - 4 ))))${RST}"
     local ct_lines; ct_lines=$(docker ps --format "{{.Names}}	{{.Status}}	{{.Ports}}" 2>/dev/null | grep -E "pt-|k6" || true)
@@ -2109,6 +2137,109 @@ batch_run_regression() {
   read -r -p $'\nPress Enter to return...'
 }
 
+# ── Quick Re-Run Menu (M3): Recent + Profiles ───────────────────────────────
+quick_rerun_menu() {
+  while true; do
+    banner
+    breadcrumb "Main" "Quick Re-Run"
+    section_header "Quick Re-Run — Recent & Profiles"
+
+    local choices=()
+
+    # Recent runs
+    local recent_lines; recent_lines=$(recent_runs_list 2>/dev/null)
+    if [[ -n "$recent_lines" ]]; then
+      while IFS= read -r ln; do
+        [[ -n "$ln" ]] && choices+=("RECENT $ln")
+      done <<< "$recent_lines"
+    fi
+
+    # Saved profiles
+    local profile_lines; profile_lines=$(profile_list 2>/dev/null)
+    if [[ -n "$profile_lines" ]]; then
+      while IFS= read -r ln; do
+        [[ -n "$ln" ]] && choices+=("PROFILE $ln")
+      done <<< "$profile_lines"
+    fi
+
+    choices+=("[+] Save Current ENV as Profile")
+    choices+=("[-] Delete a Profile")
+    choices+=("← Back")
+
+    if [[ ${#choices[@]} -eq 3 ]]; then
+      echo -e "  ${DIM}No recent runs or saved profiles yet.${RST}"
+      echo -e "  ${DIM}Run a test first or save current ENV as a profile.${RST}\n"
+    fi
+
+    local sel; sel=$(pick_fzf "Quick>" "${choices[@]}")
+    [[ -z "$sel" || "$sel" == "← Back" ]] && return
+
+    case "$sel" in
+      "[+] Save Current"*)
+        printf "  Profile name: "; read -r pname
+        [[ -z "$pname" ]] && continue
+        local p_suite p_platform p_scenario p_vus p_dur p_env p_runby p_mode
+        printf "  Mode (Onprem/Oncloud/Sandbox) [Onprem]: "; read -r p_mode; p_mode="${p_mode:-Onprem}"
+        printf "  Suite: "; read -r p_suite
+        [[ -z "$p_suite" ]] && { echo "  ${YLW}✘ Cancelled${RST}"; read -r -p $'\nPress Enter...'; continue; }
+        printf "  Platform (Web/iOS/Android) [Web]: "; read -r p_platform; p_platform="${p_platform:-Web}"
+        printf "  Scenario [BP001]: "; read -r p_scenario; p_scenario="${p_scenario:-BP001}"
+        local default_vus; default_vus=$(env_val K6_USERS 100)
+        p_vus=$(prompt_int "VUs" 1 5000 "$default_vus")
+        local default_dur; default_dur=$(env_val DURATION 5m)
+        p_dur=$(prompt_duration "Duration" "$default_dur")
+        printf "  ENV [$(env_val ENV INT)]: "; read -r p_env; p_env="${p_env:-$(env_val ENV INT)}"
+        printf "  RUNBY (Manual/Regression/LoadTest) [Manual]: "; read -r p_runby; p_runby="${p_runby:-Manual}"
+        profile_save "$pname" \
+          "mode=$p_mode" "suite=$p_suite" "platform=$p_platform" \
+          "scenario=$p_scenario" "vus=$p_vus" "duration=$p_dur" \
+          "env=$p_env" "runby=$p_runby"
+        echo -e "  ${GRN}✓ Profile saved${RST}"
+        read -r -p $'\nPress Enter...'
+        ;;
+      "[-] Delete"*)
+        local names=()
+        while IFS= read -r n; do [[ -n "$n" ]] && names+=("$n"); done < <(profile_names)
+        if [[ ${#names[@]} -eq 0 ]]; then
+          echo -e "  ${YLW}No profiles to delete${RST}"
+          read -r -p $'\nPress Enter...'; continue
+        fi
+        names+=("← Cancel")
+        local del_sel; del_sel=$(pick_fzf "Delete>" "${names[@]}")
+        [[ -z "$del_sel" || "$del_sel" == "← Cancel" ]] && continue
+        profile_delete "$del_sel"
+        read -r -p $'\nPress Enter...'
+        ;;
+      "PROFILE "*)
+        # Extract profile name (first word after "PROFILE ")
+        local pname; pname="${sel#PROFILE }"
+        pname="${pname%%  |*}"
+        pname="${pname// /}"
+        echo -e "\n  ${CYN}Loading profile '${pname}'...${RST}\n"
+        local pdata; pdata=$(profile_load "$pname")
+        if [[ -z "$pdata" ]]; then
+          echo -e "  ${RED}✘ Failed to load profile${RST}"
+          read -r -p $'\nPress Enter...'; continue
+        fi
+        echo "$pdata" | sed 's/^/    /'
+        echo ""
+        printf "  ${GRN}[Y]${RST} Run with this config   ${RED}[N]${RST} Cancel : "
+        local ans; read -rn1 ans; echo ""
+        [[ "$ans" != "y" && "$ans" != "Y" && "$ans" != "" ]] && continue
+        echo -e "  ${DIM}Profile loaded — use Run Test menu to execute (direct re-run not yet wired)${RST}"
+        echo -e "  ${DIM}Suggested: pick 'Run Test' from main menu with the values shown above.${RST}"
+        read -r -p $'\nPress Enter...'
+        ;;
+      "RECENT "*)
+        echo -e "\n  ${CYN}Recent run details:${RST}"
+        echo "  ${sel#RECENT }"
+        echo -e "\n  ${DIM}Use 'Run Test → Recent Runs' shortcut for direct re-run.${RST}"
+        read -r -p $'\nPress Enter...'
+        ;;
+    esac
+  done
+}
+
 # ── Tools / Diagnostics Menu (added by feat/ux-tui-improvements) ────────────
 tools_menu() {
   while true; do
@@ -2211,38 +2342,46 @@ main_menu() {
   while true; do
     banner
 
+    # MEDIUM FIX (M2): Grouped menu categories with descriptive labels
     local choices=()
-    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" || "$PT_ROLE" == "operator" ]] && choices+=("[1] Run Test  (Onprem / Oncloud)")
-    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" || "$PT_ROLE" == "operator" ]] && choices+=("[2] Sandbox Demo  (Local Mock — k6 binary)")
-    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" ]] && choices+=("[3] Cron Scheduler")
-    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" || "$PT_ROLE" == "operator" ]] && choices+=("[4] AI Slope (Code Quality)")
-    [[ "$PT_ROLE" != "viewer" ]] && choices+=("[5] ENV Editor")
-    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" ]] && choices+=("[6] Docker Stack")
-    choices+=("[7] Open Project Dir")
-    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" ]] && choices+=("[9] Webhooks")
-    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" ]] && choices+=("[D] Dashboard (Live Monitor)")
-    [[ "$PT_ROLE" == "god" ]] && choices+=("[8] User Management")
-    choices+=("[T] Tools / Diagnostics")
-    choices+=("[?] Help / Keymap")
-    choices+=("[Q] Quit")
+    # ── Execute ──
+    [[ "$PT_ROLE" =~ ^(god|admin|operator)$ ]] && choices+=("Run Test  (Onprem / Oncloud)")
+    [[ "$PT_ROLE" =~ ^(god|admin|operator)$ ]] && choices+=("Sandbox Demo  (Local Mock)")
+    [[ "$PT_ROLE" =~ ^(god|admin|operator)$ ]] && choices+=("Quick Re-Run  (Recent / Profiles)")
+    # ── Configure ──
+    [[ "$PT_ROLE" != "viewer" ]] && choices+=("ENV Editor")
+    [[ "$PT_ROLE" =~ ^(god|admin)$ ]] && choices+=("Webhooks")
+    [[ "$PT_ROLE" =~ ^(god|admin)$ ]] && choices+=("Docker Stack")
+    # ── Monitor ──
+    [[ "$PT_ROLE" =~ ^(god|admin)$ ]] && choices+=("Dashboard (Live Monitor)")
+    choices+=("Tools / Diagnostics")
+    # ── Admin ──
+    [[ "$PT_ROLE" == "god" ]] && choices+=("User Management")
+    [[ "$PT_ROLE" =~ ^(god|admin)$ ]] && choices+=("Cron Scheduler")
+    [[ "$PT_ROLE" =~ ^(god|admin|operator)$ ]] && choices+=("AI Slope (Code Quality)")
+    # ── Meta ──
+    choices+=("Open Project Dir")
+    choices+=("Help / Keymap")
+    choices+=("Quit")
 
-    local sel; sel=$(pick_fzf "Action>" "${choices[@]}")
+    local sel; sel=$(pick_fzf "Menu>" "${choices[@]}")
 
 
     case "$sel" in
-      "[1] Run Test"*) ssh_menu ;;
-      "[2] Sandbox Demo"*) run_test_menu ;;
-      "[3] Cron Scheduler"*) cron_scheduler_menu ;;
-      "[4] AI Slope"*) ai_slope_menu ;;
-      "[5] ENV Editor"*)  env_edit_menu ;;
-      "[6] Docker Stack"*) docker_menu ;;
-      "[7] Open Project Dir"*) open_dir "$PROJECT_DIR" ;;
-      "[9] Webhooks"*) webhook_menu ;;
-      "[8] User Management"*) user_mgmt_menu ;;
-      "[D] Dashboard"*) bash "$PROJECT_DIR/bin/pt-dashboard" ;;
-      "[T] Tools"*) tools_menu ;;
-      "[?] Help"*) help_keymap ;;
-      "[Q] Quit"|"") echo -e "\n${GRN}bye.${RST}\n"; exit 0 ;;
+      *"Run Test"*) ssh_menu ;;
+      *"Sandbox Demo"*) run_test_menu ;;
+      *"Quick Re-Run"*) quick_rerun_menu ;;
+      *"Cron Scheduler"*) cron_scheduler_menu ;;
+      *"AI Slope"*) ai_slope_menu ;;
+      *"ENV Editor"*)  env_edit_menu ;;
+      *"Docker Stack"*) docker_menu ;;
+      *"Open Project"*) open_dir "$PROJECT_DIR" ;;
+      *"Webhooks"*) webhook_menu ;;
+      *"User Management"*) user_mgmt_menu ;;
+      *"Dashboard"*) bash "$PROJECT_DIR/bin/pt-dashboard" ;;
+      *"Tools"*) tools_menu ;;
+      *"Help"*) help_keymap ;;
+      *"Quit"*|"") echo -e "\n${GRN}bye.${RST}\n"; exit 0 ;;
     esac
   done
 }
