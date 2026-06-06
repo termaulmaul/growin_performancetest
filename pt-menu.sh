@@ -1340,7 +1340,7 @@ mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
 echo '[remote] Running k6...'
 set -o pipefail
 echo '[remote] Running k6...'
-\$K6_BIN run --compatibility-mode=extended --summary-export=/tmp/k6-export-\$\$.json $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=\"$_test_pwd\" -e TEST_PIN=\"$_test_pin\" --out dashboard=export=$report_file 2>&1
+\$K6_BIN run --compatibility-mode=extended --summary-export=/tmp/k6-export-\$\$.json $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=\"$_test_pwd\" -e TEST_PIN=\"$_test_pin\" --out web-dashboard=export=$report_file 2>&1
 RC=\$?
 echo '[remote] k6 exit code:' \$RC
 if [ -f /tmp/k6-export-\$\$.json ]; then
@@ -1461,7 +1461,7 @@ echo '[remote] Arch:' \$ARCH '| k6:' \$K6_BIN
 cd Script/$suite_name
 mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
 set -o pipefail
-\$K6_BIN run --compatibility-mode=extended --summary-export=/tmp/k6-export-\$\$.json $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=\"$_test_pwd\" -e TEST_PIN=\"$_test_pin\" --out dashboard=export=$report_file 2>&1
+\$K6_BIN run --compatibility-mode=extended --summary-export=/tmp/k6-export-\$\$.json $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=\"$_test_pwd\" -e TEST_PIN=\"$_test_pin\" --out web-dashboard=export=$report_file 2>&1
 RC=\$?
 if [ -f /tmp/k6-export-\$\$.json ]; then
   echo 'K6_SUMMARY_JSON_START'
