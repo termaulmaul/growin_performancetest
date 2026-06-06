@@ -39,6 +39,17 @@ if [[ -f "$PROJECT_DIR/lib/bash/pt_profiles.sh" ]]; then
   source "$PROJECT_DIR/lib/bash/pt_profiles.sh"
 fi
 
+# PT Remote Exec (H1): unified remote run helpers
+# Provides: pt_pack_run_tarball, pt_build_k6_remote_cmd,
+#           pt_transport_upload, pt_transport_ssh,
+#           pt_transport_download_report, pt_transport_cleanup,
+#           pt_remote_run (high-level).
+# Inline ssh_menu blocks remain unchanged for backward-compat; new run
+# flows can opt into pt_remote_run for cleaner code.
+if [[ -f "$PROJECT_DIR/lib/bash/pt_remote_exec.sh" ]]; then
+  source "$PROJECT_DIR/lib/bash/pt_remote_exec.sh"
+fi
+
 
 # ── Colors ─────────────────────────────────────────────────────────────────
 RED='\033[0;31m'; GRN='\033[0;32m'; YLW='\033[1;33m'
@@ -840,6 +851,64 @@ except Exception:
 ' 2>/dev/null
 }
 
+# ── MEDIUM FIX (M4): Graceful k6 cancel ────────────────────────────────────
+# Tracks active run state so SIGINT can clean up properly. The trap is set
+# around each remote SSH invocation. On Ctrl+C:
+#   1. local side: release pt-lock + clear active_run + remove tarball
+#   2. remote side: the remote_cmd template traps SIGTERM and kills k6
+# Vars set by run blocks before invoking SSH:
+_CANCEL_ENV=""        # env name to release on cancel
+_CANCEL_TARBALL=""    # tarball to remove on cancel
+_CANCEL_REMOTE_DIR="" # remote workspace to clean
+_CANCEL_MODE=""       # Onprem|Oncloud|Sandbox
+_CANCEL_PASS=""       # ssh pass for cleanup
+
+_on_run_cancel() {
+  echo -e "\n${YLW}${BLD}⚠ Cancelling run...${RST}"
+  # 1. Release env lock
+  if [[ -n "$_CANCEL_ENV" ]]; then
+    python3 "$PROJECT_DIR/bin/pt-lock" release --env "$_CANCEL_ENV" 2>/dev/null || true
+    echo -e "  ${DIM}✓ ENV lock '$_CANCEL_ENV' released${RST}"
+  fi
+  # 2. Clear active run record
+  python3 "$PROJECT_DIR/pt-data/auth.py" clear_run "${PT_USER:-unknown}" 2>/dev/null || true
+  # 3. Try to kill remote k6 process (best-effort, may time out)
+  if [[ -n "$_CANCEL_REMOTE_DIR" && -n "$_CANCEL_MODE" ]]; then
+    echo -e "  ${DIM}Sending SIGTERM to remote k6...${RST}"
+    case "$_CANCEL_MODE" in
+      Onprem)
+        timeout 5 bash -c "_sshpass_cmd \"$_CANCEL_PASS\" ssh $_SSH_ALIVE_OPTS -o StrictHostKeyChecking=no \
+          -o ProxyCommand=\"sshpass -p '$_CANCEL_PASS' ssh -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72\" \
+          qa@10.184.120.48 'pkill -TERM -f \"k6 run\" 2>/dev/null; rm -rf $_CANCEL_REMOTE_DIR' 2>/dev/null" || true
+        ;;
+      Oncloud)
+        timeout 5 gcloud compute ssh --zone "asia-southeast2-c" "vm-pt-ksix-0" \
+          --tunnel-through-iap --project "compute-pt" \
+          --command="pkill -TERM -f 'k6 run' 2>/dev/null; rm -rf $_CANCEL_REMOTE_DIR" 2>/dev/null || true
+        ;;
+      Sandbox)
+        timeout 5 _sshpass_cmd "$_CANCEL_PASS" ssh -p 2222 -o StrictHostKeyChecking=no \
+          -o UserKnownHostsFile=/dev/null qa@127.0.0.1 \
+          "pkill -TERM -f 'k6 run' 2>/dev/null" 2>/dev/null || true
+        ;;
+    esac
+  fi
+  # 4. Cleanup local tarball
+  [[ -n "$_CANCEL_TARBALL" ]] && rm -f "$_CANCEL_TARBALL"
+  # 5. Reset state
+  _CANCEL_ENV=""; _CANCEL_TARBALL=""; _CANCEL_REMOTE_DIR=""; _CANCEL_MODE=""; _CANCEL_PASS=""
+  echo -e "  ${GRN}✓ Cleanup complete. Press Enter...${RST}"
+}
+
+# Wrap a run block with cancel trap. Caller sets _CANCEL_* vars first.
+_arm_cancel_trap() {
+  trap '_on_run_cancel; trap - INT TERM; return 130' INT TERM
+}
+_disarm_cancel_trap() {
+  trap - INT TERM
+  _CANCEL_ENV=""; _CANCEL_TARBALL=""; _CANCEL_REMOTE_DIR=""; _CANCEL_MODE=""; _CANCEL_PASS=""
+}
+
 # ── Run Test Section ────────────────────────────────────────────────────────
 ssh_menu() {
   banner
@@ -1102,7 +1171,7 @@ ssh_menu() {
           scen_label="${scen_label//,/-}"
           local report_file="../../Report/$suite_name/$platform/$scen_label/$runby/${runby}_${mode}_$(date +%m%d)_$(date +%H%M)_${scen_label}.html"
 
-          run_cmd="mkdir -p $(dirname "Report/$suite_name/$platform/$scen_label/$runby") && cd Script/$suite_name && ../../k6 run $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform --out dashboard=export=$report_file"
+          run_cmd="mkdir -p $(dirname "Report/$suite_name/$platform/$scen_label/$runby") && cd Script/$suite_name && ../../k6 run $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform --out web-dashboard=export=$report_file"
           _run_label="$suite_name / $file_sel  [$mode · $platform · ${scenario:-AllBP} · ${vus}VU · $dur]"
           python3 "$PROJECT_DIR/pt-data/auth.py" set_run "$PT_USER" "$file_sel" "$dur" 2>/dev/null || true
         fi
@@ -1198,6 +1267,14 @@ ls -d Script/'$suite_name' 2>&1 | head -1 || { echo "FATAL: Script/'$suite_name'
           local _tarball="/tmp/pt-upload-${_stamp}.tar.gz"
           local _remote_dir="/tmp/pt-run-${_stamp}"
 
+          # M4: Arm graceful-cancel trap with this run's context
+          _CANCEL_ENV="$env_name"
+          _CANCEL_TARBALL="$_tarball"
+          _CANCEL_REMOTE_DIR="$_remote_dir"
+          _CANCEL_MODE="Onprem"
+          _CANCEL_PASS="$pass"
+          _arm_cancel_trap
+
           echo -e "${DIM}[local] Packing Script/$suite_name + Helper + k6-linux binaries...${RST}"
           local _tar_k6=()
           [[ -f "$PROJECT_DIR/k6-linux-amd64" ]] && _tar_k6+=("k6-linux-amd64")
@@ -1263,7 +1340,7 @@ mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
 echo '[remote] Running k6...'
 set -o pipefail
 echo '[remote] Running k6...'
-\$K6_BIN run --compatibility-mode=extended --summary-export=/tmp/k6-export-\$\$.json $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=\"$_test_pwd\" -e TEST_PIN=\"$_test_pin\" --out dashboard=export=$report_file 2>&1
+\$K6_BIN run --compatibility-mode=extended --summary-export=/tmp/k6-export-\$\$.json $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=\"$_test_pwd\" -e TEST_PIN=\"$_test_pin\" --out web-dashboard=export=$report_file 2>&1
 RC=\$?
 echo '[remote] k6 exit code:' \$RC
 if [ -f /tmp/k6-export-\$\$.json ]; then
@@ -1300,6 +1377,7 @@ exit \$RC"
           fi
           print_run_footer "$_run_rc" "$_run_log"
           rm -f "$_tarball"
+          _disarm_cancel_trap  # M4: trap done
         fi
         ;;
 
@@ -1324,6 +1402,14 @@ exit \$RC"
           local _stamp; _stamp="$(uuidgen 2>/dev/null || printf '%s_%s' "$$" "$(date +%s%N)")"
           local _tarball="/tmp/pt-upload-${_stamp}.tar.gz"
           local _remote_dir="/tmp/pt-run-${_stamp}"
+
+          # M4: Arm graceful-cancel trap for Oncloud
+          _CANCEL_ENV="$env_name"
+          _CANCEL_TARBALL="$_tarball"
+          _CANCEL_REMOTE_DIR="$_remote_dir"
+          _CANCEL_MODE="Oncloud"
+          _CANCEL_PASS=""
+          _arm_cancel_trap
 
           echo -e "${DIM}[local] Packing Script/$suite_name + Helper + k6-linux binaries...${RST}"
           local _tar_k6=()
@@ -1375,7 +1461,7 @@ echo '[remote] Arch:' \$ARCH '| k6:' \$K6_BIN
 cd Script/$suite_name
 mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
 set -o pipefail
-\$K6_BIN run --compatibility-mode=extended --summary-export=/tmp/k6-export-\$\$.json $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=\"$_test_pwd\" -e TEST_PIN=\"$_test_pin\" --out dashboard=export=$report_file 2>&1
+\$K6_BIN run --compatibility-mode=extended --summary-export=/tmp/k6-export-\$\$.json $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=\"$_test_pwd\" -e TEST_PIN=\"$_test_pin\" --out web-dashboard=export=$report_file 2>&1
 RC=\$?
 if [ -f /tmp/k6-export-\$\$.json ]; then
   echo 'K6_SUMMARY_JSON_START'
@@ -1412,6 +1498,7 @@ exit \$RC"
           fi
           print_run_footer "$_run_rc" "$_run_log"
           rm -f "$_tarball"
+          _disarm_cancel_trap  # M4: Oncloud trap done
         fi
         ;;
 
@@ -1463,6 +1550,13 @@ REPORT_DIR=/tmp/Report/${suite_name}/${platform}/${scen_label}/${runby} k6 run -
         print_run_header "$_run_label [DEMO]" "Sandbox  127.0.0.1:2222 → http://mock-api:8080" "Sandbox"
         # MEDIUM FIX (M6): Track sandbox runs in recent_runs
         recent_runs_add "Sandbox · ${suite_name} · ${platform} · ${scen_label} · ${vus}VU · ${dur}"
+        # M4: Arm graceful-cancel trap for Sandbox (no env lock — sandbox is local-only)
+        _CANCEL_ENV=""
+        _CANCEL_TARBALL=""
+        _CANCEL_REMOTE_DIR=""  # sandbox runs in container, no /tmp/pt-run dir to clean
+        _CANCEL_MODE="Sandbox"
+        _CANCEL_PASS="$pass"
+        _arm_cancel_trap
         set +e
         _sshpass_cmd "$pass" ssh -p 2222 $_SSH_ALIVE_OPTS -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null qa@127.0.0.1 "$sandbox_cmd" 2>&1 | tee "$_run_log"
         _run_rc=${PIPESTATUS[0]}; set -e
@@ -1480,6 +1574,7 @@ REPORT_DIR=/tmp/Report/${suite_name}/${platform}/${scen_label}/${runby} k6 run -
             echo -e "${DIM}  (no HTML reports to download)${RST}"
         fi
         print_run_footer "$_run_rc" "$_run_log"
+        _disarm_cancel_trap  # M4: Sandbox trap done
         ;;
     esac
 
