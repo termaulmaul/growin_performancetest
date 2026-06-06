@@ -94,7 +94,10 @@ services:
     ports:
       - "2222:22"
     volumes:
-      - ..:/workspace:ro
+      # Workspace is mounted :rw so k6 can write HTML reports back to
+      # the host's Report/ directory. Safe for dev/sandbox; not used
+      # in production. See PR #15 / Issue #2 in simulation validation.
+      - ..:/workspace:rw
       - ./results:/results
     networks: [pt]
     healthcheck:
