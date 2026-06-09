@@ -4,7 +4,7 @@
 # ./ExaCC_LoadTest.sh
 # Declare variables
 ENV="INT"
-USER=420
+USER=335
 DURATION="2h"
 NUMSTART=1
 RUNBY="LoadTest"

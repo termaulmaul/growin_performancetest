@@ -7,7 +7,7 @@
 // ../../k6 run Growin_OMO.js -e RUNBY=Manual -e ENV=INT -e USER=200 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_OMO/Web/BP002/Manual/Manual_DryRun_0506_1409_BP002.html
 
 // Run Single BP iOS
-// ../../k6 run Growin_OMO.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_OMO/iOS/BP001/Manual/Manual_DryRun_0602_1114_BP001.html
+// ../../k6 run Growin_OMO.js -e RUNBY=Manual -e ENV=INT -e USER=85 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_OMO/iOS/BP001/Manual/Manual_DryRun_0608_0927_BP001.html
 
 // Run Single BP Android
 // ../../k6 run Growin_OMO.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Android --out dashboard=export=../../Report/Growin_OMO/Android/BP001/Manual/Manual_DryRun_0428_1100_BP001.html

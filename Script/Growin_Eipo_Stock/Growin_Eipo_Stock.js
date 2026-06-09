@@ -9,7 +9,7 @@
 // ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP004 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP004/Manual/Manual_DryRun_1113_1708_BP004_Local.html
 // ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP005 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP005/Manual/Manual_DryRun_1113_1708_BP005_Local.html
 // ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP006 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP006/Manual/Manual_DryRun_1209_1406_BP006_Local.html
-// ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP007 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP007/Manual/Manual_DryRun_0529_1356_BP007_Local.html
+// ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP007 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP007/Manual/Manual_DryRun_0603_1321_BP007_Local.html
 // ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP008 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP007/Manual/Manual_DryRun_0421_1152_BP008_Local.html
 // ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP009 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP009/Manual/Manual_DryRun_1120_1347_BP009_Local.html
 

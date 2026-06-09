@@ -121,17 +121,30 @@ export function BP010(data) { return dispatch('BP010', data); }
 // const MAX_RETRY_ATTEMPTS = 10;
 // const RETRY_DELAY = 1; // seconds between retry attempts
 
+// const BP_USER_PERCENTAGE = {
+//     BP001: 21.98,
+//     BP002: 19.18,
+//     BP003: 10.23,
+//     BP004: 10.23,
+//     BP005: 9.54,
+//     BP006: 7.57,
+//     BP007: 6.38,
+//     BP008: 5.91,
+//     BP009: 5.36,
+//     BP010: 3.62,
+// };
+
 const BP_USER_PERCENTAGE = {
-    BP001: 21.98,
-    BP002: 19.18,
-    BP003: 10.23,
-    BP004: 10.23,
-    BP005: 9.54,
-    BP006: 7.57,
-    BP007: 6.38,
-    BP008: 5.91,
-    BP009: 5.36,
-    BP010: 3.62,
+    BP001: 10,
+    BP002: 10,
+    BP003: 10,
+    BP004: 10,
+    BP005: 10,
+    BP006: 10,
+    BP007: 10,
+    BP008: 10,
+    BP009: 10,
+    BP010: 10,
 };
 
 // ✅ Function untuk calculate user distribution

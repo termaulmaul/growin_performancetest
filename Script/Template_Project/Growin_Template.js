@@ -62,7 +62,7 @@ http.setResponseCallback(http.expectedStatuses(200, 201, 400, 401, 403, 404, 500
 // ─────────────────────────────────────────────────────────────────────────────
 const BP_CONFIG = {
     Web: {
-        BP001: { fn: BP001_Web, skipSetupLogin: true,  numStart: 1501 },
+        BP001: { fn: BP001_Web, skipSetupLogin: true,  numStart: 1 },
         BP002: { fn: BP002_Web, skipSetupLogin: false                  },
     },
     // iOS: {
@@ -257,7 +257,11 @@ export const options = {
     noConnectionReuse: false,
     setupTimeout:      '3600s',
     teardownTimeout:   '3600s',
-    summaryTimeUnit:   '3600s',
+    summaryTimeUnit:   'ms',
+    thresholds: {
+        http_req_failed:   ['rate<0.001'],  // error rate < 0.1%
+        http_req_duration: ['avg<200'],     // average response time < 200ms
+    },
     // httpDebug: 'full',
 };
 
@@ -279,10 +283,13 @@ function loginWithRetry(base_url, credentials, userKey, vuId) {
         const res = http.post(`${base_url}/auth/api/v1/login`, payload, { headers });
 
         if (res.status === 200) {
-            if (attempt > 1) {
+            const token = res.json()?.data?.token ?? null;
+            if (!token) {
+                console.warn(`   ⚠️  User ${userKey} (${credentials.email}, VU${vuId}) login OK but token missing in response body`);
+            } else if (attempt > 1) {
                 console.log(`   ✅ User ${userKey} (${credentials.email}, VU${vuId}) login OK on attempt ${attempt}`);
             }
-            return { success: true, token: res.json().data.token, attempts: attempt };
+            return { success: !!token, token, attempts: attempt };
         }
 
         if (attempt < MAX_RETRY_ATTEMPTS) {

@@ -3,7 +3,7 @@
 // ../../../k6 run Growin_Data_Visualization_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 -e PLATFORM=Web  --out dashboard=export=../../../Report/Growin_Data_Visualization/Web/LoadTest/Manual_LoadTest_0519_1459.html
 
 // Run Single BP Web
-// ../../k6 run Growin_Data_Visualization.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Data_Visualization/Web/BP001/Manual/Manual_DryRun_0602_1033_BP001.html
+// ../../k6 run Growin_Data_Visualization.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Data_Visualization/Web/BP001/Manual/Manual_DryRun_0603_1035_BP001.html
 
 // Run Single BP iOS
 // ../../k6 run Growin_Data_Visualization.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Data_Visualization/iOS/BP001/Manual/Manual_DryRun_0428_1403_BP001.html

@@ -165,7 +165,7 @@ selectedBPs.forEach(bp => {
     scenarios[bp] = {
         executor: 'per-vu-iterations',
         vus: 1000,
-        iterations: 10,
+        iterations: 1,
         maxDuration: '1h',
 
         // executor: 'ramping-vus',
