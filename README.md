@@ -403,13 +403,9 @@ graph LR
 
 ### Setup
 
-1. **Start Grafana data backend** (required for metrics):
-   ```bash
-   cd get_grafana_data && bash start_backend.sh
-   # Backend runs on http://localhost:5000
-   ```
-2. Set `GRAFANA_BACKEND_URL` in `configs/pt.env` (default: `http://localhost:5000`).
-3. Run any test — report auto-generated under `Report/Utilization/`.
+1. **Grafana data backend starts automatically** on the first test run. It tries port 5000, 5001, then 5002.
+2. Set `GRAFANA_BACKEND_URL` in `configs/pt.env` if you want to use a specific remote instance (default: auto-detected local backend).
+- If Grafana backend fails to start or is unreachable, an empty report is generated (graceful fallback).
 
 ### Report Contents
 

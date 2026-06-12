@@ -136,20 +136,102 @@ def render_html(data, from_ts, to_ts):
     return html
 
 
+import subprocess
+import time
+import socket
+
+def is_port_in_use(port):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex(('127.0.0.1', port)) == 0
+
+def start_backend_if_needed():
+    """Start the Grafana backend if it's not already running, using a free port."""
+    ports_to_try = [5000, 5001, 5002]
+    
+    # 1. Check if backend is already running on a previously saved port
+    port_file = "/tmp/grafana_backend_port"
+    if os.path.exists(port_file):
+        try:
+            with open(port_file, 'r') as f:
+                saved_port = int(f.read().strip())
+            
+            # Simple health check
+            req = Request(f"http://localhost:{saved_port}/health")
+            with urlopen(req, timeout=2) as resp:
+                if resp.status == 200:
+                    return f"http://localhost:{saved_port}"
+        except Exception:
+            pass # Backend not running on saved port, continue to start it
+
+    # 2. Find a free port
+    chosen_port = None
+    for port in ports_to_try:
+        if not is_port_in_use(port):
+            chosen_port = port
+            break
+            
+    if not chosen_port:
+        print("[pt-grafana-report] Could not find a free port for backend.", file=sys.stderr)
+        return DEFAULT_BACKEND
+
+    # 3. Start the backend via start_backend.sh to ensure venv is handled
+    base_dir = os.path.dirname(os.path.dirname(__file__))
+    grafana_dir = os.path.join(base_dir, "get_grafana_data")
+    start_script = os.path.join(grafana_dir, "start_backend.sh")
+    
+    if not os.path.exists(start_script):
+        return DEFAULT_BACKEND
+        
+    print(f"[pt-grafana-report] Starting backend on port {chosen_port}...", file=sys.stderr)
+    env = os.environ.copy()
+    env["PORT"] = str(chosen_port)
+    
+    # Run detached
+    subprocess.Popen(
+        ["bash", start_script],
+        env=env,
+        cwd=grafana_dir,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        start_new_session=True
+    )
+    
+    # 4. Wait for it to become responsive
+    backend_url = f"http://localhost:{chosen_port}"
+    for _ in range(10):
+        time.sleep(0.5)
+        try:
+            req = Request(f"{backend_url}/health")
+            with urlopen(req, timeout=1) as resp:
+                if resp.status == 200:
+                    with open(port_file, 'w') as f:
+                        f.write(str(chosen_port))
+                    return backend_url
+        except Exception:
+            continue
+            
+    print("[pt-grafana-report] Backend failed to start or respond in time.", file=sys.stderr)
+    return backend_url
+
+
 def main():
     parser = argparse.ArgumentParser(description="Generate Grafana utilization HTML report")
     parser.add_argument("--start", required=True, help="Start epoch timestamp")
     parser.add_argument("--end", required=True, help="End epoch timestamp")
     parser.add_argument("--output", required=True, help="Output HTML file path")
-    parser.add_argument("--backend-url", default=DEFAULT_BACKEND, help="Grafana data backend URL")
+    parser.add_argument("--backend-url", default=None, help="Grafana data backend URL")
     args = parser.parse_args()
+
+    backend_url = args.backend_url
+    if not backend_url:
+        backend_url = start_backend_if_needed()
 
     from_ts = int(args.start)
     to_ts = int(args.end)
     from_iso = datetime.fromtimestamp(from_ts, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
     to_iso = datetime.fromtimestamp(to_ts, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
-    data = fetch_metrics(args.backend_url, from_iso, to_iso)
+    data = fetch_metrics(backend_url, from_iso, to_iso)
 
     if data is None:
         # Generate empty report with note
