@@ -63,7 +63,12 @@ pt_require_auth() {
         local _s_user="${_line%%:*}"; local _rest="${_line#*:}"
         local _s_role="${_rest%%:*}"; local _s_expiry="${_rest#*:}"
         local _now; _now=$(date +%s)
-        if [[ -n "$_s_expiry" && "$_now" -lt "$_s_expiry" ]]; then
+        if [[ "$_s_expiry" == "permanent" ]]; then
+            export PT_USER="$_s_user"
+            export PT_ROLE="$_s_role"
+            echo -e "\033[2m[auth] Skip mode active (Permanent).\033[0m" >&2
+            return 0
+        elif [[ -n "$_s_expiry" && "$_now" -lt "$_s_expiry" ]]; then
             export PT_USER="$_s_user"
             export PT_ROLE="$_s_role"
             echo -e "\033[2m[auth] Skip mode active for this session.\033[0m" >&2

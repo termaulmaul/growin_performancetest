@@ -2139,7 +2139,8 @@ tools_menu() {
       "[5] Audit Log Tail (pt-audit — last 20 entries)"
       "[6] Lock Status (pt-lock-status — env locks)"
       "[7] Show Recent Runs"
-      "[S] Skip Auth (Session)"
+      "[S] Skip Auth (15 min)"
+      "[P] Skip Auth (Permanent)"
       "[?] Help / Keymap"
       "[0] Back"
     )
@@ -2197,6 +2198,16 @@ tools_menu() {
         echo -e "  ${DIM}pt-menu.sh will not ask for password until then.${RST}"
         read -r -p $'\nPress Enter...'
         ;;
+      "[P] Skip Auth (Permanent)")
+        if [[ "$PT_ROLE" != "god" ]]; then
+          echo -e "  ${RED}God-only command.${RST}"; read -r -p $'\nPress Enter...'; continue
+        fi
+        mkdir -p "$HOME/.pt/var"
+        echo "${PT_USER}:${PT_ROLE}:permanent" > "$HOME/.pt/var/skip_auth.flag"
+        echo -e "  ${GRN}✓ Auth skip enabled permanently (until logout).${RST}"
+        echo -e "  ${DIM}Use [L] Logout in main menu to cancel.${RST}"
+        read -r -p $'\nPress Enter...'
+        ;;
       "[?] Help / Keymap")
         help_keymap
         ;;
@@ -2224,6 +2235,7 @@ main_menu() {
     [[ "$PT_ROLE" == "god" ]] && choices+=("[8] User Management")
     choices+=("[T] Tools / Diagnostics")
     choices+=("[?] Help / Keymap")
+    choices+=("[L] Logout")
     choices+=("[Q] Quit")
 
     local sel; sel=$(pick_fzf "Action>" "${choices[@]}")
@@ -2242,6 +2254,13 @@ main_menu() {
       "[D] Dashboard"*) bash "$PROJECT_DIR/bin/pt-dashboard" ;;
       "[T] Tools"*) tools_menu ;;
       "[?] Help"*) help_keymap ;;
+      "[L] Logout"*)
+        rm -f "$HOME/.pt/var/skip_auth.flag"
+        unset PT_USER PT_ROLE
+        echo -e "\n  ${GRN}Logged out successfully.${RST}"
+        sleep 1
+        exec "$0" "$@"
+        ;;
       "[Q] Quit"|"") echo -e "\n${GRN}bye.${RST}\n"; exit 0 ;;
     esac
   done
