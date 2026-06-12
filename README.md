@@ -110,10 +110,31 @@ Interactive fzf-based menu. All operations accessible from one entry point.
 
 ### Run Test Flow
 
-```
-Select Target → Select Suite → Pick Script (.js) → Choose Platform
-→ Select BP (filtered by platform folder) → Set VUs/Duration/ENV
-→ Confirm → Upload + Execute on Remote → Live Output → Report + Webhook
+```mermaid
+graph TD
+    Start(["User Launch ./pt-menu.sh"]) --> Auth{"Auth Gate<br/>(SQLite + bcrypt)"}
+    Auth -- Fail --> Exit(["Exit"])
+    Auth -- Success --> MainMenu["Main Menu<br/>(fzf TUI)"]
+
+    MainMenu --> PickRun["[1] Run Test"]
+    PickRun --> Target{"Select Target"}
+    Target -- "Onprem (SSH)" --> PickSuite
+    Target -- "Oncloud (IAP)" --> PickSuite
+    Target -- "Sandbox (Local)" --> PickSuite
+
+    PickSuite["Select Suite & BP Script"] --> Config["Configure<br/>(VUs, Duration, ENV)"]
+    Config --> Confirm{"Confirm Run"}
+    Confirm -- Yes --> Lock{"Acquire ENV Lock<br/>(pt-lock)"}
+    
+    Lock -- "Locked by other" --> Occupied["Show OCCUPIED warning"]
+    Lock -- "Success" --> Exec["Execute k6<br/>(+ 15s Heartbeat daemon)"]
+
+    Exec --> Parse["Parse Metrics<br/>(parse-k6-log.py)"]
+    Parse --> Report["Generate HTML Report"]
+    Report --> Webhook["Send Webhooks<br/>(Teams/Discord/Telegram)"]
+    Webhook --> Release["Release ENV Lock"]
+    Release --> Audit["Update Audit Trail<br/>(pt-audit)"]
+    Audit --> MainMenu
 ```
 
 **Recent Runs:** `[R]` in suite picker → select previous run → re-execute with same params.
