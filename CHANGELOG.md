@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased] - 2026-06-12
+
+### Added / Updated
+- Updated architecture diagram / golden ratio / API endpoints
+- Added Playwright v1.60+ upgrade notes (`@playwright/test@1.60+`)
+- Fixed PIN modal sequence documentation (from `explore.mjs` comments)
+- Parallel workers, HAR tracing, and AI assertions implemented.
+
 ## [2.7.0] - 2026-06-05
 
 ### Security — CRITICAL fixes

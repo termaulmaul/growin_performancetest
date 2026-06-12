@@ -11,6 +11,26 @@ Built on the **Kimi Enterprise Architecture RFC**: terminal-native auth (bcrypt 
 
 ---
 
+## 📊 Codebase Analysis (Latest)
+*Analysis Date: 2026-06-12*
+
+Full findings available in [KNOWLEDGE.md](./KNOWLEDGE.md).
+- **Code Health**: All `.sh` and `.py` files pass syntax compilation.
+- **Security Check**: ⚠️ **URGENT** - Found hardcoded credentials (`PT_SSH_PASS`, `TEST_PASSWORD`) in `configs/` and default fallbacks in Bash scripts. Hardcoded webhook URLs found in stale `.js` test copies.
+- **Testing**: ⚠️ Very low test coverage (0 active unit tests detected outside of dummy files).
+- **Agent Skills**: Installed 6 AI skills locally via `autoskills`.
+
+---
+
+## 🚀 Latest Changes
+
+- Updated architecture diagram / golden ratio / API endpoints
+- Added Playwright v1.60+ upgrade notes (`@playwright/test@1.60+`)
+- Fixed PIN modal sequence documentation (from `explore.mjs` comments)
+- Parallel workers, HAR tracing, and AI assertions implemented.
+
+---
+
 ## Quick Start
 
 ### Prerequisites
