@@ -120,14 +120,22 @@ EOF
     if [[ -f "$PROJECT_DIR/bin/pt-grafana-report" ]]; then
       mkdir -p "$_util_dir"
       local _run_end; _run_end=$(date +%s)
-      python3 "$PROJECT_DIR/bin/pt-grafana-report" \
+      local _report_out; _report_out=$(python3 "$PROJECT_DIR/bin/pt-grafana-report" \
         --start "$_RUN_START" \
         --end "$_run_end" \
         --output "$_util_file" \
-        --backend-url "$_grafana_backend" 2>/dev/null || true
+        --backend-url "$_grafana_backend" 2>/dev/null || true)
+      
+      echo "$_report_out" | head -n -1 | while IFS= read -r ln; do [[ -n "$ln" ]] && echo -e "  ${DIM}$ln${RST}"; done
+      
       if [[ -f "$_util_file" ]]; then
-        _util_url="$_util_file"
-        echo -e "  ${DIM}📈 Utilization report: ${_util_file}${RST}"
+        local _parsed_url; _parsed_url=$(echo "$_report_out" | tail -n 1)
+        if [[ "$_parsed_url" == http* ]]; then
+          _util_url="$_parsed_url"
+        else
+          _util_url="$_util_file"
+        fi
+        echo -e "  ${DIM}📈 Utilization report: ${_util_url}${RST}"
       fi
     fi
 

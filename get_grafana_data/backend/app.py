@@ -1,4 +1,5 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
+import os
 from flask_cors import CORS
 import requests
 from datetime import datetime
@@ -720,6 +721,14 @@ def get_metrics():
 
 
 @app.route('/health', methods=['GET'])
+@app.route("/report/<path:filename>", methods=["GET"])
+def serve_report(filename):
+    """Serve static HTML reports"""
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    report_dir = os.path.join(project_root, "Report", "Utilization")
+    return send_from_directory(report_dir, filename)
+
+
 def health():
     """Health check endpoint"""
     return jsonify({"status": "healthy"})

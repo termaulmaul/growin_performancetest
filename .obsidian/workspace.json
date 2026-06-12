@@ -185,6 +185,8 @@
   },
   "active": "931eb8e3687cd5bc",
   "lastOpenFiles": [
+    "bin/__pycache__/pt-grafana-reportcpython-314.pyc",
+    "bin/__pycache__",
     "artifacts/results/summary.json",
     "artifacts/results",
     "test.py",
@@ -193,7 +195,6 @@
     "test_bash_args.sh",
     "test_summary.json",
     "test_log.txt",
-    "test_webhook_flow.sh",
-    "bin/pt-grafana-report"
+    "test_webhook_flow.sh"
   ]
 }
