@@ -1,0 +1,204 @@
+# Growin PT — Local Demo & Sandbox lab.
+#
+# Default services (always start):
+#   - mock-api      (port 18080)   ← Sandbox HTTP target
+#   - k6-runner     (on-demand)    ← Sandbox direct/mock execution
+#   - sandbox-ssh   (port 2222)    ← SSH demo runner (mimics Onprem-2 flow)
+#
+# Profiles:
+#   - observability : InfluxDB + Grafana (ports 18086, 3000)
+#   - ci            : Jenkins (port 18081)
+#
+# Usage:
+#   docker compose -f docker-compose.yml --env-file configs/local.env up -d
+#   docker compose -f docker-compose.yml --env-file configs/local.env --profile observability up -d
+#   docker compose -f docker-compose.yml --env-file configs/local.env --profile ci up -d
+
+services:
+
+  # ────────────────────────────────────────────────────────────────────────
+  # MOCK API — Sandbox HTTP target (always on)
+  # ────────────────────────────────────────────────────────────────────────
+  mock-api:
+    build: ./mock-api
+    container_name: pt-mock-api
+    ports:
+      - "18080:8080"
+    environment:
+      MOCK_LATENCY_MS: "${MOCK_LATENCY_MS:-80}"
+      MOCK_ERROR_RATE: "${MOCK_ERROR_RATE:-0}"
+      MOCK_STATUS: "${MOCK_STATUS:-}"
+    deploy:
+      resources:
+        limits: { cpus: '0.5', memory: 256m }
+    mem_limit: 256m
+    healthcheck:
+      test: ["CMD","wget","-q","-O-","http://127.0.0.1:8080/health"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+    labels:
+      pt.role: "sandbox-target"
+      pt.stack: "growin-pt"
+    networks: [pt]
+
+  # ────────────────────────────────────────────────────────────────────────
+  # K6 RUNNER — On-demand executor. Reads BASE_URL/PT_TARGET from env.
+  #   - Sandbox: BASE_URL=http://mock-api:8080 (same network)
+  #   - Onprem/Oncloud: NOT used here (executes on remote via SSH)
+  # ────────────────────────────────────────────────────────────────────────
+  k6-runner:
+    image: grafana/k6:0.51.0
+    container_name: pt-k6-runner
+    depends_on:
+      mock-api:
+        condition: service_healthy
+    working_dir: /workspace
+    volumes:
+      - ..:/workspace:ro
+      - ./results:/results
+    env_file:
+      - ./configs/local.env
+    environment:
+      # BASE_URL priority: explicit > target alias > sandbox default
+      BASE_URL: "${BASE_URL:-http://mock-api:8080}"
+      PT_TARGET: "${PT_TARGET:-Sandbox}"
+      ENV: "${ENV:-SANDBOX}"
+      K6_USERS: "${K6_USERS:-1}"
+      DURATION: "${DURATION:-30s}"
+      SUITE: "${SUITE:-Growin_Calendar}"
+      SCENARIO: "${SCENARIO:-BP001}"
+      PLATFORM: "${PLATFORM:-Web}"
+    extra_hosts:
+      - "internal-api-pt.growin.id:host-gateway"
+      - "internal-api-dev.growin.id:host-gateway"
+      - "api-qa.growin.id:host-gateway"
+      - "drc-api.growin.id:host-gateway"
+    entrypoint: ["/bin/sh","/workspace/docker-local-pt/scripts/run-local.sh"]
+    deploy:
+      resources:
+        limits: { cpus: '2.0', memory: 1g }
+    mem_limit: 1g
+    labels:
+      pt.role: "sandbox-runner"
+      pt.stack: "growin-pt"
+    networks: [pt]
+
+  # ────────────────────────────────────────────────────────────────────────
+  # SANDBOX SSH — Mimics Onprem-2/Oncloud-VM flow for E2E demo of pt-menu.sh.
+  # SSH into qa@127.0.0.1:2222 (password: M@nsek.1234), run k6 on /workspace.
+  # ────────────────────────────────────────────────────────────────────────
+  sandbox-ssh:
+    build: ./sandbox
+    container_name: pt-sandbox-ssh
+    ports:
+      - "2222:22"
+    volumes:
+      - ..:/workspace:ro
+      - ./results:/results
+    networks: [pt]
+    healthcheck:
+      test: ["CMD","sh","-c","nc -z 127.0.0.1 22"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    labels:
+      pt.role: "sandbox-ssh"
+      pt.stack: "growin-pt"
+
+  # ────────────────────────────────────────────────────────────────────────
+  # OBSERVABILITY (profile: observability)
+  # ────────────────────────────────────────────────────────────────────────
+  influxdb:
+    profiles: ["observability"]
+    image: influxdb:1.8
+    container_name: pt-influx
+    ports:
+      - "18086:8086"
+    environment:
+      INFLUXDB_DB: k6
+      INFLUXDB_HTTP_AUTH_ENABLED: "false"
+    volumes:
+      - pt-influx-data:/var/lib/influxdb
+    healthcheck:
+      test: ["CMD","wget","-q","-O-","http://127.0.0.1:8086/ping"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+    deploy:
+      resources:
+        limits: { cpus: '1.0', memory: 1g }
+    mem_limit: 1g
+    labels:
+      pt.role: "observability-tsdb"
+      pt.stack: "growin-pt"
+    networks: [pt]
+
+  grafana:
+    profiles: ["observability"]
+    image: grafana/grafana:10.4.2
+    container_name: pt-grafana
+    depends_on:
+      influxdb:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/k6-local-pt-dashboard.json
+    volumes:
+      - pt-grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    deploy:
+      resources:
+        limits: { cpus: '0.5', memory: 512m }
+    mem_limit: 512m
+    labels:
+      pt.role: "observability-dashboard"
+      pt.stack: "growin-pt"
+    networks: [pt]
+
+  # ────────────────────────────────────────────────────────────────────────
+  # JENKINS (profile: ci)
+  # ────────────────────────────────────────────────────────────────────────
+  jenkins:
+    profiles: ["ci"]
+    build:
+      context: ./jenkins
+    container_name: pt-jenkins
+    ports:
+      - "18081:8080"
+      - "50000:50000"
+    environment:
+      JAVA_OPTS: "-Xms256m -Xmx1024m"
+      JENKINS_OPTS: "--prefix=/"
+    volumes:
+      - pt-jenkins-home:/var/jenkins_home
+      - ..:/workspace:rw
+      - ./results:/results:rw
+    working_dir: /workspace
+    mem_limit: 1536m
+    deploy:
+      resources:
+        limits: { cpus: '1.5', memory: 1536m }
+    depends_on:
+      mock-api:
+        condition: service_healthy
+    labels:
+      pt.role: "ci-jenkins"
+      pt.stack: "growin-pt"
+    networks: [pt]
+
+networks:
+  pt:
+    name: pt-net
+
+volumes:
+  pt-influx-data:
+  pt-grafana-data:
+  pt-jenkins-home:

@@ -1,0 +1,47 @@
+{
+  "mode": "LOCAL_DOCKER_MOCK",
+  "suite": "Growin_AI_Summarizer",
+  "scenario": "BP001",
+  "platform": "Web",
+  "variant": "original",
+  "module": "/workspace/Script/Growin_AI_Summarizer/Web/BP001.js",
+  "base_url": "http://mock-api:8080",
+  "metricCount": 27,
+  "iterations": 92,
+  "http_reqs": 276,
+  "http_req_failed_rate": 0,
+  "checks_passed": 0,
+  "checks_failed": 0,
+  "http_req_duration_p95": 57.054073249999995,
+  "custom_metrics": {
+    "duration_001_01_02_Marketdata_Gpt_Feedback": {
+      "count": 0,
+      "p95": 57.176117
+    },
+    "error_rate_001_01_02_Marketdata_Gpt_Feedback": {
+      "count": 0,
+      "p95": 0
+    },
+    "sample_001_01_02_Marketdata_Gpt_Feedback": {
+      "count": 92,
+      "p95": 0
+    },
+    "duration_001_01_01_Marketdata_Gpt_FinancialSummarizer": {
+      "count": 0,
+      "p95": 56.7523394
+    },
+    "duration_001_01_04_Marketdata_Gpt_TitleInsert": {
+      "count": 0,
+      "p95": 57.1104231
+    },
+    "sample_001_01_01_Marketdata_Gpt_FinancialSummarizer": {
+      "count": 92,
+      "p95": 0
+    },
+    "error_rate_001_01_01_Marketdata_Gpt_FinancialSummarizer": {
+      "count": 0,
+      "p95": 0
+    }
+  },
+  "timestamp": "2026-06-02T04:58:39.444Z"
+}

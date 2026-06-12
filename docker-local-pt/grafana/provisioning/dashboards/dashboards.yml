@@ -1,0 +1,11 @@
+apiVersion: 1
+providers:
+  - name: k6-local-pt
+    orgId: 1
+    folder: Local PT
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards

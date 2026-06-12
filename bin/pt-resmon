@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+"""Resource monitor: CPU/RAM/Docker/k6 health score → JSON."""
+import sys, os, json, subprocess
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'lib', 'python'))
+import click
+
+@click.group()
+def cli():
+    pass
+
+@cli.command()
+def snapshot():
+    import psutil
+    data = {}
+    
+    data['cpu_percent'] = psutil.cpu_percent(interval=0.5)
+    mem = psutil.virtual_memory()
+    data['mem_total_gb'] = round(mem.total / 1024**3, 1)
+    data['mem_used_gb'] = round(mem.used / 1024**3, 1)
+    data['mem_percent'] = mem.percent
+    data['load_avg'] = list(os.getloadavg())
+
+    # Docker: count running containers
+    try:
+        result = subprocess.run(
+            ['docker', 'ps', '--format', '{{.Names}}'],
+            capture_output=True, text=True, timeout=3
+        )
+        containers = [l for l in result.stdout.strip().splitlines() if l]
+        data['docker_running'] = len(containers)
+        data['docker_containers'] = containers
+    except Exception:
+        data['docker_running'] = -1
+
+    # k6 processes
+    try:
+        k6_procs = [p for p in psutil.process_iter(['name']) if 'k6' in (p.info['name'] or '')]
+        data['k6_running'] = len(k6_procs)
+    except Exception:
+        data['k6_running'] = 0
+
+    # Health score (0-100, lower=better)
+    score = 100
+    if data['cpu_percent'] > 80: score -= 30
+    elif data['cpu_percent'] > 60: score -= 15
+    if data['mem_percent'] > 85: score -= 30
+    elif data['mem_percent'] > 70: score -= 15
+    if data['load_avg'][0] > 8: score -= 20
+    elif data['load_avg'][0] > 4: score -= 10
+    data['health_score'] = max(0, score)
+
+    print(json.dumps({"status": "ok", "data": data}))
+
+if __name__ == '__main__':
+    cli()

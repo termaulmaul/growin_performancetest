@@ -1,0 +1,51 @@
+{
+  "mode": "LOCAL_DOCKER_MOCK",
+  "suite": "Growin_PT_Dev[ToDo]",
+  "scenario": "BP001",
+  "platform": "Web",
+  "variant": "original",
+  "module": "/workspace/Script/Growin_PT_Dev[ToDo]/Web/BP001.js",
+  "base_url": "http://mock-api:8080",
+  "metricCount": 26,
+  "iterations": 36,
+  "http_reqs": 72,
+  "http_req_failed_rate": 0,
+  "checks_passed": 0,
+  "checks_failed": 0,
+  "http_req_duration_p95": 87.10422065,
+  "custom_metrics": {
+    "duration_BP001_001_01_02_EIPO_Mock_Order_PATCH": {
+      "count": 0,
+      "p95": 86.8126145
+    },
+    "waiting_BP001_001_01_02_EIPO_Mock_Order_PATCH": {
+      "count": 0,
+      "p95": 86.64710425
+    },
+    "error_rate_BP001_001_01_01_Eipo_Pipeline_List": {
+      "count": 0,
+      "p95": 0
+    },
+    "sample_BP001_001_01_02_EIPO_Mock_Order_PATCH": {
+      "count": 36,
+      "p95": 0
+    },
+    "error_rate_BP001_001_01_02_EIPO_Mock_Order_PATCH": {
+      "count": 0,
+      "p95": 0
+    },
+    "waiting_BP001_001_01_01_Eipo_Pipeline_List": {
+      "count": 0,
+      "p95": 87.17894799999999
+    },
+    "sample_BP001_001_01_01_Eipo_Pipeline_List": {
+      "count": 36,
+      "p95": 0
+    },
+    "duration_BP001_001_01_01_Eipo_Pipeline_List": {
+      "count": 0,
+      "p95": 87.31667725
+    }
+  },
+  "timestamp": "2026-05-18T02:40:39.334Z"
+}

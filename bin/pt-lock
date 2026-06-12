@@ -1,0 +1,201 @@
+#!/usr/bin/env python3
+import sys, json, os, signal, time
+from datetime import datetime, timedelta, timezone
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'lib', 'python'))
+from db import get_conn
+
+import click
+
+PT_RUN_DIR = os.path.expanduser('~/.pt/run')
+
+def out(status, message="", data=None, error=None):
+    r = {"status": status}
+    if message: r["message"] = message
+    if data is not None: r["data"] = data
+    if error: r["error"] = error
+    print(json.dumps(r))
+    sys.exit(0 if status in ("ok", "free") else 1)
+
+def utcnow():
+    return datetime.now(timezone.utc).isoformat()
+
+def _heartbeat_loop(lock_id):
+    """Forked child: update heartbeat every 15s. Exit when parent dies."""
+    import sqlite3
+    db_path = os.environ.get('PT_DB_PATH', os.path.expanduser('~/.pt/var/pt.db'))
+    
+    def sigterm_handler(sig, frame):
+        sys.exit(0)
+    signal.signal(signal.SIGTERM, sigterm_handler)
+    
+    initial_ppid = os.getppid()
+    while True:
+        time.sleep(15)
+        # Parent died if ppid changed to 1 (Linux) or differs
+        if os.getppid() != initial_ppid and os.getppid() == 1:
+            sys.exit(0)
+        try:
+            conn = sqlite3.connect(db_path)
+            conn.execute('PRAGMA journal_mode=WAL;')
+            conn.execute('PRAGMA busy_timeout=5000;')
+            now = datetime.now(timezone.utc).isoformat()
+            conn.execute("UPDATE locks SET last_heartbeat=? WHERE id=? AND status='active'", (now, lock_id))
+            conn.commit()
+            conn.close()
+        except Exception:
+            pass
+
+@click.group()
+def cli():
+    pass
+
+@cli.command()
+@click.option('--env', required=True, help='Target env: LOCAL|INT|STG|PROD')
+@click.option('--script', required=True, help='Script name being executed')
+@click.option('--owner', default=None, help='Username (fallback: $PT_USER)')
+def acquire(env, script, owner):
+    if os.environ.get('PT_LOCK_BYPASS') == '1':
+        out("ok", data={"bypassed": True})
+
+    owner = owner or os.environ.get('PT_USER', 'unknown')
+    conn = get_conn()
+    c = conn.cursor()
+
+    # Check existing active lock
+    c.execute("SELECT id, owner, script_name, acquired_at FROM locks WHERE env=? AND status='active'", (env,))
+    existing = c.fetchone()
+    if existing:
+        out("denied", error=f"ENV {env} locked by {existing['owner']} running {existing['script_name']} since {existing['acquired_at']}")
+
+    now = utcnow()
+    try:
+        conn.execute('BEGIN IMMEDIATE')
+        c.execute("""
+            INSERT INTO locks (env, script_name, owner, acquired_at, last_heartbeat, status)
+            VALUES (?, ?, ?, ?, ?, 'active')
+        """, (env, script, owner, now, now))
+        lock_id = c.lastrowid
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        out("denied", error=f"Lock conflict: {e}")
+
+    # Fork heartbeat child
+    pid = os.fork()
+    if pid == 0:
+        # Child
+        _heartbeat_loop(lock_id)
+        sys.exit(0)
+    else:
+        # Parent: store PID
+        c.execute("UPDATE locks SET heartbeat_pid=? WHERE id=?", (pid, lock_id))
+        conn.commit()
+
+        pid_file = os.path.join(PT_RUN_DIR, f"{env}.lock.pid")
+        os.makedirs(PT_RUN_DIR, exist_ok=True)
+        with open(pid_file, 'w') as f:
+            f.write(f"{pid}\n{lock_id}")
+
+        out("ok", data={"lock_id": lock_id, "env": env, "heartbeat_pid": pid})
+
+@cli.command()
+@click.option('--env', required=True)
+@click.option('--owner', default=None)
+def release(env, owner):
+    owner = owner or os.environ.get('PT_USER', 'unknown')
+    pid_file = os.path.join(PT_RUN_DIR, f"{env}.lock.pid")
+
+    # SIGTERM heartbeat if pid file exists
+    if os.path.exists(pid_file):
+        try:
+            with open(pid_file) as f:
+                lines = f.read().strip().split('\n')
+            hb_pid = int(lines[0])
+            os.kill(hb_pid, signal.SIGTERM)
+        except Exception:
+            pass
+        try:
+            os.remove(pid_file)
+        except Exception:
+            pass
+
+    conn = get_conn()
+    now = utcnow()
+    result = conn.execute("""
+        UPDATE locks SET status='released', released_at=?, release_reason='normal'
+        WHERE env=? AND status='active'
+    """, (now, env))
+    conn.commit()
+
+    if result.rowcount == 0:
+        out("error", error="No active lock found for this env")
+    out("ok", message=f"Lock released for {env}")
+
+@cli.command()
+@click.option('--env', default=None)
+def status(env):
+    conn = get_conn()
+    if env:
+        rows = conn.execute("SELECT * FROM locks WHERE env=? AND status='active'", (env,)).fetchall()
+    else:
+        rows = conn.execute("SELECT * FROM locks WHERE status='active'").fetchall()
+
+    locks = [dict(r) for r in rows]
+    out("ok", data={"locks": locks})
+
+@cli.command('force-release')
+@click.option('--env', required=True)
+@click.option('--reason', required=True)
+@click.option('--by', default=None)
+def force_release(env, reason, by):
+    by = by or os.environ.get('PT_USER', 'unknown')
+    pid_file = os.path.join(PT_RUN_DIR, f"{env}.lock.pid")
+    if os.path.exists(pid_file):
+        try:
+            with open(pid_file) as f:
+                hb_pid = int(f.read().strip().split('\n')[0])
+            os.kill(hb_pid, signal.SIGTERM)
+        except Exception:
+            pass
+        try:
+            os.remove(pid_file)
+        except Exception:
+            pass
+
+    conn = get_conn()
+    now = utcnow()
+    conn.execute("""
+        UPDATE locks SET status='force_released', released_at=?, release_reason=?
+        WHERE env=? AND status='active'
+    """, (now, reason, env))
+    conn.commit()
+    out("ok", message=f"Force released by {by}: {reason}")
+
+@cli.command()
+@click.option('--auto', is_flag=True)
+@click.option('--stale-seconds', default=60)
+def cleanup(auto, stale_seconds):
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("SELECT id, env, last_heartbeat FROM locks WHERE status='active'")
+    now = datetime.now(timezone.utc)
+    staled = []
+    for row in c.fetchall():
+        try:
+            lh = datetime.fromisoformat(row['last_heartbeat'])
+            if lh.tzinfo is None:
+                lh = lh.replace(tzinfo=timezone.utc)
+            if (now - lh).total_seconds() > stale_seconds:
+                staled.append(row['id'])
+        except Exception:
+            staled.append(row['id'])
+
+    if staled and auto:
+        conn.execute(f"UPDATE locks SET status='stale' WHERE id IN ({','.join(['?']*len(staled))})", staled)
+        conn.commit()
+
+    out("ok", data={"stale_detected": len(staled), "marked": len(staled) if auto else 0})
+
+if __name__ == '__main__':
+    cli()

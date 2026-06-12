@@ -1,0 +1,259 @@
+{
+  "mode": "LOCAL_DOCKER_MOCK",
+  "suite": "Growin_Banner_Promo",
+  "scenario": "BP001",
+  "platform": "Web",
+  "variant": "original",
+  "module": "/workspace/Script/Growin_Banner_Promo/Web/BP001.js",
+  "base_url": "http://mock-api:8080",
+  "metricCount": 116,
+  "iterations": 22,
+  "http_reqs": 506,
+  "http_req_failed_rate": 0,
+  "checks_passed": 0,
+  "checks_failed": 0,
+  "http_req_duration_p95": 57.90646875,
+  "custom_metrics": {
+    "duration_001_01_16_User_Banner_Promo": {
+      "count": 0,
+      "p95": 57.4163396
+    },
+    "duration_001_01_13_Bond_Sbn_Master_Strapi_Banner": {
+      "count": 0,
+      "p95": 56.477774350000004
+    },
+    "duration_001_01_20_Socialinvesting_CommunityProfile_GetProfile": {
+      "count": 0,
+      "p95": 57.63652915
+    },
+    "error_rate_001_01_02_Auth_Protected_AccountCenter_Status": {
+      "count": 0,
+      "p95": 0
+    },
+    "duration_001_01_23_Auth_Client_Validate": {
+      "count": 0,
+      "p95": 58.112025849999995
+    },
+    "sample_001_01_21_Mutualfund_MutualFund_List": {
+      "count": 22,
+      "p95": 0
+    },
+    "sample_001_01_02_Auth_Protected_AccountCenter_Status": {
+      "count": 22,
+      "p95": 0
+    },
+    "sample_001_01_01_User_Profile_Status": {
+      "count": 22,
+      "p95": 0
+    },
+    "duration_001_01_08_User_Profile_Trading": {
+      "count": 0,
+      "p95": 57.61466875
+    },
+    "error_rate_001_01_23_Auth_Client_Validate": {
+      "count": 0,
+      "p95": 0
+    },
+    "duration_001_01_12_User_Watchlistgroup": {
+      "count": 0,
+      "p95": 57.217075650000005
+    },
+    "error_rate_001_01_19_Socialinvesting_Channel_JoinedByUser": {
+      "count": 0,
+      "p95": 0
+    },
+    "error_rate_001_01_22_User_Watchlist_ID": {
+      "count": 0,
+      "p95": 0
+    },
+    "error_rate_001_01_09_Auth_Protected_Validate": {
+      "count": 0,
+      "p95": 0
+    },
+    "duration_001_01_14_Bond_Sbn_Client_Check_Status": {
+      "count": 0,
+      "p95": 57.123310399999994
+    },
+    "error_rate_001_01_08_User_Profile_Trading": {
+      "count": 0,
+      "p95": 0
+    },
+    "error_rate_001_01_01_User_Profile_Status": {
+      "count": 0,
+      "p95": 0
+    },
+    "error_rate_001_01_13_Bond_Sbn_Master_Strapi_Banner": {
+      "count": 0,
+      "p95": 0
+    },
+    "sample_001_01_08_User_Profile_Trading": {
+      "count": 44,
+      "p95": 0
+    },
+    "duration_001_01_07_Auth_Protected_GetConfig": {
+      "count": 0,
+      "p95": 58.39931425
+    },
+    "error_rate_001_01_07_Auth_Protected_GetConfig": {
+      "count": 0,
+      "p95": 0
+    },
+    "duration_001_01_22_User_Watchlist_ID": {
+      "count": 0,
+      "p95": 57.536291649999995
+    },
+    "sample_001_01_06_Socialinvesting_CommunityProfile_Login": {
+      "count": 22,
+      "p95": 0
+    },
+    "error_rate_001_01_18_News": {
+      "count": 0,
+      "p95": 0
+    },
+    "sample_001_01_07_Auth_Protected_GetConfig": {
+      "count": 22,
+      "p95": 0
+    },
+    "error_rate_001_01_12_User_Watchlistgroup": {
+      "count": 0,
+      "p95": 0
+    },
+    "sample_001_01_19_Socialinvesting_Channel_JoinedByUser": {
+      "count": 22,
+      "p95": 0
+    },
+    "duration_001_01_09_Auth_Protected_Validate": {
+      "count": 0,
+      "p95": 58.01299375
+    },
+    "error_rate_001_01_11_Marketdata_StockRankExplore": {
+      "count": 0,
+      "p95": 0
+    },
+    "error_rate_001_01_16_User_Banner_Promo": {
+      "count": 0,
+      "p95": 0
+    },
+    "duration_001_01_01_User_Profile_Status": {
+      "count": 0,
+      "p95": 57.7939494
+    },
+    "sample_001_01_13_Bond_Sbn_Master_Strapi_Banner": {
+      "count": 22,
+      "p95": 0
+    },
+    "duration_001_01_11_Marketdata_StockRankExplore": {
+      "count": 0,
+      "p95": 57.3590247
+    },
+    "duration_001_01_10_User_UserSettings": {
+      "count": 0,
+      "p95": 57.3999021
+    },
+    "duration_001_01_18_News": {
+      "count": 0,
+      "p95": 57.51263545
+    },
+    "sample_001_01_14_Bond_Sbn_Client_Check_Status": {
+      "count": 22,
+      "p95": 0
+    },
+    "error_rate_001_01_15_Bond_Sbn_Master_Product_List": {
+      "count": 0,
+      "p95": 0
+    },
+    "sample_001_01_17_News_Categories": {
+      "count": 22,
+      "p95": 0
+    },
+    "duration_001_01_06_Socialinvesting_CommunityProfile_Login": {
+      "count": 0,
+      "p95": 57.99200835
+    },
+    "sample_001_01_18_News": {
+      "count": 22,
+      "p95": 0
+    },
+    "sample_001_01_22_User_Watchlist_ID": {
+      "count": 22,
+      "p95": 0
+    },
+    "sample_001_01_12_User_Watchlistgroup": {
+      "count": 22,
+      "p95": 0
+    },
+    "error_rate_001_01_14_Bond_Sbn_Client_Check_Status": {
+      "count": 0,
+      "p95": 0
+    },
+    "error_rate_001_01_10_User_UserSettings": {
+      "count": 0,
+      "p95": 0
+    },
+    "duration_001_01_21_Mutualfund_MutualFund_List": {
+      "count": 0,
+      "p95": 57.7203247
+    },
+    "sample_001_01_16_User_Banner_Promo": {
+      "count": 22,
+      "p95": 0
+    },
+    "sample_001_01_11_Marketdata_StockRankExplore": {
+      "count": 22,
+      "p95": 0
+    },
+    "sample_001_01_10_User_UserSettings": {
+      "count": 22,
+      "p95": 0
+    },
+    "duration_001_01_15_Bond_Sbn_Master_Product_List": {
+      "count": 0,
+      "p95": 57.4468101
+    },
+    "duration_001_01_17_News_Categories": {
+      "count": 0,
+      "p95": 57.48271664999999
+    },
+    "sample_001_01_23_Auth_Client_Validate": {
+      "count": 44,
+      "p95": 0
+    },
+    "error_rate_001_01_20_Socialinvesting_CommunityProfile_GetProfile": {
+      "count": 0,
+      "p95": 0
+    },
+    "error_rate_001_01_17_News_Categories": {
+      "count": 0,
+      "p95": 0
+    },
+    "duration_001_01_19_Socialinvesting_Channel_JoinedByUser": {
+      "count": 0,
+      "p95": 57.638017299999994
+    },
+    "sample_001_01_20_Socialinvesting_CommunityProfile_GetProfile": {
+      "count": 22,
+      "p95": 0
+    },
+    "duration_001_01_02_Auth_Protected_AccountCenter_Status": {
+      "count": 0,
+      "p95": 57.93978125
+    },
+    "sample_001_01_15_Bond_Sbn_Master_Product_List": {
+      "count": 22,
+      "p95": 0
+    },
+    "error_rate_001_01_06_Socialinvesting_CommunityProfile_Login": {
+      "count": 0,
+      "p95": 0
+    },
+    "error_rate_001_01_21_Mutualfund_MutualFund_List": {
+      "count": 0,
+      "p95": 0
+    },
+    "sample_001_01_09_Auth_Protected_Validate": {
+      "count": 44,
+      "p95": 0
+    }
+  },
+  "timestamp": "2026-05-26T03:31:11.176Z"
+}

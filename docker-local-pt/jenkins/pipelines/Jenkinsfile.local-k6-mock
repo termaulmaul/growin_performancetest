@@ -1,0 +1,147 @@
+// Local mock k6 PT — mock-api only. Optional Influx → Grafana.
+pipeline {
+  agent any
+
+  options {
+    timestamps()
+    buildDiscarder(logRotator(numToKeepStr: '20'))
+    timeout(time: 12, unit: 'MINUTES')
+  }
+
+  parameters {
+    string(name: 'SUITE', defaultValue: 'Growin_PT_Dev[ToDo]', description: 'Suite under Script/')
+    string(name: 'SCENARIO', defaultValue: 'BP001', description: 'Scenario ID')
+    choice(name: 'PLATFORM', choices: ['Web', 'iOS', 'Android'])
+    choice(name: 'VARIANT', choices: ['original', 'enchange'])
+    string(name: 'USER_COUNT', defaultValue: '1', description: 'k6 VUs (max 2)')
+    string(name: 'DURATION', defaultValue: '30s')
+    string(name: 'MOCK_LATENCY_MS', defaultValue: '80')
+    string(name: 'MOCK_ERROR_RATE', defaultValue: '0')
+    booleanParam(name: 'USE_GRAFANA_OUTPUT', defaultValue: true, description: 'Write k6 metrics to InfluxDB for Grafana')
+    booleanParam(name: 'SKIP_AUDIT', defaultValue: false)
+  }
+
+  environment {
+    RUNBY = 'JenkinsLocal'
+    ENV = 'LOCAL'
+    NUMSTART = '1'
+    BASE_URL = 'http://mock-api:8080'
+    DEBUG = 'false'
+    K6_INSECURE_SKIP_TLS_VERIFY = 'true'
+    RUN_ID = "${env.JOB_NAME}-${env.BUILD_NUMBER}-${params.SCENARIO}-${params.PLATFORM}-${params.VARIANT}"
+  }
+
+  stages {
+    stage('Workspace') {
+      steps {
+        sh '''
+          pwd
+          ls -lah docker-local-pt/jenkins/pipelines || true
+          node --version
+          k6 version
+        '''
+      }
+    }
+
+    stage('Validate Tools') {
+      steps {
+        sh '''
+          command -v node
+          command -v k6
+          command -v curl
+        '''
+      }
+    }
+
+    stage('Validate Params') {
+      steps {
+        sh '''
+          if ! echo "${USER_COUNT}" | grep -Eq '^[0-9]+$' || [ "${USER_COUNT}" -gt 2 ]; then
+            echo "USER_COUNT must be 1 or 2"
+            exit 1
+          fi
+        '''
+      }
+    }
+
+    stage('Audit Enhanced Contracts') {
+      when { expression { return !params.SKIP_AUDIT } }
+      steps {
+        sh '''
+          node tools/audit-enhanced-contracts.mjs || true
+          mkdir -p docker-local-pt/results/jenkins
+          cp -f .audit_guard_report.json docker-local-pt/results/jenkins/audit_guard_report.json 2>/dev/null || true
+          cp -f .audit_guard_report.md docker-local-pt/results/jenkins/audit_guard_report.md 2>/dev/null || true
+        '''
+      }
+    }
+
+    stage('Render BP Config') {
+      steps {
+        sh '''
+          mkdir -p docker-local-pt/results/jenkins
+          CFG=""
+          for d in Configs configs Config; do
+            if [ -f "Script/${SUITE}/${d}/${SCENARIO}.yaml" ]; then CFG="Script/${SUITE}/${d}/${SCENARIO}.yaml"; break; fi
+            if [ -f "Script/${SUITE}/${d}/${SCENARIO}.yml" ]; then CFG="Script/${SUITE}/${d}/${SCENARIO}.yml"; break; fi
+          done
+          if [ -n "$CFG" ]; then
+            node docker-local-pt/scripts/yaml-to-json.mjs "$CFG" > docker-local-pt/results/jenkins/${SCENARIO}.json
+          else
+            echo "{}" > docker-local-pt/results/jenkins/${SCENARIO}.json
+          fi
+        '''
+      }
+    }
+
+    stage('Mock API Healthcheck') {
+      steps {
+        sh 'curl -fsS http://mock-api:8080/health'
+      }
+    }
+
+    stage('Influx Healthcheck') {
+      when { expression { return params.USE_GRAFANA_OUTPUT } }
+      steps {
+        sh 'curl -fsS http://influxdb:8086/ping'
+      }
+    }
+
+    stage('Run k6 Mock') {
+      steps {
+        sh '''
+          export SCENARIO PLATFORM VARIANT SUITE USER_COUNT DURATION
+          export MOCK_LATENCY_MS MOCK_ERROR_RATE USE_GRAFANA_OUTPUT RUN_ID RUNBY ENV
+          export BUILD_ID="${BUILD_NUMBER}"
+          bash docker-local-pt/jenkins/scripts/run-k6-mock.sh
+        '''
+      }
+    }
+
+    stage('Check Influx Measurements') {
+      when { expression { return params.USE_GRAFANA_OUTPUT } }
+      steps {
+        sh '''
+          curl -fsS "http://influxdb:8086/query?db=k6&q=SHOW+MEASUREMENTS" | head -c 2000
+          curl -fsS "http://influxdb:8086/query?db=k6&q=SELECT+count(value)+FROM+http_reqs" | head -c 500
+        '''
+      }
+    }
+
+    stage('Publish Summary') {
+      steps {
+        sh '''
+          echo "RUN_ID=${RUN_ID}"
+          ls -lah docker-local-pt/results/jenkins/ || true
+          echo "Grafana: http://localhost:3000/d/k6-local-pt/local-k6-pt-dashboard (time range: Last 15m)"
+        '''
+      }
+    }
+  }
+
+  post {
+    always {
+      archiveArtifacts artifacts: 'docker-local-pt/results/jenkins/**/*', allowEmptyArchive: true
+    }
+  }
+}

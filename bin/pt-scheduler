@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+import sys, json, os
+from datetime import datetime, timezone
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'lib', 'python'))
+from db import get_conn
+import click
+
+def out(status, message="", data=None, error=None):
+    r = {"status": status}
+    if message: r["message"] = message
+    if data is not None: r["data"] = data
+    if error: r["error"] = error
+    print(json.dumps(r))
+    sys.exit(0 if status == "ok" else 1)
+
+@click.group()
+def cli():
+    pass
+
+@cli.command()
+def list():
+    conn = get_conn()
+    rows = conn.execute("SELECT * FROM scheduler_jobs ORDER BY created_at DESC").fetchall()
+    out("ok", data={"jobs": [dict(r) for r in rows]})
+
+@cli.command()
+@click.option('--id', 'job_id', required=True)
+@click.option('--cron', required=True)
+@click.option('--script', required=True)
+@click.option('--by', required=True)
+def add(job_id, cron, script, by):
+    conn = get_conn()
+    now = datetime.now(timezone.utc).isoformat()
+    try:
+        conn.execute('''
+            INSERT INTO scheduler_jobs (id, cron_expr, script_path, created_at, created_by)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (job_id, cron, script, now, by))
+        conn.commit()
+        out("ok", message=f"Job {job_id} added.")
+    except Exception as e:
+        out("error", error=str(e))
+
+@cli.command()
+@click.option('--id', 'job_id', required=True)
+@click.option('--action', type=click.Choice(['pause','resume']))
+def toggle(job_id, action):
+    conn = get_conn()
+    status = 'paused' if action == 'pause' else 'active'
+    res = conn.execute("UPDATE scheduler_jobs SET status=? WHERE id=?", (status, job_id))
+    conn.commit()
+    if res.rowcount == 0:
+        out("error", error="Job not found")
+    out("ok", message=f"Job {job_id} {status}.")
+
+@cli.command()
+@click.option('--id', 'job_id', required=True)
+def remove(job_id):
+    conn = get_conn()
+    res = conn.execute("DELETE FROM scheduler_jobs WHERE id=?", (job_id,))
+    conn.commit()
+    if res.rowcount == 0:
+        out("error", error="Job not found")
+    out("ok", message=f"Job {job_id} removed.")
+
+if __name__ == '__main__':
+    cli()

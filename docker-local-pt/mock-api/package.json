@@ -1,0 +1,7 @@
+{
+  "name": "pt-mock-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "server.js"
+}

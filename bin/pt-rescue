@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+import sys, os, getpass, bcrypt
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'lib', 'python'))
+from db import get_conn
+
+def rescue():
+    print("=== PT Emergency Rescue ===")
+    user = input("Username to reset/unlock: ").strip().lower()
+    
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("SELECT id FROM users WHERE username = ?", (user,))
+    if not c.fetchone():
+        print(f"Error: User '{user}' not found.")
+        sys.exit(1)
+        
+    pwd = getpass.getpass(f"New password for {user}: ")
+    if len(pwd) < 8:
+        print("Error: Minimum 8 chars.")
+        sys.exit(1)
+        
+    hashed = bcrypt.hashpw(pwd.encode('utf-8'), bcrypt.gensalt(12)).decode('utf-8')
+    conn.execute("UPDATE users SET password_hash = ?, is_locked = 0, failed_attempts = 0 WHERE username = ?", (hashed, user))
+    conn.commit()
+    print(f"Success. '{user}' password reset and account unlocked.")
+
+if __name__ == "__main__":
+    rescue()
