@@ -79,6 +79,7 @@ Key variables in `configs/pt.env`:
 | `THRESHOLD_AVG_MS` | P95 threshold (default: 200ms) |
 | `THRESHOLD_ERR_PCT` | Error rate threshold (default: 0.1%) |
 | `THRESHOLD_MIN_RPS` | Min RPS threshold (default: 381) |
+| `GRAFANA_BACKEND_URL` | Grafana data backend URL (default: `http://localhost:5000`) |
 
 ---
 
@@ -330,7 +331,8 @@ growin_performancetest/
 │   ├── pt-scheduler        # Cron job management
 │   ├── pt-dashboard        # NOC-style live monitor
 │   ├── pt-resmon           # CPU/Mem/Load snapshot
-│   └── pt-rescue           # Emergency god password reset
+│   ├── pt-rescue           # Emergency god password reset
+│   └── pt-grafana-report   # Grafana utilization HTML report generator
 ├── lib/
 │   ├── bash/pt_auth_client.sh  # Auth wrapper (session verify, skip-auth)
 │   ├── python/db.py            # SQLite schema (WAL mode)
@@ -347,6 +349,8 @@ growin_performancetest/
 │   ├── bundle.js           # k6 polyfills
 │   └── textSummary.js      # Terminal summary formatter
 ├── Report/                 # HTML reports (gitignored except template)
+│   └── Utilization/        # Auto-generated Grafana utilization reports
+├── get_grafana_data/       # Grafana metrics web app (Flask backend + HTML frontend)
 ├── docker-local-pt/        # Docker stack (mock-api, sandbox-ssh, grafana, influx, jenkins)
 ├── scheduler_cli/          # Python cron backend + AI slope validator
 ├── blueprint/              # Architecture RFCs (Kimi, Manus, DeepSeek)
@@ -376,6 +380,50 @@ growin_performancetest/
 | Error Rate | < 0.1% | `THRESHOLD_ERR_PCT` |
 | Min RPS | ≥ 381 | `THRESHOLD_MIN_RPS` |
 | CPU Usage | < 70% | (Grafana alert) |
+
+---
+
+## 📈 Grafana Utilization Report
+
+After each test run, the framework **automatically generates a Grafana utilization report** showing CPU and Memory metrics for Growin pods during the test window.
+
+### How It Works
+
+```mermaid
+graph LR
+    A["k6 Test Finishes"] --> B["pt-grafana-report"]
+    B --> C{"Grafana Backend<br/>(localhost:5000)"}
+    C --> D["Prometheus<br/>(via Grafana proxy)"]
+    D --> C
+    C --> B
+    B --> E["Report/Utilization/<br/>utilization_YYYYMMDD_HHMMSS.html"]
+    E --> F["Webhook Message<br/>(Teams/Discord/Telegram)"]
+    F --> G["📈 View Utilization Report<br/>(clickable button)"]
+```
+
+### Setup
+
+1. **Start Grafana data backend** (required for metrics):
+   ```bash
+   cd get_grafana_data && bash start_backend.sh
+   # Backend runs on http://localhost:5000
+   ```
+2. Set `GRAFANA_BACKEND_URL` in `configs/pt.env` (default: `http://localhost:5000`).
+3. Run any test — report auto-generated under `Report/Utilization/`.
+
+### Report Contents
+
+| Section | Data |
+|---------|------|
+| **Container Metrics** | Avg/Min/Max CPU (millicores) and Memory (MB) per pod |
+| **Node Utilization** | Avg CPU % and Memory per node (if available) |
+| **Time Range** | Exact start → end timestamps of test run |
+
+### Webhook Integration
+
+- **Teams**: Adaptive Card with a "📈 View Utilization Report" action button.
+- **Discord / Telegram**: Direct file path link appended to message.
+- If Grafana backend is unreachable, an empty report is generated (graceful fallback).
 
 ---
 

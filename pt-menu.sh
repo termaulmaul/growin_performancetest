@@ -110,15 +110,38 @@ print_run_footer() {
 }
 EOF
     fi
+
+    # ── Grafana Utilization Report (auto-generate after each run) ──────────
+    local _util_url=""
+    local _util_dir="$PROJECT_DIR/Report/Utilization"
+    local _util_ts; _util_ts=$(date +%Y%m%d_%H%M%S)
+    local _util_file="${_util_dir}/utilization_${_util_ts}.html"
+    local _grafana_backend; _grafana_backend=$(env_val GRAFANA_BACKEND_URL 'http://localhost:5000')
+    if [[ -f "$PROJECT_DIR/bin/pt-grafana-report" ]]; then
+      mkdir -p "$_util_dir"
+      local _run_end; _run_end=$(date +%s)
+      python3 "$PROJECT_DIR/bin/pt-grafana-report" \
+        --start "$_RUN_START" \
+        --end "$_run_end" \
+        --output "$_util_file" \
+        --backend-url "$_grafana_backend" 2>/dev/null || true
+      if [[ -f "$_util_file" ]]; then
+        _util_url="$_util_file"
+        echo -e "  ${DIM}📈 Utilization report: ${_util_file}${RST}"
+      fi
+    fi
+
+    local _util_arg=""
+    [[ -n "$_util_url" ]] && _util_arg="--utilization-url $_util_url"
     
-    [[ -n "$(env_val TELEGRAM_WEBHOOK '')" ]] && node "$PROJECT_DIR/lib/webhook/send-summary-webhook.mjs" "$res" --type telegram --webhook "$(env_val TELEGRAM_WEBHOOK '')" 2>/dev/null
-    [[ -n "$(env_val DISCORD_WEBHOOK '')" ]] && node "$PROJECT_DIR/lib/webhook/send-summary-webhook.mjs" "$res" --type discord --webhook "$(env_val DISCORD_WEBHOOK '')" 2>/dev/null
-    [[ -n "$(env_val BRRR_WEBHOOK '')" ]] && node "$PROJECT_DIR/lib/webhook/send-summary-webhook.mjs" "$res" --type brrr --webhook "$(env_val BRRR_WEBHOOK '')" 2>/dev/null
+    [[ -n "$(env_val TELEGRAM_WEBHOOK '')" ]] && node "$PROJECT_DIR/lib/webhook/send-summary-webhook.mjs" "$res" --type telegram --webhook "$(env_val TELEGRAM_WEBHOOK '')" $_util_arg 2>/dev/null
+    [[ -n "$(env_val DISCORD_WEBHOOK '')" ]] && node "$PROJECT_DIR/lib/webhook/send-summary-webhook.mjs" "$res" --type discord --webhook "$(env_val DISCORD_WEBHOOK '')" $_util_arg 2>/dev/null
+    [[ -n "$(env_val BRRR_WEBHOOK '')" ]] && node "$PROJECT_DIR/lib/webhook/send-summary-webhook.mjs" "$res" --type brrr --webhook "$(env_val BRRR_WEBHOOK '')" $_util_arg 2>/dev/null
     
     local tm; tm=$(env_val TEAMS_WEBHOOK '')
     if [[ -n "$tm" || "$(env_val NOTIFY_TEAMS 'false')" == "true" ]]; then
       [[ -z "$tm" ]] && tm=$(env_val TEAMS_WEBHOOK '')
-      [[ -n "$tm" ]] && node "$PROJECT_DIR/lib/webhook/send-summary-webhook.mjs" "$res" --type teams --webhook "$tm" 2>/dev/null
+      [[ -n "$tm" ]] && node "$PROJECT_DIR/lib/webhook/send-summary-webhook.mjs" "$res" --type teams --webhook "$tm" $_util_arg 2>/dev/null
     fi
   fi
 }

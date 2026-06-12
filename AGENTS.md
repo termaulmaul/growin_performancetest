@@ -22,6 +22,7 @@ You assist **Maulana Rafi Nurdiansyah** — SysAdmin / DevOps / QA Performance E
 - Auth / RBAC / Lock: SQLite via `lib/python/db.py` + `bin/pt-*` Python CLIs
 - Webhook notifier: `lib/webhook/send-summary-webhook.mjs` (Teams Adaptive Card + Discord + Telegram + Brrr)
 - Result parser: `lib/webhook/parse-k6-log.py`
+- Grafana metrics: `get_grafana_data/` (Flask backend) + `bin/pt-grafana-report` (CLI HTML generator)
 - Primary config: `configs/pt.env`
 - Languages: Bash, JavaScript (Node ESM), Python 3
 
@@ -79,10 +80,23 @@ graph TD
     CR -- C --> SP
 
     EXE --> RPT["Report + Webhook notify"]
-    RPT --> Main
+    RPT --> GRAF["Grafana Utilization Report"]
+    GRAF --> Main
     MT --> Tools["pt-resmon, pt-bootstrap-check,<br/>pt-rescue, pt-dashboard,<br/>pt-audit tail, pt-lock-status"]
     Tools --> Main
     MQ --> End(["Exit"])
+```
+
+### Grafana Utilization Flow
+
+```mermaid
+graph LR
+    A["k6 run ends"] --> B["pt-grafana-report"]
+    B --> C["Flask API /api/metrics"]
+    C --> D["Prometheus via Grafana"]
+    D --> C --> B
+    B --> E["Report/Utilization/utilization_*.html"]
+    E --> F["Webhook (Teams button / Discord link)"]
 ```
 
 ## 4. Lock + Heartbeat Flow
@@ -220,6 +234,7 @@ group('BP001_01_Login', () => {
 ├── Report/                      # HTML reports (gitignored, Template_Report kept)
 ├── configs/pt.env               # Primary config
 ├── pt-data/                     # Runtime state (gitignored)
+├── get_grafana_data/            # Grafana metrics web app (Flask + HTML frontend)
 ├── scheduler_cli/               # Python cron + AI slope validator
 ├── tools/                       # One-off auditors
 ├── docs/                        # Documentation

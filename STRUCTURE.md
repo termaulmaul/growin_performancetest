@@ -12,6 +12,7 @@ High-level map of `growin_performancetest`. Last updated 2026-06.
 │   ├── pt-auth, pt-rbac, pt-audit, pt-lock, pt-lock-status
 │   ├── pt-dashboard, pt-resmon, pt-rescue, pt-bootstrap-check
 │   ├── pt-scheduler, pt-usermgmt, pt-remote-daemon.sh
+│   └── pt-grafana-report                    # Grafana utilization HTML generator
 ├── lib/
 │   ├── bash/            # pt_auth_client.sh
 │   ├── python/db.py     # SQLite schema (auth + locks + audit + scheduler)
@@ -28,7 +29,8 @@ High-level map of `growin_performancetest`. Last updated 2026-06.
 │   ├── config.js        # getBaseUrl, getUserCredentials, getDefaultHeaders
 │   └── textSummary.js   # Terminal summary formatter
 ├── Report/              # HTML reports (gitignored except Template_Report/)
-│   └── <Suite>/<Platform>/<BP>/<RunBy>/<TS>.html
+│   ├── <Suite>/<Platform>/<BP>/<RunBy>/<TS>.html
+│   └── Utilization/     # Auto-generated Grafana utilization reports
 ├── configs/
 │   └── pt.env           # Primary config (env vars + thresholds + webhooks)
 ├── pt-data/             # Runtime data (gitignored: active_run.json, users.json, security.db)
@@ -50,6 +52,10 @@ High-level map of `growin_performancetest`. Last updated 2026-06.
 │   ├── mock-api/, jenkins/, sandbox/, scripts/
 │   └── results/         # Runtime artifacts (gitignored, .gitkeep preserved)
 ├── artifacts/results/   # Latest summary.json (gitignored content, dir kept)
+├── get_grafana_data/    # Grafana metrics web app (Flask backend + HTML frontend)
+│   ├── backend/app.py   # Flask API (POST /api/metrics)
+│   ├── frontend/        # index.html + app.js
+│   └── start_backend.sh # Launch helper
 ├── archive/             # Legacy artifacts (do not extend, see archive/README.md)
 ├── AGENTS.md            # Global agent context (mermaid flowcharts inside)
 ├── CLAUDE.md            # AI context + QA performance reference
@@ -85,6 +91,7 @@ High-level map of `growin_performancetest`. Last updated 2026-06.
 | `[?]` | Help / Keymap | Global keybind overlay |
 | `[R]` | (suite picker) | Show last 5 recent runs |
 | `[B]` | (suite picker) | Batch Regression multi-select |
+| `[L]` | Logout | Clears skip-auth flag, re-login |
 | `[Q]` | Quit | |
 
 ## Branches

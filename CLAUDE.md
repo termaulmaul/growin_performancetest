@@ -22,7 +22,7 @@
 | Scalability | Perf change as resources scale | incremental VU steps |
 | Capacity | Max before SLA breach | ramp until threshold violation |
 
-**Tool Stack:** k6, Grafana+InfluxDB, pt-menu.sh, Jenkins, Teams/Discord/Telegram webhook, SQLite.
+**Tool Stack:** k6, Grafana+InfluxDB+Prometheus, pt-menu.sh, Jenkins, Teams/Discord/Telegram webhook, SQLite, get_grafana_data (Flask utilization backend).
 
 ## 4. Testing Techniques
 **Functional:** Unit, Integration, E2E (BP001→BPnnn flow).
@@ -72,15 +72,19 @@ growin_performancetest/
 ├── lib/bash/pt_auth_client.sh    ← Auth gate
 ├── lib/python/db.py              ← SQLite schema
 ├── lib/webhook/                  ← Notifiers + parser
-├── bin/                          ← CLI tools (pt-auth, pt-rbac, pt-audit, pt-lock, pt-scheduler, etc.)
+├── bin/                          ← CLI tools (pt-auth, pt-rbac, pt-audit, pt-lock, pt-scheduler, pt-grafana-report, etc.)
 ├── pt-data/                      ← User state + run state
 ├── artifacts/results/            ← Latest summary.json
+├── get_grafana_data/             ← Grafana utilization web app (Flask backend + HTML frontend)
 ├── scheduler_cli/                ← Python cron backend
 ├── docs/performance-audit/       ← CI/Grafana/Jenkins checklists
 ├── blueprint/                    ← Architecture RFCs
 ├── docker-local-pt/              ← DEMO ONLY (not production target)
 └── CHANGELOG.md
 ```
+
+### Grafana Utilization Report (auto-generated)
+After each test run, `pt-grafana-report` calls `get_grafana_data` Flask API and generates `Report/Utilization/utilization_YYYYMMDD_HHMMSS.html`. The webhook message includes a clickable link to this report. Requires `get_grafana_data/start_backend.sh` running on `GRAFANA_BACKEND_URL` (default `http://localhost:5000`).
 
 ## 12. Referensi Metrik
 **Percentiles:** P50 (median), P90, P95 (SLA ref — use for thresholds), P99 (worst-case outliers), Max.
