@@ -8,7 +8,9 @@ suite_name = sys.argv[3]
 target = sys.argv[4] if len(sys.argv) > 4 else ""
 mode = sys.argv[5] if len(sys.argv) > 5 else ""
 
-with open(log_path, 'r') as f:
+import os
+
+with open(log_path, 'r', encoding='utf-8', errors='ignore') as f:
     text = f.read()
 
 # Strip ANSI codes
@@ -163,6 +165,7 @@ summary["errors"] = [
     for e in top_errors if e["count"] > 0
 ]
 
-with open(out_path, 'w') as f:
+os.makedirs(os.path.dirname(out_path), exist_ok=True)
+with open(out_path, 'w', encoding='utf-8') as f:
     json.dump(summary, f, indent=2)
 print("Parsed summary from log")
