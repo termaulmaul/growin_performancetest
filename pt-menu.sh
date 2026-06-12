@@ -918,6 +918,8 @@ ssh_menu() {
       help_keymap
       continue
     fi
+    local run_cmd=""
+    local _run_label=""
     if [[ "$suite_sel" == "[R] Show Recent Runs" ]]; then
       # Show recent runs and allow re-run selection
       local recent_entries=()
@@ -1014,16 +1016,19 @@ ssh_menu() {
       suite_dir="$_suite_dir"
       _run_label="$_suite / $_js_file  [$mode · $_plat · $_scen_label · ${_vus_re}VU · $_dur_raw]"
       recent_runs_add "$mode · $_suite · $_plat · $_scen_label · ${_vus_re}VU · $_dur_raw"
+      run_cmd="mkdir -p $(dirname "Report/$_suite/$_plat/$_scen_label/$_runby") && cd Script/$_suite && ../../k6 run $_js_file -e RUNBY=$_runby -e ENV=$_env_name -e USER=$_vus_re -e K6_USERS=$_vus_re -e DURATION=$_dur_raw -e SCENARIO=$_scen -e PLATFORM=$_plat --out dashboard=export=$_report_file"
+      suite_sel="_RECENT_READY_"
     fi
     if [[ "$suite_sel" == "[B] Batch Run Regression"* ]]; then
       batch_run_regression "$mode"
       continue
     fi
 
-    local run_cmd=""
-    local _run_label=""
 
     case "$suite_sel" in
+      "_RECENT_READY_")
+        ;;
+
       "Custom Command")
         printf "  Command: "; read -r run_cmd
         [[ -z "$run_cmd" ]] && continue
