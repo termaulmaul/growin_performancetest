@@ -184,5 +184,16 @@
     }
   },
   "active": "931eb8e3687cd5bc",
-  "lastOpenFiles": []
+  "lastOpenFiles": [
+    "artifacts/results/summary.json",
+    "artifacts/results",
+    "test.py",
+    "test_empty_json.json",
+    "test_bash_args2.sh",
+    "test_bash_args.sh",
+    "test_summary.json",
+    "test_log.txt",
+    "test_webhook_flow.sh",
+    "bin/pt-grafana-report"
+  ]
 }

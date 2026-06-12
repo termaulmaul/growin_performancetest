@@ -3,7 +3,7 @@
 
 set -euo pipefail
 
-trap '[[ -n "${_SPINNER_PID:-}" ]] && kill "$_SPINNER_PID" 2>/dev/null || true; rm -f "$HOME/.pt/var/skip_auth.flag" 2>/dev/null' EXIT
+trap '[[ -n "${_SPINNER_PID:-}" ]] && kill "$_SPINNER_PID" 2>/dev/null || true' EXIT
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -945,9 +945,11 @@ ssh_menu() {
       # Strip leading [Rx] timestamp prefix
       local _entry; _entry=$(echo "$picked_recent" | sed 's/^\[R[0-9]*\] [0-9-]* [0-9:]*  ·  //')
       # Format: Mode · Suite · Platform · Scenario · NVU · Dur
+      # Format: Mode · Suite · Platform · Scenario · NVU · Dur
       # e.g.: Onprem · Growin_Auth_AdminPermission_Create · iOS · BP001 · 335VU · 60s
       local _mode _suite _plat _scen _vus_raw _dur_raw
-      IFS=' · ' read -r _mode _suite _plat _scen _vus_raw _dur_raw <<< "$_entry"
+      _entry="${_entry// · /|}"
+      IFS='|' read -r _mode _suite _plat _scen _vus_raw _dur_raw <<< "$_entry"
       _mode="${_mode# }"; _mode="${_mode% }"
       _suite="${_suite# }"; _suite="${_suite% }"
       _plat="${_plat# }"; _plat="${_plat% }"
