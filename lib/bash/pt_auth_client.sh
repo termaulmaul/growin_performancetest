@@ -56,7 +56,7 @@ pt_auth_verify() {
 }
 
 pt_require_auth() {
-    # ── 15-min god skip (set via pt-menu.sh Tools → Skip Auth) ──────────────
+    # ── Session god skip (set via pt-menu.sh Tools → Skip Auth) ─────────────
     local _skip_flag="$HOME/.pt/var/skip_auth.flag"
     if [[ -f "$_skip_flag" ]]; then
         local _line; _line=$(cat "$_skip_flag" 2>/dev/null)
@@ -66,8 +66,7 @@ pt_require_auth() {
         if [[ -n "$_s_expiry" && "$_now" -lt "$_s_expiry" ]]; then
             export PT_USER="$_s_user"
             export PT_ROLE="$_s_role"
-            local _rem=$(( _s_expiry - _now ))
-            echo -e "\033[2m[auth] Skip mode active — ${_rem}s remaining\033[0m" >&2
+            echo -e "\033[2m[auth] Skip mode active for this session.\033[0m" >&2
             return 0
         else
             rm -f "$_skip_flag"

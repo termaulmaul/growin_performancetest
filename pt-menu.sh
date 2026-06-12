@@ -3,7 +3,7 @@
 
 set -euo pipefail
 
-trap '[[ -n "${_SPINNER_PID:-}" ]] && kill "$_SPINNER_PID" 2>/dev/null || true' EXIT
+trap '[[ -n "${_SPINNER_PID:-}" ]] && kill "$_SPINNER_PID" 2>/dev/null || true; rm -f "$HOME/.pt/var/skip_auth.flag" 2>/dev/null' EXIT
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -2139,7 +2139,7 @@ tools_menu() {
       "[5] Audit Log Tail (pt-audit — last 20 entries)"
       "[6] Lock Status (pt-lock-status — env locks)"
       "[7] Show Recent Runs"
-      "[S] Skip Auth (15 min)"
+      "[S] Skip Auth (Session)"
       "[?] Help / Keymap"
       "[0] Back"
     )
