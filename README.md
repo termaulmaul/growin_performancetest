@@ -12,13 +12,15 @@ Built on the **Kimi Enterprise Architecture RFC**: terminal-native auth (bcrypt 
 ---
 
 ## 📊 Codebase Analysis (Latest)
-*Analysis Date: 2026-06-12*
+*Analysis Date: 2026-06-15*
 
 Full findings available in [KNOWLEDGE.md](./KNOWLEDGE.md).
-- **Code Health**: All `.sh` and `.py` files pass syntax compilation.
-- **Security Check**: ⚠️ **URGENT** - Found hardcoded credentials (`PT_SSH_PASS`, `TEST_PASSWORD`) in `configs/` and default fallbacks in Bash scripts. Hardcoded webhook URLs found in stale `.js` test copies.
-- **Testing**: ⚠️ Very low test coverage (0 active unit tests detected outside of dummy files).
-- **Agent Skills**: Installed 6 AI skills locally via `autoskills`.
+- **Code Health**: All `.sh` and `.py` files pass syntax compilation. Core tools work perfectly (Bash, Python, Go modules present).
+- **Security Check**: ⚠️ **URGENT** - Found hardcoded credentials (`TEST_PASSWORD=M@nsek.123`) in `configs/pt.env.example` which should be removed. No new security flaws found.
+- **Testing**: ⚠️ Test coverage is low (0 active unit tests). Relying mainly on the E2E k6 scripts.
+- **Agent Skills**: `autoskills` successfully checked. 6 AI skills installed natively (accessibility, bash-defensive-patterns, frontend-design, golang-patterns, golang-testing, seo).
+- **Runtime Environment**: Docker daemon was currently unavailable during analysis but Docker Compose configs (`docker-local-pt`) remain intact for the Sandbox.
+- **Verdict**: DONE - Codebase is stable, architecture remains sound, but secret hygiene requires cleanup in example templates.
 
 ---
 
@@ -113,29 +115,33 @@ Interactive fzf-based menu. All operations accessible from one entry point.
 
 ```mermaid
 graph TD
-    Start(["User Launch ./pt-menu.sh"]) --> Auth{"Auth Gate<br/>(SQLite + bcrypt)"}
-    Auth -- Fail --> Exit(["Exit"])
-    Auth -- Success --> MainMenu["Main Menu<br/>(fzf TUI)"]
+    Start(["./pt-menu.sh"]) --> Auth{First run?}
+    Auth -- Yes --> Bootstrap["Initial Setup<br/>create god user"]
+    Auth -- No --> Login["Login screen"]
+    Bootstrap --> Login
+    Login --> Main["Main Menu"]
 
-    MainMenu --> PickRun["[1] Run Test"]
-    PickRun --> Target{"Select Target"}
-    Target -- "Onprem (SSH)" --> PickSuite
-    Target -- "Oncloud (IAP)" --> PickSuite
-    Target -- "Sandbox (Local)" --> PickSuite
-
-    PickSuite["Select Suite & BP Script"] --> Config["Configure<br/>(VUs, Duration, ENV)"]
-    Config --> Confirm{"Confirm Run"}
-    Confirm -- Yes --> Lock{"Acquire ENV Lock<br/>(pt-lock)"}
+    Main --> M1["[1] Run Test"]
     
-    Lock -- "Locked by other" --> Occupied["Show OCCUPIED warning"]
-    Lock -- "Success" --> Exec["Execute k6<br/>(+ 15s Heartbeat daemon)"]
+    M1 --> T1{Target}
+    T1 -- Onprem --> O1["SSH 10.82.15.72 → 10.184.120.48"]
+    T1 -- Oncloud --> O2["gcloud IAP vm-pt-ksix-0"]
+    T1 -- Sandbox --> O3["127.0.0.1:2222 demo"]
 
-    Exec --> Parse["Parse Metrics<br/>(parse-k6-log.py)"]
-    Parse --> Report["Generate HTML Report"]
-    Report --> Webhook["Send Webhooks<br/>(Teams/Discord/Telegram)"]
-    Webhook --> Release["Release ENV Lock"]
-    Release --> Audit["Update Audit Trail<br/>(pt-audit)"]
-    Audit --> MainMenu
+    O1 --> SP["Suite picker<br/>R, B, ? shortcuts"]
+    O2 --> SP
+    O3 --> SP
+
+    SP --> CFG["Configure<br/>VUs / Duration / ENV / RUNBY / Scenario"]
+    CFG --> CR{Confirm Run}
+    CR -- Y --> EXE["k6 execute + tee log"]
+    CR -- E --> CFG
+    CR -- C --> SP
+
+    EXE --> Parse["Parse Metrics<br/>(parse-k6-log.py)"]
+    Parse --> RPT["Report + Webhook notify"]
+    RPT --> GRAF["Grafana Utilization Report"]
+    GRAF --> Main
 ```
 
 **Recent Runs:** `[R]` in suite picker → select previous run → re-execute with same params.
