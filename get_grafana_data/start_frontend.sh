@@ -1,8 +1,10 @@
 #!/bin/bash
-zzzz
 echo "Starting Grafana Metrics Dashboard Frontend..."
 echo "=============================================="
 echo ""
+
+# Change to the directory where the script is located
+cd "$(dirname "$0")" || exit 1
 
 # Check if Python is installed
 if ! command -v python3 &> /dev/null; then

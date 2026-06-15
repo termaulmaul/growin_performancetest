@@ -57,12 +57,12 @@ def render_html(data, from_ts, to_ts):
         <tr>
             <td>{i}</td>
             <td>{pod}</td>
-            <td>{m.get('avg_cpu', 0):.2f}</td>
-            <td>{m.get('min_cpu', 0):.2f}</td>
-            <td>{m.get('max_cpu', 0):.2f}</td>
-            <td>{m.get('avg_memory', 0):.1f}</td>
-            <td>{m.get('min_memory', 0):.1f}</td>
-            <td>{m.get('max_memory', 0):.1f}</td>
+            <td>{m.get('avg_cpu_millicores', 0):.2f}</td>
+            <td>{m.get('min_cpu_millicores', 0):.2f}</td>
+            <td>{m.get('max_cpu_millicores', 0):.2f}</td>
+            <td>{m.get('avg_memory_mb', 0):.1f}</td>
+            <td>{m.get('min_memory_mb', 0):.1f}</td>
+            <td>{m.get('max_memory_mb', 0):.1f}</td>
         </tr>"""
 
     if not rows:
