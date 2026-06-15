@@ -139,25 +139,51 @@ if k6_start != -1 and k6_end != -1:
 # ── Extract top HTTP errors from log ─────────────────────────────────────
 from collections import defaultdict
 error_counts = defaultdict(lambda: {"count": 0, "status": "", "endpoint": ""})
-for line in text.split("\n"):
+import re as _re
+lines = text.split("\n")
+i = 0
+while i < len(lines):
+    line = lines[i]
     # Pattern: ✘ ERROR https://host/path || Status: NNN
-    import re as _re
     m = _re.search(r'ERROR\s+https?://[^/]+(/[^\s|]+)\s*\|\|\s*Status:\s*(\d+)', line)
     if m:
         endpoint, status = m.group(1).split("?")[0], m.group(2)
         key = status + ":" + endpoint
-        error_counts[key]["count"] += 1
+        
+        # Look ahead for actual failure count in K6 check summary
+        # e.g., ↳  0% - ✓ 0 / ✘ 196
+        failure_count = 1
+        if i + 1 < len(lines):
+            next_line = lines[i+1]
+            m_count = _re.search(r'✘\s*(\d+)', next_line)
+            if m_count:
+                failure_count = int(m_count.group(1))
+        
+        error_counts[key]["count"] += failure_count
         error_counts[key]["status"] = status
         error_counts[key]["endpoint"] = endpoint
+        i += 1
         continue
+    
     # Pattern: FAILED - Status: NNN || Body
     m = _re.search(r"FAILED.*?Status:[\s]*(\d{3}).*?(/[^\s|]+)", line)
     if m and int(m.group(1)) >= 400:
         endpoint, status = m.group(2).split("?")[0], m.group(1)
         key = status + ":" + endpoint
-        error_counts[key]["count"] += 1
+        
+        # Look ahead for actual failure count
+        failure_count = 1
+        if i + 1 < len(lines):
+            next_line = lines[i+1]
+            m_count = _re.search(r'✘\s*(\d+)', next_line)
+            if m_count:
+                failure_count = int(m_count.group(1))
+                
+        error_counts[key]["count"] += failure_count
         error_counts[key]["status"] = status
         error_counts[key]["endpoint"] = endpoint
+        
+    i += 1
 
 top_errors = sorted(error_counts.values(), key=lambda x: x["count"], reverse=True)[:5]
 summary["errors"] = [
