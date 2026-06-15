@@ -9,20 +9,20 @@ import exec from 'k6/execution';
 // Define custom metrics
 const ProfileConfirmationPage = {
     User_Profile_Identity_Regular: {
-        errorCount: new Counter("error_count_004_01_01_User_Profile_Identity_Regular"),
-        errorRate: new Rate("error_rate_004_01_01_User_Profile_Identity_Regular"),
-        httpDuration: new Trend("duration_004_01_01_User_Profile_Identity_Regular"),
-        httpWaiting: new Trend("waiting_004_01_01_User_Profile_Identity_Regular"),
-        requestRate: new Counter("rps_004_01_01_User_Profile_Identity_Regular"),
-        http_reqs: new Counter("sample_004_01_01_User_Profile_Identity_Regular"),
+        errorCount: new Counter("error_count_User_Profile_Identity_Regular"),
+        errorRate: new Rate("error_rate_User_Profile_Identity_Regular"),
+        httpDuration: new Trend("duration_User_Profile_Identity_Regular"),
+        httpWaiting: new Trend("waiting_User_Profile_Identity_Regular"),
+        requestRate: new Counter("rps_User_Profile_Identity_Regular"),
+        http_reqs: new Counter("sample_User_Profile_Identity_Regular"),
     },
     Oaofinance_Margin_Draft: {
-        errorCount: new Counter("error_count_004_01_02_Oaofinance_Margin_Draft"),
-        errorRate: new Rate("error_rate_004_01_02_Oaofinance_Margin_Draft"),
-        httpDuration: new Trend("duration_004_01_02_Oaofinance_Margin_Draft"),
-        httpWaiting: new Trend("waiting_004_01_02_Oaofinance_Margin_Draft"),
-        requestRate: new Counter("rps_004_01_02_Oaofinance_Margin_Draft"),
-        http_reqs: new Counter("sample_004_01_02_Oaofinance_Margin_Draft"),
+        errorCount: new Counter("error_count_Oaofinance_Margin_Draft"),
+        errorRate: new Rate("error_rate_Oaofinance_Margin_Draft"),
+        httpDuration: new Trend("duration_Oaofinance_Margin_Draft"),
+        httpWaiting: new Trend("waiting_Oaofinance_Margin_Draft"),
+        requestRate: new Counter("rps_Oaofinance_Margin_Draft"),
+        http_reqs: new Counter("sample_Oaofinance_Margin_Draft"),
     },
 };
 

@@ -12,12 +12,12 @@ import exec from 'k6/execution';
 // Define custom metrics
 const Auth_Protected_PinLogin = {
     Auth_Protected_PinLogin: {
-        errorCount: new Counter("error_count_001_01_05_Auth_Protected_PinLogin"),
-        errorRate: new Rate("error_rate_001_01_05_Auth_Protected_PinLogin"),
-        httpDuration: new Trend("duration_001_01_05_Auth_Protected_PinLogin"),
-        httpWaiting: new Trend("waiting_001_01_05_Auth_Protected_PinLogin"),
-        requestRate: new Counter("rps_001_01_05_Auth_Protected_PinLogin"),
-        http_reqs: new Counter("sample_001_01_05_Auth_Protected_PinLogin"),
+        errorCount: new Counter("error_count_Auth_Protected_PinLogin"),
+        errorRate: new Rate("error_rate_Auth_Protected_PinLogin"),
+        httpDuration: new Trend("duration_Auth_Protected_PinLogin"),
+        httpWaiting: new Trend("waiting_Auth_Protected_PinLogin"),
+        requestRate: new Counter("rps_Auth_Protected_PinLogin"),
+        http_reqs: new Counter("sample_Auth_Protected_PinLogin"),
     },
 };
 

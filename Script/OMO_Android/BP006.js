@@ -9,12 +9,12 @@ import exec from 'k6/execution';
 // Define custom metrics
 const SetMarginLimitPage = {
     Oaofinance_Margin_CalculateCollateral: {
-        errorCount: new Counter("error_count_006_01_01_Oaofinance_Margin_CalculateCollateral"),
-        errorRate: new Rate("error_rate_006_01_01_Oaofinance_Margin_CalculateCollateral"),
-        httpDuration: new Trend("duration_006_01_01_Oaofinance_Margin_CalculateCollateral"),
-        httpWaiting: new Trend("waiting_006_01_01_Oaofinance_Margin_CalculateCollateral"),
-        requestRate: new Counter("rps_006_01_01_Oaofinance_Margin_CalculateCollateral"),
-        http_reqs: new Counter("sample_006_01_01_Oaofinance_Margin_CalculateCollateral"),
+        errorCount: new Counter("error_count_Oaofinance_Margin_CalculateCollateral"),
+        errorRate: new Rate("error_rate_Oaofinance_Margin_CalculateCollateral"),
+        httpDuration: new Trend("duration_Oaofinance_Margin_CalculateCollateral"),
+        httpWaiting: new Trend("waiting_Oaofinance_Margin_CalculateCollateral"),
+        requestRate: new Counter("rps_Oaofinance_Margin_CalculateCollateral"),
+        http_reqs: new Counter("sample_Oaofinance_Margin_CalculateCollateral"),
     },
 };
 

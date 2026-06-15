@@ -7,20 +7,20 @@ import exec from 'k6/execution';
 // Define custom metrics
 const WithdrawOrderScreen = {
     Delete_Eipo_Order: {
-        errorCount: new Counter("error_count_008_01_01_Delete_Eipo_Order"),
-        errorRate: new Rate("error_rate_008_01_01_Delete_Eipo_Order"),
-        httpDuration: new Trend("duration_008_01_01_Delete_Eipo_Order"),
-        httpWaiting: new Trend("waiting_008_01_01_Delete_Eipo_Order"),
-        requestRate: new Counter("rps_008_01_01_Delete_Eipo_Order"),
-        http_reqs: new Counter("sample_008_01_01_Delete_Eipo_Order"),
+        errorCount: new Counter("error_count_Delete_Eipo_Order"),
+        errorRate: new Rate("error_rate_Delete_Eipo_Order"),
+        httpDuration: new Trend("duration_Delete_Eipo_Order"),
+        httpWaiting: new Trend("waiting_Delete_Eipo_Order"),
+        requestRate: new Counter("rps_Delete_Eipo_Order"),
+        http_reqs: new Counter("sample_Delete_Eipo_Order"),
     },
     Eipo_Order: {
-        errorCount: new Counter("error_count_008_01_02_Eipo_Order_List"),
-        errorRate: new Rate("error_rate_008_01_02_Eipo_Order_List"),
-        httpDuration: new Trend("duration_008_01_02_Eipo_Order_List"),
-        httpWaiting: new Trend("waiting_008_01_02_Eipo_Order_List"),
-        requestRate: new Counter("rps_008_01_02_Eipo_Order_List"),
-        http_reqs: new Counter("sample_008_01_02_Eipo_Order_List"),
+        errorCount: new Counter("error_count_Eipo_Order_List"),
+        errorRate: new Rate("error_rate_Eipo_Order_List"),
+        httpDuration: new Trend("duration_Eipo_Order_List"),
+        httpWaiting: new Trend("waiting_Eipo_Order_List"),
+        requestRate: new Counter("rps_Eipo_Order_List"),
+        http_reqs: new Counter("sample_Eipo_Order_List"),
     },
 };
 

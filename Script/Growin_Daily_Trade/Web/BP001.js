@@ -10,12 +10,12 @@ import exec from 'k6/execution';
 // Define custom metrics
 const DailyTradeData = {
     Marketdata_DailyTrade: {
-        errorCount: new Counter("error_count_001_01_01_Marketdata_DailyTrade"),
-        errorRate: new Rate("error_rate_001_01_01_Marketdata_DailyTrade"),
-        httpDuration: new Trend("duration_001_01_01_Marketdata_DailyTrade"),
-        httpWaiting: new Trend("waiting_001_01_01_Marketdata_DailyTrade"),
-        requestRate: new Counter("rps_001_01_01_Marketdata_DailyTrade"),
-        http_reqs: new Counter("sample_001_01_01_Marketdata_DailyTrade"),
+        errorCount: new Counter("error_count_Marketdata_DailyTrade"),
+        errorRate: new Rate("error_rate_Marketdata_DailyTrade"),
+        httpDuration: new Trend("duration_Marketdata_DailyTrade"),
+        httpWaiting: new Trend("waiting_Marketdata_DailyTrade"),
+        requestRate: new Counter("rps_Marketdata_DailyTrade"),
+        http_reqs: new Counter("sample_Marketdata_DailyTrade"),
     },
 };
 

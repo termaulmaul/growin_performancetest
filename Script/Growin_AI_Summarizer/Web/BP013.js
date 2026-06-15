@@ -14,28 +14,28 @@ import exec from 'k6/execution';
 // Define custom metrics
 const FinancialSummarizerBackendBrokerActivityTab = {
     Marketdata_BrokerActivity: {
-        errorCount: new Counter("error_count_013_01_01_Marketdata_BrokerActivity"),
-        errorRate: new Rate("error_rate_013_01_01_Marketdata_BrokerActivity"),
-        httpDuration: new Trend("duration_013_01_01_Marketdata_BrokerActivity"),
-        httpWaiting: new Trend("waiting_013_01_01_Marketdata_BrokerActivity"),
-        requestRate: new Counter("rps_013_01_01_Marketdata_BrokerActivity"),
-        http_reqs: new Counter("sample_013_01_01_Marketdata_BrokerActivity"),
+        errorCount: new Counter("error_count_Marketdata_BrokerActivity"),
+        errorRate: new Rate("error_rate_Marketdata_BrokerActivity"),
+        httpDuration: new Trend("duration_Marketdata_BrokerActivity"),
+        httpWaiting: new Trend("waiting_Marketdata_BrokerActivity"),
+        requestRate: new Counter("rps_Marketdata_BrokerActivity"),
+        http_reqs: new Counter("sample_Marketdata_BrokerActivity"),
     },
     Marketdata_BrokersMap: {
-        errorCount: new Counter("error_count_013_01_02_Marketdata_BrokersMap"),
-        errorRate: new Rate("error_rate_013_01_02_Marketdata_BrokersMap"),
-        httpDuration: new Trend("duration_013_01_02_Marketdata_BrokersMap"),
-        httpWaiting: new Trend("waiting_013_01_02_Marketdata_BrokersMap"),
-        requestRate: new Counter("rps_013_01_02_Marketdata_BrokersMap"),
-        http_reqs: new Counter("sample_013_01_02_Marketdata_BrokersMap"),
+        errorCount: new Counter("error_count_Marketdata_BrokersMap"),
+        errorRate: new Rate("error_rate_Marketdata_BrokersMap"),
+        httpDuration: new Trend("duration_Marketdata_BrokersMap"),
+        httpWaiting: new Trend("waiting_Marketdata_BrokersMap"),
+        requestRate: new Counter("rps_Marketdata_BrokersMap"),
+        http_reqs: new Counter("sample_Marketdata_BrokersMap"),
     },
     Marketdata_StockStrength: {
-        errorCount: new Counter("error_count_013_01_03_Marketdata_StockStrength"),
-        errorRate: new Rate("error_rate_013_01_03_Marketdata_StockStrength"),
-        httpDuration: new Trend("duration_013_01_03_Marketdata_StockStrength"),
-        httpWaiting: new Trend("waiting_013_01_03_Marketdata_StockStrength"),
-        requestRate: new Counter("rps_013_01_03_Marketdata_StockStrength"),
-        http_reqs: new Counter("sample_013_01_03_Marketdata_StockStrength"),
+        errorCount: new Counter("error_count_Marketdata_StockStrength"),
+        errorRate: new Rate("error_rate_Marketdata_StockStrength"),
+        httpDuration: new Trend("duration_Marketdata_StockStrength"),
+        httpWaiting: new Trend("waiting_Marketdata_StockStrength"),
+        requestRate: new Counter("rps_Marketdata_StockStrength"),
+        http_reqs: new Counter("sample_Marketdata_StockStrength"),
     }
 };
 

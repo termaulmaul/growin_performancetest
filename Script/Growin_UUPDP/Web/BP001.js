@@ -12,20 +12,20 @@ import exec from 'k6/execution';
 // Define custom metrics
 const Consent = {
     User_Profile_Trading: {
-        errorCount: new Counter("error_count_001_01_02_User_Profile_Trading"),
-        errorRate: new Rate("error_rate_001_01_01_User_Profile_Trading"),
-        httpDuration: new Trend("duration_001_01_01_User_Profile_Trading"),
-        httpWaiting: new Trend("waiting_001_01_01_User_Profile_Trading"),
-        requestRate: new Counter("rps_001_01_01_User_Profile_Trading"),
-        http_reqs: new Counter("sample_001_01_01_User_Profile_Trading"),
+        errorCount: new Counter("error_count_User_Profile_Trading"),
+        errorRate: new Rate("error_rate_User_Profile_Trading"),
+        httpDuration: new Trend("duration_User_Profile_Trading"),
+        httpWaiting: new Trend("waiting_User_Profile_Trading"),
+        requestRate: new Counter("rps_User_Profile_Trading"),
+        http_reqs: new Counter("sample_User_Profile_Trading"),
     },
     User_Consent_Submit: {
-        errorCount: new Counter("error_count_001_01_02_User_Consent_Submit"),
-        errorRate: new Rate("error_rate_001_01_02_User_Consent_Submit"),
-        httpDuration: new Trend("duration_001_01_02_User_Consent_Submit"),
-        httpWaiting: new Trend("waiting_001_01_02_User_Consent_Submit"),
-        requestRate: new Counter("rps_001_01_02_User_Consent_Submit"),
-        http_reqs: new Counter("sample_001_01_02_User_Consent_Submit"),
+        errorCount: new Counter("error_count_User_Consent_Submit"),
+        errorRate: new Rate("error_rate_User_Consent_Submit"),
+        httpDuration: new Trend("duration_User_Consent_Submit"),
+        httpWaiting: new Trend("waiting_User_Consent_Submit"),
+        requestRate: new Counter("rps_User_Consent_Submit"),
+        http_reqs: new Counter("sample_User_Consent_Submit"),
     },
 };
 

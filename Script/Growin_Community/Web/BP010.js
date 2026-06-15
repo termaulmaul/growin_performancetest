@@ -11,12 +11,12 @@ import { getChannelId, getChannelIdWithOptions, ChannelMetrics } from './channel
 // Define custom metrics
 const CommunityMember = {
     Social_ProfilesByJoinStatus: {
-        errorCount: new Counter("error_count_010_01_01_Social_ProfilesByJoinStatus"),
-        errorRate: new Rate("error_rate_010_01_01_Social_ProfilesByJoinStatus"),
-        httpDuration: new Trend("duration_010_01_01_Social_ProfilesByJoinStatus"),
-        httpWaiting: new Trend("waiting_010_01_01_Social_ProfilesByJoinStatus"),
-        requestRate: new Counter("rps_010_01_01_Social_ProfilesByJoinStatus"),
-        http_reqs: new Counter("sample_010_01_01_Social_ProfilesByJoinStatus"),
+        errorCount: new Counter("error_count_Social_ProfilesByJoinStatus"),
+        errorRate: new Rate("error_rate_Social_ProfilesByJoinStatus"),
+        httpDuration: new Trend("duration_Social_ProfilesByJoinStatus"),
+        httpWaiting: new Trend("waiting_Social_ProfilesByJoinStatus"),
+        requestRate: new Counter("rps_Social_ProfilesByJoinStatus"),
+        http_reqs: new Counter("sample_Social_ProfilesByJoinStatus"),
     },
 };
 

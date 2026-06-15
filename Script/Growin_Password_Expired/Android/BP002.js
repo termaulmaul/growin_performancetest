@@ -10,12 +10,12 @@ import exec from 'k6/execution';
 // Define custom metrics
 const Login = {
     Auth_Protected_PasswordReminder: {
-        errorCount: new Counter("error_count_002_01_01_Auth_Protected_PasswordReminder"),
-        errorRate: new Rate("error_rate_002_01_01_Auth_Protected_PasswordReminder"),
-        httpDuration: new Trend("duration_002_01_01_Auth_Protected_PasswordReminder"),
-        httpWaiting: new Trend("waiting_002_01_01_Auth_Protected_PasswordReminder"),
-        requestRate: new Counter("rps_002_01_01_Auth_Protected_PasswordReminder"),
-        http_reqs: new Counter("sample_002_01_01_Auth_Protected_PasswordReminder"),
+        errorCount: new Counter("error_count_Auth_Protected_PasswordReminder"),
+        errorRate: new Rate("error_rate_Auth_Protected_PasswordReminder"),
+        httpDuration: new Trend("duration_Auth_Protected_PasswordReminder"),
+        httpWaiting: new Trend("waiting_Auth_Protected_PasswordReminder"),
+        requestRate: new Counter("rps_Auth_Protected_PasswordReminder"),
+        http_reqs: new Counter("sample_Auth_Protected_PasswordReminder"),
     },
 };
 

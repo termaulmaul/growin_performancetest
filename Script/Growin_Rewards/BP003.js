@@ -6,12 +6,12 @@ import exec from 'k6/execution';
 // Define custom metrics
 const TnC = {
     Gamification_Content_Tnc: {
-        errorCount: new Counter("error_count_003_01_01_Gamification_Content_Tnc"),
-        errorRate: new Rate("error_rate_003_01_01_Gamification_Content_Tnc"),
-        httpDuration: new Trend("duration_003_01_01_Gamification_Content_Tnc"),
-        httpWaiting: new Trend("waiting_003_01_01_Gamification_Content_Tnc"),
-        requestRate: new Counter("rps_003_01_01_Gamification_Content_Tnc"),
-        http_reqs: new Counter("sample_003_01_01_Gamification_Content_Tnc"),
+        errorCount: new Counter("error_count_Gamification_Content_Tnc"),
+        errorRate: new Rate("error_rate_Gamification_Content_Tnc"),
+        httpDuration: new Trend("duration_Gamification_Content_Tnc"),
+        httpWaiting: new Trend("waiting_Gamification_Content_Tnc"),
+        requestRate: new Counter("rps_Gamification_Content_Tnc"),
+        http_reqs: new Counter("sample_Gamification_Content_Tnc"),
     },
 };
 

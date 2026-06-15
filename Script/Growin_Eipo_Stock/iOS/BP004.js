@@ -7,12 +7,12 @@ import exec from 'k6/execution';
 // Define custom metrics
 const AgreementScreen = {
     Eipo_Investor: {
-        errorCount: new Counter("error_count_004_01_01_Eipo_Investor"),
-        errorRate: new Rate("error_rate_004_01_01_Eipo_Investor"),
-        httpDuration: new Trend("duration_004_01_01_Eipo_Investor"),
-        httpWaiting: new Trend("waiting_004_01_01_Eipo_Investor"),
-        requestRate: new Counter("rps_004_01_01_Eipo_Investor"),
-        http_reqs: new Counter("sample_004_01_01_Eipo_Investor"),
+        errorCount: new Counter("error_count_Eipo_Investor"),
+        errorRate: new Rate("error_rate_Eipo_Investor"),
+        httpDuration: new Trend("duration_Eipo_Investor"),
+        httpWaiting: new Trend("waiting_Eipo_Investor"),
+        requestRate: new Counter("rps_Eipo_Investor"),
+        http_reqs: new Counter("sample_Eipo_Investor"),
     },
 };
 

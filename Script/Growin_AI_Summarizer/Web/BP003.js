@@ -10,12 +10,12 @@ import exec from 'k6/execution';
 // Define custom metrics
 const Homescreen = {
     Marketdata_Gpt_UserActivityInsert: {
-        errorCount: new Counter("error_count_003_01_01_Marketdata_Gpt_UserActivityInsert"),
-        errorRate: new Rate("error_rate_003_01_01_Marketdata_Gpt_UserActivityInsert"),
-        httpDuration: new Trend("duration_003_01_01_Marketdata_Gpt_UserActivityInsert"),
-        httpWaiting: new Trend("waiting_003_01_01_Marketdata_Gpt_UserActivityInsert"),
-        requestRate: new Counter("rps_003_01_01_Marketdata_Gpt_UserActivityInsert"),
-        http_reqs: new Counter("sample_003_01_01_Marketdata_Gpt_UserActivityInsert"),
+        errorCount: new Counter("error_count_Marketdata_Gpt_UserActivityInsert"),
+        errorRate: new Rate("error_rate_Marketdata_Gpt_UserActivityInsert"),
+        httpDuration: new Trend("duration_Marketdata_Gpt_UserActivityInsert"),
+        httpWaiting: new Trend("waiting_Marketdata_Gpt_UserActivityInsert"),
+        requestRate: new Counter("rps_Marketdata_Gpt_UserActivityInsert"),
+        http_reqs: new Counter("sample_Marketdata_Gpt_UserActivityInsert"),
     }
 };
 

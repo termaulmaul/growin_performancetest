@@ -12,12 +12,12 @@ import exec from 'k6/execution';
 // Define custom metrics
 const Auth_Protected_AccountCenter_Switchables = {
     Auth_Protected_AccountCenter_Switchables: {
-        errorCount: new Counter("error_count_001_01_07_Auth_Protected_AccountCenter_Switchables"),
-        errorRate: new Rate("error_rate_001_01_07_Auth_Protected_AccountCenter_Switchables"),
-        httpDuration: new Trend("duration_001_01_07_Auth_Protected_AccountCenter_Switchables"),
-        httpWaiting: new Trend("waiting_001_01_07_Auth_Protected_AccountCenter_Switchables"),
-        requestRate: new Counter("rps_001_01_07_Auth_Protected_AccountCenter_Switchables"),
-        http_reqs: new Counter("sample_001_01_07_Auth_Protected_AccountCenter_Switchables"),
+        errorCount: new Counter("error_count_Auth_Protected_AccountCenter_Switchables"),
+        errorRate: new Rate("error_rate_Auth_Protected_AccountCenter_Switchables"),
+        httpDuration: new Trend("duration_Auth_Protected_AccountCenter_Switchables"),
+        httpWaiting: new Trend("waiting_Auth_Protected_AccountCenter_Switchables"),
+        requestRate: new Counter("rps_Auth_Protected_AccountCenter_Switchables"),
+        http_reqs: new Counter("sample_Auth_Protected_AccountCenter_Switchables"),
     },
 };
 

@@ -12,12 +12,12 @@ import exec from 'k6/execution';
 // Define custom metrics
 const Order_Protected_Tradelist = {
     Order_Protected_Tradelist: {
-        errorCount: new Counter("error_count_001_01_10_Order_Protected_Tradelist"),
-        errorRate: new Rate("error_rate_001_01_10_Order_Protected_Tradelist"),
-        httpDuration: new Trend("duration_001_01_10_Order_Protected_Tradelist"),
-        httpWaiting: new Trend("waiting_001_01_10_Order_Protected_Tradelist"),
-        requestRate: new Counter("rps_001_01_10_Order_Protected_Tradelist"),
-        http_reqs: new Counter("sample_001_01_10_Order_Protected_Tradelist"),
+        errorCount: new Counter("error_count_Order_Protected_Tradelist"),
+        errorRate: new Rate("error_rate_Order_Protected_Tradelist"),
+        httpDuration: new Trend("duration_Order_Protected_Tradelist"),
+        httpWaiting: new Trend("waiting_Order_Protected_Tradelist"),
+        requestRate: new Counter("rps_Order_Protected_Tradelist"),
+        http_reqs: new Counter("sample_Order_Protected_Tradelist"),
     },
 };
 

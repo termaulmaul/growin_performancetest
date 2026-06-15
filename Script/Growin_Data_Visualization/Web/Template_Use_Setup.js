@@ -14,12 +14,12 @@ import exec from 'k6/execution';
 // Define custom metrics
 const Login_Password = {
     Auth_AdminLogin: {
-        errorCount: new Counter("error_count_001_01_01_Auth_AdminLogin"),
-        errorRate: new Rate("error_rate_001_01_01_Auth_AdminLogin"),
-        httpDuration: new Trend("duration_001_01_01_Auth_AdminLogin"),
-        httpWaiting: new Trend("waiting_001_01_01_Auth_AdminLogin"),
-        requestRate: new Counter("rps_001_01_01_Auth_AdminLogin"),
-        http_reqs: new Counter("sample_001_01_01_Auth_AdminLogin"),
+        errorCount: new Counter("error_count_Auth_AdminLogin"),
+        errorRate: new Rate("error_rate_Auth_AdminLogin"),
+        httpDuration: new Trend("duration_Auth_AdminLogin"),
+        httpWaiting: new Trend("waiting_Auth_AdminLogin"),
+        requestRate: new Counter("rps_Auth_AdminLogin"),
+        http_reqs: new Counter("sample_Auth_AdminLogin"),
     },
 };
 

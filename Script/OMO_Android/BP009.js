@@ -12,12 +12,12 @@ const signatureFile = open('./signature.jpeg', 'b');
 // Define custom metrics
 const UploadSignatureBottomSheet = {
     Oaofinance_Margin_Upload_Signature: {
-        errorCount: new Counter("error_count_009_01_01_Oaofinance_Margin_Upload_Signature"),
-        errorRate: new Rate("error_rate_009_01_01_Oaofinance_Margin_Upload_Signature"),
-        httpDuration: new Trend("duration_009_01_01_Oaofinance_Margin_Upload_Signature"),
-        httpWaiting: new Trend("waiting_009_01_01_Oaofinance_Margin_Upload_Signature"),
-        requestRate: new Counter("rps_009_01_01_Oaofinance_Margin_Upload_Signature"),
-        http_reqs: new Counter("sample_009_01_01_Oaofinance_Margin_Upload_Signature"),
+        errorCount: new Counter("error_count_Oaofinance_Margin_Upload_Signature"),
+        errorRate: new Rate("error_rate_Oaofinance_Margin_Upload_Signature"),
+        httpDuration: new Trend("duration_Oaofinance_Margin_Upload_Signature"),
+        httpWaiting: new Trend("waiting_Oaofinance_Margin_Upload_Signature"),
+        requestRate: new Counter("rps_Oaofinance_Margin_Upload_Signature"),
+        http_reqs: new Counter("sample_Oaofinance_Margin_Upload_Signature"),
     },
 };
 

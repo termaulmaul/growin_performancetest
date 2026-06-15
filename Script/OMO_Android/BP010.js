@@ -9,12 +9,12 @@ import exec from 'k6/execution';
 // Define custom metrics
 const ProfileTermsConditionsBottomSheet = {
     Oaofinance_Margin_Tnc: {
-        errorCount: new Counter("error_count_010_01_01_Oaofinance_Margin_Tnc"),
-        errorRate: new Rate("error_rate_010_01_01_Oaofinance_Margin_Tnc"),
-        httpDuration: new Trend("duration_010_01_01_Oaofinance_Margin_Tnc"),
-        httpWaiting: new Trend("waiting_010_01_01_Oaofinance_Margin_Tnc"),
-        requestRate: new Counter("rps_010_01_01_Oaofinance_Margin_Tnc"),
-        http_reqs: new Counter("sample_010_01_01_Oaofinance_Margin_Tnc"),
+        errorCount: new Counter("error_count_Oaofinance_Margin_Tnc"),
+        errorRate: new Rate("error_rate_Oaofinance_Margin_Tnc"),
+        httpDuration: new Trend("duration_Oaofinance_Margin_Tnc"),
+        httpWaiting: new Trend("waiting_Oaofinance_Margin_Tnc"),
+        requestRate: new Counter("rps_Oaofinance_Margin_Tnc"),
+        http_reqs: new Counter("sample_Oaofinance_Margin_Tnc"),
     },
 };
 

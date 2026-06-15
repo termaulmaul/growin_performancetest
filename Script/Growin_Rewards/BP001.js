@@ -6,20 +6,20 @@ import exec from 'k6/execution';
 // Define custom metrics
 const Login = {
     Auth_Login: {
-        errorCount: new Counter("error_count_001_01_01_Auth_Login"),
-        errorRate: new Rate("error_rate_001_01_01_Auth_Login"),
-        httpDuration: new Trend("duration_001_01_01_Auth_Login"),
-        httpWaiting: new Trend("waiting_001_01_01_Auth_Login"),
-        requestRate: new Counter("rps_001_01_01_Auth_Login"),
-        http_reqs: new Counter("sample_001_01_01_Auth_Login"),
+        errorCount: new Counter("error_count_Auth_Login"),
+        errorRate: new Rate("error_rate_Auth_Login"),
+        httpDuration: new Trend("duration_Auth_Login"),
+        httpWaiting: new Trend("waiting_Auth_Login"),
+        requestRate: new Counter("rps_Auth_Login"),
+        http_reqs: new Counter("sample_Auth_Login"),
     },
     Gamification_User_Detail: {
-        errorCount: new Counter("error_count_001_01_02_Gamification_User_Detail"),
-        errorRate: new Rate("error_rate_001_01_02_Gamification_User_Detail"),
-        httpDuration: new Trend("duration_001_01_02_Gamification_User_Detail"),
-        httpWaiting: new Trend("waiting_001_01_02_Gamification_User_Detail"),
-        requestRate: new Counter("rps_001_01_02_Gamification_User_Detail"),
-        http_reqs: new Counter("sample_001_01_02_Gamification_User_Detail"),
+        errorCount: new Counter("error_count_Gamification_User_Detail"),
+        errorRate: new Rate("error_rate_Gamification_User_Detail"),
+        httpDuration: new Trend("duration_Gamification_User_Detail"),
+        httpWaiting: new Trend("waiting_Gamification_User_Detail"),
+        requestRate: new Counter("rps_Gamification_User_Detail"),
+        http_reqs: new Counter("sample_Gamification_User_Detail"),
     },
 };
 

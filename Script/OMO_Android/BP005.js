@@ -9,20 +9,20 @@ import exec from 'k6/execution';
 // Define custom metrics
 const CollateralSetupPage = {
     Oaofinance_Margin_MinTotalCollateralAssetsValue: {
-        errorCount: new Counter("error_count_005_01_01_Oaofinance_Margin_MinTotalCollateralAssetsValue"),
-        errorRate: new Rate("error_rate_005_01_01_Oaofinance_Margin_MinTotalCollateralAssetsValue"),
-        httpDuration: new Trend("duration_005_01_01_Oaofinance_Margin_MinTotalCollateralAssetsValue"),
-        httpWaiting: new Trend("waiting_005_01_01_Oaofinance_Margin_MinTotalCollateralAssetsValue"),
-        requestRate: new Counter("rps_005_01_01_Oaofinance_Margin_MinTotalCollateralAssetsValue"),
-        http_reqs: new Counter("sample_005_01_01_Oaofinance_Margin_MinTotalCollateralAssetsValue"),
+        errorCount: new Counter("error_count_Oaofinance_Margin_MinTotalCollateralAssetsValue"),
+        errorRate: new Rate("error_rate_Oaofinance_Margin_MinTotalCollateralAssetsValue"),
+        httpDuration: new Trend("duration_Oaofinance_Margin_MinTotalCollateralAssetsValue"),
+        httpWaiting: new Trend("waiting_Oaofinance_Margin_MinTotalCollateralAssetsValue"),
+        requestRate: new Counter("rps_Oaofinance_Margin_MinTotalCollateralAssetsValue"),
+        http_reqs: new Counter("sample_Oaofinance_Margin_MinTotalCollateralAssetsValue"),
     },
     Oaofinance_User_EligibleAsset: {
-        errorCount: new Counter("error_count_005_01_02_Oaofinance_User_EligibleAsset"),
-        errorRate: new Rate("error_rate_005_01_02_Oaofinance_User_EligibleAsset"),
-        httpDuration: new Trend("duration_005_01_02_Oaofinance_User_EligibleAsset"),
-        httpWaiting: new Trend("waiting_005_01_02_Oaofinance_User_EligibleAsset"),
-        requestRate: new Counter("rps_005_01_02_Oaofinance_User_EligibleAsset"),
-        http_reqs: new Counter("sample_005_01_02_Oaofinance_User_EligibleAsset"),
+        errorCount: new Counter("error_count_Oaofinance_User_EligibleAsset"),
+        errorRate: new Rate("error_rate_Oaofinance_User_EligibleAsset"),
+        httpDuration: new Trend("duration_Oaofinance_User_EligibleAsset"),
+        httpWaiting: new Trend("waiting_Oaofinance_User_EligibleAsset"),
+        requestRate: new Counter("rps_Oaofinance_User_EligibleAsset"),
+        http_reqs: new Counter("sample_Oaofinance_User_EligibleAsset"),
     },
 };
 

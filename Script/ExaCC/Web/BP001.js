@@ -12,12 +12,12 @@ import exec from 'k6/execution';
 // Define custom metrics
 const User_Profile_Personal = {
     User_Profile_Personal: {
-        errorCount: new Counter("error_count_001_01_01_User_Profile_Personal"),
-        errorRate: new Rate("error_rate_001_01_01_User_Profile_Personal"),
-        httpDuration: new Trend("duration_001_01_01_User_Profile_Personal"),
-        httpWaiting: new Trend("waiting_001_01_01_User_Profile_Personal"),
-        requestRate: new Counter("rps_001_01_01_User_Profile_Personal"),
-        http_reqs: new Counter("sample_001_01_01_User_Profile_Personal"),
+        errorCount: new Counter("error_count_User_Profile_Personal"),
+        errorRate: new Rate("error_rate_User_Profile_Personal"),
+        httpDuration: new Trend("duration_User_Profile_Personal"),
+        httpWaiting: new Trend("waiting_User_Profile_Personal"),
+        requestRate: new Counter("rps_User_Profile_Personal"),
+        http_reqs: new Counter("sample_User_Profile_Personal"),
     },
 };
 

@@ -11,12 +11,12 @@ import { getChannelId, getChannelIdWithOptions, ChannelMetrics } from './channel
 // Define custom metrics
 const SharePortfolio = {
     Socialinvesting_PortfolioSharing_ShareToCommunity: {
-        errorCount: new Counter("error_count_012_01_01_Socialinvesting_PortfolioSharing_ShareToCommunity"),
-        errorRate: new Rate("error_rate_012_01_01_Socialinvesting_PortfolioSharing_ShareToCommunity"),
-        httpDuration: new Trend("duration_012_01_01_Socialinvesting_PortfolioSharing_ShareToCommunity"),
-        httpWaiting: new Trend("waiting_012_01_01_Socialinvesting_PortfolioSharing_ShareToCommunity"),
-        requestRate: new Counter("rps_012_01_01_Socialinvesting_PortfolioSharing_ShareToCommunity"),
-        http_reqs: new Counter("sample_012_01_01_Socialinvesting_PortfolioSharing_ShareToCommunity"),
+        errorCount: new Counter("error_count_Socialinvesting_PortfolioSharing_ShareToCommunity"),
+        errorRate: new Rate("error_rate_Socialinvesting_PortfolioSharing_ShareToCommunity"),
+        httpDuration: new Trend("duration_Socialinvesting_PortfolioSharing_ShareToCommunity"),
+        httpWaiting: new Trend("waiting_Socialinvesting_PortfolioSharing_ShareToCommunity"),
+        requestRate: new Counter("rps_Socialinvesting_PortfolioSharing_ShareToCommunity"),
+        http_reqs: new Counter("sample_Socialinvesting_PortfolioSharing_ShareToCommunity"),
     },
 };
 

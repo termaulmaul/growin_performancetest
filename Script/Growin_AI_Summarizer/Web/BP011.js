@@ -10,12 +10,12 @@ import exec from 'k6/execution';
 // Define custom metrics
 const FinancialSummarizerBackendFinancialFeature = {
     Marketdata_StockDailyPrice: {
-        errorCount: new Counter("error_count_011_01_01_Marketdata_StockDailyPrice"),
-        errorRate: new Rate("error_rate_011_01_01_Marketdata_StockDailyPrice"),
-        httpDuration: new Trend("duration_011_01_01_Marketdata_StockDailyPrice"),
-        httpWaiting: new Trend("waiting_011_01_01_Marketdata_StockDailyPrice"),
-        requestRate: new Counter("rps_011_01_01_Marketdata_StockDailyPrice"),
-        http_reqs: new Counter("sample_011_01_01_Marketdata_StockDailyPrice"),
+        errorCount: new Counter("error_count_Marketdata_StockDailyPrice"),
+        errorRate: new Rate("error_rate_Marketdata_StockDailyPrice"),
+        httpDuration: new Trend("duration_Marketdata_StockDailyPrice"),
+        httpWaiting: new Trend("waiting_Marketdata_StockDailyPrice"),
+        requestRate: new Counter("rps_Marketdata_StockDailyPrice"),
+        http_reqs: new Counter("sample_Marketdata_StockDailyPrice"),
     }
 };
 

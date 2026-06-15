@@ -45,20 +45,20 @@ export const options = {
 // Define custom metrics
 const Inbox = {
     Inbox_Post: {
-        errorCount: new Counter("error_count_001_01_01_Inbox_Post"),
-        errorRate: new Rate("error_rate_001_01_01_Inbox_Post"),
-        httpDuration: new Trend("duration_001_01_01_Inbox_Post"),
-        httpWaiting: new Trend("waiting_001_01_01_Inbox_Post"),
-        requestRate: new Counter("rps_001_01_01_Inbox_Post"),
-        http_reqs: new Counter("sample_001_01_01_Inbox_Post"),
+        errorCount: new Counter("error_count_Inbox_Post"),
+        errorRate: new Rate("error_rate_Inbox_Post"),
+        httpDuration: new Trend("duration_Inbox_Post"),
+        httpWaiting: new Trend("waiting_Inbox_Post"),
+        requestRate: new Counter("rps_Inbox_Post"),
+        http_reqs: new Counter("sample_Inbox_Post"),
     },
     Inbox_Get: {
-        errorCount: new Counter("error_count_001_01_02_Inbox_Get"),
-        errorRate: new Rate("error_rate_001_01_02_Inbox_Get"),
-        httpDuration: new Trend("duration_001_01_02_Inbox_Get"),
-        httpWaiting: new Trend("waiting_001_01_02_Inbox_Get"),
-        requestRate: new Counter("rps_001_01_02_Inbox_Get"),
-        http_reqs: new Counter("sample_001_01_02_Inbox_Get"),
+        errorCount: new Counter("error_count_Inbox_Get"),
+        errorRate: new Rate("error_rate_Inbox_Get"),
+        httpDuration: new Trend("duration_Inbox_Get"),
+        httpWaiting: new Trend("waiting_Inbox_Get"),
+        requestRate: new Counter("rps_Inbox_Get"),
+        http_reqs: new Counter("sample_Inbox_Get"),
     },
 };
 

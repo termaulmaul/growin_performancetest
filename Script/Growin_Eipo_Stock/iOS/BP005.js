@@ -7,20 +7,20 @@ import exec from 'k6/execution';
 // Define custom metrics
 const OrderDetailScreen = {
     Eipo_CashLimit: {
-        errorCount: new Counter("error_count_005_01_01_Eipo_CashLimit"),
-        errorRate: new Rate("error_rate_005_01_01_Eipo_CashLimit"),
-        httpDuration: new Trend("duration_005_01_01_Eipo_CashLimit"),
-        httpWaiting: new Trend("waiting_005_01_01_Eipo_CashLimit"),
-        requestRate: new Counter("rps_005_01_01_Eipo_CashLimit"),
-        http_reqs: new Counter("sample_005_01_01_Eipo_CashLimit"),
+        errorCount: new Counter("error_count_Eipo_CashLimit"),
+        errorRate: new Rate("error_rate_Eipo_CashLimit"),
+        httpDuration: new Trend("duration_Eipo_CashLimit"),
+        httpWaiting: new Trend("waiting_Eipo_CashLimit"),
+        requestRate: new Counter("rps_Eipo_CashLimit"),
+        http_reqs: new Counter("sample_Eipo_CashLimit"),
     },
     Eipo_Pipeline_EMSM: {
-        errorCount: new Counter("error_count_005_01_02_Eipo_Pipeline_EMSM"),
-        errorRate: new Rate("error_rate_005_01_02_Eipo_Pipeline_EMSM"),
-        httpDuration: new Trend("duration_005_01_02_Eipo_Pipeline_EMSM"),
-        httpWaiting: new Trend("waiting_005_01_02_Eipo_Pipeline_EMSM"),
-        requestRate: new Counter("rps_005_01_02_Eipo_Pipeline_EMSM"),
-        http_reqs: new Counter("sample_005_01_02_Eipo_Pipeline_EMSM"),
+        errorCount: new Counter("error_count_Eipo_Pipeline_EMSM"),
+        errorRate: new Rate("error_rate_Eipo_Pipeline_EMSM"),
+        httpDuration: new Trend("duration_Eipo_Pipeline_EMSM"),
+        httpWaiting: new Trend("waiting_Eipo_Pipeline_EMSM"),
+        requestRate: new Counter("rps_Eipo_Pipeline_EMSM"),
+        http_reqs: new Counter("sample_Eipo_Pipeline_EMSM"),
     },
 };
 

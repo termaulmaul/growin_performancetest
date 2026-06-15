@@ -12,12 +12,12 @@ import exec from 'k6/execution';
 // Define custom metrics
 const Auth_Login = {
     Auth_Login: {
-        errorCount: new Counter("error_count_001_01_08_Auth_Login"),
-        errorRate: new Rate("error_rate_001_01_08_Auth_Login"),
-        httpDuration: new Trend("duration_001_01_08_Auth_Login"),
-        httpWaiting: new Trend("waiting_001_01_08_Auth_Login"),
-        requestRate: new Counter("rps_001_01_08_Auth_Login"),
-        http_reqs: new Counter("sample_001_01_08_Auth_Login"),
+        errorCount: new Counter("error_count_Auth_Login"),
+        errorRate: new Rate("error_rate_Auth_Login"),
+        httpDuration: new Trend("duration_Auth_Login"),
+        httpWaiting: new Trend("waiting_Auth_Login"),
+        requestRate: new Counter("rps_Auth_Login"),
+        http_reqs: new Counter("sample_Auth_Login"),
     },
 };
 

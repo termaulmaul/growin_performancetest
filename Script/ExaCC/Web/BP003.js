@@ -12,12 +12,12 @@ import exec from 'k6/execution';
 // Define custom metrics
 const User_Protected_Profile_CollateralRatio = {
     User_Protected_Profile_CollateralRatio: {
-        errorCount: new Counter("error_count_001_01_03_User_Protected_Profile_CollateralRatio"),
-        errorRate: new Rate("error_rate_001_01_03_User_Protected_Profile_CollateralRatio"),
-        httpDuration: new Trend("duration_001_01_03_User_Protected_Profile_CollateralRatio"),
-        httpWaiting: new Trend("waiting_001_01_03_User_Protected_Profile_CollateralRatio"),
-        requestRate: new Counter("rps_001_01_03_User_Protected_Profile_CollateralRatio"),
-        http_reqs: new Counter("sample_001_01_03_User_Protected_Profile_CollateralRatio"),
+        errorCount: new Counter("error_count_User_Protected_Profile_CollateralRatio"),
+        errorRate: new Rate("error_rate_User_Protected_Profile_CollateralRatio"),
+        httpDuration: new Trend("duration_User_Protected_Profile_CollateralRatio"),
+        httpWaiting: new Trend("waiting_User_Protected_Profile_CollateralRatio"),
+        requestRate: new Counter("rps_User_Protected_Profile_CollateralRatio"),
+        http_reqs: new Counter("sample_User_Protected_Profile_CollateralRatio"),
     },
 };
 

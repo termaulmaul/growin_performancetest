@@ -51,20 +51,20 @@ export const options = {
 // Define custom metrics
 const ProfileTrading = {
     User_Profile_Trading_V1: {
-        errorCount: new Counter("error_count_000_01_01_User_Profile_Trading_V1"),
-        errorRate: new Rate("error_rate_000_01_01_User_Profile_Trading_V1"),
-        httpDuration: new Trend("duration_000_01_01_User_Profile_Trading_V1"),
-        httpWaiting: new Trend("waiting_000_01_01_User_Profile_Trading_V1"),
-        requestRate: new Counter("rps_000_01_01_User_Profile_Trading_V1"),
-        http_reqs: new Counter("sample_000_01_01_User_Profile_Trading_V1"),
+        errorCount: new Counter("error_count_User_Profile_Trading_V1"),
+        errorRate: new Rate("error_rate_User_Profile_Trading_V1"),
+        httpDuration: new Trend("duration_User_Profile_Trading_V1"),
+        httpWaiting: new Trend("waiting_User_Profile_Trading_V1"),
+        requestRate: new Counter("rps_User_Profile_Trading_V1"),
+        http_reqs: new Counter("sample_User_Profile_Trading_V1"),
     },
     User_Profile_Trading_V2: {
-        errorCount: new Counter("error_count_000_01_02_User_Profile_Trading_V2"),
-        errorRate: new Rate("error_rate_000_01_02_User_Profile_Trading_V2"),
-        httpDuration: new Trend("duration_000_01_02_User_Profile_Trading_V2"),
-        httpWaiting: new Trend("waiting_000_01_02_User_Profile_Trading_V2"),
-        requestRate: new Counter("rps_000_01_02_User_Profile_Trading_V2"),
-        http_reqs: new Counter("sample_000_01_02_User_Profile_Trading_V2"),
+        errorCount: new Counter("error_count_User_Profile_Trading_V2"),
+        errorRate: new Rate("error_rate_User_Profile_Trading_V2"),
+        httpDuration: new Trend("duration_User_Profile_Trading_V2"),
+        httpWaiting: new Trend("waiting_User_Profile_Trading_V2"),
+        requestRate: new Counter("rps_User_Profile_Trading_V2"),
+        http_reqs: new Counter("sample_User_Profile_Trading_V2"),
     },
 };
 

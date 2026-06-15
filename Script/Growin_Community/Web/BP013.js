@@ -11,12 +11,12 @@ import { getChannelId, getChannelIdWithOptions, ChannelMetrics } from './channel
 // Define custom metrics
 const AddKickRequestFromSuhuToAdmin = {
     Socialinvesting_Social_RequestKickMember: {
-        errorCount: new Counter("error_count_013_01_01_Socialinvesting_Social_RequestKickMember"),
-        errorRate: new Rate("error_rate_013_01_01_Socialinvesting_Social_RequestKickMember"),
-        httpDuration: new Trend("duration_013_01_01_Socialinvesting_Social_RequestKickMember"),
-        httpWaiting: new Trend("waiting_013_01_01_Socialinvesting_Social_RequestKickMember"),
-        requestRate: new Counter("rps_013_01_01_Socialinvesting_Social_RequestKickMember"),
-        http_reqs: new Counter("sample_013_01_01_Socialinvesting_Social_RequestKickMember"),
+        errorCount: new Counter("error_count_Socialinvesting_Social_RequestKickMember"),
+        errorRate: new Rate("error_rate_Socialinvesting_Social_RequestKickMember"),
+        httpDuration: new Trend("duration_Socialinvesting_Social_RequestKickMember"),
+        httpWaiting: new Trend("waiting_Socialinvesting_Social_RequestKickMember"),
+        requestRate: new Counter("rps_Socialinvesting_Social_RequestKickMember"),
+        http_reqs: new Counter("sample_Socialinvesting_Social_RequestKickMember"),
     },
 };
 

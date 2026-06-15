@@ -12,20 +12,20 @@ import exec from 'k6/execution';
 // Define custom metrics (unchanged)
 const DeviceManagement = {
     Auth_Protected_VerifiedDevice_List: {
-        errorCount: new Counter("error_count_002_01_01_Auth_Protected_VerifiedDevice_List"),
-        errorRate: new Rate("error_rate_002_01_01_Auth_Protected_VerifiedDevice_List"),
-        httpDuration: new Trend("duration_002_01_01_Auth_Protected_VerifiedDevice_List"),
-        httpWaiting: new Trend("waiting_002_01_01_Auth_Protected_VerifiedDevice_List"),
-        requestRate: new Counter("rps_002_01_01_Auth_Protected_VerifiedDevice_List"),
-        http_reqs: new Counter("sample_002_01_01_Auth_Protected_VerifiedDevice_List"),
+        errorCount: new Counter("error_count_Auth_Protected_VerifiedDevice_List"),
+        errorRate: new Rate("error_rate_Auth_Protected_VerifiedDevice_List"),
+        httpDuration: new Trend("duration_Auth_Protected_VerifiedDevice_List"),
+        httpWaiting: new Trend("waiting_Auth_Protected_VerifiedDevice_List"),
+        requestRate: new Counter("rps_Auth_Protected_VerifiedDevice_List"),
+        http_reqs: new Counter("sample_Auth_Protected_VerifiedDevice_List"),
     },
     Auth_Protected_VerifiedDevice_ID: {
-        errorCount: new Counter("error_count_002_01_02_Auth_Protected_VerifiedDevice"),
-        errorRate: new Rate("error_rate_002_01_02_Auth_Protected_VerifiedDevice"),
-        httpDuration: new Trend("duration_002_01_02_Auth_Protected_VerifiedDevice"),
-        httpWaiting: new Trend("waiting_002_01_02_Auth_Protected_VerifiedDevice"),
-        requestRate: new Counter("rps_002_01_02_Auth_Protected_VerifiedDevice"),
-        http_reqs: new Counter("sample_002_01_02_Auth_Protected_VerifiedDevice"),
+        errorCount: new Counter("error_count_Auth_Protected_VerifiedDevice"),
+        errorRate: new Rate("error_rate_Auth_Protected_VerifiedDevice"),
+        httpDuration: new Trend("duration_Auth_Protected_VerifiedDevice"),
+        httpWaiting: new Trend("waiting_Auth_Protected_VerifiedDevice"),
+        requestRate: new Counter("rps_Auth_Protected_VerifiedDevice"),
+        http_reqs: new Counter("sample_Auth_Protected_VerifiedDevice"),
     },
 };
 

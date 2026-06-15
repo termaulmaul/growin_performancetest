@@ -9,12 +9,12 @@ import exec from 'k6/execution';
 // Define custom metrics
 const CollateralInformationBottomSheet = {
     Oaofinance_Margin_CollateralAssetInformation: {
-        errorCount: new Counter("error_count_003_01_01_Oaofinance_Margin_CollateralAssetInformation"),
-        errorRate: new Rate("error_rate_003_01_01_Oaofinance_Margin_CollateralAssetInformation"),
-        httpDuration: new Trend("duration_003_01_01_Oaofinance_Margin_CollateralAssetInformation"),
-        httpWaiting: new Trend("waiting_003_01_01_Oaofinance_Margin_CollateralAssetInformation"),
-        requestRate: new Counter("rps_003_01_01_Oaofinance_Margin_CollateralAssetInformation"),
-        http_reqs: new Counter("sample_003_01_01_Oaofinance_Margin_CollateralAssetInformation"),
+        errorCount: new Counter("error_count_Oaofinance_Margin_CollateralAssetInformation"),
+        errorRate: new Rate("error_rate_Oaofinance_Margin_CollateralAssetInformation"),
+        httpDuration: new Trend("duration_Oaofinance_Margin_CollateralAssetInformation"),
+        httpWaiting: new Trend("waiting_Oaofinance_Margin_CollateralAssetInformation"),
+        requestRate: new Counter("rps_Oaofinance_Margin_CollateralAssetInformation"),
+        http_reqs: new Counter("sample_Oaofinance_Margin_CollateralAssetInformation"),
     },
 };
 

@@ -39,12 +39,12 @@ export const options = {
 // Define custom metrics
 const WhatsappIntegration = {
     Webhook: {
-        errorCount: new Counter("error_count_001_01_01_Webhook"),
-        errorRate: new Rate("error_rate_001_01_01_Webhook"),
-        httpDuration: new Trend("duration_001_01_01_Webhook"),
-        httpWaiting: new Trend("waiting_001_01_01_Webhook"),
-        requestRate: new Counter("rps_001_01_01_Webhook"),
-        http_reqs: new Counter("sample_001_01_01_Webhook"),
+        errorCount: new Counter("error_count_Webhook"),
+        errorRate: new Rate("error_rate_Webhook"),
+        httpDuration: new Trend("duration_Webhook"),
+        httpWaiting: new Trend("waiting_Webhook"),
+        requestRate: new Counter("rps_Webhook"),
+        http_reqs: new Counter("sample_Webhook"),
     },
 };
 

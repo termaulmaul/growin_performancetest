@@ -13,20 +13,20 @@ import { getChannelId, getChannelIdWithOptions, ChannelMetrics } from './channel
 // Define custom metrics
 const StockPick = {
     Socialinvesting_StockPick: {
-        errorCount: new Counter("error_count_003_01_01_Socialinvesting_StockPick"),
-        errorRate: new Rate("error_rate_003_01_01_Socialinvesting_StockPick"),
-        httpDuration: new Trend("duration_003_01_01_Socialinvesting_StockPick"),
-        httpWaiting: new Trend("waiting_003_01_01_Socialinvesting_StockPick"),
-        requestRate: new Counter("rps_003_01_01_Socialinvesting_StockPick"),
-        http_reqs: new Counter("sample_003_01_01_Socialinvesting_StockPick"),
+        errorCount: new Counter("error_count_Socialinvesting_StockPick"),
+        errorRate: new Rate("error_rate_Socialinvesting_StockPick"),
+        httpDuration: new Trend("duration_Socialinvesting_StockPick"),
+        httpWaiting: new Trend("waiting_Socialinvesting_StockPick"),
+        requestRate: new Counter("rps_Socialinvesting_StockPick"),
+        http_reqs: new Counter("sample_Socialinvesting_StockPick"),
     },
     Search_QuerySocialInvesting: {
-        errorCount: new Counter("error_count_003_01_02_Search_QuerySocialInvesting"),
-        errorRate: new Rate("error_rate_003_01_02_Search_QuerySocialInvesting"),
-        httpDuration: new Trend("duration_003_01_02_Search_QuerySocialInvesting"),
-        httpWaiting: new Trend("waiting_003_01_02_Search_QuerySocialInvesting"),
-        requestRate: new Counter("rps_003_01_02_Search_QuerySocialInvesting"),
-        http_reqs: new Counter("sample_003_01_02_Search_QuerySocialInvesting"),
+        errorCount: new Counter("error_count_Search_QuerySocialInvesting"),
+        errorRate: new Rate("error_rate_Search_QuerySocialInvesting"),
+        httpDuration: new Trend("duration_Search_QuerySocialInvesting"),
+        httpWaiting: new Trend("waiting_Search_QuerySocialInvesting"),
+        requestRate: new Counter("rps_Search_QuerySocialInvesting"),
+        http_reqs: new Counter("sample_Search_QuerySocialInvesting"),
     },
 };
 

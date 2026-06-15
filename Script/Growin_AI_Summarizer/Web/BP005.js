@@ -14,28 +14,28 @@ import exec from 'k6/execution';
 // Define custom metrics
 const FinancialSummarizerBackendAnalysisFeature = {
     Marketdata_Emiten_PricePerformance: {
-        errorCount: new Counter("error_count_005_01_01_Marketdata_Emiten_PricePerformance"),
-        errorRate: new Rate("error_rate_005_01_01_Marketdata_Emiten_PricePerformance"),
-        httpDuration: new Trend("duration_005_01_01_Marketdata_Emiten_PricePerformance"),
-        httpWaiting: new Trend("waiting_005_01_01_Marketdata_Emiten_PricePerformance"),
-        requestRate: new Counter("rps_005_01_01_Marketdata_Emiten_PricePerformance"),
-        http_reqs: new Counter("sample_005_01_01_Marketdata_Emiten_PricePerformance"),
+        errorCount: new Counter("error_count_Marketdata_Emiten_PricePerformance"),
+        errorRate: new Rate("error_rate_Marketdata_Emiten_PricePerformance"),
+        httpDuration: new Trend("duration_Marketdata_Emiten_PricePerformance"),
+        httpWaiting: new Trend("waiting_Marketdata_Emiten_PricePerformance"),
+        requestRate: new Counter("rps_Marketdata_Emiten_PricePerformance"),
+        http_reqs: new Counter("sample_Marketdata_Emiten_PricePerformance"),
     },
     Marketdata_Emiten_LowHighRange: {
-        errorCount: new Counter("error_count_005_01_02_Marketdata_Emiten_LowHighRange"),
-        errorRate: new Rate("error_rate_005_01_02_Marketdata_Emiten_LowHighRange"),
-        httpDuration: new Trend("duration_005_01_02_Marketdata_Emiten_LowHighRange"),
-        httpWaiting: new Trend("waiting_005_01_02_Marketdata_Emiten_LowHighRange"),
-        requestRate: new Counter("rps_005_01_02_Marketdata_Emiten_LowHighRange"),
-        http_reqs: new Counter("sample_005_01_02_Marketdata_Emiten_LowHighRange"),
+        errorCount: new Counter("error_count_Marketdata_Emiten_LowHighRange"),
+        errorRate: new Rate("error_rate_Marketdata_Emiten_LowHighRange"),
+        httpDuration: new Trend("duration_Marketdata_Emiten_LowHighRange"),
+        httpWaiting: new Trend("waiting_Marketdata_Emiten_LowHighRange"),
+        requestRate: new Counter("rps_Marketdata_Emiten_LowHighRange"),
+        http_reqs: new Counter("sample_Marketdata_Emiten_LowHighRange"),
     },
     Marketdata_Emiten_InvestorChartAgg: {
-        errorCount: new Counter("error_count_005_01_03_Marketdata_Emiten_InvestorChartAgg"),
-        errorRate: new Rate("error_rate_005_01_03_Marketdata_Emiten_InvestorChartAgg"),
-        httpDuration: new Trend("duration_005_01_03_Marketdata_Emiten_InvestorChartAgg"),
-        httpWaiting: new Trend("waiting_005_01_03_Marketdata_Emiten_InvestorChartAgg"),
-        requestRate: new Counter("rps_005_01_03_Marketdata_Emiten_InvestorChartAgg"),
-        http_reqs: new Counter("sample_005_01_03_Marketdata_Emiten_InvestorChartAgg"),
+        errorCount: new Counter("error_count_Marketdata_Emiten_InvestorChartAgg"),
+        errorRate: new Rate("error_rate_Marketdata_Emiten_InvestorChartAgg"),
+        httpDuration: new Trend("duration_Marketdata_Emiten_InvestorChartAgg"),
+        httpWaiting: new Trend("waiting_Marketdata_Emiten_InvestorChartAgg"),
+        requestRate: new Counter("rps_Marketdata_Emiten_InvestorChartAgg"),
+        http_reqs: new Counter("sample_Marketdata_Emiten_InvestorChartAgg"),
     }
 };
 

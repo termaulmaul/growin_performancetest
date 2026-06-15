@@ -12,12 +12,12 @@ import exec from 'k6/execution';
 // Define custom metrics
 const User_Protected_Portfolio_StockExercise = {
     User_Protected_Portfolio_StockExercise: {
-        errorCount: new Counter("error_count_001_01_09_User_Protected_Portfolio_StockExercise"),
-        errorRate: new Rate("error_rate_001_01_09_User_Protected_Portfolio_StockExercise"),
-        httpDuration: new Trend("duration_001_01_09_User_Protected_Portfolio_StockExercise"),
-        httpWaiting: new Trend("waiting_001_01_09_User_Protected_Portfolio_StockExercise"),
-        requestRate: new Counter("rps_001_01_09_User_Protected_Portfolio_StockExercise"),
-        http_reqs: new Counter("sample_001_01_09_User_Protected_Portfolio_StockExercise"),
+        errorCount: new Counter("error_count_User_Protected_Portfolio_StockExercise"),
+        errorRate: new Rate("error_rate_User_Protected_Portfolio_StockExercise"),
+        httpDuration: new Trend("duration_User_Protected_Portfolio_StockExercise"),
+        httpWaiting: new Trend("waiting_User_Protected_Portfolio_StockExercise"),
+        requestRate: new Counter("rps_User_Protected_Portfolio_StockExercise"),
+        http_reqs: new Counter("sample_User_Protected_Portfolio_StockExercise"),
     },
 };
 

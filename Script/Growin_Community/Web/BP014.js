@@ -11,12 +11,12 @@ import { getChannelId, getChannelIdWithOptions, ChannelMetrics } from './channel
 // Define custom metrics
 const KickByAdmin = {
     Socialinvesting_Social_RemoveByAdmin: {
-        errorCount: new Counter("error_count_014_01_01_Socialinvesting_Social_RemoveByAdmin"),
-        errorRate: new Rate("error_rate_014_01_01_Socialinvesting_Social_RemoveByAdmin"),
-        httpDuration: new Trend("duration_014_01_01_Socialinvesting_Social_RemoveByAdmin"),
-        httpWaiting: new Trend("waiting_014_01_01_Socialinvesting_Social_RemoveByAdmin"),
-        requestRate: new Counter("rps_014_01_01_Socialinvesting_Social_RemoveByAdmin"),
-        http_reqs: new Counter("sample_014_01_01_Socialinvesting_Social_RemoveByAdmin"),
+        errorCount: new Counter("error_count_Socialinvesting_Social_RemoveByAdmin"),
+        errorRate: new Rate("error_rate_Socialinvesting_Social_RemoveByAdmin"),
+        httpDuration: new Trend("duration_Socialinvesting_Social_RemoveByAdmin"),
+        httpWaiting: new Trend("waiting_Socialinvesting_Social_RemoveByAdmin"),
+        requestRate: new Counter("rps_Socialinvesting_Social_RemoveByAdmin"),
+        http_reqs: new Counter("sample_Socialinvesting_Social_RemoveByAdmin"),
     },
 };
 

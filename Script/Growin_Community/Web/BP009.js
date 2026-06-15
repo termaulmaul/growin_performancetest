@@ -7,12 +7,12 @@ import { getChannelId, getChannelIdWithOptions, ChannelMetrics } from './channel
 // Define custom metrics
 const ChatRoomHistory = {
     Social_MessagesHistory: {
-        errorCount: new Counter("error_count_009_01_01_Social_MessagesHistory"),
-        errorRate: new Rate("error_rate_009_01_01_Social_MessagesHistory"),
-        httpDuration: new Trend("duration_009_01_01_Social_MessagesHistory"),
-        httpWaiting: new Trend("waiting_009_01_01_Social_MessagesHistory"),
-        requestRate: new Counter("rps_009_01_01_Social_MessagesHistory"),
-        http_reqs: new Counter("sample_009_01_01_Social_MessagesHistory"),
+        errorCount: new Counter("error_count_Social_MessagesHistory"),
+        errorRate: new Rate("error_rate_Social_MessagesHistory"),
+        httpDuration: new Trend("duration_Social_MessagesHistory"),
+        httpWaiting: new Trend("waiting_Social_MessagesHistory"),
+        requestRate: new Counter("rps_Social_MessagesHistory"),
+        http_reqs: new Counter("sample_Social_MessagesHistory"),
     },
 };
 

@@ -7,12 +7,12 @@ import exec from 'k6/execution';
 // Define custom metrics
 const EditOrderScreen = {
     Eipo_Order: {
-        errorCount: new Counter("error_count_007_01_01_Amend_Eipo_Order"),
-        errorRate: new Rate("error_rate_007_01_01_Amend_Eipo_Order"),
-        httpDuration: new Trend("duration_007_01_01_Amend_Eipo_Order"),
-        httpWaiting: new Trend("waiting_007_01_01_Amend_Eipo_Order"),
-        requestRate: new Counter("rps_007_01_01_Amend_Eipo_Order"),
-        http_reqs: new Counter("sample_007_01_01_Amend_Eipo_Order"),
+        errorCount: new Counter("error_count_Amend_Eipo_Order"),
+        errorRate: new Rate("error_rate_Amend_Eipo_Order"),
+        httpDuration: new Trend("duration_Amend_Eipo_Order"),
+        httpWaiting: new Trend("waiting_Amend_Eipo_Order"),
+        requestRate: new Counter("rps_Amend_Eipo_Order"),
+        http_reqs: new Counter("sample_Amend_Eipo_Order"),
     },
 };
 

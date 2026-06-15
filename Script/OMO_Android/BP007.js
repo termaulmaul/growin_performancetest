@@ -8,20 +8,20 @@ import exec from 'k6/execution';
 
 const CollateralSubmitConfirmationPage = {
     Oaofinance_Quota_Status_Margin: {
-        errorCount: new Counter("error_count_007_01_01_Oaofinance_Quota_Status_Margin"),
-        errorRate: new Rate("error_rate_007_01_01_Oaofinance_Quota_Status_Margin"),
-        httpDuration: new Trend("duration_007_01_01_Oaofinance_Quota_Status_Margin"),
-        httpWaiting: new Trend("waiting_007_01_01_Oaofinance_Quota_Status_Margin"),
-        requestRate: new Counter("rps_007_01_01_Oaofinance_Quota_Status_Margin"),
-        http_reqs: new Counter("sample_007_01_01_Oaofinance_Quota_Status_Margin"),
+        errorCount: new Counter("error_count_Oaofinance_Quota_Status_Margin"),
+        errorRate: new Rate("error_rate_Oaofinance_Quota_Status_Margin"),
+        httpDuration: new Trend("duration_Oaofinance_Quota_Status_Margin"),
+        httpWaiting: new Trend("waiting_Oaofinance_Quota_Status_Margin"),
+        requestRate: new Counter("rps_Oaofinance_Quota_Status_Margin"),
+        http_reqs: new Counter("sample_Oaofinance_Quota_Status_Margin"),
     },
     Oaofinance_MarginUser_CollateralAsset: {
-        errorCount: new Counter("error_count_007_01_02_Oaofinance_MarginUser_CollateralAsset"),
-        errorRate: new Rate("error_rate_007_01_02_Oaofinance_MarginUser_CollateralAsset"),
-        httpDuration: new Trend("duration_007_01_02_Oaofinance_MarginUser_CollateralAsset"),
-        httpWaiting: new Trend("waiting_007_01_02_Oaofinance_MarginUser_CollateralAsset"),
-        requestRate: new Counter("rps_007_01_02_Oaofinance_MarginUser_CollateralAsset"),
-        http_reqs: new Counter("sample_007_01_02_Oaofinance_MarginUser_CollateralAsset"),
+        errorCount: new Counter("error_count_Oaofinance_MarginUser_CollateralAsset"),
+        errorRate: new Rate("error_rate_Oaofinance_MarginUser_CollateralAsset"),
+        httpDuration: new Trend("duration_Oaofinance_MarginUser_CollateralAsset"),
+        httpWaiting: new Trend("waiting_Oaofinance_MarginUser_CollateralAsset"),
+        requestRate: new Counter("rps_Oaofinance_MarginUser_CollateralAsset"),
+        http_reqs: new Counter("sample_Oaofinance_MarginUser_CollateralAsset"),
     },
 };
 

@@ -5,20 +5,20 @@ import exec from 'k6/execution';
 
 const TransactionHistory = {
     Gamification_Transaction_History: {
-        errorCount: new Counter("error_count_004_01_01_Gamification_Transaction_History"),
-        errorRate: new Rate("error_rate_004_01_01_Gamification_Transaction_History"),
-        httpDuration: new Trend("duration_004_01_01_Gamification_Transaction_History"),
-        httpWaiting: new Trend("waiting_004_01_01_Gamification_Transaction_History"),
-        requestRate: new Counter("rps_004_01_01_Gamification_Transaction_History"),
-        http_reqs: new Counter("sample_004_01_01_Gamification_Transaction_History"),
+        errorCount: new Counter("error_count_Gamification_Transaction_History"),
+        errorRate: new Rate("error_rate_Gamification_Transaction_History"),
+        httpDuration: new Trend("duration_Gamification_Transaction_History"),
+        httpWaiting: new Trend("waiting_Gamification_Transaction_History"),
+        requestRate: new Counter("rps_Gamification_Transaction_History"),
+        http_reqs: new Counter("sample_Gamification_Transaction_History"),
     },
     Gamification_Transaction_History_Date: {
-        errorCount: new Counter("error_count_004_01_02_Gamification_Transaction_History_Date"),
-        errorRate: new Rate("error_rate_004_01_02_Gamification_Transaction_History_Date"),
-        httpDuration: new Trend("duration_004_01_02_Gamification_Transaction_History_Date"),
-        httpWaiting: new Trend("waiting_004_01_02_Gamification_Transaction_History_Date"),
-        requestRate: new Counter("rps_004_01_02_Gamification_Transaction_History_Date"),
-        http_reqs: new Counter("sample_004_01_02_Gamification_Transaction_History_Date"),
+        errorCount: new Counter("error_count_Gamification_Transaction_History_Date"),
+        errorRate: new Rate("error_rate_Gamification_Transaction_History_Date"),
+        httpDuration: new Trend("duration_Gamification_Transaction_History_Date"),
+        httpWaiting: new Trend("waiting_Gamification_Transaction_History_Date"),
+        requestRate: new Counter("rps_Gamification_Transaction_History_Date"),
+        http_reqs: new Counter("sample_Gamification_Transaction_History_Date"),
     },
 };
 
