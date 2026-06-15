@@ -484,8 +484,8 @@ def get_metrics():
     if containers and len(containers) > 0:
         container_filter = '|'.join(containers)
     else:
-        # Default containers
-        container_filter = "growin-marketdataservice|growin-autoorderservice|growin-orderservice|growin-udfservice"
+        # Default to all containers in the namespace
+        container_filter = ".*"
 
     # Query CPU metrics (in cores)
     cpu_query = f'rate(container_cpu_usage_seconds_total{{namespace="growin",container=~"{container_filter}"}}[5m])'
