@@ -50,6 +50,7 @@ def render_html(data, from_ts, to_ts, summary_file=None):
 
     # Extract custom metric names from K6 summary to override Pod names
     api_names = ""
+    prefixes = set()
     if summary_file and os.path.isfile(summary_file):
         try:
             with open(summary_file, 'r', encoding='utf-8') as f:
@@ -61,6 +62,10 @@ def render_html(data, from_ts, to_ts, summary_file=None):
                     name = re.sub(r'^(duration|error_rate|error_count|sample|rps|waiting)_(?:\d{3}_(?:\d{2}_)+)?', '', key)
                     if name:
                         unique_names.add(name)
+                        # Extract the first word before underscore to match with pod name
+                        prefix = name.split('_')[0].lower()
+                        if prefix:
+                            prefixes.add(prefix)
                 if unique_names:
                     api_names = " / ".join(sorted(unique_names))
         except Exception as e:
@@ -69,10 +74,29 @@ def render_html(data, from_ts, to_ts, summary_file=None):
     metrics = data.get("data", [])
     node_metrics = data.get("node_data", [])
 
+    # Filter metrics to only include pods matching the K6 custom metric prefix
+    filtered_metrics = []
+    if prefixes:
+        for m in metrics:
+            pod = m.get("pod", m.get("deployment", "unknown")).lower()
+            if any(p in pod for p in prefixes):
+                filtered_metrics.append(m)
+        
+        # If no pods matched the prefixes, fallback to showing all pods
+        if not filtered_metrics:
+            filtered_metrics = metrics
+    else:
+        filtered_metrics = metrics
+
     rows = ""
-    for i, m in enumerate(metrics, 1):
+    for i, m in enumerate(filtered_metrics, 1):
         pod = m.get("pod", m.get("deployment", "unknown"))
-        display_name = f"{api_names}<br><small style='color:#8b949e'>({pod})</small>" if api_names else pod
+        
+        # Match the specific API name(s) that caused this pod to be included
+        matched_apis = [name for name in unique_names if name.split('_')[0].lower() in pod.lower()]
+        display_api = " / ".join(sorted(matched_apis)) if matched_apis else api_names
+        
+        display_name = f"<strong>{display_api}</strong><br><small style='color:#8b949e'>({pod})</small>" if display_api else pod
         rows += f"""
         <tr>
             <td>{i}</td>
