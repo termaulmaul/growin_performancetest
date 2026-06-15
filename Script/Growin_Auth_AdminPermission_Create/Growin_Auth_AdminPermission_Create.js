@@ -176,15 +176,6 @@ const BP_NUM_STARTS = isMultiBP
     ? calculateNumStarts(selectedBPs, userDistribution, NUMSTART_env)
     : Object.fromEntries(selectedBPs.map(bp => [bp, NUMSTART_env]));
 
-console.log('📊 User Distribution:');
-Object.keys(userDistribution).forEach(bp => {
-    const start = BP_NUM_STARTS[bp];
-    const count = userDistribution[bp];
-    console.log(`   ${bp}: ${count} users (${BP_USER_PERCENTAGE[bp]}%) → user #${start} to #${start + count - 1}`);
-});
-console.log(`   TOTAL: ${TOTAL_USER} users`);
-console.log(`   PLATFORM: ${platform}`);
-console.log(`   MODE: ${isMultiBP ? 'Multi-BP (LoadTest) — numStart kumulatif per BP' : 'Single BP (Manual) — NUMSTART dari env'}`);
 
 const scenarios = {};
 selectedBPs.forEach(bp => {
@@ -299,6 +290,16 @@ function loginWithRetry(base_url, credentials, userKey, vuId) {
 }
  
 export function setup() {
+    console.log('📊 User Distribution:');
+    Object.keys(userDistribution).forEach(bp => {
+    const start = BP_NUM_STARTS[bp];
+    const count = userDistribution[bp];
+    console.log(`   ${bp}: ${count} users (${BP_USER_PERCENTAGE[bp]}%) → user #${start} to #${start + count - 1}`);
+    });
+    console.log(`   TOTAL: ${TOTAL_USER} users`);
+    console.log(`   PLATFORM: ${platform}`);
+    console.log(`   MODE: ${isMultiBP ? 'Multi-BP (LoadTest) — numStart kumulatif per BP' : 'Single BP (Manual) — NUMSTART dari env'}`);
+
     const base_url = getBaseUrl();
     const tokens = {};
     const vuMapping = {};

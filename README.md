@@ -26,10 +26,10 @@ Full findings available in [KNOWLEDGE.md](./KNOWLEDGE.md).
 
 ## 🚀 Latest Changes
 
-- Updated architecture diagram / golden ratio / API endpoints
-- Added Playwright v1.60+ upgrade notes (`@playwright/test@1.60+`)
-- Fixed PIN modal sequence documentation (from `explore.mjs` comments)
-- Parallel workers, HAR tracing, and AI assertions implemented.
+- Fixed k6 init log spam by moving `console.log('User Distribution')` to `setup()` across 22 test scripts.
+- Served utilization reports via HTTP and updated Teams webhook URL mapping.
+- Fixed `recent runs` execution logic bypassing suite select and parsing issues.
+- Updated documentation and workflow flowcharts from codebase analysis.
 
 ---
 
@@ -113,39 +113,16 @@ Interactive fzf-based menu. All operations accessible from one entry point.
 
 ### Run Test Flow
 
-```mermaid
-graph TD
-    Start(["./pt-menu.sh"]) --> Auth{First run?}
-    Auth -- Yes --> Bootstrap["Initial Setup<br/>create god user"]
-    Auth -- No --> Login["Login screen"]
-    Bootstrap --> Login
-    Login --> Main["Main Menu"]
+```text
+[ ./pt-menu.sh ] → [ Auth ] → [ Login ] → [ Main Menu ]
+  (if first run) → [ Initial Setup ] → [ Login ]
 
-    Main --> M1["[1] Run Test"]
-    Main --> M2["[2] Sandbox Demo"]
-    
-    M1 --> T1{Target}
-    T1 -- Onprem --> O1["SSH 10.82.15.72 → 10.184.120.48"]
-    T1 -- Oncloud --> O2["gcloud IAP vm-pt-ksix-0"]
-    T1 -- Sandbox --> O3["127.0.0.1:2222 demo"]
+[ Main Menu ] → [1] Run Test
+              → [2] Sandbox Demo
 
-    M2 --> SM["Local Runner<br/>Mock vs Direct"]
-
-    O1 --> SP["Suite picker<br/>R, B, ? shortcuts"]
-    O2 --> SP
-    O3 --> SP
-    SM --> SP
-
-    SP --> CFG["Configure<br/>VUs / Duration / ENV / RUNBY / Scenario"]
-    CFG --> CR{Confirm Run}
-    CR -- Y --> EXE["k6 execute + tee log"]
-    CR -- E --> CFG
-    CR -- C --> SP
-
-    EXE --> Parse["Parse Metrics<br/>(parse-k6-log.py)"]
-    Parse --> RPT["Report + Webhook notify"]
-    RPT --> GRAF["Grafana Utilization Report"]
-    GRAF --> Main
+[1] Run Test → Target (Onprem / Oncloud / Sandbox)
+Target → Suite Picker → Configure (VUs/Dur/Env) → Confirm Run → Execute k6
+Execute k6 → Parse Metrics → Report + Webhook → Grafana Report → [ Main Menu ]
 ```
 
 **Recent Runs:** `[R]` in suite picker → select previous run → re-execute with same params.
@@ -399,16 +376,11 @@ After each test run, the framework **automatically generates a Grafana utilizati
 
 ### How It Works
 
-```mermaid
-graph LR
-    A["k6 Test Finishes"] --> B["pt-grafana-report"]
-    B --> C{"Grafana Backend<br/>(localhost:5000)"}
-    C --> D["Prometheus<br/>(via Grafana proxy)"]
-    D --> C
-    C --> B
-    B --> E["Report/Utilization/<br/>utilization_YYYYMMDD_HHMMSS.html"]
-    E --> F["Webhook Message<br/>(Teams/Discord/Telegram)"]
-    F --> G["📈 View Utilization Report<br/>(clickable button)"]
+```text
+[ k6 Test Finishes ] → [ pt-grafana-report ] 
+  ↔ [ Grafana Backend (localhost:5000) ] ↔ [ Prometheus ]
+[ pt-grafana-report ] → [ Report/Utilization/*.html ]
+  → [ Webhook Message ] → [ "View Utilization Report" Button ]
 ```
 
 ### Setup

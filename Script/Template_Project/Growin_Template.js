@@ -165,69 +165,7 @@ function calculateUserDistribution(totalUsers, bps) {
 
 const userDistribution = calculateUserDistribution(TOTAL_USER, selectedBPs);
 
-console.log('📊 User Distribution:');
-selectedBPs.forEach(bp => {
-    console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
-});
-console.log(`   TOTAL    : ${TOTAL_USER} users`);
-console.log(`   PLATFORM : ${platform}`);
 
-// ─────────────────────────────────────────────────────────────────────────────
-// numStart RESOLVER
-// ─────────────────────────────────────────────────────────────────────────────
-// Resolves the starting user number for every BP according to priority rules:
-//
-//   Priority (highest → lowest):
-//     1. CLI (-e NUMSTART) if present               — CLI wins when both exist
-//     2. BP_CONFIG[bp].numStart if present           — config-only fallback
-//     3. auto-continue from previous BP              — multi-BP, nothing declared
-//     4. default 1                                   — single BP, nothing declared
-//
-// Returns: { [bpName]: effectiveNumStart }
-// ─────────────────────────────────────────────────────────────────────────────
-function resolveNumStarts(bps, platform, isMultiBP) {
-    const CLI_NUMSTART     = __ENV.NUMSTART !== undefined ? parseInt(__ENV.NUMSTART) : null;
-    const hasCLI           = CLI_NUMSTART !== null && !isNaN(CLI_NUMSTART);
-    const resolved         = {};
-    let   autoNextStart    = hasCLI ? CLI_NUMSTART : 1; // cursor for auto-continue
-
-    bps.forEach(bp => {
-        const cfgNumStart    = BP_CONFIG[platform]?.[bp]?.numStart ?? null;
-        const hasCfg         = cfgNumStart !== null;
-
-        let effectiveStart;
-
-        if (hasCLI && hasCfg) {
-            // Rule 1: both present → CLI wins
-            effectiveStart = CLI_NUMSTART;
-        } else if (!hasCLI && hasCfg) {
-            // Rule 2: only config → use config
-            effectiveStart = cfgNumStart;
-        } else if (hasCLI && !hasCfg) {
-            // Rule 3: only CLI → use CLI (single BP) or auto-continue (multi-BP)
-            effectiveStart = isMultiBP ? autoNextStart : CLI_NUMSTART;
-        } else {
-            // Rule 4 / Rule 5: nothing declared
-            effectiveStart = isMultiBP ? autoNextStart : 1;
-        }
-
-        resolved[bp]  = effectiveStart;
-        // Advance cursor by the number of users assigned to this BP
-        autoNextStart = effectiveStart + (userDistribution[bp] || 0);
-    });
-
-    return resolved;
-}
-
-const isMultiBP   = selectedBPs.length > 1;
-const numStarts   = resolveNumStarts(selectedBPs, platform, isMultiBP);
-
-console.log('🔢 Resolved numStart per BP:');
-selectedBPs.forEach(bp => console.log(`   ${bp}: numStart = ${numStarts[bp]}`));
-
-// ─────────────────────────────────────────────────────────────────────────────
-// k6 SCENARIO OPTIONS
-// ─────────────────────────────────────────────────────────────────────────────
 const scenarios = {};
 selectedBPs.forEach(bp => {
     scenarios[bp] = {
@@ -385,6 +323,70 @@ function fetchTradingProfile(base_url, token, userKey, vuId, email) {
 //   Used by BP functions to resolve which user/token belongs to the current VU.
 // ─────────────────────────────────────────────────────────────────────────────
 export function setup() {
+    console.log('📊 User Distribution:');
+    selectedBPs.forEach(bp => {
+    console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
+    });
+    console.log(`   TOTAL    : ${TOTAL_USER} users`);
+    console.log(`   PLATFORM : ${platform}`);
+    
+    // ─────────────────────────────────────────────────────────────────────────────
+    // numStart RESOLVER
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Resolves the starting user number for every BP according to priority rules:
+    //
+    //   Priority (highest → lowest):
+    //     1. CLI (-e NUMSTART) if present               — CLI wins when both exist
+    //     2. BP_CONFIG[bp].numStart if present           — config-only fallback
+    //     3. auto-continue from previous BP              — multi-BP, nothing declared
+    //     4. default 1                                   — single BP, nothing declared
+    //
+    // Returns: { [bpName]: effectiveNumStart }
+    // ─────────────────────────────────────────────────────────────────────────────
+    function resolveNumStarts(bps, platform, isMultiBP) {
+    const CLI_NUMSTART     = __ENV.NUMSTART !== undefined ? parseInt(__ENV.NUMSTART) : null;
+    const hasCLI           = CLI_NUMSTART !== null && !isNaN(CLI_NUMSTART);
+    const resolved         = {};
+    let   autoNextStart    = hasCLI ? CLI_NUMSTART : 1; // cursor for auto-continue
+    
+    bps.forEach(bp => {
+    const cfgNumStart    = BP_CONFIG[platform]?.[bp]?.numStart ?? null;
+    const hasCfg         = cfgNumStart !== null;
+    
+    let effectiveStart;
+    
+    if (hasCLI && hasCfg) {
+    // Rule 1: both present → CLI wins
+    effectiveStart = CLI_NUMSTART;
+    } else if (!hasCLI && hasCfg) {
+    // Rule 2: only config → use config
+    effectiveStart = cfgNumStart;
+    } else if (hasCLI && !hasCfg) {
+    // Rule 3: only CLI → use CLI (single BP) or auto-continue (multi-BP)
+    effectiveStart = isMultiBP ? autoNextStart : CLI_NUMSTART;
+    } else {
+    // Rule 4 / Rule 5: nothing declared
+    effectiveStart = isMultiBP ? autoNextStart : 1;
+    }
+    
+    resolved[bp]  = effectiveStart;
+    // Advance cursor by the number of users assigned to this BP
+    autoNextStart = effectiveStart + (userDistribution[bp] || 0);
+    });
+    
+    return resolved;
+    }
+    
+    const isMultiBP   = selectedBPs.length > 1;
+    const numStarts   = resolveNumStarts(selectedBPs, platform, isMultiBP);
+    
+    console.log('🔢 Resolved numStart per BP:');
+    selectedBPs.forEach(bp => console.log(`   ${bp}: numStart = ${numStarts[bp]}`));
+    
+    // ─────────────────────────────────────────────────────────────────────────────
+    // k6 SCENARIO OPTIONS
+    // ─────────────────────────────────────────────────────────────────────────────
+
     const base_url = getBaseUrl();
     const tokens   = {};    // keyed by userKey (global user number)
     const vuMapping = {};   // keyed by vuId (1-based global VU index)

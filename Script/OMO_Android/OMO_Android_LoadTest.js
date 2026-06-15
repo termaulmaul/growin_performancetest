@@ -80,11 +80,7 @@ if (SCENARIO) {
 
 const userDistribution = calculateUserDistribution(TOTAL_USER, selectedBPs);
 
-console.log('📊 User Distribution:');
-Object.keys(userDistribution).forEach(bp => {
-    console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
-});
-console.log(`   TOTAL: ${TOTAL_USER} users`);
+
 
 const scenarios = {};
 selectedBPs.forEach(bp => {
@@ -141,6 +137,12 @@ function getUserCredentials(userNum, bpOffset = 0) {
 
 // ✅ SETUP FUNCTION - SEMUA BP mendapat PIN dan UUID
 export function setup() {
+    console.log('📊 User Distribution:');
+    Object.keys(userDistribution).forEach(bp => {
+    console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
+    });
+    console.log(`   TOTAL: ${TOTAL_USER} users`);
+
     const base_url = getBaseUrl();
     const tokens = {};
     const vuMapping = {};

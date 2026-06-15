@@ -121,12 +121,7 @@ if (SCENARIO) {
 
 const userDistribution = calculateUserDistribution(TOTAL_USER, selectedBPs);
 
-console.log('📊 User Distribution:');
-Object.keys(userDistribution).forEach(bp => {
-    console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_CONFIG[bp].percentage}%)`);
-});
-console.log(`   TOTAL: ${TOTAL_USER} users`);
-console.log(`   PLATFORM: ${platform}`);
+
 
 const scenarios = {};
 // selectedBPs.forEach(bp => {
@@ -264,6 +259,13 @@ function loginWithRetry(base_url, credentials, userKey, vuId) {
 }
  
 export function setup() {
+    console.log('📊 User Distribution:');
+    Object.keys(userDistribution).forEach(bp => {
+    console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_CONFIG[bp].percentage}%)`);
+    });
+    console.log(`   TOTAL: ${TOTAL_USER} users`);
+    console.log(`   PLATFORM: ${platform}`);
+
     const base_url = getBaseUrl(); // ✅ from Helper/config.js
     const tokens = {};
     const vuMapping = {};

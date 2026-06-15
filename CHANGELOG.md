@@ -1,12 +1,15 @@
 # Changelog
 
-## [Unreleased] - 2026-06-12
+## [Unreleased] - 2026-06-15
 
 ### Added / Updated
-- Updated architecture diagram / golden ratio / API endpoints
-- Added Playwright v1.60+ upgrade notes (`@playwright/test@1.60+`)
-- Fixed PIN modal sequence documentation (from `explore.mjs` comments)
-- Parallel workers, HAR tracing, and AI assertions implemented.
+- Served utilization reports via HTTP and updated Teams webhook URL mapping.
+- Updated documentation and workflow flowcharts from codebase analysis.
+
+### Fixed
+- Moved `console.log('📊 User Distribution:')` to k6 `setup()` block across 22 script files to prevent init spam.
+- Fixed `recent runs` execution logic bypassing suite select.
+- Fixed `recent runs` parsing & persistent skip auth issues.
 
 ## [2.7.0] - 2026-06-05
 
