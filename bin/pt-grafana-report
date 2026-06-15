@@ -81,10 +81,7 @@ def render_html(data, from_ts, to_ts, summary_file=None):
             pod = m.get("pod", m.get("deployment", "unknown")).lower()
             if any(p in pod for p in prefixes):
                 filtered_metrics.append(m)
-        
-        # If no pods matched the prefixes, fallback to showing all pods
-        if not filtered_metrics:
-            filtered_metrics = metrics
+        # We strictly do not fallback. If a pod doesn't match the test scenario, it shouldn't be shown.
     else:
         filtered_metrics = metrics
 
@@ -94,9 +91,13 @@ def render_html(data, from_ts, to_ts, summary_file=None):
         
         # Match the specific API name(s) that caused this pod to be included
         matched_apis = [name for name in unique_names if name.split('_')[0].lower() in pod.lower()]
-        display_api = " / ".join(sorted(matched_apis)) if matched_apis else api_names
+        display_api = " / ".join(sorted(matched_apis))
         
-        display_name = f"<strong>{display_api}</strong><br><small style='color:#8b949e'>({pod})</small>" if display_api else pod
+        if display_api:
+            display_name = f"<strong>{display_api}</strong><br><small style='color:#8b949e'>({pod})</small>"
+        else:
+            display_name = pod
+
         rows += f"""
         <tr>
             <td>{i}</td>
