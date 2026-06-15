@@ -1933,8 +1933,17 @@ webhook_menu() {
 
   case "$sel" in
     "Set Telegram Webhook")
-      printf "  Telegram URL: "; read -r url
+      printf "  Telegram Bot Token or Webhook URL: "; read -r url
       [[ -z "$url" ]] && continue
+      
+      # If user just enters bot token (doesn't start with http), construct the telegram API URL
+      if [[ ! "$url" =~ ^https?:// ]]; then
+        printf "  Telegram Chat ID: "; read -r chat_id
+        if [[ -n "$chat_id" ]]; then
+          url="https://api.telegram.org/bot${url}/sendMessage?chat_id=${chat_id}"
+        fi
+      fi
+      
       set_env_val "TELEGRAM_WEBHOOK" "$url"
       echo -e "  ${GRN}✓ saved TELEGRAM_WEBHOOK${RST}"
       read -r -p $'\nPress Enter...'
