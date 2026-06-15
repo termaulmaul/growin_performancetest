@@ -126,7 +126,7 @@ EOF
         --output "$_util_file" \
         --backend-url "$_grafana_backend" 2>/dev/null || true)
       
-      echo "$_report_out" | head -n -1 | while IFS= read -r ln; do [[ -n "$ln" ]] && echo -e "  ${DIM}$ln${RST}"; done
+      echo "$_report_out" | sed '$d' | while IFS= read -r ln; do [[ -n "$ln" ]] && echo -e "  ${DIM}$ln${RST}"; done
       
       if [[ -f "$_util_file" ]]; then
         local _parsed_url; _parsed_url=$(echo "$_report_out" | tail -n 1)
