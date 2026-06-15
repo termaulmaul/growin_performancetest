@@ -13,6 +13,7 @@ import argparse
 import json
 import sys
 import os
+import re
 from datetime import datetime, timezone
 from urllib.request import Request, urlopen
 from urllib.error import URLError
@@ -41,11 +42,29 @@ def fetch_metrics(backend_url, from_iso, to_iso):
         return None
 
 
-def render_html(data, from_ts, to_ts):
+def render_html(data, from_ts, to_ts, summary_file=None):
     """Build standalone HTML report from API response."""
     from_dt = datetime.fromtimestamp(from_ts, tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
     to_dt = datetime.fromtimestamp(to_ts, tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
     generated = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # Extract custom metric names from K6 summary to override Pod names
+    api_names = ""
+    if summary_file and os.path.isfile(summary_file):
+        try:
+            with open(summary_file, 'r', encoding='utf-8') as f:
+                sum_data = json.load(f)
+                custom_metrics = sum_data.get("custom_metrics", {})
+                unique_names = set()
+                for key in custom_metrics.keys():
+                    # Strip prefixes like duration_, error_rate_, and numeric patterns (e.g. 001_01_01_)
+                    name = re.sub(r'^(duration|error_rate|error_count|sample|rps|waiting)_(?:\d{3}_(?:\d{2}_)+)?', '', key)
+                    if name:
+                        unique_names.add(name)
+                if unique_names:
+                    api_names = " / ".join(sorted(unique_names))
+        except Exception as e:
+            print(f"[pt-grafana-report] Warning: Failed to parse summary file: {e}", file=sys.stderr)
 
     metrics = data.get("data", [])
     node_metrics = data.get("node_data", [])
@@ -53,10 +72,11 @@ def render_html(data, from_ts, to_ts):
     rows = ""
     for i, m in enumerate(metrics, 1):
         pod = m.get("pod", m.get("deployment", "unknown"))
+        display_name = f"{api_names}<br><small style='color:#8b949e'>({pod})</small>" if api_names else pod
         rows += f"""
         <tr>
             <td>{i}</td>
-            <td>{pod}</td>
+            <td>{display_name}</td>
             <td>{m.get('avg_cpu_millicores', 0):.2f}</td>
             <td>{m.get('min_cpu_millicores', 0):.2f}</td>
             <td>{m.get('max_cpu_millicores', 0):.2f}</td>
@@ -118,7 +138,7 @@ def render_html(data, from_ts, to_ts):
 <table>
     <thead>
         <tr>
-            <th>#</th><th>Pod / Deployment</th>
+            <th>#</th><th>API Scenario / Deployment</th>
             <th>Avg CPU (m)</th><th>Min CPU (m)</th><th>Max CPU (m)</th>
             <th>Avg Mem (MB)</th><th>Min Mem (MB)</th><th>Max Mem (MB)</th>
         </tr>
@@ -220,6 +240,7 @@ def main():
     parser.add_argument("--end", required=True, help="End epoch timestamp")
     parser.add_argument("--output", required=True, help="Output HTML file path")
     parser.add_argument("--backend-url", default=None, help="Grafana data backend URL")
+    parser.add_argument("--summary", default=None, help="Path to K6 summary JSON file")
     args = parser.parse_args()
 
     backend_url = args.backend_url
@@ -238,7 +259,7 @@ def main():
         data = {"data": [], "node_data": []}
         print("[pt-grafana-report] Backend unavailable, generating empty report.", file=sys.stderr)
 
-    html = render_html(data, from_ts, to_ts)
+    html = render_html(data, from_ts, to_ts, args.summary)
 
     os.makedirs(os.path.dirname(args.output) or ".", exist_ok=True)
     with open(args.output, "w", encoding="utf-8") as f:

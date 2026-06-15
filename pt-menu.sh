@@ -124,6 +124,7 @@ EOF
         --start "$_RUN_START" \
         --end "$_run_end" \
         --output "$_util_file" \
+        --summary "$res" \
         --backend-url "$_grafana_backend" 2>/dev/null || true)
       
       echo "$_report_out" | sed '$d' | while IFS= read -r ln; do [[ -n "$ln" ]] && echo -e "  ${DIM}$ln${RST}"; done
