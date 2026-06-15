@@ -488,16 +488,16 @@ def get_metrics():
         container_filter = ".*"
 
     # Query CPU metrics (in cores)
-    cpu_query = f'rate(container_cpu_usage_seconds_total{{namespace="growin",container=~"{container_filter}"}}[5m])'
+    cpu_query = f'rate(container_cpu_usage_seconds_total{{namespace="growin",container!="",container!="POD",container=~"{container_filter}"}}[5m])'
 
     # Query CPU limits
-    cpu_limit_query = f'container_spec_cpu_quota{{namespace="growin",container=~"{container_filter}"}} / container_spec_cpu_period{{namespace="growin",container=~"{container_filter}"}}'
+    cpu_limit_query = f'container_spec_cpu_quota{{namespace="growin",container!="",container!="POD",container=~"{container_filter}"}} / container_spec_cpu_period{{namespace="growin",container!="",container!="POD",container=~"{container_filter}"}}'
 
     # Query Memory metrics (in bytes)
-    memory_query = f'container_memory_working_set_bytes{{namespace="growin",container=~"{container_filter}"}}'
+    memory_query = f'container_memory_working_set_bytes{{namespace="growin",container!="",container!="POD",container=~"{container_filter}"}}'
 
     # Query Memory limits
-    memory_limit_query = f'container_spec_memory_limit_bytes{{namespace="growin",container=~"{container_filter}"}}'
+    memory_limit_query = f'container_spec_memory_limit_bytes{{namespace="growin",container!="",container!="POD",container=~"{container_filter}"}}'
 
     results = []
 
