@@ -3,10 +3,17 @@
 ## [Unreleased] - 2026-06-15
 
 ### Added / Updated
+- Supported Telegram bot token and transitioned to rich HTML format for webhook notifications.
+- Stripped numeric prefix from k6 custom metric names globally.
+- Render proper metric keys in grafana report and fixed backend start script pathing.
 - Served utilization reports via HTTP and updated Teams webhook URL mapping.
 - Updated documentation and workflow flowcharts from codebase analysis.
 
 ### Fixed
+- Formatted Telegram top header metadata into `<pre>` block for precise vertical alignment.
+- Escaped HTML characters in Telegram rich payload to prevent "Parse Entities" error.
+- Fixed Telegram HTML table padding, replaced emoji, and applied tester script fixes.
+- Replaced non-POSIX `head -n -1` with `sed ''` for macOS compatibility.
 - Moved `console.log('📊 User Distribution:')` to k6 `setup()` block across 22 script files to prevent init spam.
 - Fixed `recent runs` execution logic bypassing suite select.
 - Fixed `recent runs` parsing & persistent skip auth issues.

@@ -26,6 +26,10 @@ Full findings available in [KNOWLEDGE.md](./KNOWLEDGE.md).
 
 ## 🚀 Latest Changes
 
+- Formatted Telegram webhook notifications with rich HTML tables, `<pre>` headers, and proper bot token support.
+- Fixed Telegram `Parse Entities` errors by implementing robust HTML character escaping.
+- Stripped numeric prefix from k6 custom metric names globally and fixed Grafana metric keys rendering.
+- Replaced non-POSIX `head -n -1` with `sed ""` for full macOS compatibility in terminal summary.
 - Fixed k6 init log spam by moving `console.log('User Distribution')` to `setup()` across 22 test scripts.
 - Served utilization reports via HTTP and updated Teams webhook URL mapping.
 - Fixed `recent runs` execution logic bypassing suite select and parsing issues.
