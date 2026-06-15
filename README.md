@@ -122,15 +122,19 @@ graph TD
     Login --> Main["Main Menu"]
 
     Main --> M1["[1] Run Test"]
+    Main --> M2["[2] Sandbox Demo"]
     
     M1 --> T1{Target}
     T1 -- Onprem --> O1["SSH 10.82.15.72 → 10.184.120.48"]
     T1 -- Oncloud --> O2["gcloud IAP vm-pt-ksix-0"]
     T1 -- Sandbox --> O3["127.0.0.1:2222 demo"]
 
+    M2 --> SM["Local Runner<br/>Mock vs Direct"]
+
     O1 --> SP["Suite picker<br/>R, B, ? shortcuts"]
     O2 --> SP
     O3 --> SP
+    SM --> SP
 
     SP --> CFG["Configure<br/>VUs / Duration / ENV / RUNBY / Scenario"]
     CFG --> CR{Confirm Run}
