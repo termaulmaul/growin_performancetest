@@ -3,7 +3,7 @@
 
 set -euo pipefail
 
-trap '[[ -n "${_SPINNER_PID:-}" ]] && kill "$_SPINNER_PID" 2>/dev/null || true' EXIT
+trap '[[ -n "${_SPINNER_PID:-}" ]] && kill "$_SPINNER_PID" 2>/dev/null || true; rm -rf /tmp/pt-upload-*.tar.gz /tmp/pt-run-* 2>/dev/null' EXIT
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -71,7 +71,11 @@ print_run_footer() {
   local rc="$1" tmplog="${2:-}" skip_webhook="${3:-false}"
   local elapsed=$(( $(date +%s) - _RUN_START ))
   local dur_str="${elapsed}s"
-  [[ $elapsed -ge 60 ]] && dur_str="$(( elapsed/60 ))m $(( elapsed%60 ))s"
+  if [[ $elapsed -ge 3600 ]]; then
+    dur_str="$(( elapsed/3600 ))h $(( (elapsed%3600)/60 ))m $(( elapsed%60 ))s"
+  elif [[ $elapsed -ge 60 ]]; then
+    dur_str="$(( elapsed/60 ))m $(( elapsed%60 ))s"
+  fi
   local term_w; term_w="${COLUMNS:-$(tput cols 2>/dev/null || echo 80)}"
   local w=$(( term_w - 4 ))
   local bar; bar=$(printf '─%.0s' $(seq 1 $w))
@@ -704,7 +708,7 @@ prompt_int() {
       echo -e "  ${RED}✘ must be a positive integer${RST}" >&2
       continue
     fi
-    if (( val < min || val > max )); then
+    if (( 10#$val < min || 10#$val > max )); then
       echo -e "  ${RED}✘ out of range ($min - $max)${RST}" >&2
       continue
     fi
@@ -721,7 +725,7 @@ prompt_duration() {
     printf "  %s [%s] (e.g. 30s, 5m, 1h, 1h30m): " "$label" "$default" >&2
     read -r val
     val="${val:-$default}"
-    if [[ ! "$val" =~ ^[0-9]+(h|m|s)([0-9]+(m|s))?$ ]]; then
+    if [[ ! "$val" =~ ^[0-9]+(h|m|s)?([0-9]+(m|s))?$ ]]; then
       echo -e "  ${RED}✘ invalid k6 duration format${RST}" >&2
       continue
     fi
@@ -843,7 +847,7 @@ spinner_start() {
     local sp='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
     local i=0
     while true; do
-      printf "\r  \033[36m${sp:i++%${#sp}:1}\033[0m  $msg..." >&2
+      printf "\r  \033[36m${sp:i++%${#sp}:1}\033[0m  %s..." "$msg" >&2
       sleep 0.1
     done
   ) &
