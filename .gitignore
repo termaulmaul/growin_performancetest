@@ -54,3 +54,10 @@ Report/*
 # Tapi jangan ignore Template_Report
 !Report/[Template_Report]/
 !Report/[Template_Report]/**
+
+# Runtime and secrets
+configs/pt.env
+docker-local-pt/configs/local.env
+pt-data/
+artifacts/
+*.tar.gz
