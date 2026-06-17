@@ -42,19 +42,24 @@ m_fail = re.search(r'http_req_failed\.+:\s*([0-9\.]+)%', text)
 if m_fail:
     failed_rate = float(m_fail.group(1)) / 100.0
 
-# Extract duration from log (e.g., "default: 1 looping VUs for 30s" or "duration=30s")
+# Extract duration from suite_name label (e.g. "... · 335VU · 15m]")
 duration_str = "30s"
-m_dur_env = re.search(r'\bDURATION\s*[=:]\s*([0-9]+[smh])', text)
-if m_dur_env:
-    duration_str = m_dur_env.group(1)
+m_dur_label = re.search(r'·\s*([0-9]+[smh])\]', suite_name)
+if m_dur_label:
+    duration_str = m_dur_label.group(1)
 else:
-    m_dur_exec = re.search(r'for\s+([0-9]+[smh])\b', text)
-    if m_dur_exec:
-        duration_str = m_dur_exec.group(1)
+    # Fallback to log scraping
+    m_dur_env = re.search(r'\bDURATION\s*[=:]\s*([0-9]+[smh])', text)
+    if m_dur_env:
+        duration_str = m_dur_env.group(1)
     else:
-        m_dur_flag = re.search(r'\-\-duration[= ]([0-9]+[smh])', text)
-        if m_dur_flag:
-            duration_str = m_dur_flag.group(1)
+        m_dur_exec = re.search(r'for\s+([0-9]+[smh](?:[0-9]+[smh])?)', text)
+        if m_dur_exec:
+            duration_str = m_dur_exec.group(1)
+        else:
+            m_dur_flag = re.search(r'\-\-duration[= ]([0-9]+[smh])', text)
+            if m_dur_flag:
+                duration_str = m_dur_flag.group(1)
 
 # Extract VUs
 vus_str = "1"
