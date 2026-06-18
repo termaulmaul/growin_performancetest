@@ -206,7 +206,7 @@ banner() {
   fi
   local sep="${DIM}│${RST}"
   local run_status
-  run_status=$(python3 "$PROJECT_DIR/bin/pt-lock-status" "${PT_USER:-Unknown}" "$(env_val ENV INT)" 2>/dev/null || echo "🟢 Available | ${PT_USER:-Unknown} [Idle]")
+  run_status=$(python3 "$PROJECT_DIR/bin/pt-lock-status" "${PT_USER:-Unknown}" "$(env_val ENV INT)" 2>/dev/null || echo "${GRN}●${YLW} Available | ${PT_USER:-Unknown} [Idle]")
 
   # Webhook indicator
   local _wh_status="${DIM}○ OFF${RST}"
@@ -228,7 +228,7 @@ except: pass
   local _role_tag="${MAG}${PT_ROLE:-?}${RST}"
 
   echo -e "  ${DIM}IP${RST} $(get_local_ip)  $sep  ${YLW}ENV${RST} $env_tag  $sep  ${YLW}VUs${RST} $vus  $sep  ${YLW}Dur${RST} $dur"
-  echo -e "  ${DIM}User${RST} ${PT_USER:-?} ${DIM}·${RST} ${_role_tag}  $sep  ${DIM}Webhook${RST} ${_wh_status}  $sep  ${DIM}Grafana${RST} ${grafana_status}  $sep  ${YLW}${run_status}${RST}"
+  echo -e "  ${DIM}User${RST} ${PT_USER:-?} ${DIM}·${RST} ${_role_tag}  $sep  ${DIM}Webhook${RST} ${_wh_status}  $sep  ${DIM}Grafana${RST} ${grafana_status}  $sep  ${run_status}${RST}"
   [[ "$_last_run" != *"none"* ]] && echo -e "  ${DIM}Last${RST} ${_last_run}"
   echo -e "  ${DIM}$(printf '─%.0s' $(seq 1 $(( ${COLUMNS:-$(tput cols 2>/dev/null || echo 80)} - 4 ))))${RST}\n"
 }
