@@ -2110,6 +2110,7 @@ tools_menu() {
       "[5] Audit Log Tail (pt-audit — last 20 entries)"
       "[6] Lock Status (pt-lock-status — env locks)"
       "[7] Show Recent Runs"
+      "[8] Toggle Grafana Backend (Start/Stop)"
       "[S] Skip Auth (15 min)"
       "[P] Skip Auth (Permanent)"
       "[?] Help / Keymap"
@@ -2154,6 +2155,21 @@ tools_menu() {
           echo -e "  ${DIM}No recent runs yet.${RST}"
         else
           echo "$recent" | while IFS= read -r ln; do echo -e "  ${YLW}$ln${RST}"; done
+        fi
+        read -r -p $'\nPress Enter...'
+        ;;
+      "[8] Toggle Grafana Backend"*)
+        if pgrep -f "backend/app.py" >/dev/null; then
+          echo -e "\n  ${YLW}Stopping Grafana Backend...${RST}"
+          pkill -f "backend/app.py" || true
+          echo -e "  ${GRN}Backend stopped.${RST}"
+        else
+          echo -e "\n  ${CYN}Starting Grafana Backend in background...${RST}"
+          cd "$PROJECT_DIR/get_grafana_data" || true
+          nohup bash "start_backend.sh" > /tmp/grafana_backend.log 2>&1 &
+          echo -e "  ${GRN}Backend started! (PID: $!)${RST}"
+          echo -e "  ${DIM}Logs: /tmp/grafana_backend.log${RST}"
+          cd "$PROJECT_DIR" || true
         fi
         read -r -p $'\nPress Enter...'
         ;;
