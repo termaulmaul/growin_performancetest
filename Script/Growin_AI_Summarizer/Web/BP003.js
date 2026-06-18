@@ -18,8 +18,6 @@ const Homescreen = {
         http_reqs: new Counter("sample_Marketdata_Gpt_UserActivityInsert"),
     }
 };
-
-// ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
 export function BP003(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;

@@ -1,9 +1,4 @@
 // Command
-// Run Multiple BP
-// ../../../k6 run Growin_News_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Daily_Trade/Web/LoadTest/Manual_LoadTest_0107_1459.html
-
-// Run Single BP Web
-// ../../k6 run Growin_Daily_Trade.js -e RUNBY=Manual -e ENV=INT -e USER=100 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Daily_Trade/Web/BP001/Manual/Manual_DryRun_0413_0937_BP001.html
 
 import { textSummary } from "../../Helper/textSummary.js";
 import { htmlReport } from '../../Helper/bundle.js';
@@ -35,16 +30,12 @@ const platform = getPlatform();
 // Export BP yang tepat berdasarkan platform
 // export const BP001 = platform === 'Android' ? BP001_Android : BP001_Web;
 export const BP001 = BP001_Web;
-
-// ✅ RETRY CONFIGURATION
 const MAX_RETRY_ATTEMPTS = 10;
 const RETRY_DELAY = 1; // seconds between retry attempts
 
 const BP_USER_PERCENTAGE = {
     BP001: 100,
 };
-
-// ✅ Function untuk calculate user distribution
 function calculateUserDistribution(totalUsers, selectedBPs) {
     const distribution = {};
     let totalPercentage = 0;
@@ -168,7 +159,6 @@ selectedBPs.forEach(bp => {
 //     setupTimeout: '3600s', // ✅ Increased for large user counts
 //     teardownTimeout: '3600s',
 //     summaryTimeUnit: '3600s',
-// }
 export const options = {
     thresholds: {
         http_req_duration: ['p(95)<200'],
@@ -215,8 +205,6 @@ function getUserCredentials(userNum, bpOffset = 0) {
     
     return { email: email, password: 'M@nsek.123' };
 }
-
-// ✅ LOGIN WITH RETRY - Max 10 attempts
 function loginWithRetry(base_url, credentials, userKey, vuId) {
     const loginPayload = JSON.stringify({
         password: credentials.password,
@@ -297,8 +285,6 @@ export function setup() {
     let totalUserIdSuccess = 0;
     let totalUserIdFailed = 0;
     let totalLoginRetries = 0;
-    
-    // ✅ Object untuk menyimpan channel_id per BP
     const channelIds = {};
     
     selectedBPs.forEach((bp, bpIndex) => {
@@ -314,8 +300,6 @@ export function setup() {
                 userKey: globalUserOffset + localUserIndex
             };
         }
-        
-        // ✅ Process in batches with retry
         const numBatches = Math.ceil(usersForThisBP / BATCH_SIZE);
         
         for (let batchNum = 0; batchNum < numBatches; batchNum++) {
@@ -328,8 +312,6 @@ export function setup() {
                 const credentials = getUserCredentials(i, globalUserOffset);
                 const userKey = globalUserOffset + i;
                 const vuId = globalVuOffset + i - 1;
-                
-                // ✅ Step 1: Login with retry
                 const loginResult = loginWithRetry(base_url, credentials, userKey, vuId);
                 
                 if (loginResult.success) {
@@ -344,8 +326,6 @@ export function setup() {
                         pin_token: null,
                         bp: bp
                     };
-
-                    // ✅ Step 3: Get userID (UNTUK SEMUA USER yang berhasil PIN)
                     const profileHeaders = {
 
                         'Cookie': `ACCESS_TOKEN=${loginResult.token};`,
@@ -393,8 +373,6 @@ export function setup() {
                         tokens[userKey].ksei_acc_no = null;
                         tokens[userKey].account_name = null;
                     }
-                    
-                    // ✅ Step 2: PIN Login (UNTUK SEMUA USER)
                     const pinPayload = JSON.stringify({ value: "123456" });
                     const pinHeaders = {
                         'Content-Type': 'application/json',
@@ -444,9 +422,6 @@ export function setup() {
         globalUserOffset += usersForThisBP;
         globalVuOffset += usersForThisBP;
     });
-    
-    
-    // ✅ Summary
     console.log(`\n📊 Setup Summary:`);
     console.log(`   ✅ Login: ${totalLoginSuccess}/${TOTAL_USER} success (${((totalLoginSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
     if (totalLoginFailed > 0) console.error(`   ❌ Login Failed: ${totalLoginFailed}`);

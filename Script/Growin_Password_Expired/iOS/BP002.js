@@ -18,8 +18,6 @@ const Login = {
         http_reqs: new Counter("sample_Auth_Protected_PasswordReminder"),
     },
 };
-
-// ✅ EXPORTED FUNCTION
 export function BP002(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;

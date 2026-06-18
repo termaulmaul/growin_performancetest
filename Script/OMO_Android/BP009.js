@@ -5,8 +5,6 @@ import exec from 'k6/execution';
 
 // ##READ ME
 //BP009 - Upload Signature Bottom Sheet
-
-// ✅ PERBAIKAN: Baca file di global scope (init stage)
 const signatureFile = open('./signature.jpeg', 'b');
 
 // Define custom metrics
@@ -20,13 +18,9 @@ const UploadSignatureBottomSheet = {
         http_reqs: new Counter("sample_Oaofinance_Margin_Upload_Signature"),
     },
 };
-
-// ✅ EXPORTED FUNCTION - Menggunakan token dan user_uuid dari setup
 export function BP009(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;
-    
-    // ✅ Get userKey dari VU mapping
     const mapping = data.vuMapping[vuId];
     if (!mapping) {
         console.error(`❌ VU${vuId} - No mapping found, skipping iteration`);

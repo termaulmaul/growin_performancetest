@@ -49,21 +49,15 @@ const CommunityDetailAdminSuhu = {
         http_reqs: new Counter("sample_Socialinvesting_Channel_Statistic"),
     },
 };
-
-// ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
 export function BP008(data) {
     const scenarioName = 'BP008';
     const base_url = data.base_url;
     const isIntEnv = `${__ENV.ENV}` === 'INT';
-    
-    // ✅ GET CORRECT TOKEN FROM BP-SPECIFIC ARRAY
     const bp008Tokens = data.bpTokens[scenarioName];
     if (!bp008Tokens || bp008Tokens.length === 0) {
         console.error(`❌ ${scenarioName} - No tokens available!`);
         return;
     }
-    
-    // ✅ USE ITERATION INDEX TO GET CORRECT USER
     const iterationIndex = exec.scenario.iterationInInstance;
     const tokenIndex = iterationIndex % bp008Tokens.length; // Wrap around if iterations > tokens
     
@@ -72,8 +66,6 @@ export function BP008(data) {
         console.error(`❌ ${scenarioName} Iteration ${iterationIndex} - No valid token at index ${tokenIndex}!`);
         return;
     }
-    
-    // ✅ CRITICAL VALIDATION - ENSURE CORRECT POOL
     if (userToken.pool !== 'SUHU' && userToken.pool !== 'ADMIN') {
         console.error(`❌ CRITICAL: ${scenarioName} using ${userToken.pool} user (${userToken.email}) instead of MIXED! ABORTING.`);
         return;

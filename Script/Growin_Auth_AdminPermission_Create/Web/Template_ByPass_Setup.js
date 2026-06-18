@@ -63,8 +63,6 @@ const VerifyPage = {
         http_reqs: new Counter("sample_Auth_Protected_Otp_Validate"),
     },
 };
-
-// ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
 export function BP001(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;
@@ -95,8 +93,6 @@ export function BP001(data) {
     const account_name = userToken.account_name;
     const email = userToken.email;
     const bp = mapping.bp;
-
-    // ✅ Batch 1: Login
     let sessionToken = null;
     {
         const urls = [
@@ -143,7 +139,6 @@ export function BP001(data) {
             const metric = metrics[index];
             metric.httpDuration.add(response.timings.duration);
             if (response.status === 200) {
-                // console.log(response.body)
                 metric.errorRate.add(false);
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
@@ -179,8 +174,6 @@ export function BP001(data) {
             }
         });
     }
-
-    // ✅ Guard: stop jika login gagal dapat token
     if (!sessionToken) {
         console.error(`❌ VU${vuId} (${email}) - sessionToken null, skip batch selanjutnya`);
         sleep(0.25);

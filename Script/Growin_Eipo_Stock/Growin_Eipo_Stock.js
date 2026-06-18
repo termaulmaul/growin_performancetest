@@ -3,15 +3,6 @@
 // // ../../k6 run Growin_Eipo_Stock.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=2h -e NUMSTART=1001 --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/LoadTest/Manual_LoadTest_1208_1413.html
 
 // // Run Single BP
-// ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP001/Manual/Manual_DryRun_0529_0914_BP001_Local.html
-// ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP002/Manual/Manual_DryRun_1113_1708_BP002_Local.html
-// ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP003 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP003/Manual/Manual_DryRun_1209_1343_BP003_Local.html
-// ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP004 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP004/Manual/Manual_DryRun_1113_1708_BP004_Local.html
-// ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP005 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP005/Manual/Manual_DryRun_1113_1708_BP005_Local.html
-// ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP006 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP006/Manual/Manual_DryRun_1209_1406_BP006_Local.html
-// ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP007 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP007/Manual/Manual_DryRun_0603_1321_BP007_Local.html
-// ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP008 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP007/Manual/Manual_DryRun_0421_1152_BP008_Local.html
-// ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP009 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP009/Manual/Manual_DryRun_1120_1347_BP009_Local.html
 
 import { getBaseUrl, getUserCredentials, getDefaultHeaders, MAX_RETRY_ATTEMPTS, RETRY_DELAY, BATCH_SIZE, BATCH_DELAY } from '../../Helper/config.js';
 import { textSummary } from "../../Helper/textSummary.js";
@@ -59,12 +50,8 @@ export const BP006 = platform === 'Android' ? BP006_Android : BP006_Web;
 export const BP007 = platform === 'Android' ? BP007_Android : BP007_Web;
 export const BP008 = platform === 'Android' ? BP008_Android : BP008_Web;
 export const BP009 = platform === 'Android' ? BP009_Android : BP009_Web;
-
-// ✅ RETRY CONFIGURATION
 // const MAX_RETRY_ATTEMPTS = 10;
 // const RETRY_DELAY = 1; // seconds between retry attempts
-
-// ✅ BP_CONFIG: percentage + executor per BP
 const BP_CONFIG = {
     BP001: { percentage: 20.5, executor: 'constant-vus' },
     BP002: { percentage: 10.5, executor: 'constant-vus' },
@@ -76,8 +63,6 @@ const BP_CONFIG = {
     BP008: { percentage: 1.0, executor: 'constant-arrival-rate', rate: 70 },
     BP009: { percentage: 0.5, executor: 'constant-vus' },
 };
-
-// ✅ Function untuk calculate user distribution
 function calculateUserDistribution(totalUsers, selectedBPs) {
     const distribution = {};
     let totalPercentage = 0;
@@ -187,8 +172,6 @@ const scenarios = {};
 
 //         gracefulStop: '30s',
 //         exec: bp, // akan memanggil BP001() atau BP002() sesuai export di atas
-//     };
-// });
 
 selectedBPs.forEach(bp => {
     const config = BP_CONFIG[bp];
@@ -227,8 +210,6 @@ export const options = {
     teardownTimeout: '3600s',
     summaryTimeUnit: '3600s',
 };
-
-// ✅ LOGIN WITH RETRY — uses MAX_RETRY_ATTEMPTS & RETRY_DELAY from Helper/config.js
 function loginWithRetry(base_url, credentials, userKey, vuId) {
     const loginPayload = JSON.stringify({
         password: credentials.password,

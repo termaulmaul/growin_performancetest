@@ -1,12 +1,4 @@
 // Command
-// Run Multiple BP
-// ../../k6 run Growin_Rewards_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=205 -e DURATION=2h -e NUMSTART=101 --out dashboard=export=../../Report/Growin_Rewards/LoadTest/Manual_LoadTest_1113_1600.html
-
-// Run Single BP
-// ../../k6 run Growin_Rewards_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5s -e NUMSTART=101 -e SCENARIO=BP001 --out dashboard=export=../../Report/Growin_Rewards/BP001/Manual/Manual_DryRun_1113_1708_BP001_Local.html
-// ../../k6 run Growin_Rewards_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5s -e NUMSTART=101 -e SCENARIO=BP002 --out dashboard=export=../../Report/Growin_Rewards/BP002/Manual/Manual_DryRun_1113_1708_BP002_Local.html
-// ../../k6 run Growin_Rewards_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5s -e NUMSTART=101 -e SCENARIO=BP003 --out dashboard=export=../../Report/Growin_Rewards/BP003/Manual/Manual_DryRun_1113_1708_BP003_Local.html
-// ../../k6 run Growin_Rewards_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=205 -e DURATION=5s -e NUMSTART=101 -e SCENARIO=BP004 --out dashboard=export=../../Report/Growin_Rewards/BP004/Manual/Manual_DryRun_1113_1708_BP004_Local.html
 
 import { textSummary } from "../../Helper/textSummary.js";
 import { htmlReport } from '../../Helper/bundle.js';
@@ -18,16 +10,12 @@ import http from "k6/http";
 import { sleep } from "k6";
 
 export { BP001, BP002, BP003, BP004 }
-
-// ✅ DEFINISI PERSENTASE USER PER BP
 const BP_USER_PERCENTAGE = {
     BP001: 40,
     BP002: 40,
     BP003: 5,
     BP004: 15,
 };
-
-// ✅ Function untuk calculate user distribution
 function calculateUserDistribution(totalUsers, selectedBPs) {
     const distribution = {};
     let totalPercentage = 0;
@@ -124,8 +112,6 @@ function getUserCredentials(userNum, bpOffset = 0) {
     
     return { email: email, password: 'M@nsek.123' };
 }
-
-// ✅ SETUP FUNCTION - SEMUA BP mendapat PIN dan UUID
 export function setup() {
     console.log('📊 User Distribution:');
     Object.keys(userDistribution).forEach(bp => {
@@ -168,8 +154,6 @@ export function setup() {
                 userKey: globalUserOffset + localUserIndex
             };
         }
-        
-        // ✅ Process in batches
         const numBatches = Math.ceil(usersForThisBP / BATCH_SIZE);
         
         for (let batchNum = 0; batchNum < numBatches; batchNum++) {
@@ -182,8 +166,6 @@ export function setup() {
                 const credentials = getUserCredentials(i, globalUserOffset);
                 const userKey = globalUserOffset + i;
                 const vuId = globalVuOffset + i - 1;
-                
-                // ✅ Step 1: Regular Login
                 const loginPayload = JSON.stringify({
                     password: credentials.password,
                     email: credentials.email,
@@ -212,8 +194,6 @@ export function setup() {
                         user_uuid: null,
                         bp: bp
                     };
-                    
-                    // ✅ Step 2: PIN Login (UNTUK SEMUA USER)
                     const pinPayload = JSON.stringify({ value: "123456" });
                     const pinHeaders = {
                         'Cookie': `ACCESS_TOKEN=${token}`,
@@ -236,8 +216,6 @@ export function setup() {
                         }
                         tokens[userKey].pin_token = null;
                     }
-                    
-                    // ✅ Step 3: Get UUID (UNTUK SEMUA USER)
                     const marginDraftHeaders = {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
@@ -291,8 +269,6 @@ export function setup() {
         globalUserOffset += usersForThisBP;
         globalVuOffset += usersForThisBP;
     });
-    
-    // ✅ Summary
     console.log(`\n📊 Setup Summary:`);
     console.log(`   ✅ Login: ${totalLoginSuccess}/${TOTAL_USER} success (${((totalLoginSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
     if (totalLoginFailed > 0) console.error(`   ❌ Login Failed: ${totalLoginFailed}`);

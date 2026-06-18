@@ -1,17 +1,4 @@
 // Command
-// Run Multiple BP
-// ../../../k6 run Growin_Auth_AdminPermission_Create_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 -e PLATFORM=Web  --out dashboard=export=../../../Report/Growin_Auth_AdminPermission_Create/Web/LoadTest/Manual_LoadTest_0107_1459.html
-
-// Run Single BP Web
-// ../../k6 run Growin_Auth_AdminPermission_Create.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Auth_AdminPermission_Create/Web/BP001/Manual/Manual_DryRun_0506_1353_BP001.html
-// ../../k6 run Growin_Auth_AdminPermission_Create.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Auth_AdminPermission_Create/Web/BP002/Manual/Manual_DryRun_0518_1712_BP002.html
-// ../../k6 run Growin_Auth_AdminPermission_Create.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP003 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Auth_AdminPermission_Create/Web/BP003/Manual/Manual_DryRun_0602_1603_BP003.html
-
-// Run Single BP iOS
-// ../../k6 run Growin_Auth_AdminPermission_Create.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Auth_AdminPermission_Create/iOS/BP001/Manual/Manual_DryRun_0520_1209_BP001.html
-
-// Run Single BP Android
-// ../../k6 run Growin_Auth_AdminPermission_Create.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Android --out dashboard=export=../../Report/Growin_Auth_AdminPermission_Create/Android/BP001/Manual/Manual_DryRun_0520_1234_BP001.html
 
 import { getBaseUrl, getUserCredentials, getDefaultHeaders, MAX_RETRY_ATTEMPTS, RETRY_DELAY, BATCH_SIZE, BATCH_DELAY } from '../../Helper/config.js';
 import { textSummary } from "../../Helper/textSummary.js";
@@ -21,14 +8,8 @@ import { htmlReport } from '../../Helper/bundle.js';
 import { BP001 as BP001_Web } from "./Web/BP001.js";
 import { BP002 as BP002_Web } from "./Web/BP002.js";
 import { BP003 as BP003_Web } from "./Web/BP003.js";
-
-// ─── IMPORTS iOS ──────────────────────────────────────────────────────────────
 import { BP001 as BP001_iOS } from "./iOS/BP001.js";
-// import { BP002 as BP002_iOS } from "./iOS/BP002.js";
-
-// ─── IMPORTS Android ─────────────────────────────────────────────────────────
 import { BP001 as BP001_Android } from "./Android/BP001.js";
-// import { BP002 as BP002_Android } from "./Android/BP002.js";
 
 import http from "k6/http";
 http.setResponseCallback(http.expectedStatuses(200, 201, 400, 401, 403, 404, 500));
@@ -66,11 +47,9 @@ const BP_CONFIG = {
     },
     iOS: {
         BP001: { fn: BP001_iOS, skipSetupLogin: false},
-        // BP002: { fn: BP002_iOS, skipSetupLogin: false},
     },
     Android: {
         BP001: { fn: BP001_Android, skipSetupLogin: false},
-        // BP002: { fn: BP002_Android, skipSetupLogin: false},
     },
 };
 
@@ -93,8 +72,6 @@ function dispatch(bpName, data) {
 export function BP001(data) { return dispatch('BP001', data); }
 export function BP002(data) { return dispatch('BP002', data); }
 export function BP003(data) { return dispatch('BP003', data); }
-
-// ✅ RETRY CONFIGURATION
 // const MAX_RETRY_ATTEMPTS = 10;
 // const RETRY_DELAY = 1; // seconds between retry attempts
 
@@ -103,8 +80,6 @@ const BP_USER_PERCENTAGE = {
     BP002: 50,
     BP003: 50,
 };
-
-// ✅ Function untuk calculate user distribution
 function calculateUserDistribution(totalUsers, selectedBPs) {
     const distribution = {};
     let totalPercentage = 0;
@@ -133,8 +108,6 @@ function calculateUserDistribution(totalUsers, selectedBPs) {
     
     return distribution;
 }
-
-// ✅ Function untuk calculate numStart per BP secara kumulatif
 // Multi-BP (LoadTest): setiap BP melanjutkan dari angka terakhir BP sebelumnya
 // Single BP (Manual) : semua pakai NUMSTART dari env langsung (behaviour tidak berubah)
 function calculateNumStarts(selectedBPs, userDistribution, baseStart) {
@@ -153,10 +126,8 @@ const NUMSTART_env = parseInt(__ENV.NUMSTART) || 1;
 
 let selectedBPs = [];
 if (SCENARIO) {
-    // ✅ Single/specific BP run: pakai SCENARIO dari env (misal -e SCENARIO=BP001 atau -e SCENARIO=BP001,BP002)
     selectedBPs = SCENARIO.split(',').map(s => s.trim());
 } else {
-    // ✅ LoadTest / tanpa SCENARIO: ambil semua BP yang terdaftar di BP_CONFIG untuk platform ini
     //    Ini memastikan hanya BP yang sesuai platform yang jalan, bukan semua BP di BP_USER_PERCENTAGE
     const platformBPs = Object.keys(BP_CONFIG[platform] || {});
     if (platformBPs.length === 0) {
@@ -168,8 +139,6 @@ if (SCENARIO) {
 const isMultiBP = selectedBPs.length > 1;
 
 const userDistribution = calculateUserDistribution(TOTAL_USER, selectedBPs);
-
-// ✅ Hitung numStart per BP:
 //    - Multi-BP: kumulatif, setiap BP lanjut dari user terakhir BP sebelumnya
 //    - Single BP: semua pakai NUMSTART dari env (tidak ada perubahan behaviour)
 const BP_NUM_STARTS = isMultiBP
@@ -257,8 +226,6 @@ export const options = {
     summaryTimeUnit: '3600s',
     // httpDebug: 'full',
 };
-
-// ✅ LOGIN WITH RETRY — uses MAX_RETRY_ATTEMPTS & RETRY_DELAY from Helper/config.js
 function loginWithRetry(base_url, credentials, userKey, vuId) {
     const loginPayload = JSON.stringify({
         password: credentials.password,
@@ -325,17 +292,12 @@ export function setup() {
     let totalUserIdSuccess = 0;
     let totalUserIdFailed = 0;
     let totalLoginRetries = 0;
-    // ✅ counter untuk BP yang skip setup login
     let totalSkippedLogin = 0;
     
     selectedBPs.forEach((bp, bpIndex) => {
         const usersForThisBP = userDistribution[bp];
-
-        // ✅ Ambil config per-BP
         const bpConfig = BP_CONFIG[platform]?.[bp] ?? {};
         const skipSetupLogin = bpConfig.skipSetupLogin === true;
-
-        // ✅ Pakai BP_NUM_STARTS yang sudah dihitung di atas (kumulatif untuk multi-BP,
         //    atau NUMSTART env untuk single BP). globalUserOffset diturunkan dari sana.
         const bpNumStart = BP_NUM_STARTS[bp];
         const globalUserOffset = bpNumStart - NUMSTART_env;
@@ -354,8 +316,6 @@ export function setup() {
                 userKey: globalUserOffset + localUserIndex
             };
         }
-        
-        // ✅ Jika skipSetupLogin, assign hanya email — skip semua HTTP call
         if (skipSetupLogin) {
             for (let i = 1; i <= usersForThisBP; i++) {
                 const credentials = getUserCredentials(i, globalUserOffset);
@@ -417,8 +377,6 @@ export function setup() {
                         const tradingData = profileResponses[0].json().data;
                         
                         if (!tokens[userKey]) tokens[userKey] = {};
-                        
-                        // ✅ FIX: assign dulu, baru log
                         tokens[userKey].user_id      = tradingData.user_id;
                         tokens[userKey].client_id    = tradingData.client_id;
                         tokens[userKey].SID          = tradingData.sid;
@@ -476,14 +434,11 @@ export function setup() {
         }
         
         globalVuOffset += usersForThisBP;
-        // ✅ globalUserOffset TIDAK diakumulasi di sini — setiap BP menghitung offsetnya
         //    sendiri dari BP_NUM_STARTS di awal forEach, sehingga setiap BP
         //    selalu mulai dari nomor user yang benar terlepas dari urutan BP lainnya.
     });
     
     console.log(`\n📊 Setup Summary:`);
-
-    // ✅ tampilkan info BP yang skip login
     if (totalSkippedLogin > 0) {
         console.log(`   ⏩ Skipped (self-login BP): ${totalSkippedLogin} users`);
     }

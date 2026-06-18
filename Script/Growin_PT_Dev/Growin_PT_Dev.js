@@ -2,7 +2,6 @@
 // Gcloud compute ssh --project compute-dev-0108 --zone asia-southeast2-c "vm-dev-k6-0" --tunnel-through-iap -- -L 22:10.188.2.36:22
 
 // BP_JSON=$(python3 -c "import sys,yaml,json; print(json.dumps(yaml.safe_load(open('Configs/BP001.yaml'))))")
-// ../../k6 run Growin_PT_Dev.js -e RUNBY=Manual -e ENV=INT -e USER=5 -e DURATION=1m -e NUMSTART=71 -e SCENARIO=BP001 -e PLATFORM=Web -e BP_CONFIG="$BP_JSON"
 /**
  * Growin_PT_Dev.js — Main k6 entry point
  * 
@@ -422,13 +421,9 @@ export function handleSummary(data) {
 
         // if (runby === 'Manual') {
         //     htmlPath = `${base}/${platform}/${bp_name}/Manual/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
-        // } else if (runby === 'Regression') {
         //     htmlPath = `${base}/${platform}/${bp_name}/Regression/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
-        // } else if (runby === 'LoadTest') {
         //     htmlPath = `${base}/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
-        // } else {
         //     htmlPath = `${base}/${platform}/${bp_name}/${runby}_${bp_name}_${dateStr}_${timeStr}.html`;
-        // }
         htmlPath = `/home/jenkins/report/growin/${__ENV.APP_NAME}/${bp_name}-${timeStr}.html.html`;
         
         console.log(`Generating HTML report: ${htmlPath}`);

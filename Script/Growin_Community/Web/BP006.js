@@ -101,21 +101,15 @@ const CommunityDetailUserTrialJoinLeave = {
         http_reqs: new Counter("sample_Socialinvesting_Social_Join"),
     },
 };
-
-// ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
 export function BP006(data) {
     const scenarioName = 'BP006';
     const base_url = data.base_url;
     const isIntEnv = `${__ENV.ENV}` === 'INT';
-    
-    // ✅ GET CORRECT TOKEN FROM BP-SPECIFIC ARRAY
     const bp006Tokens = data.bpTokens[scenarioName];
     if (!bp006Tokens || bp006Tokens.length === 0) {
         console.error(`❌ ${scenarioName} - No tokens available!`);
         return;
     }
-    
-    // ✅ USE ITERATION INDEX TO GET CORRECT USER
     const iterationIndex = exec.scenario.iterationInInstance;
     const tokenIndex = iterationIndex % bp006Tokens.length; // Wrap around if iterations > tokens
     
@@ -124,8 +118,6 @@ export function BP006(data) {
         console.error(`❌ ${scenarioName} Iteration ${iterationIndex} - No valid token at index ${tokenIndex}!`);
         return;
     }
-    
-    // ✅ CRITICAL VALIDATION - ENSURE CORRECT POOL
     if (userToken.pool !== 'REGULAR') {
         console.error(`❌ CRITICAL: ${scenarioName} using ${userToken.pool} user (${userToken.email}) instead of REGULAR! ABORTING.`);
         return;

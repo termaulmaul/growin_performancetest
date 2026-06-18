@@ -11,11 +11,6 @@
 //  *   k6 run ... -e BP_CONFIG_FILE=./configs/BP001.json
 //  */
 
-// import { check, sleep } from "k6";
-// import { Trend, Counter, Rate } from "k6/metrics";
-// import http from "k6/http";
-// import exec from "k6/execution";
-
 // // ─── CONFIG LOADER ─────────────────────────────────────────────────────────────
 // // Config is injected by Jenkins as a JSON string via BP_CONFIG env var.
 // // The YAML-to-JSON conversion happens OUTSIDE k6 (in Jenkins shell step).
@@ -25,13 +20,7 @@
 //     const raw = `${__ENV.BP_CONFIG}`;
 //     if (raw && raw !== 'undefined') {
 //         BP_CONFIG = JSON.parse(raw);
-//     } else {
 //         throw new Error("BP_CONFIG env var is not set or empty.");
-//     }
-// } catch (e) {
-//     console.error(`❌ Failed to parse BP_CONFIG: ${e.message}`);
-//     console.error(`   Make sure Jenkins pipeline converts YAML to JSON and passes via -e BP_CONFIG='...'`);
-// }
 
 // // ─── DYNAMIC METRIC REGISTRY ───────────────────────────────────────────────────
 // // Metrics are created dynamically per API definition in the config.
@@ -53,10 +42,8 @@
 //         errorRate:    new Rate(`error_rate_${tag}`),
 //         errorCount:   new Counter(`error_count_${tag}`),
 //         requestCount: new Counter(`sample_${tag}`),
-//     };
 
 //     return metricRegistry[key];
-// }
 
 // // ─── THRESHOLD BUILDER ─────────────────────────────────────────────────────────
 // // Called from Growin_PT_Dev.js to dynamically build thresholds for options{}.
@@ -108,10 +95,8 @@
 //         //         allowNoData: true,   // ← tambah ini
 //         //     }
 //         // ];
-//     });
 
 //     return thresholds;
-// }
 
 // // ─── URL BUILDER ───────────────────────────────────────────────────────────────
 // function buildUrl(baseUrl, apiDef) {
@@ -121,8 +106,6 @@
 //     if (apiDef.path_params && typeof apiDef.path_params === 'object') {
 //         Object.entries(apiDef.path_params).forEach(([key, value]) => {
 //             path = path.replace(`{${key}}`, encodeURIComponent(value));
-//         });
-//     }
 
 //     // Append query params
 //     if (apiDef.query_params && typeof apiDef.query_params === 'object') {
@@ -130,10 +113,8 @@
 //             .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
 //             .join('&');
 //         if (qs) path = `${path}?${qs}`;
-//     }
 
 //     return baseUrl + path;
-// }
 
 // // ─── REQUEST DISPATCHER ────────────────────────────────────────────────────────
 // function dispatchRequest(method, url, payload, headers) {
@@ -147,34 +128,25 @@
 //         case 'PATCH':  return http.patch(url, body, params);
 //         case 'DELETE': return http.del(url, body, params);
 //         default:
-//             console.error(`❌ Unsupported HTTP method: ${method}`);
 //             return null;
-//     }
-// }
 
 // // ─── MAIN BP FUNCTION ──────────────────────────────────────────────────────────
 // export function BP001(data) {
 //     if (!BP_CONFIG) {
-//         console.error('❌ BP_CONFIG not loaded. Skipping iteration.');
 //         return;
-//     }
 
 //     const vuId      = exec.vu.idInTest;
 //     const base_url  = data.base_url;
 //     const mapping   = data.vuMapping[vuId];
 
 //     if (!mapping) {
-//         console.error(`❌ VU${vuId} - No VU mapping found, skipping.`);
 //         return;
-//     }
 
 //     const userKey   = mapping.userKey;
 //     const userToken = data.tokens[userKey];
 
 //     if (!userToken || !userToken.token || !userToken.pin_token) {
-//         console.error(`❌ VU${vuId} (User ${userKey}) - Invalid token, skipping.`);
 //         return;
-//     }
 
 //     const token     = userToken.token;
 //     const email     = userToken.email;
@@ -193,7 +165,6 @@
 //         'X-App-Version':    '1.4.1',
 //         'X-Device-Info':    'iPhone 11',
 //         'X-Device-Id':      'TEST3',
-//     };
 
 //     // ── Iterate through ALL APIs defined in config, one by one ──────────────
 //     for (const apiDef of apis) {
@@ -205,12 +176,10 @@
 //         const response = dispatchRequest(method, url, payload, headers);
 
 //         if (!response) {
-//             console.error(`❌ VU${vuId} - No response for ${method} ${url}`);
 //             metric.errorRate.add(true);
 //             metric.errorCount.add(1);
 //             metric.requestCount.add(1);
 //             continue;
-//         }
 
 //         // Record metrics
 //         metric.httpDuration.add(response.timings.duration);
@@ -224,9 +193,6 @@
 //             metric.errorCount.add(0);
 
 //             if (`${__ENV.ENV}` !== 'INT') {
-//                 console.log(`✅ ${email} [${method}] ${url} | Status: ${response.status}`);
-//             }
-//         } else {
 //             metric.errorRate.add(true);
 //             metric.errorCount.add(1);
 
@@ -234,20 +200,14 @@
 //             check(response, {
 //                 [`❌ [${method}] ${url} | Status: ${response.status} | Body: ${response.body}`]:
 //                     (r) => r.status >= 200 && r.status < 300,
-//             });
-
-//             console.error(
 //                 `❌ ${email} [${method}] ${url} | Status: ${response.status} ` +
 //                 `| Response: ${response.body} | RequestBody: ${payload ? JSON.stringify(payload) : 'null'}`
 //             );
-//         }
 
 //         // Small sleep between API calls within same iteration to avoid burst
 //         sleep(0.1);
-//     }
 
 //     sleep(0.25);
-// }
 
 /**
  * Dynamic BP Runner - Web/BP001.js

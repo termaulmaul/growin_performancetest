@@ -199,8 +199,6 @@ const Home = {
         http_reqs: new Counter("sample_Auth_Protected_Client_Selected"),
     },
 };
-
-// ✅ EXPORTED FUNCTION
 export function BP001(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;

@@ -38,8 +38,6 @@ const FinancialSummarizerBackendBrokerActivityTab = {
         http_reqs: new Counter("sample_Marketdata_StockStrength"),
     }
 };
-
-// ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
 export function BP013(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;

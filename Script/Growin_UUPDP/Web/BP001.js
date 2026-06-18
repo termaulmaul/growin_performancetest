@@ -28,8 +28,6 @@ const Consent = {
         http_reqs: new Counter("sample_User_Consent_Submit"),
     },
 };
-
-// ✅ EXPORTED FUNCTION
 export function BP001(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;
@@ -92,23 +90,14 @@ export function BP001(data) {
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
     //             metric.errorRate.add(true);
     //             metric.errorCount.add(1);
     //             metric.requestRate.add(false);
     //             metric.http_reqs.add(1);
     //             check(response, {
     //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
     //             if (`${__ENV.ENV}` != 'INT') {
     //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
 
     // Batch 2
     if (token) {

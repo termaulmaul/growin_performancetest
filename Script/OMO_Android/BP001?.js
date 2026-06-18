@@ -48,9 +48,6 @@ export const options = {
 //             vus: 1,
 //             iterations: 1,
 //             maxDuration: '1h',
-//         },
-//     },
-// };
 
 // /auth/api/v1/login
 // /auth/api/v1/protected/validate
@@ -201,7 +198,6 @@ export default function () {
         check(res, {
         [`FAILED Login || Status: ${res.status} || Body: ${res.body}`]: (r) => r.status === 200,
         });
-        // console.error(`${email} Failed to Login || Status: ${res.status} | Body: ${res.body}`);
     }
 
     if (token) {
@@ -247,7 +243,6 @@ export default function () {
                 check(response, {
                     [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
                 });
-                // console.error(`ERROR ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);   
             }
         });
     }
@@ -311,7 +306,6 @@ export default function () {
                 check(response, {
                     [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
                 });
-                // console.error(`ERROR ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);
             }
         });
     }

@@ -49,21 +49,15 @@ const ChatRoom = {
         http_reqs: new Counter("sample_ChatStreamIoApi_Members"),
     },
 };
-
-// ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
 export function BP002(data) {
     const scenarioName = 'BP002';
     const base_url = data.base_url;
     const isIntEnv = `${__ENV.ENV}` === 'INT';
-    
-    // ✅ GET CORRECT TOKEN FROM BP-SPECIFIC ARRAY
     const bp002Tokens = data.bpTokens[scenarioName];
     if (!bp002Tokens || bp002Tokens.length === 0) {
         console.error(`❌ ${scenarioName} - No tokens available!`);
         return;
     }
-    
-    // ✅ USE ITERATION INDEX TO GET CORRECT USER
     const iterationIndex = exec.scenario.iterationInInstance;
     const tokenIndex = iterationIndex % bp002Tokens.length; // Wrap around if iterations > tokens
     
@@ -72,8 +66,6 @@ export function BP002(data) {
         console.error(`❌ ${scenarioName} Iteration ${iterationIndex} - No valid token at index ${tokenIndex}!`);
         return;
     }
-    
-    // ✅ CRITICAL VALIDATION - ENSURE CORRECT POOL
     if (userToken.pool !== 'REGULAR') {
         console.error(`❌ CRITICAL: ${scenarioName} using ${userToken.pool} user (${userToken.email}) instead of REGULAR! ABORTING.`);
         return;
@@ -173,7 +165,6 @@ export function BP002(data) {
     //         'Connection':'keep-alive',
     //         'Accept-Encoding':'gzip, deflate, br',
     //         'Accept':'*/*',
-    //     };
 
     //     const requests = [
     //         ['GET', urls[0], null, { headers: stepTwoHeaders }],
@@ -193,22 +184,13 @@ export function BP002(data) {
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
     //             metric.errorRate.add(true);
     //             metric.errorCount.add(1);
     //             metric.requestRate.add(false);
     //             metric.http_reqs.add(1);
     //             check(response, {
     //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
     //             if (`${__ENV.ENV}` != 'INT') {
     //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }   
     sleep(0.5);
 }

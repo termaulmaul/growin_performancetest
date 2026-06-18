@@ -39,21 +39,15 @@ const CommunityMemberKickRequestApproval = {
         http_reqs: new Counter("sample_Socialinvesting_Social_RemoveByAdmin"),
     },
 };
-
-// ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
 export function BP011(data) {
     const scenarioName = 'BP011';
     const base_url = data.base_url;
     const isIntEnv = `${__ENV.ENV}` === 'INT';
-    
-    // ✅ GET CORRECT TOKEN FROM BP-SPECIFIC ARRAY
     const bp011Tokens = data.bpTokens[scenarioName];
     if (!bp011Tokens || bp011Tokens.length === 0) {
         console.error(`❌ ${scenarioName} - No tokens available!`);
         return;
     }
-    
-    // ✅ USE ITERATION INDEX TO GET CORRECT USER
     const iterationIndex = exec.scenario.iterationInInstance;
     const tokenIndex = iterationIndex % bp011Tokens.length; // Wrap around if iterations > tokens
     
@@ -62,8 +56,6 @@ export function BP011(data) {
         console.error(`❌ ${scenarioName} Iteration ${iterationIndex} - No valid token at index ${tokenIndex}!`);
         return;
     }
-    
-    // ✅ CRITICAL VALIDATION - ENSURE CORRECT POOL
     if (userToken.pool !== 'ADMIN') {
         console.error(`❌ CRITICAL: ${scenarioName} using ${userToken.pool} user (${userToken.email}) instead of ADMIN! ABORTING.`);
         return;

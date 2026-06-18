@@ -24,17 +24,13 @@ const ProductListScreen = {
 //     // ✅ Get userKey dari VU mapping
 //     const mapping = data.vuMapping[vuId];
 //     if (!mapping) {
-//         console.error(`❌ VU${vuId} - No mapping found, skipping iteration`);
 //         return;
-//     }
     
 //     const userKey = mapping.userKey;
 //     const userToken = data.tokens[userKey];
     
 //     if (!userToken || !userToken.token) {
-//         console.error(`❌ VU${vuId} (User ${userKey}) - No valid token available, skipping iteration`);
 //         return;
-//     }
     
 //     const token = userToken.token;
 //     const email = userToken.email;
@@ -57,7 +53,6 @@ const ProductListScreen = {
 //             'X-App-Version': '1.4.1',
 //             'X-Device-Info': 'iPhone 11',
 //             'X-Device-Id': 'TEST3'
-//         };
 
 //         const requests = [
 //             ['GET', urls[0], null, { headers: stepOneHeaders }],
@@ -77,28 +72,16 @@ const ProductListScreen = {
 //                 metric.requestRate.add(true);
 //                 metric.http_reqs.add(1);
 //                 if (`${__ENV.ENV}` != 'INT') {
-//                     console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-//                 }
-//             } else {
 //                 metric.errorRate.add(true);
 //                 metric.errorCount.add(1);
 //                 metric.requestRate.add(false);
 //                 metric.http_reqs.add(1);
 //                 check(response, {
 //                     [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-//                 });
 //                 if (`${__ENV.ENV}` != 'INT') {
 //                     const requestBody = requests[index][2];
-//                     console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-//                 }
-//             }
-//         });
-//     }
     
 //     sleep(0.25);
-// }
-
-// ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
 export function BP001(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;

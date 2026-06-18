@@ -18,8 +18,6 @@ const FinancialSummarizerBackendFinancialFeature = {
         http_reqs: new Counter("sample_Marketdata_StockDailyPrice"),
     }
 };
-
-// ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
 export function BP011(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;

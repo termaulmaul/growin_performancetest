@@ -47,9 +47,6 @@ export const options = {
 //             vus: 1,
 //             iterations: 1,
 //             maxDuration: '1h',
-//         },
-//     },
-// };
 
 // API
 // /auth/api/v1/login?nocookies=1
@@ -495,7 +492,6 @@ export default function () {
     //     const batchHeaders = {
     //         'Cookie': `ACCESS_TOKEN=${token}`,
     //         'Content-Type': 'application/json',
-    //     };
 
     //     const requests = [
     //         ['GET', urls[0], null, { headers: batchHeaders }],
@@ -515,23 +511,14 @@ export default function () {
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`200 ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);
-    //             }
-    //         } else {
     //             metric.errorRate.add(true);
     //             metric.errorCount.add(1);
     //             metric.requestRate.add(false);
     //             metric.http_reqs.add(1);
     //             check(response, {
     //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
     //             if (`${__ENV.ENV}` != 'INT') {
     //                 const requestBody = requests[index][2];
-    //                 console.error(`VU${exec.vu.idInTest} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
     sleep(0,25);
 }
 

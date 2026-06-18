@@ -1,27 +1,4 @@
 // Command
-// Run Multiple BP
-// ../../../k6 run Growin_Banner_Promo_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Banner_Promo/Web/LoadTest/Manual_LoadTest_0107_1459.html
-
-// Run Single BP Web
-// ../../k6 run Growin_Banner_Promo.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Banner_Promo/Web/BP001/Manual/Manual_DryRun_0511_1443_BP001.html
-// ../../k6 run Growin_Banner_Promo.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Banner_Promo/Web/BP002/Manual/Manual_DryRun_0413_1448_BP002.html
-// ../../k6 run Growin_Banner_Promo.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP003 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Banner_Promo/Web/BP003/Manual/Manual_DryRun_0414_1719_BP003.html
-// ../../k6 run Growin_Banner_Promo.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP004 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Banner_Promo/Web/BP004/Manual/Manual_DryRun_0415_1007_BP004.html
-// ../../k6 run Growin_Banner_Promo.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP005 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Banner_Promo/Web/BP005/Manual/Manual_DryRun_0414_1644_BP005.html
-// ../../k6 run Growin_Banner_Promo.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP006 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Banner_Promo/Web/BP006/Manual/Manual_DryRun_0414_1654_BP006.html
-// ../../k6 run Growin_Banner_Promo.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP007 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Banner_Promo/Web/BP007/Manual/Manual_DryRun_0414_1720_BP007.html
-// ../../k6 run Growin_Banner_Promo.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP008 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Banner_Promo/Web/BP008/Manual/Manual_DryRun_0414_1701_BP008.html
-// ../../k6 run Growin_Banner_Promo.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP009 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Banner_Promo/Web/BP009/Manual/Manual_DryRun_0414_1710_BP009.html
-// ../../k6 run Growin_Banner_Promo.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP010 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Banner_Promo/Web/BP010/Manual/Manual_DryRun_0414_1708_BP010.html
-// ../../k6 run Growin_Banner_Promo.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP011 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Banner_Promo/Web/BP011/Manual/Manual_DryRun_0414_1719_BP011.html
-// ../../k6 run Growin_Banner_Promo.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP012 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Banner_Promo/Web/BP012/Manual/Manual_DryRun_0414_1708_BP012.html
-// ../../k6 run Growin_Banner_Promo.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP013 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Banner_Promo/Web/BP013/Manual/Manual_DryRun_0414_1709_BP013.html
-
-// Run Single BP iOS
-// ../../k6 run Growin_Banner_Promo.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Banner_Promo/iOS/BP001/Manual/Manual_DryRun_0511_1547_BP001.html
-
-// Run Single BP Android
-// ../../k6 run Growin_Banner_Promo.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Android --out dashboard=export=../../Report/Growin_Banner_Promo/Android/BP001/Manual/Manual_DryRun_0428_1100_BP001.html
 
 import { getBaseUrl, getUserCredentials, getDefaultHeaders, MAX_RETRY_ATTEMPTS, RETRY_DELAY, BATCH_SIZE, BATCH_DELAY } from '../../Helper/config.js';
 import { textSummary } from "../../Helper/textSummary.js";
@@ -29,48 +6,7 @@ import { htmlReport } from '../../Helper/bundle.js';
 
 // ─── IMPORTS WEB ──────────────────────────────────────────────────────────────
 import { BP001 as BP001_Web } from "./Web/BP001.js";
-// import { BP002 as BP002_Web } from "./Web/BP002.js";
-// import { BP003 as BP003_Web } from "./Web/BP003.js";
-// import { BP004 as BP004_Web } from "./Web/BP004.js";
-// import { BP005 as BP005_Web } from "./Web/BP005.js";
-// import { BP006 as BP006_Web } from "./Web/BP006.js";
-// import { BP007 as BP007_Web } from "./Web/BP007.js";
-// import { BP008 as BP008_Web } from "./Web/BP008.js";
-// import { BP009 as BP009_Web } from "./Web/BP009.js";
-// import { BP010 as BP010_Web } from "./Web/BP010.js";
-// import { BP011 as BP011_Web } from "./Web/BP011.js";
-// import { BP012 as BP012_Web } from "./Web/BP012.js";
-// import { BP013 as BP013_Web } from "./Web/BP013.js";
-
-// ─── IMPORTS iOS ──────────────────────────────────────────────────────────────
 import { BP001 as BP001_iOS } from "./iOS/BP001.js";
-// import { BP002 as BP002_iOS } from "./iOS/BP002.js";
-// import { BP003 as BP003_iOS } from "./iOS/BP003.js";
-// import { BP004 as BP004_iOS } from "./iOS/BP004.js";
-// import { BP005 as BP005_iOS } from "./iOS/BP005.js";
-// import { BP006 as BP006_iOS } from "./iOS/BP006.js";
-// import { BP007 as BP007_iOS } from "./iOS/BP007.js";
-// import { BP008 as BP008_iOS } from "./iOS/BP008.js";
-// import { BP009 as BP009_iOS } from "./iOS/BP009.js";
-// import { BP010 as BP010_iOS } from "./iOS/BP010.js";
-// import { BP011 as BP011_iOS } from "./iOS/BP011.js";
-// import { BP012 as BP012_iOS } from "./iOS/BP012.js";
-// import { BP013 as BP013_iOS } from "./iOS/BP013.js";
-
-// ─── IMPORTS Android ─────────────────────────────────────────────────────────
-// import { BP001 as BP001_Android } from "./Android/BP001.js";
-// import { BP002 as BP002_Android } from "./Android/BP002.js";
-// import { BP003 as BP003_Android } from "./Android/BP003.js";
-// import { BP004 as BP004_Android } from "./Android/BP004.js";
-// import { BP005 as BP005_Android } from "./Android/BP005.js";
-// import { BP006 as BP006_Android } from "./Android/BP006.js";
-// import { BP007 as BP007_Android } from "./Android/BP007.js";
-// import { BP008 as BP008_Android } from "./Android/BP008.js";
-// import { BP009 as BP009_Android } from "./Android/BP009.js";
-// import { BP010 as BP010_Android } from "./Android/BP010.js";
-// import { BP011 as BP011_Android } from "./Android/BP011.js";
-// import { BP012 as BP012_Android } from "./Android/BP012.js";
-// import { BP013 as BP013_Android } from "./Android/BP013.js";
 
 import http from "k6/http";
 http.setResponseCallback(http.expectedStatuses(200, 201, 400, 401, 403, 404, 500));
@@ -99,7 +35,6 @@ const platform = getPlatform();
 const BP_MAP = {
     Web:     { BP001: BP001_Web     /* BP002: BP002_Web, BP003: BP003_Web, ... */ },
     iOS:     { BP001: BP001_iOS     /* BP002: BP002_iOS, BP003: BP003_iOS, ... */ },
-    // Android: { BP001: BP001_Android /* BP002: BP002_Android, BP003: BP003_Android, ... */ },
 };
 
 // ─── DISPATCHER ───────────────────────────────────────────────────────────────
@@ -124,8 +59,6 @@ export function BP001(data) { return dispatch('BP001', data); }
 // export function BP011(data) { return dispatch('BP011', data); }
 // export function BP012(data) { return dispatch('BP012', data); }
 // export function BP013(data) { return dispatch('BP013', data); }
-
-// ✅ RETRY CONFIGURATION
 // const MAX_RETRY_ATTEMPTS = 10;
 // const RETRY_DELAY = 1; // seconds between retry attempts
 
@@ -144,8 +77,6 @@ const BP_USER_PERCENTAGE = {
     // BP012: 3.75,
     // BP013: 0.19,
 };
-
-// ✅ Function untuk calculate user distribution
 function calculateUserDistribution(totalUsers, selectedBPs) {
     const distribution = {};
     let totalPercentage = 0;
@@ -269,8 +200,6 @@ export const options = {
     summaryTimeUnit: '3600s',
     // httpDebug: 'full',
 };
-
-// ✅ LOGIN WITH RETRY — uses MAX_RETRY_ATTEMPTS & RETRY_DELAY from Helper/config.js
 function loginWithRetry(base_url, credentials, userKey, vuId) {
     const loginPayload = JSON.stringify({
         password: credentials.password,

@@ -68,8 +68,6 @@ const CalendarDetail = {
         http_reqs: new Counter("sample_Marketdata_Marketinfo_CorporateActionsCalendar_Glossary"),
     },
 };
-
-// ✅ EXPORTED FUNCTION
 export function BP002(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;

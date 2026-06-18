@@ -28,8 +28,6 @@ export function BP008(data) {
         const runTimestamp = Date.now();
         
         const deviceId = `TEST_${runTimestamp}_${vuId}_${iterationId}`;
-        
-        // ✅ Get mapping from setup
         const mapping = data.vuMapping[vuId];
         if (!mapping) {
             console.error(`❌ VU${vuId} - No mapping found, skipping iteration`);
@@ -37,8 +35,6 @@ export function BP008(data) {
         }
         
         const userKey = mapping.userKey;
-        
-        // ✅ CRITICAL: Ambil token langsung dari setup - TIDAK perlu login ulang
         const userTokenData = data.tokens[userKey];
         
         if (!userTokenData || !userTokenData.token || !userTokenData.pin_token) {

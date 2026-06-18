@@ -21,13 +21,10 @@ import { SharedArray } from 'k6/data';
 //             vus: `${__ENV.USER}`,
 //             duration: `${__ENV.DURATION}`,
 //             gracefulStop: '30s',
-//         },
-//     },
 //     noConnectionReuse: false,
 //     setupTimeout: '120m',
 //     teardownTimeout: '120m',
 //     summaryTimeUnit: '120m',
-// };
 export const options = {
     thresholds: {
         http_req_duration: ['p(95)<200'],
@@ -115,16 +112,12 @@ export default function (data) {
         metric.errorCount.add(1);
         metric.requestRate.add(false);
         metric.http_reqs.add(1);
-        // console.error(`❌ Error: Status ${response.status} || Body: ${response.body}`);
     }
 
     sleep(0.25);
 }
-
-// ✅ OPTIMIZED handleSummary
 export function handleSummary(data) {
     try {
-        // ✅ Handle missing metrics
         if (!data.metrics.data_received) {
             data.metrics.data_received = { values: { count: 0, rate: 0 } };
         }
@@ -150,8 +143,6 @@ export function handleSummary(data) {
     } catch (error) {
         console.error(`❌ handleSummary error: ${error.message}`);
         console.error(`Stack: ${error.stack}`);
-        
-        // ✅ Fallback: text only
         return {
             'stdout': textSummary(data, { indent: ' ', enableColors: true }),
         };

@@ -36,17 +36,12 @@ export function BP002(data) {
     const runTimestamp = Date.now();
     
     const deviceId = `TEST_${runTimestamp}_${vuId}_${iterationId}`;
-    
-    // ✅ Get mapping from setup
     const mapping = data.vuMapping[vuId];
     if (!mapping) {
-        // console.error(`❌ VU${vuId} - No mapping found, skipping iteration`);
         return;
     }
     
     const userKey = mapping.userKey;
-    
-    // ✅ CRITICAL: Ambil token langsung dari setup - TIDAK perlu login ulang
     const userTokenData = data.tokens[userKey];
     
     if (!userTokenData || !userTokenData.token || !userTokenData.pin_token) {
@@ -95,7 +90,6 @@ export function BP002(data) {
         if (response.status === 200) {
             try {
                 const responseData = response.json();
-                // console.log(`Response : Response: ${response.body}`)
                 
                 if (responseData?.data?.data && Array.isArray(responseData.data.data) && responseData.data.data.length > 0) {
                     const allDevices = responseData.data.data;

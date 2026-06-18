@@ -15,13 +15,9 @@ const EditOrderScreen = {
         http_reqs: new Counter("sample_Amend_Eipo_Order"),
     },
 };
-
-// ✅ EXPORTED FUNCTION - dengan proper VU mapping
 export function BP007(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;
-    
-    // ✅ Get userKey dari VU mapping
     const mapping = data.vuMapping[vuId];
     if (!mapping) {
         console.error(`❌ VU${vuId} - No mapping found, skipping iteration`);

@@ -88,8 +88,6 @@ const StockDetailAnalysisTab = {
         http_reqs: new Counter("sample_Marketdata_Gpt_FeedbackUpdate"),
     },
 };
-
-// ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
 export function BP004(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;
@@ -145,16 +143,8 @@ export function BP004(data) {
     //         if (response.status === 200 || response.status === 201) {
     //             title_id = response.json().data.title_id;
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`200 ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);
-    //             }
-    //         } else {
     //             if (`${__ENV.ENV}` != 'INT') {
     //                 const requestBody = requests[index][2];
-    //                 console.error(`VU${exec.vu.idInTest} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
 
     // Batch 1
     if (token) {

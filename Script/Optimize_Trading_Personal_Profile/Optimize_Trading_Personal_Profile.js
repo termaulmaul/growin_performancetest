@@ -1,26 +1,10 @@
 // Command
-// Run Multiple BP
-// ../../k6 run Optimize_Trading_Personal_Profile_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Optimize_Trading_Personal_Profile/Web/LoadTest/Manual_LoadTest_0303_0928.html
-
-// Run Single BP Web
-// ../../k6 run Optimize_Trading_Personal_Profile.js -e RUNBY=Manual -e ENV=INT -e USER=400 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Optimize_Trading_Personal_Profile/Web/BP001/Manual/Manual_DryRun_0306_1626_BP001.html
-
-// Run Single BP iOS
-// ../../k6 run Optimize_Trading_Personal_Profile.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS --out dashboard=export=../../Report/Optimize_Trading_Personal_Profile/iOS/BP001/Manual/Manual_DryRun_0223_1412_BP001_Local.html
-// ../../k6 run Optimize_Trading_Personal_Profile.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=iOS --out dashboard=export=../../Report/Optimize_Trading_Personal_Profile/iOS/BP002/Manual/Manual_DryRun_0212_1024_BP002_Local.html
-
-// Run Single BP Android
-// ../../k6 run Optimize_Trading_Personal_Profile.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Android --out dashboard=export=../../Report/Optimize_Trading_Personal_Profile/Android/BP001/Manual/Manual_DryRun_0212_1349_BP001_Local.html
-// ../../k6 run Optimize_Trading_Personal_Profile.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=Android --out dashboard=export=../../Report/Optimize_Trading_Personal_Profile/Android/BP002/Manual/Manual_DryRun_0212_1024_BP002_Local.html
 
 import { textSummary } from "../../Helper/textSummary.js";
 import { htmlReport } from '../../Helper/bundle.js';
 import { BP001 as BP001_Web } from "./Web/BP001.js";
-// import { BP002 as BP002_Web } from "./Web/BP002.js";
 import { BP001 as BP001_iOS } from "./iOS/BP001.js";
-// import { BP002 as BP002_iOS } from "./iOS/BP002.js";
 import { BP001 as BP001_Android } from "./Android/BP001.js";
-// import { BP002 as BP002_Android } from "./Android/BP002.js";
 import http from "k6/http";
 import { sleep } from "k6";
 import { Rate } from "k6/metrics";
@@ -48,8 +32,6 @@ export const BP001 =
 // export const BP002 = 
 //   platform === 'iOS' ? BP002_iOS :
 //   BP002_Android;
-
-// ✅ RETRY CONFIGURATION
 const MAX_RETRY_ATTEMPTS = 10;
 const RETRY_DELAY = 1; // seconds between retry attempts
 
@@ -57,8 +39,6 @@ const BP_USER_PERCENTAGE = {
     BP001: 100,
     BP002: 100,
 };
-
-// ✅ Function untuk calculate user distribution
 function calculateUserDistribution(totalUsers, selectedBPs) {
     const distribution = {};
     let totalPercentage = 0;
@@ -216,8 +196,6 @@ function getUserCredentials(userNum, bpOffset = 0) {
     
     return { email: email, password: 'M@nsek.123' };
 }
-
-// ✅ LOGIN WITH RETRY - Max 10 attempts
 function loginWithRetry(base_url, credentials, userKey, vuId) {
     const loginPayload = JSON.stringify({
         password: credentials.password,
@@ -296,8 +274,6 @@ export function setup() {
     let totalPinSuccess = 0;
     let totalPinFailed = 0;
     let totalLoginRetries = 0;
-    
-    // ✅ Object untuk menyimpan channel_id per BP
     const channelIds = {};
     
     selectedBPs.forEach((bp, bpIndex) => {
@@ -313,8 +289,6 @@ export function setup() {
                 userKey: globalUserOffset + localUserIndex
             };
         }
-        
-        // ✅ Process in batches with retry
         const numBatches = Math.ceil(usersForThisBP / BATCH_SIZE);
         
         for (let batchNum = 0; batchNum < numBatches; batchNum++) {
@@ -327,8 +301,6 @@ export function setup() {
                 const credentials = getUserCredentials(i, globalUserOffset);
                 const userKey = globalUserOffset + i;
                 const vuId = globalVuOffset + i - 1;
-                
-                // ✅ Step 1: Login with retry
                 const loginResult = loginWithRetry(base_url, credentials, userKey, vuId);
                 
                 if (loginResult.success) {
@@ -343,8 +315,6 @@ export function setup() {
                         pin_token: null,
                         bp: bp
                     };
-                    
-                    // ✅ Step 2: PIN Login (UNTUK SEMUA USER)
                     const pinPayload = JSON.stringify({ value: "123456" });
                     const pinHeaders = {
                         'Content-Type': 'application/json',
@@ -394,9 +364,6 @@ export function setup() {
         globalUserOffset += usersForThisBP;
         globalVuOffset += usersForThisBP;
     });
-    
-    
-    // ✅ Summary
     console.log(`\n📊 Setup Summary:`);
     console.log(`   ✅ Login: ${totalLoginSuccess}/${TOTAL_USER} success (${((totalLoginSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
     if (totalLoginFailed > 0) console.error(`   ❌ Login Failed: ${totalLoginFailed}`);

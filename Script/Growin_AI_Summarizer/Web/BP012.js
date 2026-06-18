@@ -88,8 +88,6 @@ const StockDetailBrokerActivityTab = {
         http_reqs: new Counter("sample_Marketdata_Gpt_FeedbackUpdate"),
     },
 };
-
-// ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
 export function BP012(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;

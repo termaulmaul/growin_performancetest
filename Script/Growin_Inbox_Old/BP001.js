@@ -45,9 +45,6 @@ export const options = {
 //             vus: 1,
 //             iterations: 1,
 //             maxDuration: '1h',
-//         },
-//     },
-// };
 
 // /inbox/api/v1
 // /inbox/api/v1
@@ -139,7 +136,6 @@ export default function () {
     if (res.status === 200) {
         token = res.json().data.token;
     } else {
-        // console.error(`${email} Failed to Login || Status: ${res.status} | Body: ${res.body}`);
     }
     sleep(0,25);
     
@@ -282,7 +278,6 @@ export default function () {
                 check(response, {
                     [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200 || r.status === 201
                 });
-                // console.error(`ERROR ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);
             }
         });
     }

@@ -1,22 +1,4 @@
 // Command
-// Run Multiple BP
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Community/Web/LoadTest/Manual_LoadTest_0107_1459.html
-
-// Run Single BP
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=250 -e DURATION=2m -e NUMSTART=101 -e SCENARIO=BP001 --out dashboard=export=../../../Report/Growin_Community/Web/BP001/Manual/Manual_DryRun_0123_0936_BP001_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=250 -e DURATION=2m -e NUMSTART=101 -e SCENARIO=BP002 --out dashboard=export=../../../Report/Growin_Community/Web/BP002/Manual/Manual_DryRun_0123_0939_BP002_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=250 -e DURATION=15m -e NUMSTART=101 -e SCENARIO=BP003 --out dashboard=export=../../../Report/Growin_Community/Web/BP003/Manual/Manual_DryRun_0202_1056_BP003_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=2051 -e SCENARIO=BP004 --out dashboard=export=../../../Report/Growin_Community/Web/BP004/Manual/Manual_DryRun_1219_1442_BP004_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=250 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP005 --out dashboard=export=../../../Report/Growin_Community/Web/BP005/Manual/Manual_DryRun_0127_2214_BP005_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=250 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP006 --out dashboard=export=../../../Report/Growin_Community/Web/BP006/Manual/Manual_DryRun_0202_1513_BP006_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=250 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP007 --out dashboard=export=../../../Report/Growin_Community/Web/BP007/Manual/Manual_DryRun_1218_2016_BP007_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=75 -e DURATION=5m -e NUMSTART=2001 -e SCENARIO=BP008 --out dashboard=export=../../../Report/Growin_Community/Web/BP008/Manual/Manual_DryRun_1203_2010_BP008_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=250 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP009 --out dashboard=export=../../../Report/Growin_Community/Web/BP009/Manual/Manual_DryRun_1217_1455_BP009_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=250 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP010 --out dashboard=export=../../../Report/Growin_Community/Web/BP010/Manual/Manual_DryRun_1217_1501_BP010_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=50 -e DURATION=5m -e NUMSTART=2001 -e SCENARIO=BP011 --out dashboard=export=../../../Report/Growin_Community/Web/BP011/Manual/Manual_DryRun_1203_2018_BP011_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=250 -e DURATION=5m -e NUMSTART=101 -e SCENARIO=BP012 --out dashboard=export=../../../Report/Growin_Community/Web/BP012/Manual/Manual_DryRun_1227_1615_BP012_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=25 -e DURATION=1m -e NUMSTART=2051 -e SCENARIO=BP013 --out dashboard=export=../../../Report/Growin_Community/Web/BP013/Manual/Manual_DryRun_1227_1807_BP013_Local.html
-// ../../../k6 run Growin_Community_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=50 -e DURATION=5m -e NUMSTART=2001 -e SCENARIO=BP014 --out dashboard=export=../../../Report/Growin_Community/Web/BP014/Manual/Manual_DryRun_1227_1627_BP014_Local.html
 
 import { textSummary } from "../../../Helper/textSummary.js";
 import { htmlReport } from '../../../Helper/bundle.js';
@@ -39,8 +21,6 @@ import { sleep } from "k6";
 import { Rate } from "k6/metrics";
 
 export { BP001, BP002, BP003, BP004, BP005, BP006, BP007, BP008, BP009, BP010, BP011, BP012, BP013, BP014 }
-
-// ✅ DEFINISI PERSENTASE USER PER BP
 const BP_USER_PERCENTAGE = {
     BP001: 40,
     BP002: 10,
@@ -57,8 +37,6 @@ const BP_USER_PERCENTAGE = {
     BP013: 1,
     BP014: 1,
 };
-
-// ✅ Function untuk calculate user distribution
 function calculateUserDistribution(totalUsers, selectedBPs) {
     const distribution = {};
     let totalPercentage = 0;
@@ -214,8 +192,6 @@ function getUserCredentials(userNum, bpOffset = 0) {
     
     return { email: email, password: 'M@nsek.123' };
 }
-
-// ✅ SETUP FUNCTION - SEMUA BP mendapat PIN
 export function setup() {
     console.log('📊 User Distribution:');
     Object.keys(userDistribution).forEach(bp => {
@@ -241,8 +217,6 @@ export function setup() {
     let totalLoginFailed = 0;
     let totalPinSuccess = 0;
     let totalPinFailed = 0;
-    
-    // ✅ Object untuk menyimpan channel_id per BP
     const channelIds = {};
     
     selectedBPs.forEach((bp, bpIndex) => {
@@ -258,8 +232,6 @@ export function setup() {
                 userKey: globalUserOffset + localUserIndex
             };
         }
-        
-        // ✅ Process in batches
         const numBatches = Math.ceil(usersForThisBP / BATCH_SIZE);
         
         for (let batchNum = 0; batchNum < numBatches; batchNum++) {
@@ -272,8 +244,6 @@ export function setup() {
                 const credentials = getUserCredentials(i, globalUserOffset);
                 const userKey = globalUserOffset + i;
                 const vuId = globalVuOffset + i - 1;
-                
-                // ✅ Step 1: Regular Login
                 const loginPayload = JSON.stringify({
                     password: credentials.password,
                     email: credentials.email,
@@ -305,8 +275,6 @@ export function setup() {
                         pin_token: null,
                         bp: bp
                     };
-                    
-                    // ✅ Step 2: PIN Login (UNTUK SEMUA USER)
                     const pinPayload = JSON.stringify({ value: "123456" });
                     const pinHeaders = {
                         'Content-Type': 'application/json',
@@ -359,9 +327,6 @@ export function setup() {
         globalUserOffset += usersForThisBP;
         globalVuOffset += usersForThisBP;
     });
-    
-    
-    // ✅ Summary
     console.log(`\n📊 Setup Summary:`);
     console.log(`   ✅ Login: ${totalLoginSuccess}/${TOTAL_USER} success (${((totalLoginSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
     if (totalLoginFailed > 0) console.error(`   ❌ Login Failed: ${totalLoginFailed}`);

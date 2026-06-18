@@ -1,9 +1,4 @@
 // Command
-// Run Multiple BP
-// ../../k6 run OMO_Android_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=280 -e DURATION=2h -e NUMSTART=101 --out dashboard=export=../../Report/OMO_Android/LoadTest/Manual_LoadTest_1120_2003.html
-
-// Run Single BP
-// ../../k6 run OMO_Android_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=316 -e DURATION=30s -e NUMSTART=101 --out dashboard=export=../../Report/OMO_Android/BP001/Manual/Manual_LoadTest_1107_1731.html
 
 
 
@@ -23,8 +18,6 @@ import http from "k6/http";
 import { sleep } from "k6";
 
 export { BP001, BP002, BP003, BP004, BP005, BP006, BP007, BP008, BP009, BP010 }
-
-// ✅ DEFINISI PERSENTASE USER PER BP
 const BP_USER_PERCENTAGE = {
     BP001: 25,    // 25% dari total user
     BP002: 25,    // 25% dari total user
@@ -37,8 +30,6 @@ const BP_USER_PERCENTAGE = {
     BP009: 6.25,  // 6.25% dari total user
     BP010: 6.25,  // 6.25% dari total user
 };
-
-// ✅ Function untuk calculate user distribution
 function calculateUserDistribution(totalUsers, selectedBPs) {
     const distribution = {};
     let totalPercentage = 0;
@@ -139,8 +130,6 @@ function getUserCredentials(userNum, bpOffset = 0) {
     
     return { email: email, password: 'M@nsek.123' };
 }
-
-// ✅ SETUP FUNCTION - SEMUA BP mendapat PIN dan UUID
 export function setup() {
     console.log('📊 User Distribution:');
     Object.keys(userDistribution).forEach(bp => {
@@ -183,8 +172,6 @@ export function setup() {
                 userKey: globalUserOffset + localUserIndex
             };
         }
-        
-        // ✅ Process in batches
         const numBatches = Math.ceil(usersForThisBP / BATCH_SIZE);
         
         for (let batchNum = 0; batchNum < numBatches; batchNum++) {
@@ -197,8 +184,6 @@ export function setup() {
                 const credentials = getUserCredentials(i, globalUserOffset);
                 const userKey = globalUserOffset + i;
                 const vuId = globalVuOffset + i - 1;
-                
-                // ✅ Step 1: Regular Login
                 const loginPayload = JSON.stringify({
                     password: credentials.password,
                     email: credentials.email,
@@ -227,8 +212,6 @@ export function setup() {
                         user_uuid: null,
                         bp: bp
                     };
-                    
-                    // ✅ Step 2: PIN Login (UNTUK SEMUA USER)
                     const pinPayload = JSON.stringify({ value: "123456" });
                     const pinHeaders = {
                         'Cookie': `ACCESS_TOKEN=${token}`,
@@ -251,8 +234,6 @@ export function setup() {
                         }
                         tokens[userKey].pin_token = null;
                     }
-                    
-                    // ✅ Step 3: Get UUID (UNTUK SEMUA USER)
                     const marginDraftHeaders = {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
@@ -306,8 +287,6 @@ export function setup() {
         globalUserOffset += usersForThisBP;
         globalVuOffset += usersForThisBP;
     });
-    
-    // ✅ Summary
     console.log(`\n📊 Setup Summary:`);
     console.log(`   ✅ Login: ${totalLoginSuccess}/${TOTAL_USER} success (${((totalLoginSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
     if (totalLoginFailed > 0) console.error(`   ❌ Login Failed: ${totalLoginFailed}`);

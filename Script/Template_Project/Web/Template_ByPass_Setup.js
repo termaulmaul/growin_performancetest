@@ -63,8 +63,6 @@ const VerifyPage = {
         http_reqs: new Counter("sample_Auth_Protected_Otp_Validate"),
     },
 };
-
-// ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
 export function BP001(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;
@@ -72,23 +70,15 @@ export function BP001(data) {
     const runTimestamp = Date.now();
     
     const deviceId = `TEST_${runTimestamp}_${vuId}_${iterationId}`;
-    
-    // ✅ Get mapping from setup
     // const mapping = data.vuMapping[vuId];
     // if (!mapping) {
-    //     console.error(`❌ VU${vuId} - No mapping found, skipping iteration`);
     //     return;
-    // }
     
     const userKey = mapping.userKey;
-    
-    // ✅ CRITICAL: Ambil token langsung dari setup - TIDAK perlu login ulang
     const userTokenData = data.tokens[userKey];
     
     // if (!userTokenData || !userTokenData.token || !userTokenData.pin_token) {
-    //     console.error(`❌ VU${vuId} (${userTokenData?.email}) - No valid tokens from setup, skipping iteration`);
     //     return;
-    // }
     
     // const token = userTokenData.token;
     // const pinToken = userTokenData.pin_token;

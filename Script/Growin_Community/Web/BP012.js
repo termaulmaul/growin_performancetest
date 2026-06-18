@@ -19,21 +19,15 @@ const SharePortfolio = {
         http_reqs: new Counter("sample_Socialinvesting_PortfolioSharing_ShareToCommunity"),
     },
 };
-
-// ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
 export function BP012(data) {
     const scenarioName = 'BP012';
     const base_url = data.base_url;
     const isIntEnv = `${__ENV.ENV}` === 'INT';
-    
-    // ✅ GET CORRECT TOKEN FROM BP-SPECIFIC ARRAY
     const bp012Tokens = data.bpTokens[scenarioName];
     if (!bp012Tokens || bp012Tokens.length === 0) {
         console.error(`❌ ${scenarioName} - No tokens available!`);
         return;
     }
-    
-    // ✅ USE ITERATION INDEX TO GET CORRECT USER
     const iterationIndex = exec.scenario.iterationInInstance;
     const tokenIndex = iterationIndex % bp012Tokens.length; // Wrap around if iterations > tokens
     
@@ -42,8 +36,6 @@ export function BP012(data) {
         console.error(`❌ ${scenarioName} Iteration ${iterationIndex} - No valid token at index ${tokenIndex}!`);
         return;
     }
-    
-    // ✅ CRITICAL VALIDATION - ENSURE CORRECT POOL
     if (userToken.pool !== 'REGULAR') {
         console.error(`❌ CRITICAL: ${scenarioName} using ${userToken.pool} user (${userToken.email}) instead of REGULAR! ABORTING.`);
         return;
@@ -59,10 +51,8 @@ export function BP012(data) {
 
     // // Final safety check sebelum melanjutkan ke API calls
     // if (!channel_id) {
-    //     console.error(`   ❌ ${email} - Still no channel_id after all fallbacks, aborting iteration`);
     //     // SystemMetrics.noChannelFound.add(1);
     //     return;
-    // }
 
     // Portfolio ID
     let portfolio_id;

@@ -49,9 +49,6 @@ export const options = {
 //             vus: 1,
 //             iterations: 1,
 //             maxDuration: '1h',
-//         },
-//     },
-// };
 
 // /auth/api/v1/login
 // /user/api/v1/user_settings

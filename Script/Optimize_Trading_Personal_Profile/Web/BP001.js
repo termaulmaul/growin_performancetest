@@ -224,8 +224,6 @@ const Home = {
         http_reqs: new Counter("sample_Marketdata_Marketinfo_UpcomingCorporateActions"),
     }
 };
-
-// ✅ EXPORTED FUNCTION
 export function BP001(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;
@@ -375,23 +373,14 @@ export function BP001(data) {
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
     //             metric.errorRate.add(true);
     //             metric.errorCount.add(1);
     //             metric.requestRate.add(false);
     //             metric.http_reqs.add(1);
     //             check(response, {
     //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
     //             if (`${__ENV.ENV}` != 'INT') {
     //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
 
     // // Batch 3
     // if (token) {
@@ -401,7 +390,6 @@ export function BP001(data) {
 
     //     const Auth_Protected_PasswordRemindLater_Payload = JSON.stringify({ 
     //         current_phase: 1 
-    //     });
 
     //     const requests = [
     //         ['POST', urls[0], Auth_Protected_PasswordRemindLater_Payload, { headers: headers }],
@@ -421,23 +409,14 @@ export function BP001(data) {
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
     //             metric.errorRate.add(true);
     //             metric.errorCount.add(1);
     //             metric.requestRate.add(false);
     //             metric.http_reqs.add(1);
     //             check(response, {
     //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
     //             if (`${__ENV.ENV}` != 'INT') {
     //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
 
     // // Batch 4
     // if (token) {
@@ -463,23 +442,14 @@ export function BP001(data) {
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
     //             metric.errorRate.add(true);
     //             metric.errorCount.add(1);
     //             metric.requestRate.add(false);
     //             metric.http_reqs.add(1);
     //             check(response, {
     //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
     //             if (`${__ENV.ENV}` != 'INT') {
     //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
 
     // // Batch 5
     // if (token) {
@@ -505,23 +475,14 @@ export function BP001(data) {
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
     //             metric.errorRate.add(true);
     //             metric.errorCount.add(1);
     //             metric.requestRate.add(false);
     //             metric.http_reqs.add(1);
     //             check(response, {
     //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
     //             if (`${__ENV.ENV}` != 'INT') {
     //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
 
     // // Batch 6
     // let watchlistGroupID;
@@ -552,41 +513,22 @@ export function BP001(data) {
     //                     watchlistGroupID = watchlistData.data[0].id;
                         
     //                     if (`${__ENV.ENV}` != 'INT') {
-    //                         console.log(`${email} Got watchlistID: ${watchlistGroupID}`);
-    //                     }
-    //                 } else {
     //                     if (`${__ENV.ENV}` != 'INT') {
-    //                         console.error(`${email} No watchlist data found in response`);
-    //                     }
-    //                 }
-    //             } catch (e) {
     //                 if (`${__ENV.ENV}` != 'INT') {
-    //                     console.error(`${email} Failed to parse watchlistgroup response: ${e.message}`);
-    //                 }
-    //             }
 
     //             metric.errorRate.add(false);
     //             metric.errorCount.add(0);
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
     //             metric.errorRate.add(true);
     //             metric.errorCount.add(1);
     //             metric.requestRate.add(false);
     //             metric.http_reqs.add(1);
     //             check(response, {
     //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
     //             if (`${__ENV.ENV}` != 'INT') {
     //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
 
     // // Batch 7
     // if (token) {
@@ -612,23 +554,14 @@ export function BP001(data) {
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
     //             metric.errorRate.add(true);
     //             metric.errorCount.add(1);
     //             metric.requestRate.add(false);
     //             metric.http_reqs.add(1);
     //             check(response, {
     //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
     //             if (`${__ENV.ENV}` != 'INT') {
     //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
 
     // // Batch 8
     // if (token) {
@@ -654,23 +587,14 @@ export function BP001(data) {
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
     //             metric.errorRate.add(true);
     //             metric.errorCount.add(1);
     //             metric.requestRate.add(false);
     //             metric.http_reqs.add(1);
     //             check(response, {
     //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
     //             if (`${__ENV.ENV}` != 'INT') {
     //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
 
     // // Batch 9
     // if (token) {
@@ -696,23 +620,14 @@ export function BP001(data) {
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
     //             metric.errorRate.add(true);
     //             metric.errorCount.add(1);
     //             metric.requestRate.add(false);
     //             metric.http_reqs.add(1);
     //             check(response, {
     //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
     //             if (`${__ENV.ENV}` != 'INT') {
     //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
 
     // // Batch 10
     // if (token) {
@@ -738,23 +653,14 @@ export function BP001(data) {
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
     //             metric.errorRate.add(true);
     //             metric.errorCount.add(1);
     //             metric.requestRate.add(false);
     //             metric.http_reqs.add(1);
     //             check(response, {
     //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
     //             if (`${__ENV.ENV}` != 'INT') {
     //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
 
     // // Batch 11
     // if (token) {
@@ -780,23 +686,14 @@ export function BP001(data) {
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
     //             metric.errorRate.add(true);
     //             metric.errorCount.add(1);
     //             metric.requestRate.add(false);
     //             metric.http_reqs.add(1);
     //             check(response, {
     //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
     //             if (`${__ENV.ENV}` != 'INT') {
     //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
 
     // // Batch 12
     // if (token) {
@@ -822,23 +719,14 @@ export function BP001(data) {
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
     //             metric.errorRate.add(true);
     //             metric.errorCount.add(1);
     //             metric.requestRate.add(false);
     //             metric.http_reqs.add(1);
     //             check(response, {
     //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
     //             if (`${__ENV.ENV}` != 'INT') {
     //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
 
     // // Batch 13
     // if (token) {
@@ -864,23 +752,14 @@ export function BP001(data) {
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
     //             metric.errorRate.add(true);
     //             metric.errorCount.add(1);
     //             metric.requestRate.add(false);
     //             metric.http_reqs.add(1);
     //             check(response, {
     //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
     //             if (`${__ENV.ENV}` != 'INT') {
     //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
 
     // // Batch 14
     // if (token) {
@@ -906,23 +785,14 @@ export function BP001(data) {
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
     //             metric.errorRate.add(true);
     //             metric.errorCount.add(1);
     //             metric.requestRate.add(false);
     //             metric.http_reqs.add(1);
     //             check(response, {
     //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
     //             if (`${__ENV.ENV}` != 'INT') {
     //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
 
     // // Batch 15
     // if (token) {
@@ -948,23 +818,14 @@ export function BP001(data) {
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
     //             metric.errorRate.add(true);
     //             metric.errorCount.add(1);
     //             metric.requestRate.add(false);
     //             metric.http_reqs.add(1);
     //             check(response, {
     //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
     //             if (`${__ENV.ENV}` != 'INT') {
     //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
 
     // // Batch 16
     // if (token) {
@@ -990,23 +851,14 @@ export function BP001(data) {
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
     //             metric.errorRate.add(true);
     //             metric.errorCount.add(1);
     //             metric.requestRate.add(false);
     //             metric.http_reqs.add(1);
     //             check(response, {
     //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
     //             if (`${__ENV.ENV}` != 'INT') {
     //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
 
     // // Batch 17
     // if (token) {
@@ -1032,23 +884,14 @@ export function BP001(data) {
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
     //             metric.errorRate.add(true);
     //             metric.errorCount.add(1);
     //             metric.requestRate.add(false);
     //             metric.http_reqs.add(1);
     //             check(response, {
     //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
     //             if (`${__ENV.ENV}` != 'INT') {
     //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
 
     // // Batch 18
     // if (token) {
@@ -1074,23 +917,14 @@ export function BP001(data) {
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
     //             metric.errorRate.add(true);
     //             metric.errorCount.add(1);
     //             metric.requestRate.add(false);
     //             metric.http_reqs.add(1);
     //             check(response, {
     //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
     //             if (`${__ENV.ENV}` != 'INT') {
     //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
     
     // // Batch 19
     // if (token) {
@@ -1116,23 +950,14 @@ export function BP001(data) {
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
     //             metric.errorRate.add(true);
     //             metric.errorCount.add(1);
     //             metric.requestRate.add(false);
     //             metric.http_reqs.add(1);
     //             check(response, {
     //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
     //             if (`${__ENV.ENV}` != 'INT') {
     //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
 
     // // Batch 20
     // if (token) {
@@ -1158,22 +983,13 @@ export function BP001(data) {
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
-    //             }
-    //         } else {
     //             metric.errorRate.add(true);
     //             metric.errorCount.add(1);
     //             metric.requestRate.add(false);
     //             metric.http_reqs.add(1);
     //             check(response, {
     //                 [`ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body}`]: (r) => r.status === 200
-    //             });
     //             if (`${__ENV.ENV}` != 'INT') {
     //                 const requestBody = requests[index][2];
-    //                 console.error(`${email} ERROR ${urls[index]} || Status: ${response.status} || Response Body: ${response.body} || Request Body: ${requestBody}`);
-    //             }
-    //         }
-    //     });
-    // }
     sleep(0.25);
 }

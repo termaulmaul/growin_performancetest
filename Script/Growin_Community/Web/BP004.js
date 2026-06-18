@@ -56,21 +56,15 @@ function formatDate(date) {
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
 }
-
-// ✅ FIXED FUNCTION - menggunakan bpTokens untuk mapping yang benar
 export function BP004(data) {
     const scenarioName = 'BP004';
     const base_url = data.base_url;
     const isIntEnv = `${__ENV.ENV}` === 'INT';
-    
-    // ✅ GET CORRECT TOKEN FROM BP-SPECIFIC ARRAY
     const bp004Tokens = data.bpTokens[scenarioName];
     if (!bp004Tokens || bp004Tokens.length === 0) {
         console.error(`❌ ${scenarioName} - No tokens available!`);
         return;
     }
-    
-    // ✅ USE ITERATION INDEX TO GET CORRECT USER
     const iterationIndex = exec.scenario.iterationInInstance;
     const tokenIndex = iterationIndex % bp004Tokens.length; // Wrap around if iterations > tokens
     
@@ -79,8 +73,6 @@ export function BP004(data) {
         console.error(`❌ ${scenarioName} Iteration ${iterationIndex} - No valid token at index ${tokenIndex}!`);
         return;
     }
-    
-    // ✅ CRITICAL VALIDATION - ENSURE CORRECT POOL
     if (userToken.pool !== 'SUHU') {
         console.error(`❌ CRITICAL: ${scenarioName} using ${userToken.pool} user (${userToken.email}) instead of SUHU! ABORTING.`);
         return;
@@ -192,8 +184,6 @@ export function BP004(data) {
             ['GET', urls[0], null, { headers: stepOneHeaders }],
         ];
         const responses = http.batch(requests);
-
-        // ✅ EXTRACT ID FIRST
         const response = responses[0];
         if (response.status === 200) {
             try {

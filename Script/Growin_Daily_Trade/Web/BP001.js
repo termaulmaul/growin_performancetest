@@ -18,8 +18,6 @@ const DailyTradeData = {
         http_reqs: new Counter("sample_Marketdata_DailyTrade"),
     },
 };
-
-// ✅ EXPORTED FUNCTION
 export function BP001(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;

@@ -70,8 +70,6 @@ const CalendarDetail = {
         http_reqs: new Counter("sample_CorporateActionsCalendarOrder_Detail_MyEvents_Selected_date"),
     },
 };
-
-// ✅ EXPORTED FUNCTION
 export function BP001(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;

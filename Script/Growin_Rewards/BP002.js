@@ -38,13 +38,9 @@ const Homescreen = {
         http_reqs: new Counter("sample_Gamification_Reward_Redeem"),
     },
 };
-
-// ✅ EXPORTED FUNCTION - dengan proper VU mapping
 export function BP002(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;
-    
-    // ✅ Get userKey dari VU mapping
     const mapping = data.vuMapping[vuId];
     if (!mapping) {
         console.error(`❌ VU${vuId} - No mapping found, skipping iteration`);
@@ -169,7 +165,6 @@ export function BP002(data) {
                     try {
                         const rewardData = response.json();
                         if (rewardData && rewardData.data && rewardData.data.length > 0) {
-                            // ✅ CORRECTED: id is a string, not an array
                             // rewardID = rewardData.data[0].id;
                             const iteration = exec.scenario.iterationInInstance;
                             const index = iteration % rewardData.data.length;

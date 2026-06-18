@@ -4,17 +4,9 @@
 //
 // COMMAND EXAMPLES:
 //
-// Run Multiple BP (LoadTest):
-//   ../../../k6 run Growin_Ratelimit_Reset_Password_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 -e PLATFORM=Web --out dashboard=export=../../../Report/Growin_Ratelimit_Reset_Password/Web/LoadTest/Manual_LoadTest_0107_1459.html
 //
-// Run Single BP Web:
-//   ../../k6 run Growin_Ratelimit_Reset_Password.js -e RUNBY=Manual -e ENV=INT -e USER=1000 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Ratelimit_Reset_Password/Web/BP001/Manual/Manual_DryRun_0506_1353_BP001.html
 //
-// Run Single BP iOS:
-//   ../../k6 run Growin_Ratelimit_Reset_Password.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Ratelimit_Reset_Password/iOS/BP001/Manual/Manual_DryRun_0428_1403_BP001.html
 //
-// Run Single BP Android:
-//   ../../k6 run Growin_Ratelimit_Reset_Password.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Android --out dashboard=export=../../Report/Growin_Ratelimit_Reset_Password/Android/BP001/Manual/Manual_DryRun_0428_1100_BP001.html
 //
 // ─────────────────────────────────────────────────────────────────────────────
 // numStart Priority Rules (per BP):
@@ -35,12 +27,8 @@ import { BP001 as BP001_Web } from './Web/BP001.js';
 import { BP002 as BP002_Web } from './Web/BP002.js';
 
 // ─── BP FUNCTION IMPORTS — iOS ────────────────────────────────────────────────
-// import { BP001 as BP001_iOS } from './iOS/BP001.js';
-// import { BP002 as BP002_iOS } from './iOS/BP002.js';
 
 // ─── BP FUNCTION IMPORTS — Android ───────────────────────────────────────────
-// import { BP001 as BP001_Android } from './Android/BP001.js';
-// import { BP002 as BP002_Android } from './Android/BP002.js';
 
 import http from 'k6/http';
 import { sleep } from 'k6';
@@ -65,14 +53,6 @@ const BP_CONFIG = {
         BP001: { fn: BP001_Web, skipSetupLogin: true },
         BP002: { fn: BP002_Web, skipSetupLogin: false },
     },
-    // iOS: {
-    //     BP001: { fn: BP001_iOS, skipSetupLogin: true,  numStart: 1001 },
-    //     BP002: { fn: BP002_iOS, skipSetupLogin: false                  },
-    // },
-    // Android: {
-    //     BP001: { fn: BP001_Android, skipSetupLogin: false, numStart: 1001 },
-    //     BP002: { fn: BP002_Android, skipSetupLogin: false                  },
-    // },
 };
 
 // ─── User distribution (percentage per BP across all platforms) ───────────────
@@ -314,7 +294,6 @@ function fetchTradingProfile(base_url, token, userKey, vuId, email) {
 //     token,        ← session token  (null if skipSetupLogin or login failed)
 //     pin_token,    ← PIN token      (null if skipped or failed)
 //     user_id, client_id, SID, ksei_acc_no, account_name
-//   }
 //
 // vuMapping structure:
 //   { [vuId]: { bp, userKey } }

@@ -78,8 +78,6 @@ const KeystatFeature = {
         http_reqs: new Counter("sample_Marketdata_KeyStatistic_Liquidity"),
     }
 };
-
-// ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
 export function BP002(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;

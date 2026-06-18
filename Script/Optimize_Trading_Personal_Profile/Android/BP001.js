@@ -219,8 +219,6 @@ const Home = {
         http_reqs: new Counter("sample_Marketdata_Marketinfo_UpcomingCorporateActions"),
     }
 };
-
-// ✅ EXPORTED FUNCTION
 export function BP001(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;

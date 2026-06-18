@@ -64,8 +64,6 @@ export function BP008(data) {
         'Accept-Encoding':'gzip, deflate, br',
         'Accept':'*/*',
     };
-
-    // ✅ ADD NAME TAG to group all order creation requests
     let res = http.post(base_url + '/eipo/mock/order', EIPO_Order_Payload, { headers: orderHeaders, tags: { name: 'Create_EIPO_Order' }});
 
     let orderID = null;
@@ -92,8 +90,6 @@ export function BP008(data) {
             'Accept-Encoding':'gzip, deflate, br',
             'Accept':'*/*',
         };
-
-        // ✅ ADD NAME TAG to group all delete requests
         const requests = [
             ['DELETE', base_url + `/eipo/mock/order/${orderID}`, null, { headers: stepOneHeaders, tags: { name: 'Delete_EIPO_Order' }} ],
         ];
@@ -136,8 +132,6 @@ export function BP008(data) {
             'Accept-Encoding':'gzip, deflate, br',
             'Accept':'*/*',
         };
-
-        // ✅ ADD NAME TAG - this URL is already good (no dynamic ID)
         const requests = [
             ['GET', base_url + `/eipo/mock/order?page=1&per_page=20`, null, { headers: stepTwoHeaders, tags: { name: 'Get_EIPO_Orders' } }], // ✅ Groups all list requests 
         ];

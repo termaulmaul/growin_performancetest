@@ -59,21 +59,15 @@ const CommunityDetailUserTrialSwitch = {
         http_reqs: new Counter("sample_Socialinvesting_Social_Switch"),
     },
 };
-
-// ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
 export function BP005(data) {
     const scenarioName = 'BP005';
     const base_url = data.base_url;
     const isIntEnv = `${__ENV.ENV}` === 'INT';
-    
-    // ✅ GET CORRECT TOKEN FROM BP-SPECIFIC ARRAY
     const bp005Tokens = data.bpTokens[scenarioName];
     if (!bp005Tokens || bp005Tokens.length === 0) {
         console.error(`❌ ${scenarioName} - No tokens available!`);
         return;
     }
-    
-    // ✅ USE ITERATION INDEX TO GET CORRECT USER
     const iterationIndex = exec.scenario.iterationInInstance;
     const tokenIndex = iterationIndex % bp005Tokens.length; // Wrap around if iterations > tokens
     
@@ -82,8 +76,6 @@ export function BP005(data) {
         console.error(`❌ ${scenarioName} Iteration ${iterationIndex} - No valid token at index ${tokenIndex}!`);
         return;
     }
-    
-    // ✅ CRITICAL VALIDATION - ENSURE CORRECT POOL
     if (userToken.pool !== 'REGULAR') {
         console.error(`❌ CRITICAL: ${scenarioName} using ${userToken.pool} user (${userToken.email}) instead of REGULAR! ABORTING.`);
         return;
@@ -161,10 +153,7 @@ export function BP005(data) {
                             console.log(`[BATCH 1] Type: ${typeof switchChannelID}`);
                         } 
                         // else {
-                        //     console.error(`${email} Tidak ada channel lain selain ${channel_id}`);
                         //     switchChannelID = null;
-                        //     console.log(`[BATCH 1] switchChannelID SET TO NULL`);
-                        // }
                     }
                 } catch (parseError) {
                     console.error(`${email} Error parsing response: ${parseError}`);

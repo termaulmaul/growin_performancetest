@@ -98,8 +98,6 @@ const StockDetailNewsTab = {
         http_reqs: new Counter("sample_News"),
     },
 };
-
-// ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
 export function BP008(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;

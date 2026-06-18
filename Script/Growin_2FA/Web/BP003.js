@@ -398,10 +398,8 @@ export function BP003(data) {
     }
 
     // if (!test3Token || !test3PinToken) {
-    //     console.error(`${email} ❌ Cannot proceed with device management - missing tokens`);
     //     sleep(0.25);
     //     return;
-    // }
 
     const deviceMgmtHeaders = {
         'Cookie': `ACCESS_TOKEN=${test3Token}; PIN_ACCESS_TOKEN=${test3PinToken}`,

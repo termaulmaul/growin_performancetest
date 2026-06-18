@@ -38,8 +38,6 @@ const FinancialSummarizerBackendAnalysisFeature = {
         http_reqs: new Counter("sample_Marketdata_Emiten_InvestorChartAgg"),
     }
 };
-
-// ✅ EXPORTED FUNCTION - menggunakan channel_id dari setup
 export function BP005(data) {
     const vuId = exec.vu.idInTest;
     const base_url = data.base_url;

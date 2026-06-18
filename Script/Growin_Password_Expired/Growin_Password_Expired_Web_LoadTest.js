@@ -8,33 +8,14 @@
 // // ../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=Android --out dashboard=export=../../Report/Growin_Password_Expired/Android/BP002/Manual/Manual_DryRun_0113_1554_BP002_Local.html
 
 // // Run Single BP iOS
-// ../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=1m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Password_Expired/iOS/BP001/Manual/Manual_DryRun_0511_1305_BP001_Local.html
-// ../../k6 run --local-ips=10.184.120.42-10.184.120.47 Growin_Password_Expired_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=2h -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Password_Expired/iOS/BP001/Manual/Manual_DryRun_0428_1410_BP001_Local.html
 // // ../../k6 run Growin_Password_Expired_Web_LoadTest.js -e RUNBY=Manual -e ENV=INT -e USER=300 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Password_Expired/iOS/BP002/Manual/Manual_DryRun_0113_1554_BP002_Local.html
-
-// import { textSummary } from "../../Helper/textSummary.js";
-// import { htmlReport } from '../../Helper/bundle.js';
-// import { getBaseUrl, getUserCredentials, getDefaultHeaders, MAX_RETRY_ATTEMPTS, RETRY_DELAY, BATCH_SIZE, BATCH_DELAY } from '../../Helper/config.js';
-// import { BP001 as BP001_Android } from "./Android/BP001.js";
-// import { BP002 as BP002_Android } from "./Android/BP002.js";
-// import { BP001 as BP001_iOS } from "./iOS/BP001.js";
-// import { BP002 as BP002_iOS } from "./iOS/BP002.js";
-
-// import http from "k6/http";
-// import { sleep } from "k6";
-// import { Rate } from "k6/metrics";
 // // ../k6 run Growin_BurstOrder_V3.js -e ENV=INT -e USERNAME=TESTMON -e MAIL=guysmail.com -e PAD=2 -e NUMSTART=1000 -e USER=2 -e ITER=1 -e RUNTIME=60 -e INTERVAL=300
 // function getPlatform() {
 //     const { PLATFORM } = __ENV;
     
 //     if (PLATFORM && ['Android', 'iOS'].includes(PLATFORM)) {cd..
 //         return PLATFORM;
-//     }
-    
-//     console.error('❌ PLATFORM must be specified: Android or iOS');
-//     console.error('   Example: -e PLATFORM=Android or -e PLATFORM=iOS');
 //     return 'Android'; // default fallback
-// }
 
 // const platform = getPlatform();
 
@@ -49,7 +30,6 @@
 // const BP_USER_PERCENTAGE = {
 //     BP001: 50,
 //     BP002: 50,
-// };
 
 // // ✅ Function untuk calculate user distribution
 // function calculateUserDistribution(totalUsers, selectedBPs) {
@@ -58,12 +38,9 @@
     
 //     selectedBPs.forEach(bp => {
 //         totalPercentage += BP_USER_PERCENTAGE[bp] || 0;
-//     });
     
 //     if (totalPercentage === 0) {
-//         console.error('❌ No valid BP selected or percentage not defined!');
 //         return distribution;
-//     }
     
 //     let allocatedUsers = 0;
 //     selectedBPs.forEach((bp, index) => {
@@ -71,15 +48,11 @@
         
 //         if (index === selectedBPs.length - 1) {
 //             distribution[bp] = totalUsers - allocatedUsers;
-//         } else {
 //             const users = Math.floor((percentage / totalPercentage) * totalUsers);
 //             distribution[bp] = users;
 //             allocatedUsers += users;
-//         }
-//     });
     
 //     return distribution;
-// }
 
 // const { SCENARIO } = __ENV;
 // const TOTAL_USER = parseInt(__ENV.TOTAL_USER) || parseInt(__ENV.USER) || 100;
@@ -88,10 +61,8 @@
 // if (SCENARIO) {
 //     // User bisa input: BP001 atau BP001,BP002
 //     selectedBPs = SCENARIO.split(',').map(s => s.trim());
-// } else {
 //     // Default: jalankan semua BP
 //     selectedBPs = Object.keys(BP_USER_PERCENTAGE);
-// }
 
 // const userDistribution = calculateUserDistribution(TOTAL_USER, selectedBPs);
 
@@ -136,8 +107,6 @@ export const options = {
     teardownTimeout: '3600s',
     summaryTimeUnit: '3600s',
 };
-
-// ✅ PARALLEL BATCH LOGIN
 // Mengirim semua login request dalam satu batch, lalu retry hanya yang gagal
 function batchLoginWithRetry(base_url, batchCredentialsList) {
     // batchCredentialsList: array of { credentials, userKey, vuId }
@@ -218,8 +187,6 @@ function batchLoginWithRetry(base_url, batchCredentialsList) {
 
     return results;
 }
-
-// ✅ PARALLEL BATCH: PIN + Profile sekaligus untuk semua valid users
 function batchFetchPinAndProfile(base_url, validUsers) {
     // validUsers: array of { userKey, token }
     if (validUsers.length === 0) return {};
@@ -283,8 +250,6 @@ function batchFetchPinAndProfile(base_url, validUsers) {
 export function setup() {
     console.log('📊 User Distribution:');
     // Object.keys(userDistribution).forEach(bp => {
-    //     console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
-    // });
     console.log(`   TOTAL: ${TOTAL_USER} users`);
     console.log(`   PLATFORM: ${platform}`);
     
@@ -352,8 +317,6 @@ export function setup() {
     
     //         gracefulStop: '30s',
     //         exec: bp, // akan memanggil BP001() atau BP002() sesuai export di atas
-    //     };
-    // });
     
     // export const options = {
     thresholds: {
@@ -367,7 +330,6 @@ export function setup() {
     //     teardownTimeout: '3600s',
     //     summaryTimeUnit: '3600s',
     //     // httpDebug: 'full', // optional, untuk debug
-    // };
     
     // // ✅ LOGIN WITH RETRY — uses MAX_RETRY_ATTEMPTS & RETRY_DELAY from Helper/config.js
     // function loginWithRetry(base_url, credentials, userKey, vuId) {
@@ -375,7 +337,6 @@ export function setup() {
     //         password: credentials.password,
     //         email: credentials.email,
     //         recaptcha: '',
-    //     });
     
     //     const loginHeaders = getDefaultHeaders(); // ✅ from Helper/config.js
     
@@ -384,37 +345,22 @@ export function setup() {
     
     //         if (loginRes.status === 200) {
     //             if (attempt > 1) {
-    //                 console.log(`   ✅ User ${userKey} (${credentials.email}, VU${vuId}) LOGIN SUCCESS on attempt ${attempt}`);
-    //             }
     //             return {
     //                 success: true,
     //                 token: loginRes.json().data.token,
     //                 attempts: attempt
-    //             };
-    //         }
     
     //         if (attempt < MAX_RETRY_ATTEMPTS) {
     //             console.warn(`   ⚠️  User ${userKey} (${credentials.email}, VU${vuId}) LOGIN attempt ${attempt}/${MAX_RETRY_ATTEMPTS} FAILED - Status: ${loginRes.status}, retrying...`);
     //             sleep(RETRY_DELAY);
-    //         } else {
-    //             console.error(`   ❌ User ${userKey} (${credentials.email}, VU${vuId}) LOGIN FAILED after ${MAX_RETRY_ATTEMPTS} attempts - Status: ${loginRes.status}`);
-    //         }
-    //     }
     
     //     return { success: false, token: null, attempts: MAX_RETRY_ATTEMPTS };
-    // }
     
     // export function setup() {
     //     const base_url = getBaseUrl(); // ✅ from Helper/config.js
     //     const tokens = {};
     //     const vuMapping = {};
     //     const channelIds = {};
-    
-    //     console.log(`🔐 Starting login for ${TOTAL_USER} users distributed across ${selectedBPs.length} BPs...`);
-    //     console.log(`📦 Batch processing: ${BATCH_SIZE} users per batch, ${BATCH_DELAY}s delay`);
-    //     console.log(`🔁 Retry enabled: Max ${MAX_RETRY_ATTEMPTS} attempts per login`);
-    //     console.log(`🔑 ALL users will get PIN token`);
-    //     console.log(`📱 Platform: ${platform}`);
     
     //     let globalUserOffset = 0;
     //     let globalVuOffset = 1;
@@ -430,23 +376,17 @@ export function setup() {
     //     selectedBPs.forEach((bp, bpIndex) => {
     //         const usersForThisBP = userDistribution[bp];
     
-    //         console.log(`\n📦 Processing ${bp} on ${platform} - ${usersForThisBP} users (VU ${globalVuOffset} to ${globalVuOffset + usersForThisBP - 1})...`);
-    
     //         for (let localUserIndex = 1; localUserIndex <= usersForThisBP; localUserIndex++) {
     //             const vuId = globalVuOffset + localUserIndex - 1;
     //             vuMapping[vuId] = {
     //                 bp: bp,
     //                 userKey: globalUserOffset + localUserIndex
-    //             };
-    //         }
     
     //         const numBatches = Math.ceil(usersForThisBP / BATCH_SIZE);
     
     //         for (let batchNum = 0; batchNum < numBatches; batchNum++) {
     //             const batchStart = batchNum * BATCH_SIZE + 1;
     //             const batchEnd = Math.min((batchNum + 1) * BATCH_SIZE, usersForThisBP);
-    
-    //             console.log(`   📦 Batch ${batchNum + 1}/${numBatches}: Users ${batchStart}-${batchEnd}`);
     
     //             for (let i = batchStart; i <= batchEnd; i++) {
     //                 const credentials = getUserCredentials(i, globalUserOffset); // ✅ from Helper/config.js
@@ -459,14 +399,12 @@ export function setup() {
     //                     totalLoginSuccess++;
     //                     if (loginResult.attempts > 1) {
     //                         totalLoginRetries += (loginResult.attempts - 1);
-    //                     }
     
     //                     tokens[userKey] = { 
     //                         email: credentials.email, 
     //                         token: loginResult.token,
     //                         pin_token: null,
     //                         bp: bp
-    //                     };
     
     //                     const profileHeaders = getDefaultHeaders(loginResult.token); // ✅ from Helper/config.js
     
@@ -485,19 +423,13 @@ export function setup() {
     //                         tokens[userKey].SID         = tradingData.sid;
     //                         tokens[userKey].ksei_acc_no = tradingData.ksei_acc_no;
     //                         tokens[userKey].account_name = tradingData.account_name;
-    
-    //                         console.log(`✅ Assigned - user_id: ${tokens[userKey].user_id}, client_id: ${tokens[userKey].client_id}`);
-    //                     } else {
     //                         totalUserIdFailed++;
     //                         if (i === batchStart || totalUserIdFailed <= 5) {
-    //                             console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) GET trading profile FAILED - Status: ${profileResponses[0].status} || Body: ${profileResponses[0].body}`);
-    //                         }
     //                         tokens[userKey].user_id      = null;
     //                         tokens[userKey].client_id    = null;
     //                         tokens[userKey].SID          = null;
     //                         tokens[userKey].ksei_acc_no  = null;
     //                         tokens[userKey].account_name = null;
-    //                     }
     
     //                     const pinPayload = JSON.stringify({ value: "123456" });
     //                     const pinHeaders = getDefaultHeaders(loginResult.token); // ✅ from Helper/config.js
@@ -507,14 +439,9 @@ export function setup() {
     //                     if (pinRes.status === 200) {
     //                         totalPinSuccess++;
     //                         tokens[userKey].pin_token = pinRes.json().data.pin_token;
-    //                     } else {
     //                         totalPinFailed++;
     //                         if (i === batchStart || totalPinFailed <= 5) {
-    //                             console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) PIN FAILED - Status: ${pinRes.status}`);
-    //                         }
     //                         tokens[userKey].pin_token = null;
-    //                     }
-    //                 } else {
     //                     totalLoginFailed++;
     //                     totalLoginRetries += (loginResult.attempts - 1);
     //                     tokens[userKey] = { 
@@ -522,57 +449,33 @@ export function setup() {
     //                         token: null,
     //                         pin_token: null,
     //                         bp: bp
-    //                     };
-    //                 }
-    //             }
-    
-    //             console.log(`   ✅ Batch ${batchNum + 1}/${numBatches} completed`);
     
     //             if (batchNum < numBatches - 1) {
     //                 sleep(BATCH_DELAY);
-    //             }
-    //         }
     
     //         globalUserOffset += usersForThisBP;
     //         globalVuOffset += usersForThisBP;
-    //     });
-    
-    //     console.log(`\n📊 Setup Summary:`);
-    //     console.log(`   ✅ Login: ${totalLoginSuccess}/${TOTAL_USER} success (${((totalLoginSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
     //     if (totalLoginFailed > 0) console.error(`   ❌ Login Failed: ${totalLoginFailed}`);
     //     if (totalLoginRetries > 0) console.log(`   🔁 Login Retries: ${totalLoginRetries} total retry attempts`);
-    
-    //     console.log(`   ✅ PIN: ${totalPinSuccess}/${TOTAL_USER} success (${((totalPinSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
     //     if (totalPinFailed > 0) console.error(`   ❌ PIN Failed: ${totalPinFailed}`);
-    
-    //     console.log(`\n📋 Per-BP Summary:`);
     //     selectedBPs.forEach(bp => {
     //         const bpTokens = Object.values(tokens).filter(t => t.bp === bp);
     //         const logins = bpTokens.filter(t => t.token !== null).length;
     //         const pins = bpTokens.filter(t => t.pin_token !== null).length;
     //         const channelId = channelIds[bp] || 'N/A';
     
-    //         console.log(`   ${bp}: ${logins}/${bpTokens.length} logins, ${pins}/${bpTokens.length} PINs, channel_id: ${channelId}`);
-    //     });
-    
-    //     console.log(`\n🎉 Setup completed!`);
-    
     //     return { 
     //         base_url: base_url, 
     //         tokens: tokens,
     //         vuMapping: vuMapping,
     //         channelIds: channelIds
-    //     };
-    // }
     
     // export function handleSummary(data) {
     //     try {
     //         if (!data.metrics.data_received) {
     //             data.metrics.data_received = { values: { count: 0, rate: 0 } };
-    //         }
     //         if (!data.metrics.data_sent) {
     //             data.metrics.data_sent = { values: { count: 0, rate: 0 } };
-    //         }
     
     //         const now = new Date();
     //         const dateStr = now.toLocaleDateString('id-ID').replace(/\//g, '');
@@ -584,7 +487,6 @@ export function setup() {
     
     //         if (selectedBPs.length === 1) {
     //             bp_name = selectedBPs[0]; // langsung 'BP001', bukan 'BP001_A'
-    //         } else if (selectedBPs.length > 1) {
     //             // Sort dan ambil range
     //             const sortedBPs = [...selectedBPs].sort();
     
@@ -597,74 +499,38 @@ export function setup() {
     //                 const min = String(nums[0]).padStart(3, '0');
     //                 const max = String(nums[nums.length - 1]).padStart(3, '0');
     //                 bp_name = `BP${min}-BP${max}`;
-    //             }
-    //         }
-    
-    //         console.log(`[${dateStr}_${timeStr}] Starting report generation for ${bp_name} on ${platform}...`);
     
     //         if (runby === 'Manual') {
     //             const htmlPath = `../../Report/Growin_AI_Summarizer/${platform}/${bp_name}/Manual/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
-    //             console.log(`Generating HTML: ${htmlPath}`);
     
     //             return {
     //                 [htmlPath]: htmlReport(data),
     //                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
-    //             };
-    //         } else if (runby === 'Regression') {
     //             const htmlPath = `../../Report/Growin_AI_Summarizer/${platform}/${bp_name}/Regression/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
-    //             console.log(`Generating HTML: ${htmlPath}`);
     
     //             return {
     //                 [htmlPath]: htmlReport(data),
     //                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
-    //             };
-    //         } else if (runby === 'LoadTest') {
     //             const htmlPath = `../../Report/Growin_AI_Summarizer/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
-    //             console.log(`Generating HTML: ${htmlPath}`);
     
     //             return {
     //                 [htmlPath]: htmlReport(data),
     //                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
-    //             };
-    //         }
-    
-    //     } catch (error) {
-    //         console.error(`❌ handleSummary error: ${error.message}`);
-    //         console.error(`Stack: ${error.stack}`);
     
     //         return {
     //             'stdout': textSummary(data, { indent: ' ', enableColors: true }),
-    //         };
-    //     }
-    // }
     
     // // Command
     // // Run Multiple BP
     // // ../../k6 run Growin_Eipo_Stock.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=2h -e NUMSTART=1001 --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/LoadTest/Manual_LoadTest_1208_1413.html
     
     // // Run Single BP
-    // ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP001/Manual/Manual_DryRun_0417_1111_BP001_Local.html
-    // ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP002/Manual/Manual_DryRun_1113_1708_BP002_Local.html
-    // ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP003 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP003/Manual/Manual_DryRun_1209_1343_BP003_Local.html
-    // ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP004 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP004/Manual/Manual_DryRun_1113_1708_BP004_Local.html
-    // ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP005 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP005/Manual/Manual_DryRun_1113_1708_BP005_Local.html
-    // ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP006 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP006/Manual/Manual_DryRun_1209_1406_BP006_Local.html
-    // ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP007 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP007/Manual/Manual_DryRun_0422_1110_BP007_Local.html
-    // ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP008 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP007/Manual/Manual_DryRun_0421_1152_BP008_Local.html
-    // ../../k6 run Growin_Eipo_Stock.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP009 -e PLATFORM=iOS --out dashboard=export=../../Report/Growin_Eipo_Stock/iOS/BP009/Manual/Manual_DryRun_1120_1347_BP009_Local.html
     
     import { getBaseUrl, getUserCredentials, getDefaultHeaders, MAX_RETRY_ATTEMPTS, RETRY_DELAY, BATCH_SIZE, BATCH_DELAY } from '../../Helper/config.js';
     import { textSummary } from "../../Helper/textSummary.js";
     import { htmlReport } from '../../Helper/bundle.js';
     import { BP001 as BP001_Web } from "./iOS/BP001.js";
     import { BP002 as BP002_Web } from "./iOS/BP002.js";
-    // import { BP003 as BP003_Web } from "./iOS/BP003.js";
-    // import { BP004 as BP004_Web } from "./iOS/BP004.js";
-    // import { BP005 as BP005_Web } from "./iOS/BP005.js";
-    // import { BP006 as BP006_Web } from "./iOS/BP006.js";
-    // import { BP007 as BP007_Web } from "./iOS/BP007.js";
-    // import { BP008 as BP008_Web } from "./iOS/BP008.js";
-    // import { BP009 as BP009_Web } from "./iOS/BP009.js";
     
     import http from "k6/http";
     http.setResponseCallback(http.expectedStatuses(200, 201, 400, 401, 403, 404, 500));
@@ -698,18 +564,10 @@ export function setup() {
     // export const BP007 = platform === 'Android' ? BP007_Android : BP007_Web;
     // export const BP008 = platform === 'Android' ? BP008_Android : BP008_Web;
     // export const BP009 = platform === 'Android' ? BP009_Android : BP009_Web;
-    
-    // ✅ BP_CONFIG: percentage + executor per BP
     const BP_CONFIG = {
     BP001: { percentage: 20.5, executor: 'constant-vus' },
     BP002: { percentage: 10.5, executor: 'constant-vus' },
     BP003: { percentage: 30.5, executor: 'constant-vus' },
-    // BP004: { percentage: 10.5, executor: 'constant-vus' },
-    // BP005: { percentage: 20.5, executor: 'constant-vus' },
-    // BP006: { percentage: 5.5,  executor: 'constant-arrival-rate', rate: 70 },
-    // BP007: { percentage: 0.5,  executor: 'constant-arrival-rate', rate: 70 },
-    // BP008: { percentage: 1.0,  executor: 'constant-arrival-rate', rate: 70 },
-    // BP009: { percentage: 0.5,  executor: 'constant-vus' },
     };
     
     function calculateUserDistribution(totalUsers, selectedBPs) {

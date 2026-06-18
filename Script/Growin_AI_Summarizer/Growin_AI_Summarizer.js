@@ -1,21 +1,4 @@
 // Command
-// Run Multiple BP
-// ../../../k6 run Growin_AI_Summarizer_LoadTest.js -e RUNBY=LoadTest -e ENV=INT -e USER=316 -e DURATION=5m -e NUMSTART=101 --out dashboard=export=../../../Report/Growin_Community/Web/LoadTest/Manual_LoadTest_0107_1459.html
-
-// Run Single BP Web
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=15m -e NUMSTART=1 -e SCENARIO=BP001 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP001/Manual/Manual_DryRun_0521_1350_BP001.html
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=335 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP002 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP002/Manual/Manual_DryRun_0413_1448_BP002.html
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP003 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP003/Manual/Manual_DryRun_0414_1719_BP003.html
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP004 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP004/Manual/Manual_DryRun_0415_1007_BP004.html
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP005 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP005/Manual/Manual_DryRun_0414_1644_BP005.html
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP006 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP006/Manual/Manual_DryRun_0414_1654_BP006.html
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP007 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP007/Manual/Manual_DryRun_0414_1720_BP007.html
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP008 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP008/Manual/Manual_DryRun_0414_1701_BP008.html
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP009 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP009/Manual/Manual_DryRun_0414_1710_BP009.html
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP010 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP010/Manual/Manual_DryRun_0414_1708_BP010.html
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP011 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP011/Manual/Manual_DryRun_0414_1719_BP011.html
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP012 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP012/Manual/Manual_DryRun_0414_1708_BP012.html
-// ../../k6 run Growin_AI_Summarizer.js -e RUNBY=Manual -e ENV=INT -e USER=1 -e DURATION=5m -e NUMSTART=1 -e SCENARIO=BP013 -e PLATFORM=Web --out dashboard=export=../../Report/Growin_Community/Web/BP013/Manual/Manual_DryRun_0414_1709_BP013.html
 
 import { getBaseUrl, getUserCredentials, getDefaultHeaders, MAX_RETRY_ATTEMPTS, RETRY_DELAY, BATCH_SIZE, BATCH_DELAY } from '../../Helper/config.js';
 import { textSummary } from "../../Helper/textSummary.js";
@@ -71,8 +54,6 @@ export const BP010 = platform === 'Android' ? BP010_Android : BP010_Web;
 export const BP011 = platform === 'Android' ? BP011_Android : BP011_Web;
 export const BP012 = platform === 'Android' ? BP012_Android : BP012_Web;
 export const BP013 = platform === 'Android' ? BP013_Android : BP013_Web;
-
-// ✅ RETRY CONFIGURATION
 // const MAX_RETRY_ATTEMPTS = 10;
 // const RETRY_DELAY = 1; // seconds between retry attempts
 
@@ -91,8 +72,6 @@ const BP_USER_PERCENTAGE = {
     BP012: 3.75,
     BP013: 0.19,
 };
-
-// ✅ Function untuk calculate user distribution
 function calculateUserDistribution(totalUsers, selectedBPs) {
     const distribution = {};
     let totalPercentage = 0;
@@ -216,7 +195,6 @@ selectedBPs.forEach(bp => {
 //     setupTimeout: '3600s', // ✅ Increased for large user counts
 //     teardownTimeout: '3600s',
 //     summaryTimeUnit: '3600s',
-// }
 export const options = {
     thresholds: {
         http_req_duration: ['p(95)<200'],
@@ -234,16 +212,11 @@ export const options = {
 // function getBaseUrl() {
 //     if(`${__ENV.ENV}`=='DEV'){
 //         return 'https://api-dev.growin.id';
-//     } else if ((`${__ENV.ENV}`=='QA')) {
 //         return 'https://api-qa.growin.id';
-//     } else if (`${__ENV.ENV}`=='DRC') {
 //         return 'https://drc-api.growin.id';
-//     } else if (`${__ENV.ENV}`=='INT') {
 //         return 'https://internal-api-pt.growin.id';
-//     }
 //     return 'https://internal-api-pt.growin.id';
 //     // return 'https://financialsummarizer-pt.growin.id';
-// }
 
 // function getUserCredentials(userNum, bpOffset = 0) {
 //     const startNum = parseInt(`${__ENV.NUMSTART}`) || 0;
@@ -254,16 +227,12 @@ export const options = {
 //     if(`${__ENV.ENV}`=='DEV' || `${__ENV.ENV}`=='QA'){
 //         formattedNum = String(startNum + actualUserNum - 1).padStart(3, '0');
 //         email = 'mostng' + formattedNum + '@guysmail.com';
-//     } else if (`${__ENV.ENV}`=='DRC') {
 //         formattedNum = String(startNum + actualUserNum - 1).padStart(0, '0');
 //         email = 'MOSTNG' + formattedNum + '@guysmail.com';
-//     } else if (`${__ENV.ENV}`=='INT') {
 //         formattedNum = String(startNum + actualUserNum - 1).padStart(2, '0');
 //         email = 'TESTMON' + formattedNum + '@guysmail.com';
-//     }
     
 //     return { email: email, password: 'M@nsek.123' };
-// }
 
 // // ✅ LOGIN WITH RETRY - Max 10 attempts
 // function loginWithRetry(base_url, credentials, userKey, vuId) {
@@ -271,7 +240,6 @@ export const options = {
 //         password: credentials.password,
 //         email: credentials.email,
 //         recaptcha: '',
-//     });
 
 //     const loginHeaders = {
 //         'Content-Type': 'application/json',
@@ -284,36 +252,25 @@ export const options = {
 //         'X-App-Version': '1.4.1',
 //         'X-Device-Info': 'iPhone 11',
 //         'X-Device-Id': 'TEST3'
-//     };
 
 //     for (let attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
 //         const loginRes = http.post(base_url + '/auth/api/v1/login', loginPayload, { headers: loginHeaders });
 //         // const loginRes = http.post('https://internal-api-pt.growin.id/auth/api/v1/login', loginPayload, { headers: loginHeaders });
 //         if (loginRes.status === 200) {
 //             if (attempt > 1) {
-//                 console.log(`   ✅ User ${userKey} (${credentials.email}, VU${vuId}) LOGIN SUCCESS on attempt ${attempt}`);
-//             }
 //             return {
 //                 success: true,
 //                 token: loginRes.json().data.token,
 //                 attempts: attempt
-//             };
-//         }
         
 //         if (attempt < MAX_RETRY_ATTEMPTS) {
 //             console.warn(`   ⚠️  User ${userKey} (${credentials.email}, VU${vuId}) LOGIN attempt ${attempt}/${MAX_RETRY_ATTEMPTS} FAILED - Status: ${loginRes.status}, retrying...`);
 //             sleep(RETRY_DELAY);
-//         } else {
-//             console.error(`   ❌ User ${userKey} (${credentials.email}, VU${vuId}) LOGIN FAILED after ${MAX_RETRY_ATTEMPTS} attempts - Status: ${loginRes.status}`);
-//         }
-//     }
     
 //     return {
 //         success: false,
 //         token: null,
 //         attempts: MAX_RETRY_ATTEMPTS
-//     };
-// }
 
 // export function setup() {
     console.log('📊 User Distribution:');
@@ -329,12 +286,6 @@ export const options = {
     
 //     const BATCH_SIZE = 500; // Process 500 users at a time
 //     const BATCH_DELAY = 2; // 2 seconds between batches
-    
-//     console.log(`🔐 Starting login for ${TOTAL_USER} users distributed across ${selectedBPs.length} BPs...`);
-//     console.log(`📦 Batch processing: ${BATCH_SIZE} users per batch, ${BATCH_DELAY}s delay`);
-//     console.log(`🔁 Retry enabled: Max ${MAX_RETRY_ATTEMPTS} attempts per login`);
-//     console.log(`🔑 ALL users will get PIN token`);
-//     console.log(`📱 Platform: ${platform}`);
     
 //     let globalUserOffset = 0;
 //     let globalVuOffset = 1;
@@ -353,16 +304,12 @@ export const options = {
 //     selectedBPs.forEach((bp, bpIndex) => {
 //         const usersForThisBP = userDistribution[bp];
         
-//         console.log(`\n📦 Processing ${bp} on ${platform} - ${usersForThisBP} users (VU ${globalVuOffset} to ${globalVuOffset + usersForThisBP - 1})...`);
-        
 //         // Create VU mapping
 //         for (let localUserIndex = 1; localUserIndex <= usersForThisBP; localUserIndex++) {
 //             const vuId = globalVuOffset + localUserIndex - 1;
 //             vuMapping[vuId] = {
 //                 bp: bp,
 //                 userKey: globalUserOffset + localUserIndex
-//             };
-//         }
         
 //         // ✅ Process in batches with retry
 //         const numBatches = Math.ceil(usersForThisBP / BATCH_SIZE);
@@ -370,8 +317,6 @@ export const options = {
 //         for (let batchNum = 0; batchNum < numBatches; batchNum++) {
 //             const batchStart = batchNum * BATCH_SIZE + 1;
 //             const batchEnd = Math.min((batchNum + 1) * BATCH_SIZE, usersForThisBP);
-            
-//             console.log(`   📦 Batch ${batchNum + 1}/${numBatches}: Users ${batchStart}-${batchEnd}`);
             
 //             for (let i = batchStart; i <= batchEnd; i++) {
 //                 const credentials = getUserCredentials(i, globalUserOffset);
@@ -385,14 +330,12 @@ export const options = {
 //                     totalLoginSuccess++;
 //                     if (loginResult.attempts > 1) {
 //                         totalLoginRetries += (loginResult.attempts - 1);
-//                     }
                     
 //                     tokens[userKey] = { 
 //                         email: credentials.email, 
 //                         token: loginResult.token,
 //                         pin_token: null,
 //                         bp: bp
-//                     };
 
 
 //                     // ✅ Step 3: Get userID (UNTUK SEMUA USER yang berhasil PIN)
@@ -408,7 +351,6 @@ export const options = {
 //                         'X-App-Version': '1.4.1',
 //                         'X-Device-Info': 'iPhone 11',
 //                         'X-Device-Id': 'TEST3'
-//                     };
 
 //                     const profileUrls = [
 //                         base_url + `/user/api/v1/profile/trading`
@@ -420,10 +362,8 @@ export const options = {
 //                     ];
 
 //                     const profileResponses = http.batch(profileRequests);
-//                     console.log(profileResponses[0].body)
 
 //                     // Handle profile/trading (index 0)
-//                     console.log(`LKJHGVHJBK ${profileResponses[0].status}`)
 //                     if (profileResponses[0].status == 200) {
 //                         totalUserIdSuccess++;
 //                         const tradingData = profileResponses[0].json().data;
@@ -431,7 +371,6 @@ export const options = {
 //                         // Pastikan object-nya ada dulu sebelum assign
 //                         if (!tokens[userKey]) {
 //                             tokens[userKey] = {};
-//                         }
                         
 //                         tokens[userKey].user_id = tradingData.user_id;
 //                         tokens[userKey].client_id = tradingData.client_id;
@@ -440,18 +379,13 @@ export const options = {
 //                         tokens[userKey].account_name = tradingData.account_name;
                         
 //                         // Verifikasi langsung setelah assign
-//                         console.log(`✅ Assigned - user_id: ${tokens[userKey].user_id}, client_id: ${tokens[userKey].client_id}`);
-//                     } else {
 //                         totalUserIdFailed++;
 //                         if (i === batchStart || totalUserIdFailed <= 5) {
-//                             console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) GET trading profile FAILED - Status: ${profileResponses[0].status} || Body: ${profileResponses[0].body}`);
-//                         }
 //                         tokens[userKey].user_id = null;
 //                         tokens[userKey].client_id = null;
 //                         tokens[userKey].SID = null;
 //                         tokens[userKey].ksei_acc_no = null;
 //                         tokens[userKey].account_name = null;
-//                     }
                     
 //                     // ✅ Step 2: PIN Login (UNTUK SEMUA USER)
 //                     const pinPayload = JSON.stringify({ value: "123456" });
@@ -467,22 +401,15 @@ export const options = {
 //                         'X-App-Version': '1.4.1',
 //                         'X-Device-Info': 'iPhone 11',
 //                         'X-Device-Id': 'TEST3'
-//                     };
 
 //                     const pinRes = http.post(base_url + '/auth/api/v1/protected/pin-login', pinPayload, { headers: pinHeaders });
 //                     // const pinRes = http.post('https://internal-api-pt.growin.id/auth/api/v1/protected/pin-login', pinPayload, { headers: pinHeaders });
-//                     console.log(`DEBUG - token: '${loginResult.token}' | pin: '${pinRes.json().data.pin_token}'`);
 //                     if (pinRes.status === 200) {
 //                         totalPinSuccess++;
 //                         tokens[userKey].pin_token = pinRes.json().data.pin_token;
-//                     } else {
 //                         totalPinFailed++;
 //                         if (i === batchStart || totalPinFailed <= 5) {
-//                             console.error(`   ❌ User ${userKey} ${credentials.email} (VU${vuId}) PIN FAILED - Status: ${pinRes.status}`);
-//                         }
 //                         tokens[userKey].pin_token = null;
-//                     }
-//                 } else {
 //                     totalLoginFailed++;
 //                     totalLoginRetries += (loginResult.attempts - 1);
 //                     tokens[userKey] = { 
@@ -490,52 +417,29 @@ export const options = {
 //                         token: null,
 //                         pin_token: null,
 //                         bp: bp
-//                     };
-//                 }
-//             }
-            
-//             console.log(`   ✅ Batch ${batchNum + 1}/${numBatches} completed`);
             
 //             if (batchNum < numBatches - 1) {
 //                 sleep(BATCH_DELAY);
-//             }
-//         }
         
 //         globalUserOffset += usersForThisBP;
 //         globalVuOffset += usersForThisBP;
-//     });
     
     
 //     // ✅ Summary
-//     console.log(`\n📊 Setup Summary:`);
-//     console.log(`   ✅ Login: ${totalLoginSuccess}/${TOTAL_USER} success (${((totalLoginSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
 //     if (totalLoginFailed > 0) console.error(`   ❌ Login Failed: ${totalLoginFailed}`);
 //     if (totalLoginRetries > 0) console.log(`   🔁 Login Retries: ${totalLoginRetries} total retry attempts`);
-    
-//     console.log(`   ✅ PIN: ${totalPinSuccess}/${TOTAL_USER} success (${((totalPinSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
 //     if (totalPinFailed > 0) console.error(`   ❌ PIN Failed: ${totalPinFailed}`);
-    
-//     console.log(`\n📋 Per-BP Summary:`);
 //     selectedBPs.forEach(bp => {
 //         const bpTokens = Object.values(tokens).filter(t => t.bp === bp);
 //         const logins = bpTokens.filter(t => t.token !== null).length;
 //         const pins = bpTokens.filter(t => t.pin_token !== null).length;
 //         const channelId = channelIds[bp] || 'N/A';
-        
-//         console.log(`   ${bp}: ${logins}/${bpTokens.length} logins, ${pins}/${bpTokens.length} PINs, channel_id: ${channelId}`);
-//     });
-    
-//     console.log(`\n🎉 Setup completed!`);
     
 //     return { 
 //         base_url: base_url, 
 //         tokens: tokens,
 //         vuMapping: vuMapping,
 //         channelIds: channelIds  // ✅ Pass channelIds object ke semua BP functions
-//     };
-// }
-
-// ✅ LOGIN WITH RETRY — uses MAX_RETRY_ATTEMPTS & RETRY_DELAY from Helper/config.js
 function loginWithRetry(base_url, credentials, userKey, vuId) {
     const loginPayload = JSON.stringify({
         password: credentials.password,
