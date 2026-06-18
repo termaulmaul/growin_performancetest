@@ -205,27 +205,39 @@ banner() {
   local sep="${DIM}│${RST}"
   local run_status
   
-  # Async target check to avoid UI freeze
-  if [[ ! -f /tmp/.k6_target_check_pid ]] || ! kill -0 $(cat /tmp/.k6_target_check_pid 2>/dev/null) 2>/dev/null; then
-    (
-      local pass="${PT_SSH_PASS:-$(env_val PT_SSH_PASS '')}"
-      local remote_k6=""
-      # Check Onprem
-      if [[ -n "$pass" ]]; then
-        remote_k6=$(sshpass -p "$pass" ssh -q -o StrictHostKeyChecking=no -o ConnectTimeout=2 qa@10.82.15.72 "ssh -q -o StrictHostKeyChecking=no -o ConnectTimeout=2 qa@10.184.120.48 'ps aux | grep \"[k]6 \" | head -n 1'" 2>/dev/null)
-      fi
-      # Check Oncloud
-      if [[ -z "$remote_k6" ]]; then
-        remote_k6=$(timeout 3s gcloud compute ssh vm-pt-ksix-0 --tunnel-through-iap --project compute-pt --zone asia-southeast2-c --command "ps aux | grep \"[k]6 \" | head -n 1" 2>/dev/null || true)
-      fi
-      
-      if [[ -n "$remote_k6" ]]; then
-        echo "RUNNING" > /tmp/.k6_target_status
-      else
-        echo "IDLE" > /tmp/.k6_target_status
-      fi
-    ) >/dev/null 2>&1 &
-    echo $! > /tmp/.k6_target_check_pid
+  # Async target check to avoid UI freeze (Interval: 10 detik)
+  local do_check=true
+  if [[ -f /tmp/.k6_target_status_time ]]; then
+    local last_check=$(cat /tmp/.k6_target_status_time 2>/dev/null || echo 0)
+    local now=$(date +%s)
+    if (( now - last_check < 10 )); then
+      do_check=false
+    fi
+  fi
+
+  if $do_check; then
+    if [[ ! -f /tmp/.k6_target_check_pid ]] || ! kill -0 $(cat /tmp/.k6_target_check_pid 2>/dev/null) 2>/dev/null; then
+      (
+        local pass="${PT_SSH_PASS:-$(env_val PT_SSH_PASS '')}"
+        local remote_k6=""
+        # Check Onprem
+        if [[ -n "$pass" ]]; then
+          remote_k6=$(sshpass -p "$pass" ssh -q -o StrictHostKeyChecking=no -o ConnectTimeout=2 qa@10.82.15.72 "ssh -q -o StrictHostKeyChecking=no -o ConnectTimeout=2 qa@10.184.120.48 'ps aux | grep \"[k]6 \" | grep -v grep | head -n 1'" 2>/dev/null)
+        fi
+        # Check Oncloud
+        if [[ -z "$remote_k6" ]]; then
+          remote_k6=$(timeout 3s gcloud compute ssh vm-pt-ksix-0 --tunnel-through-iap --project compute-pt --zone asia-southeast2-c --command "ps aux | grep \"[k]6 \" | grep -v grep | head -n 1" 2>/dev/null || true)
+        fi
+        
+        if [[ -n "$remote_k6" ]]; then
+          echo "RUNNING" > /tmp/.k6_target_status
+        else
+          echo "IDLE" > /tmp/.k6_target_status
+        fi
+        date +%s > /tmp/.k6_target_status_time
+      ) >/dev/null 2>&1 &
+      echo $! > /tmp/.k6_target_check_pid
+    fi
   fi
 
   local k6_running=$(cat /tmp/.k6_target_status 2>/dev/null)
