@@ -204,10 +204,33 @@ banner() {
   fi
   local sep="${DIM}│${RST}"
   local run_status
-  local k6_running
-  k6_running=$(ps aux | grep "[k]6 " | grep -v "pt-lock-status" | head -n 1 || true)
-  if [[ -n "$k6_running" ]]; then
-    run_status="${RED}● RUNNING${RST} ${DIM}| Local k6 process is executing...${RST}"
+  
+  # Async target check to avoid UI freeze
+  if [[ ! -f /tmp/.k6_target_check_pid ]] || ! kill -0 $(cat /tmp/.k6_target_check_pid 2>/dev/null) 2>/dev/null; then
+    (
+      local pass="${PT_SSH_PASS:-$(env_val PT_SSH_PASS '')}"
+      local remote_k6=""
+      # Check Onprem
+      if [[ -n "$pass" ]]; then
+        remote_k6=$(sshpass -p "$pass" ssh -q -o StrictHostKeyChecking=no -o ConnectTimeout=2 qa@10.82.15.72 "ssh -q -o StrictHostKeyChecking=no -o ConnectTimeout=2 qa@10.184.120.48 'ps aux | grep \"[k]6 \" | head -n 1'" 2>/dev/null)
+      fi
+      # Check Oncloud
+      if [[ -z "$remote_k6" ]]; then
+        remote_k6=$(timeout 3s gcloud compute ssh vm-pt-ksix-0 --tunnel-through-iap --project compute-pt --zone asia-southeast2-c --command "ps aux | grep \"[k]6 \" | head -n 1" 2>/dev/null || true)
+      fi
+      
+      if [[ -n "$remote_k6" ]]; then
+        echo "RUNNING" > /tmp/.k6_target_status
+      else
+        echo "IDLE" > /tmp/.k6_target_status
+      fi
+    ) >/dev/null 2>&1 &
+    echo $! > /tmp/.k6_target_check_pid
+  fi
+
+  local k6_running=$(cat /tmp/.k6_target_status 2>/dev/null)
+  if [[ "$k6_running" == "RUNNING" ]]; then
+    run_status="${RED}● RUNNING${RST} ${DIM}| Remote k6 process is executing...${RST}"
   else
     run_status=$(python3 "$PROJECT_DIR/bin/pt-lock-status" "${PT_USER:-Unknown}" "$(env_val ENV INT)" 2>/dev/null || echo "${GRN}● Available${RST} ${DIM}| ${PT_USER:-Unknown} [Idle]${RST}")
   fi
