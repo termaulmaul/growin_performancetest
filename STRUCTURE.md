@@ -8,7 +8,7 @@ High-level map of `growin_performancetest`. Last updated 2026-06.
 ├── pt-tui               # TUI launcher binary
 ├── Regression.sh        # Top-level regression runner
 ├── setup-pt.sh          # Bootstrap helper
-├── bin/                 # CLI tools (Kimi Architecture)
+├── bin/                 # CLI tools (Core Architecture)
 │   ├── pt-auth, pt-rbac, pt-audit, pt-lock, pt-lock-status
 │   ├── pt-dashboard, pt-resmon, pt-rescue, pt-bootstrap-check
 │   ├── pt-scheduler, pt-usermgmt, pt-remote-daemon.sh
@@ -45,7 +45,7 @@ High-level map of `growin_performancetest`. Last updated 2026-06.
 │   ├── ux-improvements.md          # PR #2 UX log
 │   ├── ux-deferred-batch.md        # PR #3 UX log
 │   └── performance-test-codebase-audit.md
-├── blueprint/           # Architecture RFCs (deepseek, kimi, manus)
+├── blueprint/           # Architecture RFCs (Deep Research)
 ├── docker-local-pt/     # Demo stack (compose, mock-api, jenkins, grafana)
 │   ├── docker-compose.yml
 │   ├── configs/local.env

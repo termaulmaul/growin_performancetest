@@ -155,7 +155,7 @@
 
 ## [Unreleased] - 2026-05-29
 
-### Added (Kimi Architecture Implementation)
+### Added (Core Architecture Implementation)
 * **Auth Gate & Session Cache**: Forced interactive TUI login requiring valid credentials, backed by encrypted SQLite tokens with robust RBAC structure (`god`, `admin`, `operator`, `readonly`, `guest`).
 * **Initial Setup Bootstrap Mode**: Upon running the TUI on a fresh instance without any users, the system initiates an interactive bootstrap flow asking the operator to securely create the primary `god` user.
 * **Environment Locking & Concurrency Protection**: Added execution locking mechanism bounding load test processes to active environments (`INT`, `STG`, etc.). Includes a backend process heartbeat daemon checking every 15s to cleanly clear stale locks on unexpected crashes.

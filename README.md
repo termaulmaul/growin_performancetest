@@ -7,7 +7,7 @@
 [![python](https://img.shields.io/badge/python-3.x-blue)](https://www.python.org)
 [![status](https://img.shields.io/badge/status-v2.8.0-brightgreen)](./CHANGELOG.md)
 
-Built on the **Kimi Enterprise Architecture RFC**: terminal-native auth (bcrypt + SQLite), RBAC, env concurrency locking, metric parsing, multi-channel webhooks (Teams / Discord / Telegram / Brrr), NOC-style live dashboard.
+Built on the **Core Enterprise Architecture RFC**: terminal-native auth (bcrypt + SQLite), RBAC, env concurrency locking, metric parsing, multi-channel webhooks (Teams / Discord / Telegram / Brrr), NOC-style live dashboard.
 
 ---
 
@@ -342,7 +342,7 @@ growin_performancetest/
 ├── configs/
 │   ├── pt.env              # Primary config (gitignored)
 │   └── pt.env.example      # Template (committed)
-├── bin/                    # CLI tools (Kimi Architecture)
+├── bin/                    # CLI tools (Core Architecture)
 │   ├── pt-auth             # Login, sessions, bootstrap (bcrypt)
 │   ├── pt-rbac             # Permission checks
 │   ├── pt-audit            # Immutable audit log
@@ -373,7 +373,7 @@ growin_performancetest/
 ├── get_grafana_data/       # Grafana metrics web app (Flask backend + HTML frontend)
 ├── docker-local-pt/        # Docker stack (mock-api, sandbox-ssh, grafana, influx, jenkins)
 ├── scheduler_cli/          # Python cron backend + AI slope validator
-├── blueprint/              # Architecture RFCs (Kimi, Manus, DeepSeek)
+├── blueprint/              # Architecture RFCs (Deep Research)
 ├── docs/                   # Audit checklists, UX docs
 ├── tools/                  # One-off audit scripts
 ├── archive/                # Legacy files (do not extend)
