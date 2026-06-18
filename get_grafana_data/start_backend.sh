@@ -29,7 +29,7 @@ pip install -r requirements.txt
 
 # Start the backend server
 echo ""
-echo "Starting backend server on http://localhost:5000"
+echo "Starting backend server (port will be auto-assigned)"
 echo "Press Ctrl+C to stop the server"
 echo ""
 cd backend

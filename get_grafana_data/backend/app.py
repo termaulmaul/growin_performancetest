@@ -741,4 +741,21 @@ if __name__ == '__main__':
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     port = int(os.environ.get('PORT', 5000))
+
+    import socket
+    def find_free_port(start_port):
+        for p in range(start_port, 6000):
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                if s.connect_ex(('127.0.0.1', p)) != 0:
+                    return p
+        return start_port
+
+    port = find_free_port(port)
+    
+    try:
+        with open('/tmp/grafana_backend_port', 'w') as f:
+            f.write(str(port))
+    except Exception:
+        pass
+
     app.run(host='0.0.0.0', port=port, debug=False)
