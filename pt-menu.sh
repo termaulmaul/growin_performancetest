@@ -195,9 +195,7 @@ banner() {
   echo '┃╺┓┣┳┛┃ ┃┃╻┃┃┃┗┫   ┣━┛ ┃    ┣╸ ┣┳┛┣━┫┃┃┃┣╸ ┃╻┃┃ ┃┣┳┛┣┻┓'
   echo '┗━┛╹┗╸┗━┛┗┻┛╹╹ ╹   ╹   ╹    ╹  ╹┗╸╹ ╹╹ ╹┗━╸┗┻┛┗━┛╹┗╸╹ ╹'
   echo -e "${RST}"
-  local env_tag; env_tag=$(env_val ENV "—")
-  local vus; vus=$(env_val K6_USERS "—")
-  local dur; dur=$(env_val DURATION "—")
+
   local grafana_port=5000
   [[ -f /tmp/grafana_backend_port ]] && grafana_port=$(cat /tmp/grafana_backend_port 2>/dev/null)
   local grafana_status="${RED}○ OFF${RST}"
@@ -227,8 +225,8 @@ except: pass
   fi
   local _role_tag="${MAG}${PT_ROLE:-?}${RST}"
 
-  echo -e "  ${DIM}IP${RST} $(get_local_ip)  $sep  ${YLW}ENV${RST} $env_tag  $sep  ${YLW}VUs${RST} $vus  $sep  ${YLW}Dur${RST} $dur"
-  echo -e "  ${DIM}User${RST} ${PT_USER:-?} ${DIM}·${RST} ${_role_tag}  $sep  ${DIM}Webhook${RST} ${_wh_status}  $sep  ${DIM}Grafana${RST} ${grafana_status}  $sep  ${run_status}${RST}"
+  echo -e "  ${DIM}User${RST} ${PT_USER:-?} ${DIM}·${RST} ${_role_tag}  $sep  ${DIM}IP${RST} $(get_local_ip)"
+  echo -e "  ${DIM}Webhook${RST} ${_wh_status}  $sep  ${DIM}Grafana${RST} ${grafana_status}  $sep  ${run_status}${RST}"
   [[ "$_last_run" != *"none"* ]] && echo -e "  ${DIM}Last${RST} ${_last_run}"
   echo -e "  ${DIM}$(printf '─%.0s' $(seq 1 $(( ${COLUMNS:-$(tput cols 2>/dev/null || echo 80)} - 4 ))))${RST}\n"
 }
