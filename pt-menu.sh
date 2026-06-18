@@ -790,9 +790,9 @@ check_k6_blocker() {
     echo -e "${RED}│                                                        │${RST}"
     echo -e "${RED}│  Unable to run. Another process is executing:          │${RST}"
     local p_text
-    p_text=$(printf "  %-50s" "$running_script")
-    # Truncate if too long to fit in 50 chars
-    if [ ${#p_text} -gt 52 ]; then p_text="${p_text:0:49}..."; fi
+    p_text=$(printf "  %-52s" "$running_script")
+    # Truncate if too long to fit in 54 chars
+    if [ ${#p_text} -gt 54 ]; then p_text="${p_text:0:51}..."; fi
     echo -e "${RED}│${p_text}  │${RST}"
     echo -e "${RED}│  Please wait until it finishes.                        │${RST}"
     echo -e "${RED}│                                                        │${RST}"
