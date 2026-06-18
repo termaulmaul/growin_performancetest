@@ -210,11 +210,10 @@ banner() {
   local run_status
   run_status=$(python3 "$PROJECT_DIR/bin/pt-lock-status" "${PT_USER:-Unknown}" "$(env_val ENV INT)" 2>/dev/null || echo "🟢 Available | ${PT_USER:-Unknown} [Idle]")
 
-  # ── Verbose status (added by feat/ux-deferred-batch) ──────────────────
-  # Webhook indicator dot
-  local _wh_dot="${DIM}○${RST}"
+  # Webhook indicator
+  local _wh_status="${RED}OFF${RST}"
   if [[ -n "$(env_val TEAMS_WEBHOOK '')$(env_val DISCORD_WEBHOOK '')$(env_val TELEGRAM_WEBHOOK '')$(env_val BRRR_WEBHOOK '')" ]]; then
-    _wh_dot="${GRN}●${RST}"
+    _wh_status="${GRN}ON${RST}"
   fi
   # Last recent run summary
   local _last_run="${DIM}none${RST}"
@@ -231,7 +230,7 @@ except: pass
   local _role_tag="${MAG}${PT_ROLE:-?}${RST}"
 
   echo -e "  ${DIM}IP${RST} $(get_local_ip)  $sep  ${YLW}ENV${RST} $env_tag  $sep  ${YLW}VUs${RST} $vus  $sep  ${YLW}Dur${RST} $dur"
-  echo -e "  ${DIM}User${RST} ${PT_USER:-?} ${DIM}·${RST} ${_role_tag}  $sep  ${DIM}Webhook${RST} ${_wh_dot}  $sep  ${DIM}Grafana${RST} ${grafana_color}${grafana_status}${RST}  $sep  ${YLW}${run_status}${RST}"
+  echo -e "  ${DIM}User${RST} ${PT_USER:-?} ${DIM}·${RST} ${_role_tag}  $sep  ${DIM}Webhook${RST} ${_wh_status}  $sep  ${DIM}Grafana${RST} ${grafana_color}${grafana_status}${RST}  $sep  ${YLW}${run_status}${RST}"
   [[ "$_last_run" != *"none"* ]] && echo -e "  ${DIM}Last${RST} ${_last_run}"
   echo -e "  ${DIM}$(printf '─%.0s' $(seq 1 $(( ${COLUMNS:-$(tput cols 2>/dev/null || echo 80)} - 4 ))))${RST}\n"
 }
