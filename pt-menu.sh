@@ -2108,8 +2108,20 @@ grafana_menu() {
     section_header "Grafana Backend"
     
     local stat_str="${RED}○ OFF${RST}"
-    if pgrep -f "backend/app.py" >/dev/null; then
-      stat_str="${GRN}● ON${RST} (PID: $(pgrep -f "backend/app.py" | head -n 1))"
+    local is_running=false
+    local g_port=""
+    local g_pid=""
+    if [[ -f "/tmp/grafana_backend_port" ]]; then
+      g_port=$(cat /tmp/grafana_backend_port 2>/dev/null || true)
+      if [[ -n "$g_port" ]] && curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${g_port}/health" | grep -q "200"; then
+        is_running=true
+        g_pid=$(lsof -t -iTCP:"$g_port" -sTCP:LISTEN 2>/dev/null | head -n 1)
+        if [[ -n "$g_pid" ]]; then
+          stat_str="${GRN}● ON${RST} (Port: $g_port | PID: $g_pid)"
+        else
+          stat_str="${GRN}● ON${RST} (Port: $g_port)"
+        fi
+      fi
     fi
     echo -e "  ${DIM}Status:${RST} $stat_str\n"
 
@@ -2124,25 +2136,31 @@ grafana_menu() {
 
     case "$sel" in
       "[1] Start Backend"*)
-        if pgrep -f "backend/app.py" >/dev/null; then
+        if $is_running; then
           echo -e "\n  ${YLW}Backend is already running.${RST}"
         else
           echo -e "\n  ${CYN}Starting Grafana Backend in background...${RST}"
           cd "$PROJECT_DIR/get_grafana_data" || true
           nohup bash "start_backend.sh" > /tmp/grafana_backend.log 2>&1 &
-          echo -e "  ${GRN}Backend started! (PID: $!)${RST}"
+          echo -e "  ${GRN}Backend start sequence initiated!${RST}"
+          echo -e "  ${DIM}It may take a few seconds to boot up and assign a port.${RST}"
           echo -e "  ${DIM}Logs: /tmp/grafana_backend.log${RST}"
           cd "$PROJECT_DIR" || true
         fi
         read -r -p $'\nPress Enter...'
         ;;
       "[2] Stop Backend"*)
-        if pgrep -f "backend/app.py" >/dev/null; then
-          echo -e "\n  ${YLW}Stopping Grafana Backend...${RST}"
-          pkill -f "backend/app.py" || true
+        if $is_running && [[ -n "$g_pid" ]]; then
+          echo -e "\n  ${YLW}Stopping Grafana Backend (PID: $g_pid)...${RST}"
+          kill -9 "$g_pid" 2>/dev/null || true
+          rm -f /tmp/grafana_backend_port
           echo -e "  ${GRN}Backend stopped.${RST}"
+        elif $is_running; then
+          echo -e "\n  ${YLW}Backend is responding on port $g_port, but could not detect PID to kill.${RST}"
         else
           echo -e "\n  ${DIM}Backend is not running.${RST}"
+          # Clean up stale port file just in case
+          rm -f /tmp/grafana_backend_port
         fi
         read -r -p $'\nPress Enter...'
         ;;
