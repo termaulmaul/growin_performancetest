@@ -198,11 +198,14 @@ banner() {
   local env_tag; env_tag=$(env_val ENV "—")
   local vus; vus=$(env_val K6_USERS "—")
   local dur; dur=$(env_val DURATION "—")
-  local docker_ct; docker_ct=$(docker ps --format "{{.Names}}" 2>/dev/null | grep -cE "pt-|k6" | tail -n 1 || echo 0)
-  docker_ct="${docker_ct//[!0-9]/}"
-  [[ -z "$docker_ct" ]] && docker_ct=0
-  local docker_color="$RED"
-  [[ "$docker_ct" -gt 0 ]] && docker_color="$GRN"
+  local grafana_port=5000
+  [[ -f /tmp/grafana_backend_port ]] && grafana_port=$(cat /tmp/grafana_backend_port 2>/dev/null)
+  local grafana_status="OFF"
+  local grafana_color="$RED"
+  if curl -s -f -m 1 "http://127.0.0.1:${grafana_port}/health" >/dev/null 2>&1; then
+    grafana_status="ON"
+    grafana_color="$GRN"
+  fi
   local sep="${DIM}│${RST}"
   local run_status
   run_status=$(python3 "$PROJECT_DIR/bin/pt-lock-status" "${PT_USER:-Unknown}" "$(env_val ENV INT)" 2>/dev/null || echo "🟢 Available | ${PT_USER:-Unknown} [Idle]")
@@ -228,7 +231,7 @@ except: pass
   local _role_tag="${MAG}${PT_ROLE:-?}${RST}"
 
   echo -e "  ${DIM}IP${RST} $(get_local_ip)  $sep  ${YLW}ENV${RST} $env_tag  $sep  ${YLW}VUs${RST} $vus  $sep  ${YLW}Dur${RST} $dur"
-  echo -e "  ${DIM}User${RST} ${PT_USER:-?} ${DIM}·${RST} ${_role_tag}  $sep  ${DIM}Webhook${RST} ${_wh_dot}  $sep  ${DIM}Docker${RST} ${docker_color}${docker_ct}${RST}  $sep  ${YLW}${run_status}${RST}"
+  echo -e "  ${DIM}User${RST} ${PT_USER:-?} ${DIM}·${RST} ${_role_tag}  $sep  ${DIM}Webhook${RST} ${_wh_dot}  $sep  ${DIM}Grafana${RST} ${grafana_color}${grafana_status}${RST}  $sep  ${YLW}${run_status}${RST}"
   [[ "$_last_run" != *"none"* ]] && echo -e "  ${DIM}Last${RST} ${_last_run}"
   echo -e "  ${DIM}$(printf '─%.0s' $(seq 1 $(( ${COLUMNS:-$(tput cols 2>/dev/null || echo 80)} - 4 ))))${RST}\n"
 }
