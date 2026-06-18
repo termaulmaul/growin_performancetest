@@ -204,8 +204,13 @@ banner() {
   fi
   local sep="${DIM}│${RST}"
   local run_status
-  run_status=$(python3 "$PROJECT_DIR/bin/pt-lock-status" "${PT_USER:-Unknown}" "$(env_val ENV INT)" 2>/dev/null || echo "${GRN}● Available${RST} ${DIM}| ${PT_USER:-Unknown} [Idle]${RST}")
-
+  local k6_running
+  k6_running=$(ps aux | grep "[k]6 " | grep -v "pt-lock-status" | head -n 1)
+  if [[ -n "$k6_running" ]]; then
+    run_status="${RED}● RUNNING${RST} ${DIM}| Local k6 process is executing...${RST}"
+  else
+    run_status=$(python3 "$PROJECT_DIR/bin/pt-lock-status" "${PT_USER:-Unknown}" "$(env_val ENV INT)" 2>/dev/null || echo "${GRN}● Available${RST} ${DIM}| ${PT_USER:-Unknown} [Idle]${RST}")
+  fi
   # Webhook indicator
   local _wh_status="${DIM}○ OFF${RST}"
   if [[ -n "$(env_val TEAMS_WEBHOOK '')$(env_val DISCORD_WEBHOOK '')$(env_val TELEGRAM_WEBHOOK '')$(env_val BRRR_WEBHOOK '')" ]]; then
