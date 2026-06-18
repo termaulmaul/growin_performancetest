@@ -1786,53 +1786,6 @@ Press Enter...'
   done
 }
 
-# ── AI Slope Check (Standalone) ────────────────────────────────────────────
-ai_slope_menu() {
-  banner
-  section_header "AI Slope — Code Quality Scanner"
-
-  # Pick script to analyze
-  local script_choices=()
-  while IFS= read -r s; do
-    [[ -z "$s" ]] && continue
-    while IFS= read -r f; do
-      script_choices+=("$f")
-    done < <(find "$PROJECT_DIR/Script/$s" -name '*.js' -o -name '*.sh' 2>/dev/null | head -20)
-  done < <(find "$PROJECT_DIR/Script" -maxdepth 1 -mindepth 1 -type d -exec basename {} \; | sort)
-  # Add shell scripts from root
-  while IFS= read -r f; do
-    script_choices+=("$f")
-  done < <(find "$PROJECT_DIR" -maxdepth 1 -name '*.sh' | sort)
-  script_choices+=("Custom path" "← Back")
-
-  local sel; sel=$(pick_fzf "Analyze>" "${script_choices[@]}")
-
-  [[ -z "$sel" || "$sel" == "← Back" ]] && return
-
-  local target_path="$sel"
-  if [[ "$sel" == "Custom path" ]]; then
-    printf "  File path: "; read -r target_path
-    [[ -z "$target_path" ]] && { echo "Cancelled."; read -r -p $'\nPress Enter...'; return; }
-  fi
-
-  if [[ ! -f "$target_path" ]]; then
-    echo -e "  ${RED}File not found: $target_path${RST}"
-    read -r -p $'\nPress Enter...'
-    return
-  fi
-
-  echo -e "\n${YLW}  Analyzing: $target_path${RST}\n"
-  set +e
-  python3 -c "
-import sys; sys.path.insert(0,'$PROJECT_DIR/scheduler_cli')
-from ai.slope_validator import validate_script, format_report
-r = validate_script('$target_path')
-print(format_report(r))
-" 2>&1
-  set -e
-  read -r -p $'\nPress Enter...'
-}
-
 
 # ── Webhook Menu ───────────────────────────────────────────────────────────
 webhook_menu() {
@@ -2283,7 +2236,7 @@ main_menu() {
     [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" || "$PT_ROLE" == "operator" ]] && choices+=("[1] Run Test  (Onprem / Oncloud)")
     [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" || "$PT_ROLE" == "operator" ]] && choices+=("[2] Sandbox Demo  (Local Mock — k6 binary)")
     [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" ]] && choices+=("[3] Cron Scheduler")
-    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" || "$PT_ROLE" == "operator" ]] && choices+=("[4] AI Slope (Code Quality)")
+
     [[ "$PT_ROLE" != "viewer" ]] && choices+=("[5] ENV Editor")
     choices+=("[7] Open Project Dir")
     [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" ]] && choices+=("[9] Webhooks")
@@ -2301,7 +2254,7 @@ main_menu() {
       "[1] Run Test"*) ssh_menu ;;
       "[2] Sandbox Demo"*) run_test_menu ;;
       "[3] Cron Scheduler"*) cron_scheduler_menu ;;
-      "[4] AI Slope"*) ai_slope_menu ;;
+
       "[5] ENV Editor"*)  env_edit_menu ;;
       "[7] Open Project Dir"*) open_dir "$PROJECT_DIR" ;;
       "[9] Webhooks"*) webhook_menu ;;
