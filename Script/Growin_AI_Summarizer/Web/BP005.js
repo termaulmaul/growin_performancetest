@@ -87,10 +87,9 @@ export function BP005(data) {
             base_url + `/marketdata/api/v1/emiten/price-performance/BBCA`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -129,10 +128,9 @@ export function BP005(data) {
             base_url + `/marketdata/api/v1/emiten/low-high-range/BBCA`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -171,10 +169,9 @@ export function BP005(data) {
             base_url + `/marketdata/api/v1/emiten/investor-chart-agg/BBCA`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

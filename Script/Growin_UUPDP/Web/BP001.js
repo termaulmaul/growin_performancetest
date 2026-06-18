@@ -110,10 +110,9 @@ export function BP001(data) {
             is_consent_marketing : false
         });
 
-        const requests = [
-            ['POST', urls[0], Marketdata_Gpt_RecommendationQuestion_Payload, { headers: headers }]
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.post(urls[0], Marketdata_Gpt_RecommendationQuestion_Payload, { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

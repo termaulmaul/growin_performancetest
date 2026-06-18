@@ -1,3 +1,4 @@
+import { getDefaultHeaders } from "../../Helper/config.js";
 import { check, sleep } from "k6";
 import { Trend, Counter, Rate } from "k6/metrics";
 import http from "k6/http";
@@ -273,74 +274,7 @@ export default function () {
     }
 
     // Define request headers
-    const headers = {
-        'Content-Type': 'application/json',
-    };
-
-    // Login payload
-    const payload = JSON.stringify({
-        password: 'M@nsek.123',
-        email: email,
-        recaptcha: '',
-    });
-
-    // Perform login request
-    let res = http.post(base_url + '/auth/api/v1/login', payload, {headers:headers});
-
-    let token;
-    if (res.status === 200) {
-        token = res.json().data.token;
-        if (`${__ENV.ENV}` != 'INT') {
-            console.log(`VU${exec.vu.idInTest} - ${email} Login Success`);
-        }
-    } else {
-        if (`${__ENV.ENV}` != 'INT') {
-            console.error(`VU${exec.vu.idInTest} - ${email} Failed to Login || Status: ${res.status} || Status: ${res.body}`);
-        }
-        return;
-    }
-    sleep(0,25);
-
-    // Batch 1: Main homepage requests
-    let watchlistID;
-    if (token) {
-        const urls = [
-            base_url + `/user/api/v1/user_settings`,
-            base_url + `/auth/api/v1/protected/get-config`,
-            base_url + `/order/api/v1/order-status-action-map`,
-            base_url + `/auth/api/v1/protected/account-center/status`,
-            base_url + `/user/api/v1/watchlistgroup`,
-            base_url + `/news/api/v2/categories?is_sharia=0`,
-            base_url + `/user/api/v1/profile/trading`,
-            base_url + `/user/api/v1/profile/personal`,
-            base_url + `/auth/api/v1/protected/client/selected`,
-            base_url + `/user/api/v1/banner/promo`,
-            base_url + `/user/api/v2/profile/trading`,
-            base_url + `/bond/api/v1/sbn/master/product/list?max=4&page=0&search=&status=A`,
-            base_url + `/bond/api/v1/sbn/client/check/status`,
-            base_url + `/auth/api/v1/protected/account-center/switchables`,
-            base_url + `/user/api/v1/watchlistgroup`,
-            base_url + `/mutualfund/api/v1/content/risk-profile?size=original`,
-            base_url + `/news/api/v2/?category=&is_sharia=0&items=5&page=1&ticker=`,
-            base_url + `/mutualfund/api/v1/user/risk-profile`,
-            base_url + `/bond/api/v1/sbn/master/strapi/banner`,
-            base_url + `/mutualfund/api/v1/user/filter`,
-            base_url + `/mutualfund/api/v1/mutual-fund/list?limit=3&product=&subscribable=1`,
-        ];
-
-        const batchHeaders = {
-            'Content-Type': 'application/json',
-            'Accept': '*/*',
-            'Accept-Language': 'en',
-            'Connection': 'keep-alive',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Cookie': `ACCESS_TOKEN=${token};`,
-            'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-            'X-App-Name': 'web',
-            'X-App-Version': '1.4.1',
-            'X-Device-Info': 'iPhone 11',
-            'X-Device-Id': 'TEST3'
-        };
+    const headers = getDefaultHeaders(token);
 
         const requests = [
             ['GET', urls[0], undefined, {headers:batchHeaders}],
@@ -447,10 +381,9 @@ export default function () {
             'X-Device-Id': 'TEST3'
         };
 
-        const requests = [
-            ['GET', urls[0], null, { headers: batchHeaders }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: batchHeaders })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

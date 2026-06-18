@@ -81,10 +81,9 @@ export function BP003(data) {
             "email_address": email,
         });
 
-        const requests = [
-            ['POST', urls[0], userActivityInsert_Payload, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.post(urls[0], userActivityInsert_Payload, { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

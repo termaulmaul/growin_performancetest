@@ -430,10 +430,9 @@ export default function (data) {
             'X-Device-Id': 'TEST3'
         };
 
-        const requests = [
-            ['GET', urls[0], null, { headers: stepTwoHeaders }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: stepTwoHeaders })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -585,10 +584,9 @@ export default function (data) {
             'X-Device-Id': 'TEST3'
         };
 
-        const requests = [
-            ['GET', urls[0], null, { headers: stepFourHeaders }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: stepFourHeaders })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

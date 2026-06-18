@@ -126,10 +126,9 @@ export function BP001(data) {
             "sec-fetch-site": "same-site",
         };
 
-        const requests = [
-            ['POST', urls[0], Auth_Login_Payload, { headers: Auth_Login_Headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.post(urls[0], Auth_Login_Payload, { headers: Auth_Login_Headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -209,10 +208,9 @@ export function BP001(data) {
             base_url + `/auth/api/v1/protected/otp/status`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -302,10 +300,9 @@ export function BP001(data) {
             otp: "123321",
         });
 
-        const requests = [
-            ['POST', urls[0], Auth_Protected_Otp_Validate_Payload, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.post(urls[0], Auth_Protected_Otp_Validate_Payload, { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

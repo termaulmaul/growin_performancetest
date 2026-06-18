@@ -108,10 +108,9 @@ export function BP012(data) {
             'X-Device-Id': 'TEST3'
         };
 
-        const requests = [
-            ['GET', urls[0], null, { headers: stepOneHeaders }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: stepOneHeaders })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

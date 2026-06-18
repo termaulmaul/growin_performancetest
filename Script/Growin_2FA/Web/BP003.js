@@ -127,8 +127,9 @@ export function BP003(data) {
             "sec-fetch-site": "same-site",
         };
 
-        const requests = [['POST', url, loginPayload, { headers: loginHeaders }]];
-        const responses = http.batch(requests);
+        const responses = [
+        http.post(url, loginPayload, { headers: loginHeaders })
+    ];
 
         responses.forEach((response, index) => {
             const metric = Home.Auth_Login;
@@ -188,8 +189,9 @@ export function BP003(data) {
             "sec-fetch-site": "same-site",
         };
 
-        const requests = [['GET', url, null, { headers: otpStatusHeaders }]];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(url, { headers: otpStatusHeaders })
+    ];
 
         responses.forEach((response) => {
             const metric = Home.Auth_Protected_Otp_Status;
@@ -245,8 +247,9 @@ export function BP003(data) {
             "sec-fetch-site": "same-site",
         };
 
-        const requests = [['POST', url, null, { headers: otpRequestHeaders }]];
-        const responses = http.batch(requests);
+        const responses = [
+        http.post(url, null, { headers: otpRequestHeaders })
+    ];
 
         responses.forEach((response) => {
             const metric = VerifyPage.Auth_Protected_Otp_Request;
@@ -304,8 +307,9 @@ export function BP003(data) {
             "sec-fetch-site": "same-site",
         };
 
-        const requests = [['POST', url, otpValidatePayload, { headers: otpValidateHeaders }]];
-        const responses = http.batch(requests);
+        const responses = [
+        http.post(url, otpValidatePayload, { headers: otpValidateHeaders })
+    ];
 
         responses.forEach((response) => {
             const metric = VerifyPage.Auth_Protected_Otp_Validate;
@@ -419,8 +423,9 @@ export function BP003(data) {
     let deviceIdToDelete = null;
     {
         const url = base_url + `/auth/api/v1/protected/verified-device/list`;
-        const requests = [['GET', url, null, { headers: deviceMgmtHeaders }]];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(url, { headers: deviceMgmtHeaders })
+    ];
 
         responses.forEach((response) => {
             const metric = DeviceManagement.Auth_Protected_VerifiedDevice_List;

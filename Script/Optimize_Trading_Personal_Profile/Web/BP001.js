@@ -268,10 +268,9 @@ export function BP001(data) {
             base_url + `/user/api/v2/profile/trading`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

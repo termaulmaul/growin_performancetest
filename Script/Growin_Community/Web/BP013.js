@@ -81,10 +81,9 @@ export function BP013(data) {
             'X-Device-Id': 'TEST3'
         };
 
-        const requests = [
-            ['POST', urls[0], Socialinvesting_Social_RequestKickMember_Payload, { headers: stepOneHeaders }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.post(urls[0], Socialinvesting_Social_RequestKickMember_Payload, { headers: stepOneHeaders })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

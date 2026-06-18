@@ -67,10 +67,9 @@ export function BP006(data) {
             'Accept':'*/*',
         };
 
-        const requests = [
-            ['GET', urls[0], null, { headers: stepOneHeaders }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: stepOneHeaders })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -129,10 +128,9 @@ export function BP006(data) {
             'Accept':'*/*',
         };
 
-        const requests = [
-            ['POST', urls[0], EIPO_Order_Payload, { headers: stepTwoHeaders }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.post(urls[0], EIPO_Order_Payload, { headers: stepTwoHeaders })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -180,10 +178,9 @@ export function BP006(data) {
             'Accept':'*/*',
         };
 
-        const requests = [
-            ['GET', urls[0], null, { headers: stepThreeHeaders }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: stepThreeHeaders })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

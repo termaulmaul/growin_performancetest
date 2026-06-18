@@ -200,10 +200,9 @@ export function BP002(data) {
             base_url + `/marketdata/api/v1/marketinfo/corporate-actions-calendar-detail/my-events?selected_date=${oneWeekFormatted}`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -287,10 +286,9 @@ export function BP002(data) {
             base_url + `/marketdata/api/v1/marketinfo/corporate-actions-calendar/glossary`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

@@ -130,10 +130,9 @@ export function BP004(data) {
             'Accept':'*/*',
         };
 
-        const requests = [
-            ['POST', urls[0], Socialinvesting_CreateStockPick_Payload, { headers: stepTwoHeaders }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.post(urls[0], Socialinvesting_CreateStockPick_Payload, { headers: stepTwoHeaders })
+    ];
 
         responses.forEach((response, index) => {
             const metric = StockPick.Socialinvesting_CreateStockPick;
@@ -180,10 +179,9 @@ export function BP004(data) {
             'Accept':'*/*',
         };
 
-        const requests = [
-            ['GET', urls[0], null, { headers: stepOneHeaders }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: stepOneHeaders })
+    ];
         const response = responses[0];
         if (response.status === 200) {
             try {
@@ -251,10 +249,9 @@ export function BP004(data) {
             'X-Device-Id': 'TEST3'
         };
 
-        const requests = [
-            ['DELETE', urls[0], null, { headers: stepThreeHeaders }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.del(urls[0], null, { headers: stepThreeHeaders })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -307,10 +304,9 @@ export function BP004(data) {
             'X-Device-Id': 'TEST3'
         };
 
-        const requests = [
-            ['GET', urls[0], null, { headers: stepFourHeaders }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: stepFourHeaders })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

@@ -132,10 +132,9 @@ export function BP001(data) {
             base_url + `/eipo/pipeline/list?filter_status=ongoing&page=1&per_page=20`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

@@ -1,3 +1,4 @@
+import { getDefaultHeaders } from "../../../Helper/config.js";
 import { check, sleep } from "k6";
 import { Trend, Counter, Rate } from "k6/metrics";
 import http from "k6/http";
@@ -258,8 +259,9 @@ export function BP003(data) {
             'X-Device-Id': 'TEST3',
         };
 
-        const requests = [['POST', url, loginPayload, { headers: loginHeaders }]];
-        const responses = http.batch(requests);
+        const responses = [
+        http.post(url, loginPayload, { headers: loginHeaders })
+    ];
 
         responses.forEach((response, index) => {
             const metric = Home.Auth_Login;
@@ -275,19 +277,7 @@ export function BP003(data) {
         });
     }
 
-    const headersAfterLogin = {
-        'Cookie': `ACCESS_TOKEN=${token}`,
-        'Content-Type': 'application/json',
-        'Accept-Language': 'en',
-        'Connection': 'keep-alive',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Accept': '*/*',
-        'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-        'X-App-Name': 'web',
-        'X-App-Version': '1.4.1',
-        'X-Device-Info': 'iPhone 11',
-        'X-Device-Id': 'TEST3',
-    };
+    const headersAfterLogin = getDefaultHeaders(token);
 
     // Batch 1 - Home
     {

@@ -154,10 +154,9 @@ export function BP006(data) {
             'Accept':'*/*',
         };
 
-        const requests = [
-            ['GET', urls[0], null, { headers: stepOneHeaders }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: stepOneHeaders })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -290,10 +289,9 @@ export function BP006(data) {
             'Accept':'*/*',
         };
 
-        const requests = [
-            ['POST', urls[0], null, { headers: stepOneHeaders }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.post(urls[0], null, { headers: stepOneHeaders })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -345,10 +343,9 @@ export function BP006(data) {
             'Accept':'*/*',
         };
 
-        const requests = [
-            ['GET', urls[0], null, { headers: stepOneHeaders }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: stepOneHeaders })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -487,10 +484,9 @@ export function BP006(data) {
             'Accept':'*/*',
         };
 
-        const requests = [
-            ['POST', urls[0], Socialinvesting_Social_Join_Payload, { headers: stepOneHeaders }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.post(urls[0], Socialinvesting_Social_Join_Payload, { headers: stepOneHeaders })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

@@ -1176,10 +1176,9 @@ export function BP001(data) {
             base_url + `/marketdata/api/v1/marketinfo/corporate-actions-calendar-order/home`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -1218,10 +1217,9 @@ export function BP001(data) {
             base_url + `/marketdata/api/v1/marketinfo/upcoming-corporate-actions`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

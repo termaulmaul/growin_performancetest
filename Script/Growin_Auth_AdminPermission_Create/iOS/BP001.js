@@ -357,10 +357,9 @@ export function BP001(data) {
             base_url + `/auth/api/v1/protected/password-reminder`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -417,10 +416,9 @@ export function BP001(data) {
             'X-Device-Id': 'TEST3'
         };
 
-        const requests = [
-            ['POST', urls[0], Auth_Protected_PasswordRemindLater_Payload, { headers: stepThreeHeaders }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.post(urls[0], Auth_Protected_PasswordRemindLater_Payload, { headers: stepThreeHeaders })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -473,10 +471,9 @@ export function BP001(data) {
             'X-Device-Id': 'TEST3'
         };
 
-        const requests = [
-            ['GET', urls[0], null, { headers: stepFourHeaders }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: stepFourHeaders })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -529,10 +526,9 @@ export function BP001(data) {
             'X-Device-Id': 'TEST3'
         };
 
-        const requests = [
-            ['GET', urls[0], null, { headers: stepFiveHeaders }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: stepFiveHeaders })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -586,10 +582,9 @@ export function BP001(data) {
             'X-Device-Id': 'TEST3'
         };
 
-        const requests = [
-            ['GET', urls[0], null, { headers: stepSixHeaders }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: stepSixHeaders })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -664,10 +659,9 @@ export function BP001(data) {
             'X-Device-Id': 'TEST3'
         };
 
-        const requests = [
-            ['GET', urls[0], null, { headers: stepSevenHeaders }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: stepSevenHeaders })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -720,10 +714,9 @@ export function BP001(data) {
             'X-Device-Id': 'TEST3'
         };
 
-        const requests = [
-            ['GET', urls[0], null, { headers: stepEightHeaders }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: stepEightHeaders })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -762,10 +755,9 @@ export function BP001(data) {
             base_url + `/news/api/v2/categories`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -804,10 +796,9 @@ export function BP001(data) {
             base_url + `/news/api/v2/categories`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -846,10 +837,9 @@ export function BP001(data) {
             base_url + `/oaofinance/api/v1/quota/status/margin`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -888,10 +878,9 @@ export function BP001(data) {
             base_url + `/oaofinance/api/v1/user-opening-progress-summary/monitoring/margin`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -930,10 +919,9 @@ export function BP001(data) {
             base_url + `/auth/api/v1/protected/account-center/switchables`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -972,10 +960,9 @@ export function BP001(data) {
             base_url + `/mutualfund/api/v1/user/risk-profile`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -1014,10 +1001,9 @@ export function BP001(data) {
             base_url + `/auth/api/v1/protected/account-center/status`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -1056,10 +1042,9 @@ export function BP001(data) {
             base_url + `/bond/api/v1/sbn/master/strapi/banner`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -1098,10 +1083,9 @@ export function BP001(data) {
             base_url + `/mutualfund/api/v1/user/risk-profile`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -1140,10 +1124,9 @@ export function BP001(data) {
             base_url + `/mutualfund/api/v1/mutual-fund/list?limit=3`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -1182,10 +1165,9 @@ export function BP001(data) {
             base_url + `/news/api/v2/?category=&is_sharia=0&items=5&page=1`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -1224,10 +1206,9 @@ export function BP001(data) {
             base_url + `/auth/api/v1/protected/get-config`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -1266,10 +1247,9 @@ export function BP001(data) {
             base_url + `/auth/api/v1/protected/client/selected`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -1308,10 +1288,9 @@ export function BP001(data) {
             base_url + `/bond/api/v1/sbn/client/check/status`,
         ];
 
-        const requests = [
-            ['POST', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.post(urls[0], null, { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -1350,10 +1329,9 @@ export function BP001(data) {
             base_url + `/mutualfund/api/v1/user/filter`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -1392,10 +1370,9 @@ export function BP001(data) {
             base_url + `/user/api/v1/user_settings`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -1434,10 +1411,9 @@ export function BP001(data) {
             base_url + `/order/api/v1/order-status-action-map`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

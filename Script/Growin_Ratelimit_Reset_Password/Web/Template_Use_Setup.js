@@ -1,3 +1,4 @@
+import { getDefaultHeaders } from "../../../Helper/config.js";
 import { check, sleep } from "k6";
 import { Trend, Counter, Rate } from "k6/metrics";
 import http from "k6/http";
@@ -44,19 +45,7 @@ export function BP001(data) {
     // const pinToken = userTokenData.pin_token;
     const email = userTokenData.email;
     
-    const headersAfterLogin = {
-        'Cookie': `ACCESS_TOKEN=${token}`,
-        'Content-Type': 'application/json',
-        'Accept-Language': 'en',
-        'Connection': 'keep-alive',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Accept': '*/*',
-        'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-        'X-App-Name': 'web',
-        'X-App-Version': '1.4.1',
-        'X-Device-Info': 'iPhone 11',
-        'X-Device-Id': 'TEST3',
-    };
+    const headersAfterLogin = getDefaultHeaders(token);
 
     // ─── Batch 1 - Login_PIN ───────────────────────────────────────────────────
     {
@@ -68,10 +57,9 @@ export function BP001(data) {
             value: "123456"
         });
 
-        const requests = [
-            ['POST', urls[0], Auth_Protected_AdminPinLogin_Payload, { headers: headersAfterLogin }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.post(urls[0], Auth_Protected_AdminPinLogin_Payload, { headers: headersAfterLogin })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -111,19 +99,7 @@ export function BP001(data) {
         });
     }
 
-    const headersAfterPin = {
-        'Cookie': `ACCESS_TOKEN=${token}; PIN_ACCESS_TOKEN=${pinToken}`,
-        'Content-Type': 'application/json',
-        'Accept-Language': 'en',
-        'Connection': 'keep-alive',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Accept': '*/*',
-        'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-        'X-App-Name': 'web',
-        'X-App-Version': '1.4.1',
-        'X-Device-Info': 'iPhone 11',
-        'X-Device-Id': 'TEST3',
-    };
+    const headersAfterPin = getDefaultHeaders(token, pinToken);
 
     // ─── Batch 2 - Refresh_Token_Pass ───────────────────────────────────────────────────
     {
@@ -131,10 +107,9 @@ export function BP001(data) {
             base_url + `/auth/api/v1/admin/refresh/pass-token`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headersAfterPin }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headersAfterPin })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

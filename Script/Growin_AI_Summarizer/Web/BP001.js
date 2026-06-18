@@ -157,10 +157,9 @@ export function BP001(data) {
             user_id: user_id
         });
 
-        const requests = [
-            ['POST', urls[0], Marketdata_Gpt_FinancialSummarizer_Payload, { headers: headers, timeout: '300s' }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.post(urls[0], Marketdata_Gpt_FinancialSummarizer_Payload, { headers: headers, timeout: '300s' })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -286,10 +285,9 @@ export function BP001(data) {
             product_id: "BBCA"
         });
 
-        const requests = [
-            ['POST', urls[0], Marketdata_Gpt_ConversationActivityInsert_1_Payload, { headers: headers, timeout: '300s' }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.post(urls[0], Marketdata_Gpt_ConversationActivityInsert_1_Payload, { headers: headers, timeout: '300s' })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -346,10 +344,9 @@ export function BP001(data) {
             recommendation_chat_id: 0
         });
 
-        const requests = [
-            ['POST', urls[0], Marketdata_Gpt_ConversationActivityInsert_2_Payload, { headers: headers, timeout: '300s' }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.post(urls[0], Marketdata_Gpt_ConversationActivityInsert_2_Payload, { headers: headers, timeout: '300s' })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -397,10 +394,9 @@ export function BP001(data) {
             remarks: "Performance Test Update!"
         });
 
-        const requests = [
-            ['POST', urls[0], Marketdata_Gpt_FeedbackInsert_Payload, { headers: headers, timeout: '300s' }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.post(urls[0], Marketdata_Gpt_FeedbackInsert_Payload, { headers: headers, timeout: '300s' })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -452,10 +448,9 @@ export function BP001(data) {
             remarks: "Performance Test Update"
         });
 
-        const requests = [
-            ['PUT', urls[0], Marketdata_Gpt_FeedbackUpdate_Payload, { headers: headers, timeout: '300s' }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.put(urls[0], Marketdata_Gpt_FeedbackUpdate_Payload, { headers: headers, timeout: '300s' })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

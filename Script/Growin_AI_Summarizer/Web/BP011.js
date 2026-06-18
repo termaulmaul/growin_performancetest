@@ -67,10 +67,9 @@ export function BP011(data) {
             base_url + `/marketdata/api/v1/stock-daily-price?symbol=BBCA&market=RG&start_date=10-01-2026&end_date=10-02-2026`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

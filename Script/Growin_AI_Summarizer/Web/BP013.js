@@ -87,10 +87,9 @@ export function BP013(data) {
             base_url + `/marketdata/api/v1/broker-activity?stock_symbol=BBCA&start_date=2026-02-09&end_date=2026-02-09&is_net=false&domicile=`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -129,10 +128,9 @@ export function BP013(data) {
             base_url + `/marketdata/api/v1/brokers-map`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
@@ -171,10 +169,9 @@ export function BP013(data) {
             base_url + `/marketdata/api/v1/stock-strength?stockcode=BBCA&resolution=5`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

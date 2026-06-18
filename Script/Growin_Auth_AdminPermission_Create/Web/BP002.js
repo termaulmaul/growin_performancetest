@@ -1,3 +1,4 @@
+import { getDefaultHeaders } from "../../../Helper/config.js";
 import { check, sleep } from "k6";
 import { Trend, Counter, Rate } from "k6/metrics";
 import http from "k6/http";
@@ -42,18 +43,7 @@ export function BP002(data) {
     const pinToken = userTokenData.pin_token;
     const email = userTokenData.email;
 
-    const headersBeforeLogin = {
-        'Content-Type': 'application/json',
-        'Accept-Language': 'en',
-        'Connection': 'keep-alive',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Accept': '*/*',
-        'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-        'X-App-Name': 'web',
-        'X-App-Version': '1.4.1',
-        'X-Device-Info': 'iPhone 11',
-        'X-Device-Id': 'TEST3',
-    };
+    const headersBeforeLogin = getDefaultHeaders();
 
     // Batch 1 - Home
     {
@@ -67,10 +57,9 @@ export function BP002(data) {
             recaptcha: '',
         });
 
-        const requests = [
-            ['POST', urls[0], Auth_Login_Payload, { headers: headersBeforeLogin }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.post(urls[0], Auth_Login_Payload, { headers: headersBeforeLogin })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

@@ -74,10 +74,9 @@ export function BP002(data) {
         // 'X-Device-Id': deviceId,
     };
 
-    const requests = [
-        ['GET', urls[0], null, { headers: stepOneHeaders }],
+    const responses = [
+        http.get(urls[0], { headers: stepOneHeaders })
     ];
-    const responses = http.batch(requests);
 
     responses.forEach((response, index) => {
         const metrics = [

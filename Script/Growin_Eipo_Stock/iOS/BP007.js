@@ -91,10 +91,9 @@ export function BP007(data) {
             'Accept':'*/*',
         };
 
-        const requests = [
-            ['PATCH', urls[0], EIPO_Order_Payload, { headers: stepOneHeaders, timeout: '5m' }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.patch(urls[0], EIPO_Order_Payload, { headers: stepOneHeaders, timeout: '5m' })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

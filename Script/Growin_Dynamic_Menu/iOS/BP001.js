@@ -1,3 +1,4 @@
+import { getDefaultHeaders } from "../../../Helper/config.js";
 import { check, sleep } from "k6";
 import { Trend, Counter, Rate } from "k6/metrics";
 import http from "k6/http";
@@ -114,19 +115,7 @@ export function BP001(data) {
     const pinToken = userTokenData.pin_token;
     const email = userTokenData.email;
     
-    const headersAfterPin = {
-        'Cookie': `ACCESS_TOKEN=${token}; PIN_ACCESS_TOKEN=${pinToken}`,
-        'Content-Type': 'application/json',
-        'Accept-Language': 'en',
-        'Connection': 'keep-alive',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Accept': '*/*',
-        'User-Agent': 'Growin/1.4.1 (iPhone; iOS 26.1) Alamofire/5.9.1',
-        'X-App-Name': 'web',
-        'X-App-Version': '1.4.1',
-        'X-Device-Info': 'iPhone 11',
-        'X-Device-Id': 'TEST3',
-    };
+    const headersAfterPin = getDefaultHeaders(token, pinToken);
 
     // ─── Batch 2 - Refresh_Token_Pass ───────────────────────────────────────────────────
     {

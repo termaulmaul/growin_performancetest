@@ -67,10 +67,9 @@ export function BP007(data) {
             base_url + `/marketdata/api/v1/marketinfo/financial-statements/BMRI/annually?sort=asc`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

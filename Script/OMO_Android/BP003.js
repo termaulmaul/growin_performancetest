@@ -51,10 +51,9 @@ export function BP003(data) {
         'Accept':'*/*',
     };
 
-    const requests = [
-        ['GET', urls[0], undefined, {headers:stepOneHeaders}],
+    const responses = [
+        http.get(urls[0], {headers:stepOneHeaders})
     ];
-    const responses = http.batch(requests);
 
     responses.forEach((response, index) => {
         const metric = CollateralInformationBottomSheet.Oaofinance_Margin_CollateralAssetInformation;

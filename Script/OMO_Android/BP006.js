@@ -62,10 +62,9 @@ export function BP006(data) {
             porto: [{market_value: 50000000}]
         });
 
-        const requests = [
-            ['POST', urls[0], Oaofinance_Margin_CalculateCollateral_Payload, {headers:stepOneHeaders}],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.post(urls[0], Oaofinance_Margin_CalculateCollateral_Payload, {headers:stepOneHeaders})
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

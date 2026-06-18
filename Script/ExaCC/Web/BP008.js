@@ -73,10 +73,9 @@ export function BP008(data) {
             recaptcha: '',
         });
 
-        const requests = [
-            ['POST', urls[0], loginPayload, { headers: headersAfterPin }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.post(urls[0], loginPayload, { headers: headersAfterPin })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [

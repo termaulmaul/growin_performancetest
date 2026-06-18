@@ -137,10 +137,9 @@ export function BP009(data) {
             base_url + `/marketdata/api/v1/marketinfo/profile?seccode=BBRI`,
         ];
 
-        const requests = [
-            ['GET', urls[0], null, { headers: headers }],
-        ];
-        const responses = http.batch(requests);
+        const responses = [
+        http.get(urls[0], { headers: headers })
+    ];
 
         responses.forEach((response, index) => {
             const metrics = [
