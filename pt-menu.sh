@@ -224,11 +224,11 @@ banner() {
         if [[ -n "$pass" ]]; then
           remote_k6=$(sshpass -p "$pass" ssh -q -o StrictHostKeyChecking=no -o ConnectTimeout=5 \
             -o ProxyCommand="sshpass -p \"$pass\" ssh -q -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72" \
-            qa@10.184.120.48 'ps aux | grep "[k]6 "' 2>/dev/null)
+            qa@10.184.120.48 'ps aux' 2>/dev/null | grep "[k]6 " | grep -v "grep" | head -n 1)
         fi
         # Check Oncloud
         if [[ -z "$remote_k6" ]]; then
-          remote_k6=$(timeout 3s gcloud compute ssh vm-pt-ksix-0 --tunnel-through-iap --project compute-pt --zone asia-southeast2-c --command="ps aux | grep \"[k]6 \" | grep -v grep | head -n 1" 2>/dev/null || true)
+          remote_k6=$(timeout 3s gcloud compute ssh vm-pt-ksix-0 --tunnel-through-iap --project compute-pt --zone asia-southeast2-c --command="ps aux" 2>/dev/null | grep "[k]6 " | grep -v "grep" | head -n 1 || true)
         fi
         
         if [[ -n "$remote_k6" ]]; then
