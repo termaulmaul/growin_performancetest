@@ -127,7 +127,7 @@ export function BP001(data) {
             metric.http_reqs.add(1);
             
             if (`${__ENV.ENV}` != 'INT') {
-                console.log(`${email} ${urls[index]} || Status: ${response.status} || Response: ${response.body}`);
+                // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Response: ${response.body}`);
             }
         } else {
             metric.errorRate.add(true);

@@ -70,7 +70,7 @@ export function BP011(data) {
     }
     
     // // ✅ DEBUG LOG - Confirm correct mapping
-    // console.log(`🔍 ${scenarioName} K6-VU${__VU} Iter${iterationIndex} → Setup-VU${userToken.vuId} → User${userToken.userNum} (${userToken.email}) | Pool: ${userToken.pool} ✅`);
+    // /* log disabled */ (`🔍 ${scenarioName} K6-VU${__VU} Iter${iterationIndex} → Setup-VU${userToken.vuId} → User${userToken.userNum} (${userToken.email}) | Pool: ${userToken.pool} ✅`);
     
     const token = userToken.token;
     const pin_token = userToken.pin_token;
@@ -124,7 +124,7 @@ export function BP011(data) {
                 metric.http_reqs.add(1);
 
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -185,7 +185,7 @@ export function BP011(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -245,7 +245,7 @@ export function BP011(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);

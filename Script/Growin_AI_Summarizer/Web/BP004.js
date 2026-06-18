@@ -145,7 +145,7 @@ export function BP004(data) {
     //         if (response.status === 200 || response.status === 201) {
     //             title_id = response.json().data.title_id;
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`200 ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);
+    //                 /* log disabled */ (`200 ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);
     //             }
     //         } else {
     //             if (`${__ENV.ENV}` != 'INT') {
@@ -188,7 +188,7 @@ export function BP004(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -252,7 +252,7 @@ export function BP004(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -272,7 +272,7 @@ export function BP004(data) {
     }
 
     // Batch 3
-    // console.log(`title_id = ${title_id}`)
+    // /* log disabled */ (`title_id = ${title_id}`)
     let conversation_id;
     if (token) {
         const urls = [
@@ -315,7 +315,7 @@ export function BP004(data) {
                 metric.http_reqs.add(1);
                 conversation_id = response.json().data.conversation_id;
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -375,7 +375,7 @@ export function BP004(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -427,7 +427,7 @@ export function BP004(data) {
                 feedback_id = response.json().data.feedback_id;
                 conversation_id = response.json().data.conversation_id;
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -477,7 +477,7 @@ export function BP004(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);

@@ -97,7 +97,7 @@ export function BP001(data) {
             metric.requestRate.add(true);
             metric.http_reqs.add(1);
             if (`${__ENV.ENV}` != 'INT') {
-                console.log(`${email} ${urls1[index]} || Status: ${response.status}`);
+                // /* log disabled */ (`${email} ${urls1[index]} || Status: ${response.status}`);
             }
         } else {
             metric.errorRate.add(true);
@@ -141,7 +141,7 @@ export function BP001(data) {
             metric.requestRate.add(true);
             metric.http_reqs.add(1);
             if (`${__ENV.ENV}` != 'INT') {
-                console.log(`${email} ${urls2[index]} || Status: ${response.status}`);
+                // /* log disabled */ (`${email} ${urls2[index]} || Status: ${response.status}`);
             }
         } else {
             metric.errorRate.add(true);
@@ -185,7 +185,7 @@ export function BP001(data) {
             metric.requestRate.add(true);
             metric.http_reqs.add(1);
             if (`${__ENV.ENV}` != 'INT') {
-                console.log(`${email} ${urls3[index]} || Status: ${response.status}`);
+                // /* log disabled */ (`${email} ${urls3[index]} || Status: ${response.status}`);
             }
         } else {
             metric.errorRate.add(true);

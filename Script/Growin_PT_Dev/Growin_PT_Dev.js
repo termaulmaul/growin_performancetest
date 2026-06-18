@@ -179,11 +179,11 @@ function loginWithRetry(base_url, credentials, userKey, vuId) {
 
     for (let attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
         const fullUrl = base_url + '/auth/api/v1/login';
-        // console.log(`   🔗 Request URL: ${fullUrl}`);  // ← tambah ini
+        // /* log disabled */ (`   🔗 Request URL: ${fullUrl}`);  // ← tambah ini
         const res = http.post(fullUrl, payload, { headers: loginHeaders });
         if (res.status === 200) {
             if (attempt > 1) {
-                console.log(`   ✅ User ${userKey} (${credentials.email}) LOGIN SUCCESS on attempt ${attempt}`);
+                // /* log disabled */ (`   ✅ User ${userKey} (${credentials.email}) LOGIN SUCCESS on attempt ${attempt}`);
             }
             return { success: true, token: res.json().data.token, attempts: attempt };
         }
@@ -199,11 +199,11 @@ function loginWithRetry(base_url, credentials, userKey, vuId) {
 
 // ─── SETUP ─────────────────────────────────────────────────────────────────────
 export function setup() {
-    console.log('📊 User Distribution:');
+    // /* log disabled */ ('📊 User Distribution:');
     selectedBPs.forEach(bp => {
-    console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
+    // /* log disabled */ (`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
     });
-    console.log(`   TOTAL: ${TOTAL_USER} users | PLATFORM: ${platform}`);
+    // /* log disabled */ (`   TOTAL: ${TOTAL_USER} users | PLATFORM: ${platform}`);
     
     // ─── SCENARIOS ─────────────────────────────────────────────────────────────────
 
@@ -214,9 +214,9 @@ export function setup() {
     const BATCH_SIZE  = 500;
     const BATCH_DELAY = 2;
 
-    console.log(`🔐 Starting login for ${TOTAL_USER} users...`);
-    console.log(`📦 Batch: ${BATCH_SIZE}/batch | Retry: max ${MAX_RETRY_ATTEMPTS} attempts`);
-    console.log(`📱 Platform: ${platform}`);
+    // /* log disabled */ (`🔐 Starting login for ${TOTAL_USER} users...`);
+    // /* log disabled */ (`📦 Batch: ${BATCH_SIZE}/batch | Retry: max ${MAX_RETRY_ATTEMPTS} attempts`);
+    // /* log disabled */ (`📱 Platform: ${platform}`);
 
     let globalUserOffset = 0;
     let globalVuOffset   = 1;
@@ -226,7 +226,7 @@ export function setup() {
 
     selectedBPs.forEach(bp => {
         const usersForThisBP = userDistribution[bp];
-        console.log(`\n📦 ${bp} on ${platform}: ${usersForThisBP} users (VU ${globalVuOffset}–${globalVuOffset + usersForThisBP - 1})`);
+        // /* log disabled */ (`\n📦 ${bp} on ${platform}: ${usersForThisBP} users (VU ${globalVuOffset}–${globalVuOffset + usersForThisBP - 1})`);
 
         for (let i = 1; i <= usersForThisBP; i++) {
             vuMapping[globalVuOffset + i - 1] = {
@@ -239,7 +239,7 @@ export function setup() {
         for (let batchNum = 0; batchNum < numBatches; batchNum++) {
             const batchStart = batchNum * BATCH_SIZE + 1;
             const batchEnd   = Math.min((batchNum + 1) * BATCH_SIZE, usersForThisBP);
-            console.log(`   📦 Batch ${batchNum + 1}/${numBatches}: Users ${batchStart}–${batchEnd}`);
+            // /* log disabled */ (`   📦 Batch ${batchNum + 1}/${numBatches}: Users ${batchStart}–${batchEnd}`);
 
             for (let i = batchStart; i <= batchEnd; i++) {
                 const credentials = getUserCredentials(i, globalUserOffset);
@@ -275,7 +275,7 @@ export function setup() {
                     };
 
                     const pinRes = http.post(base_url + '/auth/api/v1/protected/pin-login', pinPayload, { headers: pinHeaders });
-                    // console.log(`DEBUG - token: '${loginResult.token}' | pin: '${pinRes.json().data.pin_token}'`);
+                    // /* log disabled */ (`DEBUG - token: '${loginResult.token}' | pin: '${pinRes.json().data.pin_token}'`);
 
                     if (pinRes.status === 200) {
                         totalPinSuccess++;
@@ -301,7 +301,7 @@ export function setup() {
                 }
             }
 
-            console.log(`   ✅ Batch ${batchNum + 1}/${numBatches} completed`);
+            // /* log disabled */ (`   ✅ Batch ${batchNum + 1}/${numBatches} completed`);
             if (batchNum < numBatches - 1) sleep(BATCH_DELAY);
         }
 
@@ -309,11 +309,11 @@ export function setup() {
         globalVuOffset   += usersForThisBP;
     });
 
-    console.log(`\n📊 Setup Summary:`);
-    console.log(`   ✅ Login: ${totalLoginSuccess}/${TOTAL_USER} (${((totalLoginSuccess / TOTAL_USER) * 100).toFixed(1)}%)`);
+    // /* log disabled */ (`\n📊 Setup Summary:`);
+    // /* log disabled */ (`   ✅ Login: ${totalLoginSuccess}/${TOTAL_USER} (${((totalLoginSuccess / TOTAL_USER) * 100).toFixed(1)}%)`);
     if (totalLoginFailed  > 0) console.error(`   ❌ Login Failed: ${totalLoginFailed}`);
-    if (totalLoginRetries > 0) console.log(`   🔁 Login Retries: ${totalLoginRetries}`);
-    console.log(`   ✅ PIN:   ${totalPinSuccess}/${TOTAL_USER} (${((totalPinSuccess / TOTAL_USER) * 100).toFixed(1)}%)`);
+    if (totalLoginRetries > 0) /* log disabled */ (`   🔁 Login Retries: ${totalLoginRetries}`);
+    // /* log disabled */ (`   ✅ PIN:   ${totalPinSuccess}/${TOTAL_USER} (${((totalPinSuccess / TOTAL_USER) * 100).toFixed(1)}%)`);
     if (totalPinFailed > 0) console.error(`   ❌ PIN Failed: ${totalPinFailed}`);
 
     return { base_url, tokens, vuMapping };
@@ -402,7 +402,7 @@ export function handleSummary(data) {
             });
 
             // Also log to stdout for Jenkins console
-            console.log(
+            // /* log disabled */ (
                 `[${verdict}] ${apiDef.id} ${apiDef.method} ${apiDef.path} | ` +
                 `p95: ${p95RespTime.toFixed(0)}ms | ErrorRate: ${(errorRate*100).toFixed(2)}% | RPS: ${actualRps.toFixed(1)}`
             );
@@ -413,8 +413,8 @@ export function handleSummary(data) {
 
         // Overall verdict — FAIL if any API failed
         const overallPass = apiResults.every(r => r.verdict === '✅ PASS');
-        console.log(`\n🏁 Overall Result: ${overallPass ? '✅ ALL PASS' : '❌ SOME APIs FAILED'}`);
-        console.log(`   (k6 will exit with non-zero code if any threshold was breached — Jenkins can read this)`);
+        // /* log disabled */ (`\n🏁 Overall Result: ${overallPass ? '✅ ALL PASS' : '❌ SOME APIs FAILED'}`);
+        // /* log disabled */ (`   (k6 will exit with non-zero code if any threshold was breached — Jenkins can read this)`);
 
         // ── Report Paths ────────────────────────────────────────────────────
         let htmlPath = '';
@@ -431,7 +431,7 @@ export function handleSummary(data) {
         // }
         htmlPath = `/home/jenkins/report/growin/${__ENV.APP_NAME}/${bp_name}-${timeStr}.html.html`;
         
-        console.log(`Generating HTML report: ${htmlPath}`);
+        // /* log disabled */ (`Generating HTML report: ${htmlPath}`);
 
         return {
             [htmlPath]: htmlReport(data),

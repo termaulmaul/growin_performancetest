@@ -145,7 +145,7 @@ export function BP003(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${url} || Status: ${response.status} || Body: ${response.body}`);
+                    // /* log disabled */ (`${email} ${url} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -202,7 +202,7 @@ export function BP003(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${url} || Status: ${response.status} || Body: ${response.body}`);
+                    // /* log disabled */ (`${email} ${url} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -259,7 +259,7 @@ export function BP003(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${url} || Status: ${response.status} || Body: ${response.body}`);
+                    // /* log disabled */ (`${email} ${url} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -318,7 +318,7 @@ export function BP003(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${url} || Status: ${response.status} || Body: ${response.body}`);
+                    // /* log disabled */ (`${email} ${url} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -443,7 +443,7 @@ export function BP003(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${url} || Status: ${response.status} || Response: ${response.body}`);
+                    // /* log disabled */ (`${email} ${url} || Status: ${response.status} || Response: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -476,7 +476,7 @@ export function BP003(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${url} || Status: ${response.status} || Response: ${response.body}`);
+                    // /* log disabled */ (`${email} ${url} || Status: ${response.status} || Response: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);

@@ -82,7 +82,7 @@ export function BP001(data) {
         try {
             token = loginResponse.json().data.token;
             if (`${__ENV.ENV}` != 'INT') {
-                console.log(`VU${vuId} ${email} Login SUCCESS || Status: ${loginResponse.status}`);
+                // /* log disabled */ (`VU${vuId} ${email} Login SUCCESS || Status: ${loginResponse.status}`);
             }
         } catch (e) {
             if (`${__ENV.ENV}` != 'INT') {
@@ -141,7 +141,7 @@ export function BP001(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);

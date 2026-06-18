@@ -10,6 +10,11 @@ import { SharedArray } from 'k6/data';
 
 // Define options for test execution
 // export const options = {
+    thresholds: {
+        http_req_duration: ['p(95)<200'],
+        http_req_failed: ['rate<0.001'],
+        http_reqs: ['rate>=381'],
+    },
 //     scenarios: {
 //         contacts: {
 //             executor: 'constant-vus',
@@ -24,6 +29,11 @@ import { SharedArray } from 'k6/data';
 //     summaryTimeUnit: '120m',
 // };
 export const options = {
+    thresholds: {
+        http_req_duration: ['p(95)<200'],
+        http_req_failed: ['rate<0.001'],
+        http_reqs: ['rate>=381'],
+    },
   scenarios: {
     contacts: {
       executor: 'per-vu-iterations',
@@ -78,17 +88,17 @@ export default function (data) {
 
     // Log start time
     const startTime = new Date();
-    console.log(`⏰ Request started at: ${startTime.toISOString()}`);
+    // /* log disabled */ (`⏰ Request started at: ${startTime.toISOString()}`);
 
     const response = http.post(url, test, params);
 
     // Log end time
     const endTime = new Date();
     const duration = (endTime - startTime) / 1000;
-    console.log(`⏰ Request ended at: ${endTime.toISOString()}`);
-    console.log(`⏱️ Total duration: ${duration}s`);
-    console.log(`📊 Status: ${response.status} - ${response.body}`);
-    // console.log(`📝 Body: ${response.body}`);
+    // /* log disabled */ (`⏰ Request ended at: ${endTime.toISOString()}`);
+    // /* log disabled */ (`⏱️ Total duration: ${duration}s`);
+    // /* log disabled */ (`📊 Status: ${response.status} - ${response.body}`);
+    // /* log disabled */ (`📝 Body: ${response.body}`);
 
     // Check metrics
     const metric = WhatsappIntegration.Webhook;
@@ -99,7 +109,7 @@ export default function (data) {
         metric.errorCount.add(0);
         metric.requestRate.add(true);
         metric.http_reqs.add(1);
-        console.log(`✅ Success: ${response.body}`);
+        // /* log disabled */ (`✅ Success: ${response.body}`);
     } else {
         metric.errorRate.add(true);
         metric.errorCount.add(1);
@@ -126,11 +136,11 @@ export function handleSummary(data) {
         const dateStr = now.toLocaleDateString('id-ID').replace(/\//g, '');
         const timeStr = now.toLocaleTimeString('id-ID').replace(/:/g, '');
         
-        console.log(`[${dateStr}_${timeStr}] Starting report generation...`);
+        // /* log disabled */ (`[${dateStr}_${timeStr}] Starting report generation...`);
         
         
         const htmlPath = `Wabadima_${dateStr}_${timeStr}.html`;
-        console.log(`Generating HTML: ${htmlPath}`);
+        // /* log disabled */ (`Generating HTML: ${htmlPath}`);
         
         return {
             [htmlPath]: htmlReport(data),

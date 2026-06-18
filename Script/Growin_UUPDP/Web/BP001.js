@@ -92,7 +92,7 @@ export function BP001(data) {
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+    //                 /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
     //             }
     //         } else {
     //             metric.errorRate.add(true);
@@ -139,7 +139,7 @@ export function BP001(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);

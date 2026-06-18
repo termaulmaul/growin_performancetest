@@ -73,7 +73,7 @@ export function BP008(data) {
     if (res.status === 200) {
         orderID = res.json().data.id;
         if (`${__ENV.ENV}` != 'INT') {
-            console.log(`User ${email} Order Success || Status: ${res.status} || Body: ${res.body}`);
+            // /* log disabled */ (`User ${email} Order Success || Status: ${res.status} || Body: ${res.body}`);
         }
     } else {
         if (`${__ENV.ENV}` != 'INT') {
@@ -109,7 +109,7 @@ export function BP008(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} Delete Order ${orderID} || Status: ${response.status}`);
+                    // /* log disabled */ (`${email} Delete Order ${orderID} || Status: ${response.status}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -153,7 +153,7 @@ export function BP008(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} Get Orders || Status: ${response.status}`);
+                    // /* log disabled */ (`${email} Get Orders || Status: ${response.status}`);
                 }
             } else {
                 metric.errorRate.add(true);

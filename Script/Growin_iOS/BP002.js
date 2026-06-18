@@ -16,6 +16,11 @@ import { textSummary } from "../../Helper/textSummary.js";
 
 // Define options for test execution
 export const options = {
+    thresholds: {
+        http_req_duration: ['p(95)<200'],
+        http_req_failed: ['rate<0.001'],
+        http_reqs: ['rate>=381'],
+    },
     scenarios: {
         contacts: {
             executor: 'constant-vus',
@@ -31,6 +36,11 @@ export const options = {
 };
 
 // export const options = {
+    thresholds: {
+        http_req_duration: ['p(95)<200'],
+        http_req_failed: ['rate<0.001'],
+        http_reqs: ['rate>=381'],
+    },
 //     scenarios: {
 //         contacts: {
 //             executor: 'per-vu-iterations',
@@ -284,7 +294,7 @@ export default function () {
     if (res.status === 200) {
         token = res.json().data.token;
         if (`${__ENV.ENV}` != 'INT') {
-            console.log(`VU${exec.vu.idInTest} - ${email} Login Success`);
+            // /* log disabled */ (`VU${exec.vu.idInTest} - ${email} Login Success`);
         }
     } else {
         if (`${__ENV.ENV}` != 'INT') {
@@ -402,7 +412,7 @@ export default function () {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`200 ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);
+                    // /* log disabled */ (`200 ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -458,7 +468,7 @@ export default function () {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`200 ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);
+                    // /* log disabled */ (`200 ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -505,7 +515,7 @@ export default function () {
     //             metric.requestRate.add(true);
     //             metric.http_reqs.add(1);
     //             if (`${__ENV.ENV}` != 'INT') {
-    //                 console.log(`200 ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);
+    //                 /* log disabled */ (`200 ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);
     //             }
     //         } else {
     //             metric.errorRate.add(true);

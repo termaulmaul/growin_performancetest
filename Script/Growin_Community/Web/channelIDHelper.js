@@ -48,16 +48,16 @@ export function getChannelId(base_url, token, bp, isIntEnv = false) {
                 if (joinedChannels.length > 0) {
                     channel_id = joinedChannels[0].channel_id;
                     if (!isIntEnv) {
-                        console.log(`   ✅ ${bp} found JOINED channel: ${channel_id}`);
+                        // /* log disabled */ (`   ✅ ${bp} found JOINED channel: ${channel_id}`);
                     }
                 } else {
                     if (!isIntEnv) {
-                        console.log(`   ⚠️  ${bp} - No JOINED channels found in joined-by-user, trying get-list...`);
+                        // /* log disabled */ (`   ⚠️  ${bp} - No JOINED channels found in joined-by-user, trying get-list...`);
                     }
                 }
             } else {
                 if (!isIntEnv) {
-                    console.log(`   ⚠️  ${bp} - Empty or invalid response from joined-by-user, trying get-list...`);
+                    // /* log disabled */ (`   ⚠️  ${bp} - Empty or invalid response from joined-by-user, trying get-list...`);
                 }
             }
         } catch (e) {
@@ -81,11 +81,11 @@ export function getChannelId(base_url, token, bp, isIntEnv = false) {
                 if (listData && listData.data && Array.isArray(listData.data) && listData.data.length > 0) {
                     channel_id = listData.data[0].channel_id;
                     if (!isIntEnv) {
-                        console.log(`   ✅ ${bp} fallback channel from get-list: ${channel_id}`);
+                        // /* log disabled */ (`   ✅ ${bp} fallback channel from get-list: ${channel_id}`);
                     }
                 } else {
                     if (!isIntEnv) {
-                        console.log(`   ⚠️  ${bp} - Empty or invalid response from get-list, trying LEFT channels...`);
+                        // /* log disabled */ (`   ⚠️  ${bp} - Empty or invalid response from get-list, trying LEFT channels...`);
                     }
                 }
             } catch (e) {
@@ -112,7 +112,7 @@ export function getChannelId(base_url, token, bp, isIntEnv = false) {
             if (leftedChannels.length > 0) {
                 channel_id = leftedChannels[0].channel_id;
                 if (!isIntEnv) {
-                    console.log(`   ⚠️  ${bp} using LEFT channel as last resort: ${channel_id}`);
+                    // /* log disabled */ (`   ⚠️  ${bp} using LEFT channel as last resort: ${channel_id}`);
                 }
             } else {
                 console.error(`   ❌ ${bp} - No channels available (no JOINED, no get-list, no LEFT)`);
@@ -179,7 +179,7 @@ export function getChannelIdWithOptions(options) {
                 if (preferredChannels.length > 0) {
                     channel_id = preferredChannels[0].channel_id;
                     if (!isIntEnv) {
-                        console.log(`   ✅ ${bp} found ${preferredStatus} channel: ${channel_id}`);
+                        // /* log disabled */ (`   ✅ ${bp} found ${preferredStatus} channel: ${channel_id}`);
                     }
                     return channel_id;
                 }
@@ -204,7 +204,7 @@ export function getChannelIdWithOptions(options) {
                 if (listData && listData.data && Array.isArray(listData.data) && listData.data.length > 0) {
                     channel_id = listData.data[0].channel_id;
                     if (!isIntEnv) {
-                        console.log(`   ✅ ${bp} fallback channel from get-list: ${channel_id}`);
+                        // /* log disabled */ (`   ✅ ${bp} fallback channel from get-list: ${channel_id}`);
                     }
                     return channel_id;
                 }
@@ -230,7 +230,7 @@ export function getChannelIdWithOptions(options) {
             if (leftedChannels.length > 0) {
                 channel_id = leftedChannels[0].channel_id;
                 if (!isIntEnv) {
-                    console.log(`   ⚠️  ${bp} using LEFT channel: ${channel_id}`);
+                    // /* log disabled */ (`   ⚠️  ${bp} using LEFT channel: ${channel_id}`);
                 }
                 return channel_id;
             }

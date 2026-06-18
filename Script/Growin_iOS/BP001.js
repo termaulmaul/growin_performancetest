@@ -18,6 +18,11 @@ import { SharedArray } from 'k6/data';
 
 // Define options for test execution
 export const options = {
+    thresholds: {
+        http_req_duration: ['p(95)<200'],
+        http_req_failed: ['rate<0.001'],
+        http_reqs: ['rate>=381'],
+    },
     scenarios: {
         contacts: {
             executor: 'constant-vus',
@@ -33,6 +38,11 @@ export const options = {
 };
 
 // export const options = {
+    thresholds: {
+        http_req_duration: ['p(95)<200'],
+        http_req_failed: ['rate<0.001'],
+        http_reqs: ['rate>=381'],
+    },
 //     scenarios: {
 //         contacts: {
 //             executor: 'per-vu-iterations',
@@ -336,7 +346,7 @@ export function setup() {
         users[i] = { email: email };
     }
     
-    console.log(`Prepared ${totalUsers} users for login testing`);
+    // /* log disabled */ (`Prepared ${totalUsers} users for login testing`);
     
     return { base_url: base_url, users: users };
 }
@@ -385,7 +395,7 @@ export default function (data) {
         try {
             token = loginResponse.json().data.token;
             if (`${__ENV.ENV}` != 'INT') {
-                console.log(`VU${vuId} ${email} Login SUCCESS || Status: ${loginResponse.status}`);
+                // /* log disabled */ (`VU${vuId} ${email} Login SUCCESS || Status: ${loginResponse.status}`);
             }
         } catch (e) {
             if (`${__ENV.ENV}` != 'INT') {
@@ -441,7 +451,7 @@ export default function (data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -525,7 +535,7 @@ export default function (data) {
                             watchlistID = watchlistData.data[0].id;
                             
                             if (`${__ENV.ENV}` != 'INT') {
-                                console.log(`${email} Got watchlistID: ${watchlistID}`);
+                                // /* log disabled */ (`${email} Got watchlistID: ${watchlistID}`);
                             }
                         } else {
                             if (`${__ENV.ENV}` != 'INT') {
@@ -540,7 +550,7 @@ export default function (data) {
                 }
 
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -596,7 +606,7 @@ export default function (data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -785,7 +795,7 @@ export default function (data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);

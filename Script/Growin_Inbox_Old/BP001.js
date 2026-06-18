@@ -17,6 +17,11 @@ import { textSummary } from "../../Helper/textSummary.js";
 
 // Define options for test execution
 export const options = {
+    thresholds: {
+        http_req_duration: ['p(95)<200'],
+        http_req_failed: ['rate<0.001'],
+        http_reqs: ['rate>=381'],
+    },
     scenarios: {
         contacts: {
             executor: 'constant-vus',
@@ -29,6 +34,11 @@ export const options = {
 };
 
 // export const options = {
+    thresholds: {
+        http_req_duration: ['p(95)<200'],
+        http_req_failed: ['rate<0.001'],
+        http_reqs: ['rate>=381'],
+    },
 //     scenarios: {
 //         contacts: {
 //             executor: 'per-vu-iterations',
@@ -263,7 +273,7 @@ export default function () {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                // console.log(`200 ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);
+                // /* log disabled */ (`200 ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);
             } else {
                 metric.errorRate.add(true);
                 metric.errorCount.add(1);

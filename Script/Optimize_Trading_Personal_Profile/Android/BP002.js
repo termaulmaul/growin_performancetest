@@ -112,9 +112,9 @@ export function BP002(data) {
     twoWeeksLater.setDate(today.getDate() + 14);
     const twoWeeksFormatted = formatDate(twoWeeksLater);
 
-    // console.log(todayFormatted);      // 2026-02-08
-    // console.log(oneWeekFormatted);    // 2026-02-15
-    // console.log(twoWeeksFormatted);   // 2026-02-22
+    // /* log disabled */ (todayFormatted);      // 2026-02-08
+    // /* log disabled */ (oneWeekFormatted);    // 2026-02-15
+    // /* log disabled */ (twoWeeksFormatted);   // 2026-02-22
 
     // Fungsi untuk mendapatkan tanggal pertama dan terakhir tahun ini
     function getYearBoundaries(date = new Date()) {
@@ -133,8 +133,8 @@ export function BP002(data) {
     }
 
     const { first, last } = getYearBoundaries();
-    // console.log(first);  // 2026-01-01
-    // console.log(last);   // 2026-12-31
+    // /* log disabled */ (first);  // 2026-01-01
+    // /* log disabled */ (last);   // 2026-12-31
 
     const headers = {
         'Cookie': `ACCESS_TOKEN=${token};`,
@@ -178,7 +178,7 @@ export function BP002(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -220,7 +220,7 @@ export function BP002(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -265,7 +265,7 @@ export function BP002(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -307,7 +307,7 @@ export function BP002(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);

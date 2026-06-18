@@ -342,7 +342,7 @@ export function BP003(data) {
                         watchlistGroupID = watchlistData.data[5].id;
                         
                         if (`${__ENV.ENV}` != 'INT') {
-                            console.log(`${email} Got watchlistID: ${watchlistGroupID}`);
+                            // /* log disabled */ (`${email} Got watchlistID: ${watchlistGroupID}`);
                         }
                     } else {
                         if (`${__ENV.ENV}` != 'INT') {
@@ -361,7 +361,7 @@ export function BP003(data) {
                 metric.http_reqs.add(1);
                 
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Response: ${response.body}`);
+                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Response: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -439,7 +439,7 @@ export function BP003(data) {
                 metric.http_reqs.add(1);
                 
                 if (`${__ENV.ENV}` != 'INT') {
-                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Response: ${response.body}`);
+                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Response: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
