@@ -1539,85 +1539,6 @@ Press Enter...'
   done
 }
 
-# ── Docker Section ──────────────────────────────────────────────────────────
-docker_menu() {
-  while true; do
-    banner
-    section_header "Docker — Local PT Stack"
-    local compose_dir="$PROJECT_DIR/docker-local-pt"
-    local compose_yml="$compose_dir/docker-compose.yml"
-    local compose_env="$compose_dir/configs/local.env"
-    echo -e "${CYN}${BLD}  Container         Status                  Ports${RST}"
-    echo -e "  ${DIM}$(printf '─%.0s' $(seq 1 $(( ${COLUMNS:-$(tput cols 2>/dev/null || echo 80)} - 4 ))))${RST}"
-    local ct_lines; ct_lines=$(docker ps --format "{{.Names}}	{{.Status}}	{{.Ports}}" 2>/dev/null | grep -E "pt-|k6" || true)
-    if [[ -n "$ct_lines" ]]; then
-      while IFS=$'\t' read -r name status ports; do
-        printf "  ${GRN}▶${RST}  %-18s  %-22s  ${DIM}%s${RST}\n" "$name" "$status" "$ports"
-      done <<< "$ct_lines"
-    else
-      echo -e "  ${DIM}(no pt/k6 containers running)${RST}"
-    fi
-    echo ""
-
-    local choices=(
-      "Start stack (mock + k6)"
-      "Start stack + observability (Grafana/Influx)"
-      "Restart stack"
-      "Show logs (mock-api)"
-      "Stop all"
-      "← Back"
-    )
-    local sel; sel=$(pick_fzf "Docker>" "${choices[@]}")
-
-    [[ -z "$sel" || "$sel" == "← Back" ]] && return 0
-    case "$sel" in
-      "Start stack (mock + k6)")
-        echo ""
-        spinner_start "Starting stack"
-        docker compose -f "$compose_yml" --env-file "$compose_env" up -d mock-api 2>&1
-        spinner_stop
-        echo -e "  ${GRN}${BLD}✓ stack started${RST}" 
-        read -r -p $'
-Press Enter...' ;;
-      "Start stack + observability"*)
-        echo ""
-        spinner_start "Starting full stack"
-        docker compose -f "$compose_yml" --env-file "$compose_env" --profile observability up -d mock-api influxdb grafana 2>&1
-        spinner_stop
-        echo -e "  ${GRN}${BLD}✓ full stack started${RST}" 
-        read -r -p $'
-Press Enter...' ;;
-      "Restart stack")
-        echo ""
-        spinner_start "Restarting stack"
-        docker compose -f "$compose_yml" down 2>&1
-        docker compose -f "$compose_yml" --env-file "$compose_env" up -d mock-api 2>&1
-        spinner_stop
-        echo -e "  ${GRN}${BLD}✓ stack restarted${RST}" 
-        read -r -p $'
-Press Enter...' ;;
-      "Show logs (mock-api)")
-        cd "$PROJECT_DIR"
-        echo -e "
-${CYN}  Logs — mock-api (last 50 lines, Ctrl+C to exit):${RST}
-"
-        docker compose -f "$compose_dir/docker-compose.yml" logs --tail=50 -f mock-api 2>&1 || true
-        read -r -p $'
-Press Enter...'
-        continue ;;
-      "Stop all")
-        echo ""
-        spinner_start "Stopping all containers"
-        docker compose -f "$compose_yml" down 2>&1
-        spinner_stop
-        echo -e "  ${YLW}${BLD}⏹ stack stopped${RST}" 
-        read -r -p $'
-Press Enter...' ;;
-    esac
-    cd "$PROJECT_DIR"
-  done
-}
-
 # ── Sandbox Demo Run ──────────────────────────────────────────────────────────
 run_test_menu() {
   banner
@@ -2278,7 +2199,6 @@ main_menu() {
     [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" ]] && choices+=("[3] Cron Scheduler")
     [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" || "$PT_ROLE" == "operator" ]] && choices+=("[4] AI Slope (Code Quality)")
     [[ "$PT_ROLE" != "viewer" ]] && choices+=("[5] ENV Editor")
-    [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" ]] && choices+=("[6] Docker Stack")
     choices+=("[7] Open Project Dir")
     [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" ]] && choices+=("[9] Webhooks")
     [[ "$PT_ROLE" == "god" || "$PT_ROLE" == "admin" ]] && choices+=("[D] Dashboard (Live Monitor)")
@@ -2297,7 +2217,6 @@ main_menu() {
       "[3] Cron Scheduler"*) cron_scheduler_menu ;;
       "[4] AI Slope"*) ai_slope_menu ;;
       "[5] ENV Editor"*)  env_edit_menu ;;
-      "[6] Docker Stack"*) docker_menu ;;
       "[7] Open Project Dir"*) open_dir "$PROJECT_DIR" ;;
       "[9] Webhooks"*) webhook_menu ;;
       "[8] User Management"*) user_mgmt_menu ;;
