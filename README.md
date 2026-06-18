@@ -101,7 +101,6 @@ Interactive fzf-based menu. All operations accessible from one entry point.
 | `[1]` | **Run Test** (Onprem / Oncloud / Sandbox) | god, admin, operator |
 | `[2]` | **Sandbox Demo** (Local Docker mock) | god, admin, operator |
 | `[3]` | **Cron Scheduler** (SQLite-backed) | god, admin |
-| `[4]` | **AI Slope** (Code quality scanner) | god, admin, operator |
 | `[5]` | **ENV Editor** | all except viewer |
 | `[6]` | **Docker Stack** (start/stop/logs) | god, admin |
 | `[7]` | **Open Project Dir** | all |
@@ -125,7 +124,6 @@ graph TD
     Main --> M1["[1] Run Test"]
     Main --> M2["[2] Sandbox Demo"]
     Main --> M3["[3] Cron Scheduler"]
-    Main --> M4["[4] AI Slope"]
     Main --> M5["[5] ENV Editor"]
     Main --> M6["[6] Docker Stack"]
     Main --> M8["[8] User Mgmt — god only"]

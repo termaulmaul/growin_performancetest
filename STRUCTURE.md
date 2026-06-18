@@ -80,7 +80,6 @@ High-level map of `growin_performancetest`. Last updated 2026-06.
 | `[1]` | Run Test | Onprem / Oncloud / Sandbox |
 | `[2]` | Sandbox Demo | Mock-API stack or Direct k6 |
 | `[3]` | Cron Scheduler | SQLite-backed cron jobs |
-| `[4]` | AI Slope | Code quality scanner |
 | `[5]` | ENV Editor | Inline / $EDITOR / Summary modes |
 | `[6]` | Docker Stack | mock-api + grafana + jenkins |
 | `[7]` | Open Project Dir | macOS/Linux file manager |

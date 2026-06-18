@@ -54,7 +54,6 @@ graph TD
     Main --> M1["[1] Run Test"]
     Main --> M2["[2] Sandbox Demo"]
     Main --> M3["[3] Cron Scheduler"]
-    Main --> M4["[4] AI Slope"]
     Main --> M5["[5] ENV Editor"]
     Main --> M6["[6] Docker Stack"]
     Main --> M8["[8] User Mgmt — god only"]
