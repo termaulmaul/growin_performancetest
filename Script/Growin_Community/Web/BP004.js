@@ -87,7 +87,7 @@ export function BP004(data) {
     }
     
     // // ✅ DEBUG LOG - Confirm correct mapping
-    // /* log disabled */ (`🔍 ${scenarioName} K6-VU${__VU} Iter${iterationIndex} → Setup-VU${userToken.vuId} → User${userToken.userNum} (${userToken.email}) | Pool: ${userToken.pool} ✅`);
+    console.log(`🔍 ${scenarioName} K6-VU${__VU} Iter${iterationIndex} → Setup-VU${userToken.vuId} → User${userToken.userNum} (${userToken.email}) | Pool: ${userToken.pool} ✅`);
     
     const token = userToken.token;
     const pin_token = userToken.pin_token;
@@ -152,9 +152,9 @@ export function BP004(data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                // /* log disabled */ (`${email} channel_id create stock pick : ${channel_id}`)
+                console.log(`${email} channel_id create stock pick : ${channel_id}`)
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -200,10 +200,10 @@ export function BP004(data) {
                 const socialinvestingStockPick = response.json();
                 if (socialinvestingStockPick?.data?.length > 0) {
                     const allIds = socialinvestingStockPick.data.map(item => item.id);
-                    // /* log disabled */ (`${email} ✅ All IDs (${allIds.length}):`, allIds);
+                    console.log(`${email} ✅ All IDs (${allIds.length}):`, allIds);
 
                     id = socialinvestingStockPick.data[0].id;
-                    // /* log disabled */ (`${email} ✅ Got ID Stock Pick: ${id}`);
+                    console.log(`${email} ✅ Got ID Stock Pick: ${id}`);
                 } else {
                     console.error(`${email} ❌ No stock picks in response - data array is empty`);
                 }
@@ -224,9 +224,9 @@ export function BP004(data) {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                // /* log disabled */ (`${email} channel_id stock pick : ${channel_id}`)
+                console.log(`${email} channel_id stock pick : ${channel_id}`)
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -279,7 +279,7 @@ export function BP004(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -335,7 +335,7 @@ export function BP004(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);

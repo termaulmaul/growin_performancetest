@@ -223,7 +223,7 @@ function loginWithRetry(base_url, credentials, userKey, vuId) {
 
         if (res.status === 200) {
             if (attempt > 1) {
-                // /* log disabled */ (`   ✅ User ${userKey} (${credentials.email}, VU${vuId}) login OK on attempt ${attempt}`);
+                console.log(`   ✅ User ${userKey} (${credentials.email}, VU${vuId}) login OK on attempt ${attempt}`);
             }
             return { success: true, token: res.json().data.token, attempts: attempt };
         }
@@ -283,7 +283,7 @@ function fetchTradingProfile(base_url, token, userKey, vuId, email) {
 
     if (res.status === 200) {
         const d = res.json().data;
-        // /* log disabled */ (
+        console.log(
             `   ✅ User ${userKey} (${email}) profile — ` +
             `user_id: ${d.user_id}, client_id: ${d.client_id}`
         );
@@ -321,12 +321,12 @@ function fetchTradingProfile(base_url, token, userKey, vuId, email) {
 //   Used by BP functions to resolve which user/token belongs to the current VU.
 // ─────────────────────────────────────────────────────────────────────────────
 export function setup() {
-    // /* log disabled */ ('📊 User Distribution:');
+    console.log('📊 User Distribution:');
     selectedBPs.forEach(bp => {
-    // /* log disabled */ (`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
+    console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
     });
-    // /* log disabled */ (`   TOTAL    : ${TOTAL_USER} users`);
-    // /* log disabled */ (`   PLATFORM : ${platform}`);
+    console.log(`   TOTAL    : ${TOTAL_USER} users`);
+    console.log(`   PLATFORM : ${platform}`);
     
     // ─────────────────────────────────────────────────────────────────────────────
     // numStart RESOLVER
@@ -378,8 +378,8 @@ export function setup() {
     const isMultiBP   = selectedBPs.length > 1;
     const numStarts   = resolveNumStarts(selectedBPs, platform, isMultiBP);
     
-    // /* log disabled */ ('🔢 Resolved numStart per BP:');
-    selectedBPs.forEach(bp => /* log disabled */ (`   ${bp}: numStart = ${numStarts[bp]}`));
+    console.log('🔢 Resolved numStart per BP:');
+    selectedBPs.forEach(bp => console.log(`   ${bp}: numStart = ${numStarts[bp]}`));
     
     // ─────────────────────────────────────────────────────────────────────────────
     // k6 SCENARIO OPTIONS
@@ -399,11 +399,11 @@ export function setup() {
     let totalProfileOK    = 0;
     let totalProfileFail  = 0;
 
-    // /* log disabled */ (`\n🚀 Setup starting — ${TOTAL_USER} users across ${selectedBPs.length} BP(s)`);
-    // /* log disabled */ (`   Platform  : ${platform}`);
-    // /* log disabled */ (`   Batch size: ${BATCH_SIZE} | Batch delay: ${BATCH_DELAY}s`);
-    // /* log disabled */ (`   Max retry : ${MAX_RETRY_ATTEMPTS} | Retry delay: ${RETRY_DELAY}s`);
-    // /* log disabled */ (`   Mode      : ${isMultiBP ? 'Multi-BP (LoadTest)' : 'Single BP (Manual)'}\n`);
+    console.log(`\n🚀 Setup starting — ${TOTAL_USER} users across ${selectedBPs.length} BP(s)`);
+    console.log(`   Platform  : ${platform}`);
+    console.log(`   Batch size: ${BATCH_SIZE} | Batch delay: ${BATCH_DELAY}s`);
+    console.log(`   Max retry : ${MAX_RETRY_ATTEMPTS} | Retry delay: ${RETRY_DELAY}s`);
+    console.log(`   Mode      : ${isMultiBP ? 'Multi-BP (LoadTest)' : 'Single BP (Manual)'}\n`);
 
     // ── Build vuMapping first (needed by BPs to resolve their own user) ───────
     // VU IDs are 1-based and assigned sequentially across all BPs in order.
@@ -429,11 +429,11 @@ export function setup() {
         const bpCfg          = BP_CONFIG[platform]?.[bp] ?? {};
         const skipLogin      = bpCfg.skipSetupLogin === true;
 
-        // /* log disabled */ (`\n📦 [${bp}] ${count} users | VU ${globalVuOffset}–${globalVuOffset + count - 1} | numStart: ${startUser}`);
+        console.log(`\n📦 [${bp}] ${count} users | VU ${globalVuOffset}–${globalVuOffset + count - 1} | numStart: ${startUser}`);
 
         // ── skipSetupLogin: assign email only, no HTTP calls ─────────────────
         if (skipLogin) {
-            // /* log disabled */ (`   ⏩ skipSetupLogin=true — BP will login per iteration`);
+            console.log(`   ⏩ skipSetupLogin=true — BP will login per iteration`);
 
             for (let i = 0; i < count; i++) {
                 const userKey    = startUser + i;
@@ -464,7 +464,7 @@ export function setup() {
             const batchFrom = batchIdx * BATCH_SIZE;
             const batchTo   = Math.min(batchFrom + BATCH_SIZE, count);
 
-            // /* log disabled */ (`   📦 Batch ${batchIdx + 1}/${numBatches}: users ${startUser + batchFrom}–${startUser + batchTo - 1}`);
+            console.log(`   📦 Batch ${batchIdx + 1}/${numBatches}: users ${startUser + batchFrom}–${startUser + batchTo - 1}`);
 
             for (let i = batchFrom; i < batchTo; i++) {
                 const userKey    = startUser + i;
@@ -521,7 +521,7 @@ export function setup() {
                 };
             }
 
-            // /* log disabled */ (`   ✅ Batch ${batchIdx + 1}/${numBatches} done`);
+            console.log(`   ✅ Batch ${batchIdx + 1}/${numBatches} done`);
 
             if (batchIdx < numBatches - 1) sleep(BATCH_DELAY);
         }
@@ -532,37 +532,37 @@ export function setup() {
     // ── Summary ───────────────────────────────────────────────────────────────
     const loginTotal = TOTAL_USER - totalSkipped;
 
-    // /* log disabled */ ('\n📊 Setup Summary:');
+    console.log('\n📊 Setup Summary:');
     if (totalSkipped > 0) {
-        // /* log disabled */ (`   ⏩ Skipped (self-login BP): ${totalSkipped}`);
+        console.log(`   ⏩ Skipped (self-login BP): ${totalSkipped}`);
     }
     if (loginTotal > 0) {
-        // /* log disabled */ (`   Login   : ${totalLoginOK}/${loginTotal} OK (${pct(totalLoginOK, loginTotal)}%)`);
+        console.log(`   Login   : ${totalLoginOK}/${loginTotal} OK (${pct(totalLoginOK, loginTotal)}%)`);
         if (totalLoginFail    > 0) console.error(`   ❌ Login failed : ${totalLoginFail}`);
-        if (totalLoginRetries > 0) /* log disabled */ (`   🔁 Login retries: ${totalLoginRetries} total`);
-        // /* log disabled */ (`   PIN     : ${totalPinOK}/${loginTotal} OK (${pct(totalPinOK, loginTotal)}%)`);
+        if (totalLoginRetries > 0) console.log(`   🔁 Login retries: ${totalLoginRetries} total`);
+        console.log(`   PIN     : ${totalPinOK}/${loginTotal} OK (${pct(totalPinOK, loginTotal)}%)`);
         if (totalPinFail > 0) console.error(`   ❌ PIN failed   : ${totalPinFail}`);
-        // /* log disabled */ (`   Profile : ${totalProfileOK}/${loginTotal} OK (${pct(totalProfileOK, loginTotal)}%)`);
+        console.log(`   Profile : ${totalProfileOK}/${loginTotal} OK (${pct(totalProfileOK, loginTotal)}%)`);
         if (totalProfileFail > 0) console.error(`   ❌ Profile failed: ${totalProfileFail}`);
     }
 
-    // /* log disabled */ ('\n📋 Per-BP Summary:');
+    console.log('\n📋 Per-BP Summary:');
     selectedBPs.forEach(bp => {
         const bpCfg   = BP_CONFIG[platform]?.[bp] ?? {};
         const skipped = bpCfg.skipSetupLogin === true;
         const bpToks  = Object.values(tokens).filter(t => t.bp === bp);
 
         if (skipped) {
-            // /* log disabled */ (`   ${bp}: ⏩ login skipped — ${bpToks.length} users assigned`);
+            console.log(`   ${bp}: ⏩ login skipped — ${bpToks.length} users assigned`);
         } else {
             const logins   = bpToks.filter(t => t.token     !== null).length;
             const pins     = bpToks.filter(t => t.pin_token !== null).length;
             const profiles = bpToks.filter(t => t.user_id   !== null).length;
-            // /* log disabled */ (`   ${bp}: ${logins}/${bpToks.length} logins | ${pins}/${bpToks.length} PINs | ${profiles}/${bpToks.length} profiles`);
+            console.log(`   ${bp}: ${logins}/${bpToks.length} logins | ${pins}/${bpToks.length} PINs | ${profiles}/${bpToks.length} profiles`);
         }
     });
 
-    // /* log disabled */ ('\n🎉 Setup complete!\n');
+    console.log('\n🎉 Setup complete!\n');
 
     return { base_url, tokens, vuMapping };
 }
@@ -608,7 +608,7 @@ export function handleSummary(data) {
         const dir      = reportDirs[runby] ?? reportDirs.Manual;
         const htmlPath = `${dir}/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
 
-        // /* log disabled */ (`📄 Generating report: ${htmlPath}`);
+        console.log(`📄 Generating report: ${htmlPath}`);
 
         return {
             [htmlPath]: htmlReport(data),

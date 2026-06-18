@@ -147,7 +147,7 @@ function batchLoginWithRetry(base_url, batchCredentialsList) {
     for (let attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
         if (pendingUsers.length === 0) break;
 
-        // /* log disabled */ (`   🔁 Login attempt ${attempt}/${MAX_RETRY_ATTEMPTS} for ${pendingUsers.length} users...`);
+        console.log(`   🔁 Login attempt ${attempt}/${MAX_RETRY_ATTEMPTS} for ${pendingUsers.length} users...`);
 
         // Build batch request untuk semua pending users
         
@@ -184,7 +184,7 @@ function batchLoginWithRetry(base_url, batchCredentialsList) {
                     vuId: item.vuId,
                 };
                 if (attempt > 1) {
-                    // /* log disabled */ (`   ✅ User ${item.userKey} (${item.credentials.email}, VU${item.vuId}) LOGIN SUCCESS on attempt ${attempt}`);
+                    console.log(`   ✅ User ${item.userKey} (${item.credentials.email}, VU${item.vuId}) LOGIN SUCCESS on attempt ${attempt}`);
                 }
             } else {
                 if (attempt < MAX_RETRY_ATTEMPTS) {
@@ -271,7 +271,7 @@ function batchFetchPinAndProfile(base_url, validUsers) {
             results[u.userKey].ksei_acc_no  = tradingData.ksei_acc_no;
             results[u.userKey].account_name = tradingData.account_name;
 
-            // /* log disabled */ (`✅ Assigned - user_id: ${tradingData.user_id}, client_id: ${tradingData.client_id}`);
+            console.log(`✅ Assigned - user_id: ${tradingData.user_id}, client_id: ${tradingData.client_id}`);
         } else {
             console.error(`   ❌ Profile FAILED user ${u.userKey} (${u.email}) - Status: ${profileResponses[idx].status} || Body: ${profileResponses[idx].body}`);
         }
@@ -281,12 +281,12 @@ function batchFetchPinAndProfile(base_url, validUsers) {
 }
 
 export function setup() {
-    // /* log disabled */ ('📊 User Distribution:');
+    console.log('📊 User Distribution:');
     // Object.keys(userDistribution).forEach(bp => {
-    //     /* log disabled */ (`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
+    //     console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
     // });
-    // /* log disabled */ (`   TOTAL: ${TOTAL_USER} users`);
-    // /* log disabled */ (`   PLATFORM: ${platform}`);
+    console.log(`   TOTAL: ${TOTAL_USER} users`);
+    console.log(`   PLATFORM: ${platform}`);
     
     // const scenarios = {};
     // selectedBPs.forEach(bp => {
@@ -384,7 +384,7 @@ export function setup() {
     
     //         if (loginRes.status === 200) {
     //             if (attempt > 1) {
-    //                 /* log disabled */ (`   ✅ User ${userKey} (${credentials.email}, VU${vuId}) LOGIN SUCCESS on attempt ${attempt}`);
+    //                 console.log(`   ✅ User ${userKey} (${credentials.email}, VU${vuId}) LOGIN SUCCESS on attempt ${attempt}`);
     //             }
     //             return {
     //                 success: true,
@@ -410,11 +410,11 @@ export function setup() {
     //     const vuMapping = {};
     //     const channelIds = {};
     
-    //     /* log disabled */ (`🔐 Starting login for ${TOTAL_USER} users distributed across ${selectedBPs.length} BPs...`);
-    //     /* log disabled */ (`📦 Batch processing: ${BATCH_SIZE} users per batch, ${BATCH_DELAY}s delay`);
-    //     /* log disabled */ (`🔁 Retry enabled: Max ${MAX_RETRY_ATTEMPTS} attempts per login`);
-    //     /* log disabled */ (`🔑 ALL users will get PIN token`);
-    //     /* log disabled */ (`📱 Platform: ${platform}`);
+    //     console.log(`🔐 Starting login for ${TOTAL_USER} users distributed across ${selectedBPs.length} BPs...`);
+    //     console.log(`📦 Batch processing: ${BATCH_SIZE} users per batch, ${BATCH_DELAY}s delay`);
+    //     console.log(`🔁 Retry enabled: Max ${MAX_RETRY_ATTEMPTS} attempts per login`);
+    //     console.log(`🔑 ALL users will get PIN token`);
+    //     console.log(`📱 Platform: ${platform}`);
     
     //     let globalUserOffset = 0;
     //     let globalVuOffset = 1;
@@ -430,7 +430,7 @@ export function setup() {
     //     selectedBPs.forEach((bp, bpIndex) => {
     //         const usersForThisBP = userDistribution[bp];
     
-    //         /* log disabled */ (`\n📦 Processing ${bp} on ${platform} - ${usersForThisBP} users (VU ${globalVuOffset} to ${globalVuOffset + usersForThisBP - 1})...`);
+    //         console.log(`\n📦 Processing ${bp} on ${platform} - ${usersForThisBP} users (VU ${globalVuOffset} to ${globalVuOffset + usersForThisBP - 1})...`);
     
     //         for (let localUserIndex = 1; localUserIndex <= usersForThisBP; localUserIndex++) {
     //             const vuId = globalVuOffset + localUserIndex - 1;
@@ -446,7 +446,7 @@ export function setup() {
     //             const batchStart = batchNum * BATCH_SIZE + 1;
     //             const batchEnd = Math.min((batchNum + 1) * BATCH_SIZE, usersForThisBP);
     
-    //             /* log disabled */ (`   📦 Batch ${batchNum + 1}/${numBatches}: Users ${batchStart}-${batchEnd}`);
+    //             console.log(`   📦 Batch ${batchNum + 1}/${numBatches}: Users ${batchStart}-${batchEnd}`);
     
     //             for (let i = batchStart; i <= batchEnd; i++) {
     //                 const credentials = getUserCredentials(i, globalUserOffset); // ✅ from Helper/config.js
@@ -486,7 +486,7 @@ export function setup() {
     //                         tokens[userKey].ksei_acc_no = tradingData.ksei_acc_no;
     //                         tokens[userKey].account_name = tradingData.account_name;
     
-    //                         /* log disabled */ (`✅ Assigned - user_id: ${tokens[userKey].user_id}, client_id: ${tokens[userKey].client_id}`);
+    //                         console.log(`✅ Assigned - user_id: ${tokens[userKey].user_id}, client_id: ${tokens[userKey].client_id}`);
     //                     } else {
     //                         totalUserIdFailed++;
     //                         if (i === batchStart || totalUserIdFailed <= 5) {
@@ -526,7 +526,7 @@ export function setup() {
     //                 }
     //             }
     
-    //             /* log disabled */ (`   ✅ Batch ${batchNum + 1}/${numBatches} completed`);
+    //             console.log(`   ✅ Batch ${batchNum + 1}/${numBatches} completed`);
     
     //             if (batchNum < numBatches - 1) {
     //                 sleep(BATCH_DELAY);
@@ -537,25 +537,25 @@ export function setup() {
     //         globalVuOffset += usersForThisBP;
     //     });
     
-    //     /* log disabled */ (`\n📊 Setup Summary:`);
-    //     /* log disabled */ (`   ✅ Login: ${totalLoginSuccess}/${TOTAL_USER} success (${((totalLoginSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
+    //     console.log(`\n📊 Setup Summary:`);
+    //     console.log(`   ✅ Login: ${totalLoginSuccess}/${TOTAL_USER} success (${((totalLoginSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
     //     if (totalLoginFailed > 0) console.error(`   ❌ Login Failed: ${totalLoginFailed}`);
-    //     if (totalLoginRetries > 0) /* log disabled */ (`   🔁 Login Retries: ${totalLoginRetries} total retry attempts`);
+    //     if (totalLoginRetries > 0) console.log(`   🔁 Login Retries: ${totalLoginRetries} total retry attempts`);
     
-    //     /* log disabled */ (`   ✅ PIN: ${totalPinSuccess}/${TOTAL_USER} success (${((totalPinSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
+    //     console.log(`   ✅ PIN: ${totalPinSuccess}/${TOTAL_USER} success (${((totalPinSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
     //     if (totalPinFailed > 0) console.error(`   ❌ PIN Failed: ${totalPinFailed}`);
     
-    //     /* log disabled */ (`\n📋 Per-BP Summary:`);
+    //     console.log(`\n📋 Per-BP Summary:`);
     //     selectedBPs.forEach(bp => {
     //         const bpTokens = Object.values(tokens).filter(t => t.bp === bp);
     //         const logins = bpTokens.filter(t => t.token !== null).length;
     //         const pins = bpTokens.filter(t => t.pin_token !== null).length;
     //         const channelId = channelIds[bp] || 'N/A';
     
-    //         /* log disabled */ (`   ${bp}: ${logins}/${bpTokens.length} logins, ${pins}/${bpTokens.length} PINs, channel_id: ${channelId}`);
+    //         console.log(`   ${bp}: ${logins}/${bpTokens.length} logins, ${pins}/${bpTokens.length} PINs, channel_id: ${channelId}`);
     //     });
     
-    //     /* log disabled */ (`\n🎉 Setup completed!`);
+    //     console.log(`\n🎉 Setup completed!`);
     
     //     return { 
     //         base_url: base_url, 
@@ -600,11 +600,11 @@ export function setup() {
     //             }
     //         }
     
-    //         /* log disabled */ (`[${dateStr}_${timeStr}] Starting report generation for ${bp_name} on ${platform}...`);
+    //         console.log(`[${dateStr}_${timeStr}] Starting report generation for ${bp_name} on ${platform}...`);
     
     //         if (runby === 'Manual') {
     //             const htmlPath = `../../Report/Growin_AI_Summarizer/${platform}/${bp_name}/Manual/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
-    //             /* log disabled */ (`Generating HTML: ${htmlPath}`);
+    //             console.log(`Generating HTML: ${htmlPath}`);
     
     //             return {
     //                 [htmlPath]: htmlReport(data),
@@ -612,7 +612,7 @@ export function setup() {
     //             };
     //         } else if (runby === 'Regression') {
     //             const htmlPath = `../../Report/Growin_AI_Summarizer/${platform}/${bp_name}/Regression/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
-    //             /* log disabled */ (`Generating HTML: ${htmlPath}`);
+    //             console.log(`Generating HTML: ${htmlPath}`);
     
     //             return {
     //                 [htmlPath]: htmlReport(data),
@@ -620,7 +620,7 @@ export function setup() {
     //             };
     //         } else if (runby === 'LoadTest') {
     //             const htmlPath = `../../Report/Growin_AI_Summarizer/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
-    //             /* log disabled */ (`Generating HTML: ${htmlPath}`);
+    //             console.log(`Generating HTML: ${htmlPath}`);
     
     //             return {
     //                 [htmlPath]: htmlReport(data),
@@ -753,23 +753,23 @@ export function setup() {
     
     const userDistribution = calculateUserDistribution(TOTAL_USER, selectedBPs);
     
-    // /* log disabled */ ('📊 User Distribution:');
+    console.log('📊 User Distribution:');
     Object.keys(userDistribution).forEach(bp => {
-    // /* log disabled */ (`   ${bp}: ${userDistribution[bp]} users (${BP_CONFIG[bp].percentage}%)`);
+    console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_CONFIG[bp].percentage}%)`);
     });
-    // /* log disabled */ (`   TOTAL: ${TOTAL_USER} users`);
-    // /* log disabled */ (`   PLATFORM: ${platform}`);
+    console.log(`   TOTAL: ${TOTAL_USER} users`);
+    console.log(`   PLATFORM: ${platform}`);
 
     const base_url = getBaseUrl();
     const tokens   = {};
     const vuMapping = {};
     const channelIds = {};
 
-    // /* log disabled */ (`🔐 Starting PARALLEL login for ${TOTAL_USER} users distributed across ${selectedBPs.length} BPs...`);
-    // /* log disabled */ (`📦 Batch processing: ${BATCH_SIZE} users per batch, ${BATCH_DELAY}s delay between batches`);
-    // /* log disabled */ (`🔁 Retry enabled: Max ${MAX_RETRY_ATTEMPTS} attempts per login (batch retry)`);
-    // /* log disabled */ (`🔑 ALL users will get PIN token`);
-    // /* log disabled */ (`📱 Platform: ${platform}`);
+    console.log(`🔐 Starting PARALLEL login for ${TOTAL_USER} users distributed across ${selectedBPs.length} BPs...`);
+    console.log(`📦 Batch processing: ${BATCH_SIZE} users per batch, ${BATCH_DELAY}s delay between batches`);
+    console.log(`🔁 Retry enabled: Max ${MAX_RETRY_ATTEMPTS} attempts per login (batch retry)`);
+    console.log(`🔑 ALL users will get PIN token`);
+    console.log(`📱 Platform: ${platform}`);
 
     let globalUserOffset = 0;
     let globalVuOffset   = 1;
@@ -785,7 +785,7 @@ export function setup() {
     selectedBPs.forEach((bp) => {
         const usersForThisBP = userDistribution[bp];
 
-        // /* log disabled */ (`\n📦 Processing ${bp} on ${platform} - ${usersForThisBP} users (VU ${globalVuOffset} to ${globalVuOffset + usersForThisBP - 1})...`);
+        console.log(`\n📦 Processing ${bp} on ${platform} - ${usersForThisBP} users (VU ${globalVuOffset} to ${globalVuOffset + usersForThisBP - 1})...`);
 
         // Build VU mapping untuk BP ini
         for (let localUserIndex = 1; localUserIndex <= usersForThisBP; localUserIndex++) {
@@ -802,7 +802,7 @@ export function setup() {
             const batchStart = batchNum * BATCH_SIZE + 1;
             const batchEnd   = Math.min((batchNum + 1) * BATCH_SIZE, usersForThisBP);
 
-            // /* log disabled */ (`\n   📦 Batch ${batchNum + 1}/${numBatches}: Users ${batchStart}-${batchEnd} (${batchEnd - batchStart + 1} users)`);
+            console.log(`\n   📦 Batch ${batchNum + 1}/${numBatches}: Users ${batchStart}-${batchEnd} (${batchEnd - batchStart + 1} users)`);
 
             // ── Step 1: Build credential list untuk batch ini ──────────────────
             const batchCredentialsList = [];
@@ -861,7 +861,7 @@ export function setup() {
 
             // ── Step 4: Parallel PIN + Profile untuk semua valid users sekaligus
             if (validUsersForPinProfile.length > 0) {
-                // /* log disabled */ (`   🔑 Fetching PIN + Profile for ${validUsersForPinProfile.length} valid users in parallel...`);
+                console.log(`   🔑 Fetching PIN + Profile for ${validUsersForPinProfile.length} valid users in parallel...`);
 
                 const pinProfileResults = batchFetchPinAndProfile(base_url, validUsersForPinProfile);
 
@@ -892,7 +892,7 @@ export function setup() {
                 });
             }
 
-            // /* log disabled */ (`   ✅ Batch ${batchNum + 1}/${numBatches} completed — Login: ${validUsersForPinProfile.length}/${batchEnd - batchStart + 1} success`);
+            console.log(`   ✅ Batch ${batchNum + 1}/${numBatches} completed — Login: ${validUsersForPinProfile.length}/${batchEnd - batchStart + 1} success`);
 
             if (batchNum < numBatches - 1) {
                 sleep(BATCH_DELAY);
@@ -904,27 +904,27 @@ export function setup() {
     });
 
     // ── Final Summary ──────────────────────────────────────────────────────────
-    // /* log disabled */ (`\n📊 Setup Summary:`);
-    // /* log disabled */ (`   ✅ Login:   ${totalLoginSuccess}/${TOTAL_USER} success (${((totalLoginSuccess / TOTAL_USER) * 100).toFixed(1)}%)`);
+    console.log(`\n📊 Setup Summary:`);
+    console.log(`   ✅ Login:   ${totalLoginSuccess}/${TOTAL_USER} success (${((totalLoginSuccess / TOTAL_USER) * 100).toFixed(1)}%)`);
     if (totalLoginFailed  > 0) console.error(`   ❌ Login Failed:  ${totalLoginFailed}`);
-    if (totalLoginRetries > 0) /* log disabled */ (`   🔁 Login Retries: ${totalLoginRetries} total retry attempts`);
+    if (totalLoginRetries > 0) console.log(`   🔁 Login Retries: ${totalLoginRetries} total retry attempts`);
 
-    // /* log disabled */ (`   ✅ PIN:     ${totalPinSuccess}/${TOTAL_USER} success (${((totalPinSuccess / TOTAL_USER) * 100).toFixed(1)}%)`);
+    console.log(`   ✅ PIN:     ${totalPinSuccess}/${TOTAL_USER} success (${((totalPinSuccess / TOTAL_USER) * 100).toFixed(1)}%)`);
     if (totalPinFailed    > 0) console.error(`   ❌ PIN Failed:    ${totalPinFailed}`);
 
-    // /* log disabled */ (`   ✅ Profile: ${totalUserIdSuccess}/${TOTAL_USER} success (${((totalUserIdSuccess / TOTAL_USER) * 100).toFixed(1)}%)`);
+    console.log(`   ✅ Profile: ${totalUserIdSuccess}/${TOTAL_USER} success (${((totalUserIdSuccess / TOTAL_USER) * 100).toFixed(1)}%)`);
     if (totalUserIdFailed > 0) console.error(`   ❌ Profile Failed: ${totalUserIdFailed}`);
 
-    // /* log disabled */ (`\n📋 Per-BP Summary:`);
+    console.log(`\n📋 Per-BP Summary:`);
     selectedBPs.forEach(bp => {
         const bpTokens   = Object.values(tokens).filter(t => t.bp === bp);
         const logins     = bpTokens.filter(t => t.token     !== null).length;
         const pins       = bpTokens.filter(t => t.pin_token !== null).length;
         const channelId  = channelIds[bp] || 'N/A';
-        // /* log disabled */ (`   ${bp}: ${logins}/${bpTokens.length} logins, ${pins}/${bpTokens.length} PINs, channel_id: ${channelId}`);
+        console.log(`   ${bp}: ${logins}/${bpTokens.length} logins, ${pins}/${bpTokens.length} PINs, channel_id: ${channelId}`);
     });
 
-    // /* log disabled */ (`\n🎉 Setup completed!`);
+    console.log(`\n🎉 Setup completed!`);
 
     return {
         base_url: base_url,
@@ -967,25 +967,25 @@ export function handleSummary(data) {
             }
         }
 
-        // /* log disabled */ (`[${dateStr}_${timeStr}] Starting report generation for ${bp_name} on ${platform}...`);
+        console.log(`[${dateStr}_${timeStr}] Starting report generation for ${bp_name} on ${platform}...`);
 
         if (runby === 'Manual') {
             const htmlPath = `../../Report/Growin_Eipo_Stock/${platform}/${bp_name}/Manual/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
-            // /* log disabled */ (`Generating HTML: ${htmlPath}`);
+            console.log(`Generating HTML: ${htmlPath}`);
             return {
                 [htmlPath]: htmlReport(data),
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if (runby === 'Regression') {
             const htmlPath = `../../Report/Growin_Eipo_Stock/${platform}/${bp_name}/Regression/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
-            // /* log disabled */ (`Generating HTML: ${htmlPath}`);
+            console.log(`Generating HTML: ${htmlPath}`);
             return {
                 [htmlPath]: htmlReport(data),
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),
             };
         } else if (runby === 'LoadTest') {
             const htmlPath = `../../Report/Growin_Eipo_Stock/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
-            // /* log disabled */ (`Generating HTML: ${htmlPath}`);
+            console.log(`Generating HTML: ${htmlPath}`);
             return {
                 [htmlPath]: htmlReport(data),
                 'stdout': textSummary(data, { indent: ' ', enableColors: true }),

@@ -143,7 +143,7 @@ export function BP001(data) {
             const metric = metrics[index];
             metric.httpDuration.add(response.timings.duration);
             if (response.status === 200) {
-                // /* log disabled */ (response.body)
+                console.log(response.body)
                 metric.errorRate.add(false);
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
@@ -161,7 +161,7 @@ export function BP001(data) {
                 }
 
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -234,7 +234,7 @@ export function BP001(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -280,7 +280,7 @@ export function BP001(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -327,7 +327,7 @@ export function BP001(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);

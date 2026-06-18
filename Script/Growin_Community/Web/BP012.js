@@ -50,7 +50,7 @@ export function BP012(data) {
     }
     
     // // ✅ DEBUG LOG - Confirm correct mapping
-    // /* log disabled */ (`🔍 ${scenarioName} K6-VU${__VU} Iter${iterationIndex} → Setup-VU${userToken.vuId} → User${userToken.userNum} (${userToken.email}) | Pool: ${userToken.pool} ✅`);
+    console.log(`🔍 ${scenarioName} K6-VU${__VU} Iter${iterationIndex} → Setup-VU${userToken.vuId} → User${userToken.userNum} (${userToken.email}) | Pool: ${userToken.pool} ✅`);
     
     const token = userToken.token;
     const pin_token = userToken.pin_token;
@@ -84,7 +84,7 @@ export function BP012(data) {
         const UserPortfolioStock = resUserPortfolioStock.json();
         portfolio_id = UserPortfolioStock.data[0].PortfolioId;
         
-        // /* log disabled */ (UserPortfolioStock);
+        console.log(UserPortfolioStock);
     } else {
         console.error(`${email} UserPortfolioStock Failed - Status: ${resUserPortfolioStock.status} - Body: ${resUserPortfolioStock.body}`);
     }
@@ -137,7 +137,7 @@ export function BP012(data) {
                 metric.http_reqs.add(1);
 
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);

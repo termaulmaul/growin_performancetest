@@ -242,7 +242,7 @@ function loginWithRetry(base_url, credentials, userKey, vuId) {
         
         if (loginRes.status === 200) {
             if (attempt > 1) {
-                // /* log disabled */ (`   ✅ User ${userKey} (${credentials.email}, VU${vuId}) LOGIN SUCCESS on attempt ${attempt}`);
+                console.log(`   ✅ User ${userKey} (${credentials.email}, VU${vuId}) LOGIN SUCCESS on attempt ${attempt}`);
             }
             return {
                 success: true,
@@ -267,12 +267,12 @@ function loginWithRetry(base_url, credentials, userKey, vuId) {
 }
 
 export function setup() {
-    // /* log disabled */ ('📊 User Distribution:');
+    console.log('📊 User Distribution:');
     Object.keys(userDistribution).forEach(bp => {
-    // /* log disabled */ (`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
+    console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
     });
-    // /* log disabled */ (`   TOTAL: ${TOTAL_USER} users`);
-    // /* log disabled */ (`   PLATFORM: ${platform}`);
+    console.log(`   TOTAL: ${TOTAL_USER} users`);
+    console.log(`   PLATFORM: ${platform}`);
 
     const base_url = getBaseUrl();
     const tokens = {};
@@ -281,11 +281,11 @@ export function setup() {
     const BATCH_SIZE = 500; // Process 500 users at a time
     const BATCH_DELAY = 2; // 2 seconds between batches
     
-    // /* log disabled */ (`🔐 Starting login for ${TOTAL_USER} users distributed across ${selectedBPs.length} BPs...`);
-    // /* log disabled */ (`📦 Batch processing: ${BATCH_SIZE} users per batch, ${BATCH_DELAY}s delay`);
-    // /* log disabled */ (`🔁 Retry enabled: Max ${MAX_RETRY_ATTEMPTS} attempts per login`);
-    // /* log disabled */ (`🔑 ALL users will get PIN token`);
-    // /* log disabled */ (`📱 Platform: ${platform}`);
+    console.log(`🔐 Starting login for ${TOTAL_USER} users distributed across ${selectedBPs.length} BPs...`);
+    console.log(`📦 Batch processing: ${BATCH_SIZE} users per batch, ${BATCH_DELAY}s delay`);
+    console.log(`🔁 Retry enabled: Max ${MAX_RETRY_ATTEMPTS} attempts per login`);
+    console.log(`🔑 ALL users will get PIN token`);
+    console.log(`📱 Platform: ${platform}`);
     
     let globalUserOffset = 0;
     let globalVuOffset = 1;
@@ -304,7 +304,7 @@ export function setup() {
     selectedBPs.forEach((bp, bpIndex) => {
         const usersForThisBP = userDistribution[bp];
         
-        // /* log disabled */ (`\n📦 Processing ${bp} on ${platform} - ${usersForThisBP} users (VU ${globalVuOffset} to ${globalVuOffset + usersForThisBP - 1})...`);
+        console.log(`\n📦 Processing ${bp} on ${platform} - ${usersForThisBP} users (VU ${globalVuOffset} to ${globalVuOffset + usersForThisBP - 1})...`);
         
         // Create VU mapping
         for (let localUserIndex = 1; localUserIndex <= usersForThisBP; localUserIndex++) {
@@ -322,7 +322,7 @@ export function setup() {
             const batchStart = batchNum * BATCH_SIZE + 1;
             const batchEnd = Math.min((batchNum + 1) * BATCH_SIZE, usersForThisBP);
             
-            // /* log disabled */ (`   📦 Batch ${batchNum + 1}/${numBatches}: Users ${batchStart}-${batchEnd}`);
+            console.log(`   📦 Batch ${batchNum + 1}/${numBatches}: Users ${batchStart}-${batchEnd}`);
             
             for (let i = batchStart; i <= batchEnd; i++) {
                 const credentials = getUserCredentials(i, globalUserOffset);
@@ -373,7 +373,7 @@ export function setup() {
                     const profileResponses = http.batch(profileRequests);
 
                     // Handle profile/trading (index 0)
-                    // /* log disabled */ (`LKJHGVHJBK ${profileResponses[0].status}`)
+                    console.log(`LKJHGVHJBK ${profileResponses[0].status}`)
                     if (profileResponses[0].status === 200) {
                         totalUserIdSuccess++;
                         const tradingData = profileResponses[0].json().data;
@@ -411,7 +411,7 @@ export function setup() {
                     };
 
                     const pinRes = http.post(base_url + '/auth/api/v1/protected/pin-login', pinPayload, { headers: pinHeaders });
-                    // /* log disabled */ (`DEBUG - token: '${loginResult.token}' | pin: '${pinRes.json().data.pin_token}'`);
+                    console.log(`DEBUG - token: '${loginResult.token}' | pin: '${pinRes.json().data.pin_token}'`);
                     if (pinRes.status === 200) {
                         totalPinSuccess++;
                         tokens[userKey].pin_token = pinRes.json().data.pin_token;
@@ -434,7 +434,7 @@ export function setup() {
                 }
             }
             
-            // /* log disabled */ (`   ✅ Batch ${batchNum + 1}/${numBatches} completed`);
+            console.log(`   ✅ Batch ${batchNum + 1}/${numBatches} completed`);
             
             if (batchNum < numBatches - 1) {
                 sleep(BATCH_DELAY);
@@ -447,25 +447,25 @@ export function setup() {
     
     
     // ✅ Summary
-    // /* log disabled */ (`\n📊 Setup Summary:`);
-    // /* log disabled */ (`   ✅ Login: ${totalLoginSuccess}/${TOTAL_USER} success (${((totalLoginSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
+    console.log(`\n📊 Setup Summary:`);
+    console.log(`   ✅ Login: ${totalLoginSuccess}/${TOTAL_USER} success (${((totalLoginSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
     if (totalLoginFailed > 0) console.error(`   ❌ Login Failed: ${totalLoginFailed}`);
-    if (totalLoginRetries > 0) /* log disabled */ (`   🔁 Login Retries: ${totalLoginRetries} total retry attempts`);
+    if (totalLoginRetries > 0) console.log(`   🔁 Login Retries: ${totalLoginRetries} total retry attempts`);
     
-    // /* log disabled */ (`   ✅ PIN: ${totalPinSuccess}/${TOTAL_USER} success (${((totalPinSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
+    console.log(`   ✅ PIN: ${totalPinSuccess}/${TOTAL_USER} success (${((totalPinSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
     if (totalPinFailed > 0) console.error(`   ❌ PIN Failed: ${totalPinFailed}`);
     
-    // /* log disabled */ (`\n📋 Per-BP Summary:`);
+    console.log(`\n📋 Per-BP Summary:`);
     selectedBPs.forEach(bp => {
         const bpTokens = Object.values(tokens).filter(t => t.bp === bp);
         const logins = bpTokens.filter(t => t.token !== null).length;
         const pins = bpTokens.filter(t => t.pin_token !== null).length;
         const channelId = channelIds[bp] || 'N/A';
         
-        // /* log disabled */ (`   ${bp}: ${logins}/${bpTokens.length} logins, ${pins}/${bpTokens.length} PINs, channel_id: ${channelId}`);
+        console.log(`   ${bp}: ${logins}/${bpTokens.length} logins, ${pins}/${bpTokens.length} PINs, channel_id: ${channelId}`);
     });
     
-    // /* log disabled */ (`\n🎉 Setup completed!`);
+    console.log(`\n🎉 Setup completed!`);
     
     return { 
         base_url: base_url, 
@@ -510,11 +510,11 @@ export function handleSummary(data) {
             }
         }
         
-        // /* log disabled */ (`[${dateStr}_${timeStr}] Starting report generation for ${bp_name} on ${platform}...`);
+        console.log(`[${dateStr}_${timeStr}] Starting report generation for ${bp_name} on ${platform}...`);
         
         if (runby === 'Manual') {
             const htmlPath = `../../Report/Growin_UUPDP/${platform}/${bp_name}/Manual/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
-            // /* log disabled */ (`Generating HTML: ${htmlPath}`);
+            console.log(`Generating HTML: ${htmlPath}`);
             
             return {
                 [htmlPath]: htmlReport(data),
@@ -522,7 +522,7 @@ export function handleSummary(data) {
             };
         } else if (runby === 'Regression') {
             const htmlPath = `../../Report/Growin_UUPDP/${platform}/${bp_name}/Regression/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
-            // /* log disabled */ (`Generating HTML: ${htmlPath}`);
+            console.log(`Generating HTML: ${htmlPath}`);
             
             return {
                 [htmlPath]: htmlReport(data),
@@ -530,7 +530,7 @@ export function handleSummary(data) {
             };
         } else if (runby === 'LoadTest') {
             const htmlPath = `../../Report/Growin_UUPDP/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
-            // /* log disabled */ (`Generating HTML: ${htmlPath}`);
+            console.log(`Generating HTML: ${htmlPath}`);
             
             return {
                 [htmlPath]: htmlReport(data),

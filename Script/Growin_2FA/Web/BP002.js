@@ -95,7 +95,7 @@ export function BP002(data) {
         if (response.status === 200) {
             try {
                 const responseData = response.json();
-                // /* log disabled */ (`Response : Response: ${response.body}`)
+                console.log(`Response : Response: ${response.body}`)
                 
                 if (responseData?.data?.data && Array.isArray(responseData.data.data) && responseData.data.data.length > 0) {
                     const allDevices = responseData.data.data;
@@ -114,7 +114,7 @@ export function BP002(data) {
             metric.http_reqs.add(1);
             
             if (`${__ENV.ENV}` != 'INT') {
-                // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Response: ${response.body}`);
+                console.log(`${email} ${urls[index]} || Status: ${response.status} || Response: ${response.body}`);
             }
         } else {
             metric.errorRate.add(true);
@@ -173,7 +173,7 @@ export function BP002(data) {
                 metric.http_reqs.add(1);
                 
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${deleteUrls[index]} || Status: ${response.status} || Response: ${response.body}`);
+                    console.log(`${email} ${deleteUrls[index]} || Status: ${response.status} || Response: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);

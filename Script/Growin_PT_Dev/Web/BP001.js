@@ -224,7 +224,7 @@
 //             metric.errorCount.add(0);
 
 //             if (`${__ENV.ENV}` !== 'INT') {
-//                 /* log disabled */ (`✅ ${email} [${method}] ${url} | Status: ${response.status}`);
+//                 console.log(`✅ ${email} [${method}] ${url} | Status: ${response.status}`);
 //             }
 //         } else {
 //             metric.errorRate.add(true);
@@ -479,7 +479,7 @@ export function BP001(data) {
             metric.errorCount.add(0);
 
             if (`${__ENV.ENV}` !== 'INT') {
-                // /* log disabled */ (`✅ ${email} [${method}] ${url} | Status: ${response.status}`);
+                console.log(`✅ ${email} [${method}] ${url} | Status: ${response.status}`);
             }
         } else {
             metric.errorRate.add(true);

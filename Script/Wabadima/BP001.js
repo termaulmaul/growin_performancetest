@@ -88,17 +88,17 @@ export default function (data) {
 
     // Log start time
     const startTime = new Date();
-    // /* log disabled */ (`⏰ Request started at: ${startTime.toISOString()}`);
+    console.log(`⏰ Request started at: ${startTime.toISOString()}`);
 
     const response = http.post(url, test, params);
 
     // Log end time
     const endTime = new Date();
     const duration = (endTime - startTime) / 1000;
-    // /* log disabled */ (`⏰ Request ended at: ${endTime.toISOString()}`);
-    // /* log disabled */ (`⏱️ Total duration: ${duration}s`);
-    // /* log disabled */ (`📊 Status: ${response.status} - ${response.body}`);
-    // /* log disabled */ (`📝 Body: ${response.body}`);
+    console.log(`⏰ Request ended at: ${endTime.toISOString()}`);
+    console.log(`⏱️ Total duration: ${duration}s`);
+    console.log(`📊 Status: ${response.status} - ${response.body}`);
+    console.log(`📝 Body: ${response.body}`);
 
     // Check metrics
     const metric = WhatsappIntegration.Webhook;
@@ -109,7 +109,7 @@ export default function (data) {
         metric.errorCount.add(0);
         metric.requestRate.add(true);
         metric.http_reqs.add(1);
-        // /* log disabled */ (`✅ Success: ${response.body}`);
+        console.log(`✅ Success: ${response.body}`);
     } else {
         metric.errorRate.add(true);
         metric.errorCount.add(1);
@@ -136,11 +136,11 @@ export function handleSummary(data) {
         const dateStr = now.toLocaleDateString('id-ID').replace(/\//g, '');
         const timeStr = now.toLocaleTimeString('id-ID').replace(/:/g, '');
         
-        // /* log disabled */ (`[${dateStr}_${timeStr}] Starting report generation...`);
+        console.log(`[${dateStr}_${timeStr}] Starting report generation...`);
         
         
         const htmlPath = `Wabadima_${dateStr}_${timeStr}.html`;
-        // /* log disabled */ (`Generating HTML: ${htmlPath}`);
+        console.log(`Generating HTML: ${htmlPath}`);
         
         return {
             [htmlPath]: htmlReport(data),

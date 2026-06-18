@@ -90,7 +90,7 @@ export function BP005(data) {
     }
     
     // // ✅ DEBUG LOG - Confirm correct mapping
-    // /* log disabled */ (`🔍 ${scenarioName} K6-VU${__VU} Iter${iterationIndex} → Setup-VU${userToken.vuId} → User${userToken.userNum} (${userToken.email}) | Pool: ${userToken.pool} ✅`);
+    console.log(`🔍 ${scenarioName} K6-VU${__VU} Iter${iterationIndex} → Setup-VU${userToken.vuId} → User${userToken.userNum} (${userToken.email}) | Pool: ${userToken.pool} ✅`);
     
     const token = userToken.token;
     const pin_token = userToken.pin_token;
@@ -157,13 +157,13 @@ export function BP005(data) {
                         // Ambil channel_id yang pertama dari hasil filter
                         if (differentChannels.length > 0) {
                             switchChannelIDGetList = differentChannels[0].channel_id;
-                            // /* log disabled */ (`[BATCH 1] switchChannelID SET TO: ${switchChannelID}`);
-                            // /* log disabled */ (`[BATCH 1] Type: ${typeof switchChannelID}`);
+                            console.log(`[BATCH 1] switchChannelID SET TO: ${switchChannelID}`);
+                            console.log(`[BATCH 1] Type: ${typeof switchChannelID}`);
                         } 
                         // else {
                         //     console.error(`${email} Tidak ada channel lain selain ${channel_id}`);
                         //     switchChannelID = null;
-                        //     // /* log disabled */ (`[BATCH 1] switchChannelID SET TO NULL`);
+                        //     console.log(`[BATCH 1] switchChannelID SET TO NULL`);
                         // }
                     }
                 } catch (parseError) {
@@ -172,7 +172,7 @@ export function BP005(data) {
                 }
 
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -191,7 +191,7 @@ export function BP005(data) {
             
         });
     }
-    // /* log disabled */ (`switchChannelIDGetList : ${switchChannelIDGetList}`)
+    console.log(`switchChannelIDGetList : ${switchChannelIDGetList}`)
 
     // Batch 2
     let switchChannelID;
@@ -240,11 +240,11 @@ export function BP005(data) {
                         if (leftChannel) {
                             switchChannelID = leftChannel.channel_id;
                             if (`${__ENV.ENV}` != 'INT') {
-                                // /* log disabled */ (`Got LEFT Channel ID: ${switchChannelID}`);
+                                console.log(`Got LEFT Channel ID: ${switchChannelID}`);
                             }
                         } else {
                             if (`${__ENV.ENV}` != 'INT') {
-                                // /* log disabled */ (`No channel with LEFT status found`);
+                                console.log(`No channel with LEFT status found`);
                             }
                         }
                     }
@@ -262,7 +262,7 @@ export function BP005(data) {
                 metric.http_reqs.add(1);
 
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -281,24 +281,24 @@ export function BP005(data) {
     }
 
     // Batch 3
-    // /* log disabled */ (`[BEFORE CHANGE BATCH 3] switchChannelID: ${switchChannelID}`);
+    console.log(`[BEFORE CHANGE BATCH 3] switchChannelID: ${switchChannelID}`);
     if (switchChannelID == null) {
         switchChannelID = switchChannelIDGetList
     }
-    // /* log disabled */ (`[AFTER CHANGE BATCH 3] switchChannelID: ${switchChannelID}`);
+    console.log(`[AFTER CHANGE BATCH 3] switchChannelID: ${switchChannelID}`);
 
     if (token) {
         const urls = [
             base_url + `/socialinvesting/api/v1/social/switch`,
         ];
 
-        // /* log disabled */ (`[BATCH 3 START] switchChannelID: ${switchChannelID}`);
+        console.log(`[BATCH 3 START] switchChannelID: ${switchChannelID}`);
         const Socialinvesting_Social_Switch_Payload = JSON.stringify({
             new_channel_id: switchChannelID,
             // new_channel_id: leftChannel,
         });
         
-        // /* log disabled */ (`[BATCH 3] Payload: ${Socialinvesting_Social_Switch_Payload}`);
+        console.log(`[BATCH 3] Payload: ${Socialinvesting_Social_Switch_Payload}`);
 
         const stepThreeHeaders = {
             'Content-Type': 'application/json',
@@ -332,14 +332,14 @@ export function BP005(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body} || UUID : ${switchChannelID}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body} || UUID : ${switchChannelID}`);
                 }
             } else {
                 metric.errorRate.add(true);
                 metric.errorCount.add(1);
                 metric.requestRate.add(false);
                 metric.http_reqs.add(1);
-                // /* log disabled */ (`${email} to Channel ID : ${switchChannelID}`)
+                console.log(`${email} to Channel ID : ${switchChannelID}`)
                 check(response, {
                     [`${email} ERROR ${urls[index]} || Status: ${response.status} || Body: ${response.body} || UUID : ${switchChannelID}`]: (r) => r.status === 200
                 });

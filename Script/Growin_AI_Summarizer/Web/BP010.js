@@ -174,7 +174,7 @@ export function BP010(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -238,7 +238,7 @@ export function BP010(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -298,7 +298,7 @@ export function BP010(data) {
                 metric.http_reqs.add(1);
                 conversation_id = response.json().data.conversation_id;
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -355,7 +355,7 @@ export function BP010(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -406,7 +406,7 @@ export function BP010(data) {
                 feedback_id = response.json().data.feedback_id;
                 conversation_id = response.json().data.conversation_id;
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -430,7 +430,7 @@ export function BP010(data) {
             base_url + `/marketdata/api/v1/gpt/feedback_update`,
         ];
 
-        // /* log disabled */ (`feedback_id = ${feedback_id}`)
+        console.log(`feedback_id = ${feedback_id}`)
 
         const Marketdata_Gpt_FeedbackUpdate_Payload = JSON.stringify({
             feedback_id: feedback_id,
@@ -457,7 +457,7 @@ export function BP010(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);

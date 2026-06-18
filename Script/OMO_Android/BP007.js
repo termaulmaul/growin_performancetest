@@ -76,7 +76,7 @@ export function BP007(data) {
                 last_price = selectedStock.last_price;
                 
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`VU${vuId} ${email} Selected Stock - ${stock_code} (${portfolio_id})`);
+                    console.log(`VU${vuId} ${email} Selected Stock - ${stock_code} (${portfolio_id})`);
                 }
             } else {
                 if (`${__ENV.ENV}` != 'INT') {
@@ -141,7 +141,7 @@ export function BP007(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`VU${vuId} ${email} SUCCESS ${urls[index]}`);
+                    console.log(`VU${vuId} ${email} SUCCESS ${urls[index]}`);
                 }
             } else {
                 metric.errorRate.add(true);

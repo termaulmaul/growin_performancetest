@@ -314,10 +314,10 @@ function loginWithRetry(base_url, credentials, userKey, vuId) {
     for (let attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
         const loginRes = http.post(base_url + '/auth/api/v1/login', loginPayload, { headers: loginHeaders });
  
-        // /* log disabled */ (`Response Body: ${loginRes.body}`)
+        console.log(`Response Body: ${loginRes.body}`)
         if (loginRes.status === 200) {
             if (attempt > 1) {
-                // /* log disabled */ (`   ✅ User ${userKey} (${credentials.email}, VU${vuId}) LOGIN SUCCESS on attempt ${attempt}`);
+                console.log(`   ✅ User ${userKey} (${credentials.email}, VU${vuId}) LOGIN SUCCESS on attempt ${attempt}`);
             }
             return {
                 success: true,
@@ -338,26 +338,26 @@ function loginWithRetry(base_url, credentials, userKey, vuId) {
 }
  
 export function setup() {
-    // /* log disabled */ ('📊 User Distribution:');
+    console.log('📊 User Distribution:');
     Object.keys(userDistribution).forEach(bp => {
     const start = BP_NUM_STARTS[bp];
     const count = userDistribution[bp];
-    // /* log disabled */ (`   ${bp}: ${count} users (${BP_USER_PERCENTAGE[bp]}%) → user #${start} to #${start + count - 1}`);
+    console.log(`   ${bp}: ${count} users (${BP_USER_PERCENTAGE[bp]}%) → user #${start} to #${start + count - 1}`);
     });
-    // /* log disabled */ (`   TOTAL: ${TOTAL_USER} users`);
-    // /* log disabled */ (`   PLATFORM: ${platform}`);
-    // /* log disabled */ (`   MODE: ${isMultiBP ? 'Multi-BP (LoadTest) — numStart kumulatif per BP' : 'Single BP (Manual) — NUMSTART dari env'}`);
+    console.log(`   TOTAL: ${TOTAL_USER} users`);
+    console.log(`   PLATFORM: ${platform}`);
+    console.log(`   MODE: ${isMultiBP ? 'Multi-BP (LoadTest) — numStart kumulatif per BP' : 'Single BP (Manual) — NUMSTART dari env'}`);
 
     const base_url = getBaseUrl();
     const tokens = {};
     const vuMapping = {};
     
-    // /* log disabled */ (`🔐 Starting login for ${TOTAL_USER} users distributed across ${selectedBPs.length} BPs...`);
-    // /* log disabled */ (`📦 Batch processing: ${BATCH_SIZE} users per batch, ${BATCH_DELAY}s delay`);
-    // /* log disabled */ (`🔁 Retry enabled: Max ${MAX_RETRY_ATTEMPTS} attempts per login`);
-    // /* log disabled */ (`🔑 ALL users will get PIN token`);
-    // /* log disabled */ (`📱 Platform: ${platform}`);
-    // /* log disabled */ (`🔢 Mode: ${isMultiBP ? 'Multi-BP (LoadTest) — numStart kumulatif per BP' : 'Single BP (Manual) — pakai NUMSTART dari env'}`);
+    console.log(`🔐 Starting login for ${TOTAL_USER} users distributed across ${selectedBPs.length} BPs...`);
+    console.log(`📦 Batch processing: ${BATCH_SIZE} users per batch, ${BATCH_DELAY}s delay`);
+    console.log(`🔁 Retry enabled: Max ${MAX_RETRY_ATTEMPTS} attempts per login`);
+    console.log(`🔑 ALL users will get PIN token`);
+    console.log(`📱 Platform: ${platform}`);
+    console.log(`🔢 Mode: ${isMultiBP ? 'Multi-BP (LoadTest) — numStart kumulatif per BP' : 'Single BP (Manual) — pakai NUMSTART dari env'}`);
     
     let globalVuOffset = 1;
     
@@ -383,11 +383,11 @@ export function setup() {
         const bpNumStart = BP_NUM_STARTS[bp];
         const globalUserOffset = bpNumStart - NUMSTART_env;
 
-        // /* log disabled */ (`\n📦 Processing ${bp} on ${platform} - ${usersForThisBP} users (VU ${globalVuOffset} to ${globalVuOffset + usersForThisBP - 1})...`);
-        // /* log disabled */ (`   🔢 numStart efektif: ${bpNumStart} (user #${bpNumStart} to #${bpNumStart + usersForThisBP - 1})`);
+        console.log(`\n📦 Processing ${bp} on ${platform} - ${usersForThisBP} users (VU ${globalVuOffset} to ${globalVuOffset + usersForThisBP - 1})...`);
+        console.log(`   🔢 numStart efektif: ${bpNumStart} (user #${bpNumStart} to #${bpNumStart + usersForThisBP - 1})`);
 
         if (skipSetupLogin) {
-            // /* log disabled */ (`   ⏩ skipSetupLogin=true: setup login di-skip untuk ${bp}, BP akan login sendiri per-iterasi`);
+            console.log(`   ⏩ skipSetupLogin=true: setup login di-skip untuk ${bp}, BP akan login sendiri per-iterasi`);
         }
         
         for (let localUserIndex = 1; localUserIndex <= usersForThisBP; localUserIndex++) {
@@ -427,7 +427,7 @@ export function setup() {
             const batchStart = batchNum * BATCH_SIZE + 1;
             const batchEnd = Math.min((batchNum + 1) * BATCH_SIZE, usersForThisBP);
             
-            // /* log disabled */ (`   📦 Batch ${batchNum + 1}/${numBatches}: Users ${batchStart}-${batchEnd}`);
+            console.log(`   📦 Batch ${batchNum + 1}/${numBatches}: Users ${batchStart}-${batchEnd}`);
             
             for (let i = batchStart; i <= batchEnd; i++) {
                 const credentials = getUserCredentials(i, globalUserOffset);
@@ -469,9 +469,9 @@ export function setup() {
                         tokens[userKey].account_name = tradingData.account_name;
 
                         // const tradingData = profileResponses[0].json().data;
-                        // /* log disabled */ (`🔍 tradingData RAW: ${JSON.stringify(tradingData)}`);
+                        console.log(`🔍 tradingData RAW: ${JSON.stringify(tradingData)}`);
                         
-                        // /* log disabled */ (`✅ Assigned Email ${credentials.email} - user_id: ${tokens[userKey].user_id}, client_id: ${tokens[userKey].client_id}`);
+                        console.log(`✅ Assigned Email ${credentials.email} - user_id: ${tokens[userKey].user_id}, client_id: ${tokens[userKey].client_id}`);
                     } else {
                         totalUserIdFailed++;
                         if (i === batchStart || totalUserIdFailed <= 5) {
@@ -511,7 +511,7 @@ export function setup() {
                 }
             }
             
-            // /* log disabled */ (`   ✅ Batch ${batchNum + 1}/${numBatches} completed`);
+            console.log(`   ✅ Batch ${batchNum + 1}/${numBatches} completed`);
             
             if (batchNum < numBatches - 1) {
                 sleep(BATCH_DELAY);
@@ -524,39 +524,39 @@ export function setup() {
         //    selalu mulai dari nomor user yang benar terlepas dari urutan BP lainnya.
     });
     
-    // /* log disabled */ (`\n📊 Setup Summary:`);
+    console.log(`\n📊 Setup Summary:`);
 
     // ✅ tampilkan info BP yang skip login
     if (totalSkippedLogin > 0) {
-        // /* log disabled */ (`   ⏩ Skipped (self-login BP): ${totalSkippedLogin} users`);
+        console.log(`   ⏩ Skipped (self-login BP): ${totalSkippedLogin} users`);
     }
 
     const loginTotal = TOTAL_USER - totalSkippedLogin;
     if (loginTotal > 0) {
-        // /* log disabled */ (`   ✅ Login: ${totalLoginSuccess}/${loginTotal} success (${((totalLoginSuccess/loginTotal)*100).toFixed(1)}%)`);
+        console.log(`   ✅ Login: ${totalLoginSuccess}/${loginTotal} success (${((totalLoginSuccess/loginTotal)*100).toFixed(1)}%)`);
         if (totalLoginFailed > 0) console.error(`   ❌ Login Failed: ${totalLoginFailed}`);
-        if (totalLoginRetries > 0) /* log disabled */ (`   🔁 Login Retries: ${totalLoginRetries} total retry attempts`);
+        if (totalLoginRetries > 0) console.log(`   🔁 Login Retries: ${totalLoginRetries} total retry attempts`);
         
-        // /* log disabled */ (`   ✅ PIN: ${totalPinSuccess}/${loginTotal} success (${((totalPinSuccess/loginTotal)*100).toFixed(1)}%)`);
+        console.log(`   ✅ PIN: ${totalPinSuccess}/${loginTotal} success (${((totalPinSuccess/loginTotal)*100).toFixed(1)}%)`);
         if (totalPinFailed > 0) console.error(`   ❌ PIN Failed: ${totalPinFailed}`);
     }
     
-    // /* log disabled */ (`\n📋 Per-BP Summary:`);
+    console.log(`\n📋 Per-BP Summary:`);
     selectedBPs.forEach(bp => {
         const bpConfig = BP_CONFIG[platform]?.[bp] ?? {};
         const skipSetupLogin = bpConfig.skipSetupLogin === true;
         const bpTokens = Object.values(tokens).filter(t => t.bp === bp);
 
         if (skipSetupLogin) {
-            // /* log disabled */ (`   ${bp}: ⏩ login skipped (self-login per-iteration) — ${bpTokens.length} users assigned`);
+            console.log(`   ${bp}: ⏩ login skipped (self-login per-iteration) — ${bpTokens.length} users assigned`);
         } else {
             const logins = bpTokens.filter(t => t.token !== null).length;
             const pins = bpTokens.filter(t => t.pin_token !== null).length;
-            // /* log disabled */ (`   ${bp}: ${logins}/${bpTokens.length} logins, ${pins}/${bpTokens.length} PINs`);
+            console.log(`   ${bp}: ${logins}/${bpTokens.length} logins, ${pins}/${bpTokens.length} PINs`);
         }
     });
     
-    // /* log disabled */ (`\n🎉 Setup completed!`);
+    console.log(`\n🎉 Setup completed!`);
     
     return { 
         base_url: base_url, 
@@ -598,11 +598,11 @@ export function handleSummary(data) {
             }
         }
         
-        // /* log disabled */ (`[${dateStr}_${timeStr}] Starting report generation for ${bp_name} on ${platform}...`);
+        console.log(`[${dateStr}_${timeStr}] Starting report generation for ${bp_name} on ${platform}...`);
         
         if (runby === 'Manual') {
             const htmlPath = `../../Report/ExaCC/${platform}/${bp_name}/Manual/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
-            // /* log disabled */ (`Generating HTML: ${htmlPath}`);
+            console.log(`Generating HTML: ${htmlPath}`);
             
             return {
                 [htmlPath]: htmlReport(data),
@@ -610,7 +610,7 @@ export function handleSummary(data) {
             };
         } else if (runby === 'Regression') {
             const htmlPath = `../../Report/ExaCC/${platform}/${bp_name}/Regression/${runby}_Detail_${bp_name}_${dateStr}_${timeStr}.html`;
-            // /* log disabled */ (`Generating HTML: ${htmlPath}`);
+            console.log(`Generating HTML: ${htmlPath}`);
             
             return {
                 [htmlPath]: htmlReport(data),
@@ -618,7 +618,7 @@ export function handleSummary(data) {
             };
         } else if (runby === 'LoadTest') {
             const htmlPath = `../../Report/ExaCC/${platform}/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
-            // /* log disabled */ (`Generating HTML: ${htmlPath}`);
+            console.log(`Generating HTML: ${htmlPath}`);
             
             return {
                 [htmlPath]: htmlReport(data),

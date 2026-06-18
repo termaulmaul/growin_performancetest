@@ -217,11 +217,11 @@ function getUserCredentials(userNum, bpOffset = 0) {
 
 // ✅ SETUP FUNCTION - SEMUA BP mendapat PIN
 export function setup() {
-    // /* log disabled */ ('📊 User Distribution:');
+    console.log('📊 User Distribution:');
     Object.keys(userDistribution).forEach(bp => {
-    // /* log disabled */ (`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
+    console.log(`   ${bp}: ${userDistribution[bp]} users (${BP_USER_PERCENTAGE[bp]}%)`);
     });
-    // /* log disabled */ (`   TOTAL: ${TOTAL_USER} users`);
+    console.log(`   TOTAL: ${TOTAL_USER} users`);
 
     const base_url = getBaseUrl();
     const tokens = {};
@@ -230,9 +230,9 @@ export function setup() {
     const BATCH_SIZE = 500; // Process 50 users at a time
     const BATCH_DELAY = 2; // 3 seconds between batches
     
-    // /* log disabled */ (`🔐 Starting login for ${TOTAL_USER} users distributed across ${selectedBPs.length} BPs...`);
-    // /* log disabled */ (`📦 Batch processing: ${BATCH_SIZE} users per batch, ${BATCH_DELAY}s delay`);
-    // /* log disabled */ (`🔑 ALL users will get PIN token`);
+    console.log(`🔐 Starting login for ${TOTAL_USER} users distributed across ${selectedBPs.length} BPs...`);
+    console.log(`📦 Batch processing: ${BATCH_SIZE} users per batch, ${BATCH_DELAY}s delay`);
+    console.log(`🔑 ALL users will get PIN token`);
     
     let globalUserOffset = 0;
     let globalVuOffset = 1;
@@ -248,7 +248,7 @@ export function setup() {
     selectedBPs.forEach((bp, bpIndex) => {
         const usersForThisBP = userDistribution[bp];
         
-        // /* log disabled */ (`\n📦 Processing ${bp} - ${usersForThisBP} users (VU ${globalVuOffset} to ${globalVuOffset + usersForThisBP - 1})...`);
+        console.log(`\n📦 Processing ${bp} - ${usersForThisBP} users (VU ${globalVuOffset} to ${globalVuOffset + usersForThisBP - 1})...`);
         
         // Create VU mapping
         for (let localUserIndex = 1; localUserIndex <= usersForThisBP; localUserIndex++) {
@@ -266,7 +266,7 @@ export function setup() {
             const batchStart = batchNum * BATCH_SIZE + 1;
             const batchEnd = Math.min((batchNum + 1) * BATCH_SIZE, usersForThisBP);
             
-            // /* log disabled */ (`   📦 Batch ${batchNum + 1}/${numBatches}: Users ${batchStart}-${batchEnd}`);
+            console.log(`   📦 Batch ${batchNum + 1}/${numBatches}: Users ${batchStart}-${batchEnd}`);
             
             for (let i = batchStart; i <= batchEnd; i++) {
                 const credentials = getUserCredentials(i, globalUserOffset);
@@ -349,7 +349,7 @@ export function setup() {
                 }
             }
             
-            // /* log disabled */ (`   ✅ Batch ${batchNum + 1}/${numBatches} completed`);
+            console.log(`   ✅ Batch ${batchNum + 1}/${numBatches} completed`);
             
             if (batchNum < numBatches - 1) {
                 sleep(BATCH_DELAY);
@@ -362,24 +362,24 @@ export function setup() {
     
     
     // ✅ Summary
-    // /* log disabled */ (`\n📊 Setup Summary:`);
-    // /* log disabled */ (`   ✅ Login: ${totalLoginSuccess}/${TOTAL_USER} success (${((totalLoginSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
+    console.log(`\n📊 Setup Summary:`);
+    console.log(`   ✅ Login: ${totalLoginSuccess}/${TOTAL_USER} success (${((totalLoginSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
     if (totalLoginFailed > 0) console.error(`   ❌ Login Failed: ${totalLoginFailed}`);
     
-    // /* log disabled */ (`   ✅ PIN: ${totalPinSuccess}/${TOTAL_USER} success (${((totalPinSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
+    console.log(`   ✅ PIN: ${totalPinSuccess}/${TOTAL_USER} success (${((totalPinSuccess/TOTAL_USER)*100).toFixed(1)}%)`);
     if (totalPinFailed > 0) console.error(`   ❌ PIN Failed: ${totalPinFailed}`);
     
-    // /* log disabled */ (`\n📋 Per-BP Summary:`);
+    console.log(`\n📋 Per-BP Summary:`);
     selectedBPs.forEach(bp => {
         const bpTokens = Object.values(tokens).filter(t => t.bp === bp);
         const logins = bpTokens.filter(t => t.token !== null).length;
         const pins = bpTokens.filter(t => t.pin_token !== null).length;
         const channelId = channelIds[bp] || 'N/A';
         
-        // /* log disabled */ (`   ${bp}: ${logins}/${bpTokens.length} logins, ${pins}/${bpTokens.length} PINs, channel_id: ${channelId}`);
+        console.log(`   ${bp}: ${logins}/${bpTokens.length} logins, ${pins}/${bpTokens.length} PINs, channel_id: ${channelId}`);
     });
     
-    // /* log disabled */ (`\n🎉 Setup completed!`);
+    console.log(`\n🎉 Setup completed!`);
     
     return { 
         base_url: base_url, 
@@ -419,11 +419,11 @@ export function handleSummary(data) {
             }
         }
         
-        // /* log disabled */ (`[${dateStr}_${timeStr}] Starting report generation for ${bp_name}...`);
+        console.log(`[${dateStr}_${timeStr}] Starting report generation for ${bp_name}...`);
         
         if(`${__ENV.RUNBY}`=='Manual'){
             const htmlPath = `../../../Report/Growin_Community/Web/${SCENARIO}/Manual/${__ENV.RUNBY}_Detail_${SCENARIO}_${dateStr}_${timeStr}.html`;
-            // /* log disabled */ (`Generating HTML: ${htmlPath}`);
+            console.log(`Generating HTML: ${htmlPath}`);
             
             return {
                 [htmlPath]: htmlReport(data),
@@ -431,7 +431,7 @@ export function handleSummary(data) {
             };
         } else if(`${__ENV.RUNBY}`=='Regression'){
             const htmlPath = `../../../Report/Growin_Community/Web/${SCENARIO}/Regression/${__ENV.RUNBY}_Detail_${SCENARIO}_${dateStr}_${timeStr}.html`;
-            // /* log disabled */ (`Generating HTML: ${htmlPath}`);
+            console.log(`Generating HTML: ${htmlPath}`);
             
             return {
                 [htmlPath]: htmlReport(data),
@@ -439,7 +439,7 @@ export function handleSummary(data) {
             };
         } else if(`${__ENV.RUNBY}`=='LoadTest'){
             const htmlPath = `../../../Report/Growin_Community/Web/LoadTest/${runby}_${dateStr}_${timeStr}.html`;
-            // /* log disabled */ (`Generating HTML: ${htmlPath}`);
+            console.log(`Generating HTML: ${htmlPath}`);
             
             return {
                 [htmlPath]: htmlReport(data),

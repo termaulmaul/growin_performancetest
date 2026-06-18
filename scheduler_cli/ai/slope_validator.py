@@ -41,8 +41,8 @@ RISK_PATTERNS = [
      "desc": "Missing 'set -e' — errors may be silently ignored", "check_type": "file_level", "lang": "shell"},
 
     # JS/K6 specific risks
-    {"name": "console_log_spam", "pattern": r"console\.log\(", "severity": 5,
-     "desc": "console.log in production test — use k6 metrics/logging instead", "lang": "js"},
+    {"name": "console_log_spam", "pattern": r"console\.log\(", "severity": 0,
+     "desc": "console.log in production test (allowed per user request)", "lang": "js"},
     {"name": "hardcoded_ip", "pattern": r"https?://[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+", "severity": 15,
      "desc": "Hardcoded IP in test script — use DNS or config environments", "lang": "js"},
     {"name": "no_thresholds", "pattern": r"thresholds", "severity": 15,

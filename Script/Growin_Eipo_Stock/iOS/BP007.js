@@ -66,7 +66,7 @@ export function BP007(data) {
     if (res.status === 200) {
         orderID = res.json().data.id;
         if (`${__ENV.ENV}` != 'INT') {
-            // /* log disabled */ (`User ${email} Order Success || Status: ${res.status} || Body: ${res.body}`);
+            console.log(`User ${email} Order Success || Status: ${res.status} || Body: ${res.body}`);
         }
     } else {
         if (`${__ENV.ENV}` != 'INT') {
@@ -113,7 +113,7 @@ export function BP007(data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);

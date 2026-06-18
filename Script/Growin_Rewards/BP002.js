@@ -104,7 +104,7 @@ export function BP002(data) {
                 tierID = response.json().data[0].id
                 if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body} || Request Body: ${requestBody}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body} || Request Body: ${requestBody}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -124,7 +124,7 @@ export function BP002(data) {
     
     // Batch 2
     let rewardID;
-    // /* log disabled */ (`tierID: ${tierID}`)
+    console.log(`tierID: ${tierID}`)
     if (token) {
         const urls = [
             base_url + `/gamification/api/v2/reward/user?tier_id=${tierID}`,
@@ -176,7 +176,7 @@ export function BP002(data) {
                             rewardID = rewardData.data[index].id;
                             
                             if (`${__ENV.ENV}` != 'INT') {
-                                // /* log disabled */ (`Got reward ID: ${id}`);
+                                console.log(`Got reward ID: ${id}`);
                             }
                         } else {
                             console.error(`No reward data available`);
@@ -187,7 +187,7 @@ export function BP002(data) {
                 }
                 if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body} || Request Body: ${requestBody}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body} || Request Body: ${requestBody}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -205,7 +205,7 @@ export function BP002(data) {
         });
     }
     
-    // /* log disabled */ (`rewardID: ${rewardID}`)
+    console.log(`rewardID: ${rewardID}`)
     // Batch 3
     if (token) {
         const urls = [
@@ -250,7 +250,7 @@ export function BP002(data) {
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
                     const requestBody = requests[index][2];
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body} || Request Body: ${requestBody}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body} || Request Body: ${requestBody}`);
                 }
             } else {
                 metric.errorRate.add(true);

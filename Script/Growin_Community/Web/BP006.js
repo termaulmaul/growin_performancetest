@@ -132,7 +132,7 @@ export function BP006(data) {
     }
     
     // // ✅ DEBUG LOG - Confirm correct mapping
-    // /* log disabled */ (`🔍 ${scenarioName} K6-VU${__VU} Iter${iterationIndex} → Setup-VU${userToken.vuId} → User${userToken.userNum} (${userToken.email}) | Pool: ${userToken.pool} ✅`);
+    console.log(`🔍 ${scenarioName} K6-VU${__VU} Iter${iterationIndex} → Setup-VU${userToken.vuId} → User${userToken.userNum} (${userToken.email}) | Pool: ${userToken.pool} ✅`);
     
     const token = userToken.token;
     const pin_token = userToken.pin_token;
@@ -181,7 +181,7 @@ export function BP006(data) {
                 metric.http_reqs.add(1);
 
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -249,11 +249,11 @@ export function BP006(data) {
                             if (joinedChannel) {
                                 joinedChannelID = joinedChannel.channel_id;
                                 if (`${__ENV.ENV}` != 'INT') {
-                                    // /* log disabled */ (`Got JOINED Channel ID: ${joinedChannelID}`);
+                                    console.log(`Got JOINED Channel ID: ${joinedChannelID}`);
                                 }
                             } else {
                                 if (`${__ENV.ENV}` != 'INT') {
-                                    // /* log disabled */ (`No channel with JOINED status found`);
+                                    console.log(`No channel with JOINED status found`);
                                 }
                             }
                         }
@@ -263,7 +263,7 @@ export function BP006(data) {
                 }
 
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -317,7 +317,7 @@ export function BP006(data) {
                 metric.http_reqs.add(1);
 
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -372,7 +372,7 @@ export function BP006(data) {
                 metric.http_reqs.add(1);
 
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -440,11 +440,11 @@ export function BP006(data) {
                             if (joinedChannel) {
                                 leftedChannelID = joinedChannel.channel_id;
                                 if (`${__ENV.ENV}` != 'INT') {
-                                    // /* log disabled */ (`Got LEFTED Channel ID: ${leftedChannelID}`);
+                                    console.log(`Got LEFTED Channel ID: ${leftedChannelID}`);
                                 }
                             } else {
                                 if (`${__ENV.ENV}` != 'INT') {
-                                    // /* log disabled */ (`No channel with LEFTED status found`);
+                                    console.log(`No channel with LEFTED status found`);
                                 }
                             }
                         }
@@ -454,7 +454,7 @@ export function BP006(data) {
                 }
 
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -514,7 +514,7 @@ export function BP006(data) {
                 metric.http_reqs.add(1);
 
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);

@@ -346,7 +346,7 @@ export function setup() {
         users[i] = { email: email };
     }
     
-    // /* log disabled */ (`Prepared ${totalUsers} users for login testing`);
+    console.log(`Prepared ${totalUsers} users for login testing`);
     
     return { base_url: base_url, users: users };
 }
@@ -395,7 +395,7 @@ export default function (data) {
         try {
             token = loginResponse.json().data.token;
             if (`${__ENV.ENV}` != 'INT') {
-                // /* log disabled */ (`VU${vuId} ${email} Login SUCCESS || Status: ${loginResponse.status}`);
+                console.log(`VU${vuId} ${email} Login SUCCESS || Status: ${loginResponse.status}`);
             }
         } catch (e) {
             if (`${__ENV.ENV}` != 'INT') {
@@ -451,7 +451,7 @@ export default function (data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -535,7 +535,7 @@ export default function (data) {
                             watchlistID = watchlistData.data[0].id;
                             
                             if (`${__ENV.ENV}` != 'INT') {
-                                // /* log disabled */ (`${email} Got watchlistID: ${watchlistID}`);
+                                console.log(`${email} Got watchlistID: ${watchlistID}`);
                             }
                         } else {
                             if (`${__ENV.ENV}` != 'INT') {
@@ -550,7 +550,7 @@ export default function (data) {
                 }
 
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -606,7 +606,7 @@ export default function (data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);
@@ -795,7 +795,7 @@ export default function (data) {
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
                 if (`${__ENV.ENV}` != 'INT') {
-                    // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
+                    console.log(`${email} ${urls[index]} || Status: ${response.status} || Body: ${response.body}`);
                 }
             } else {
                 metric.errorRate.add(true);

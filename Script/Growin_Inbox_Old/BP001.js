@@ -273,7 +273,7 @@ export default function () {
                 metric.errorCount.add(0);
                 metric.requestRate.add(true);
                 metric.http_reqs.add(1);
-                // /* log disabled */ (`200 ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);
+                console.log(`200 ${urls[index]} || Status: ${response.status} | Body: ${response.body}`);
             } else {
                 metric.errorRate.add(true);
                 metric.errorCount.add(1);

@@ -89,7 +89,7 @@ export function BP004(data) {
             metric.requestRate.add(true);
             metric.http_reqs.add(1);
             if (`${__ENV.ENV}` != 'INT') {
-                // /* log disabled */ (`${email} ${urls[index]} || Status: ${response.status}`);
+                console.log(`${email} ${urls[index]} || Status: ${response.status}`);
             }
         } else {
             metric.errorRate.add(true);
