@@ -249,7 +249,8 @@ banner() {
   if [[ "$k6_status_raw" == RUNNING* ]]; then
     local k6_script="${k6_status_raw#RUNNING|}"
     if [[ -z "$k6_script" || "$k6_script" == "RUNNING" ]]; then k6_script="k6 process"; fi
-    run_status="${RED}● RUNNING${RST} ${DIM}| ${k6_script} is executing...${RST}"
+    if [[ ${#k6_script} -gt 25 ]]; then k6_script="${k6_script:0:22}..."; fi
+    run_status="${RED}● RUNNING${RST} ${DIM}| ${k6_script}${RST}"
   else
     run_status=$(python3 "$PROJECT_DIR/bin/pt-lock-status" "${PT_USER:-Unknown}" "$(env_val ENV INT)" 2>/dev/null || echo "${GRN}● Available${RST} ${DIM}| ${PT_USER:-Unknown} [Idle]${RST}")
   fi
@@ -2227,7 +2228,22 @@ tools_menu() {
 
     case "$sel" in
       "[1] Resource Monitor"*)
-        python3 "$PROJECT_DIR/bin/pt-resmon" snapshot 2>/dev/null || echo -e "  ${YLW}pt-resmon not available${RST}"
+        local resmon_out; resmon_out=$(python3 "$PROJECT_DIR/bin/pt-resmon" snapshot 2>/dev/null)
+        if [[ -n "$resmon_out" ]]; then
+          echo "$resmon_out" | python3 -c '
+import sys, json
+try:
+    d = json.loads(sys.stdin.read()).get("data", {})
+    c, m, t, p = d.get("cpu_percent", 0), d.get("mem_used_gb", 0), d.get("mem_total_gb", 0), d.get("mem_percent", 0)
+    print(f"  CPU: \033[1;36m{c}%\033[0m   RAM: \033[1;36m{m}GB\033[0m / {t}GB ({p}%)")
+    print(f"  Health Score: \033[1;32m{d.get(\"health_score\", 0)}\033[0m")
+    if d.get("load_avg"): print(f"  Load Avg: {d.get(\"load_avg\")}")
+except:
+    print("  Failed to parse metrics")
+'
+        else
+          echo -e "  ${YLW}pt-resmon not available${RST}"
+        fi
         read -r -p $'\nPress Enter...'
         ;;
       "[2] Bootstrap Check"*)
@@ -2246,7 +2262,7 @@ tools_menu() {
         ;;
       "[5] Audit Log Tail"*)
         echo -e "\n${CYN}${BLD}  ── Audit Log (last 20) ──${RST}\n"
-        python3 "$PROJECT_DIR/bin/pt-audit" tail 20 2>/dev/null || echo -e "  ${YLW}pt-audit not available${RST}"
+        python3 "$PROJECT_DIR/bin/pt-audit" tail --limit 20 2>/dev/null || echo -e "  ${YLW}pt-audit not available${RST}"
         read -r -p $'\nPress Enter...'
         ;;
       "[6] Lock Status"*)
