@@ -222,7 +222,9 @@ banner() {
         local remote_k6=""
         # Check Onprem
         if [[ -n "$pass" ]]; then
-          remote_k6=$(sshpass -p "$pass" ssh -q -o StrictHostKeyChecking=no -o ConnectTimeout=2 qa@10.82.15.72 "ssh -q -o StrictHostKeyChecking=no -o ConnectTimeout=2 qa@10.184.120.48 'ps aux | grep \"[k]6 \" | grep -v grep | head -n 1'" 2>/dev/null)
+          remote_k6=$(sshpass -p "$pass" ssh -q -o StrictHostKeyChecking=no -o ConnectTimeout=5 \
+            -o ProxyCommand="sshpass -p \"$pass\" ssh -q -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72" \
+            qa@10.184.120.48 'ps aux | grep "[k]6 "' 2>/dev/null)
         fi
         # Check Oncloud
         if [[ -z "$remote_k6" ]]; then
