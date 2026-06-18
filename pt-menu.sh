@@ -228,11 +228,14 @@ banner() {
         fi
         # Check Oncloud
         if [[ -z "$remote_k6" ]]; then
-          remote_k6=$(timeout 3s gcloud compute ssh vm-pt-ksix-0 --tunnel-through-iap --project compute-pt --zone asia-southeast2-c --command "ps aux | grep \"[k]6 \" | grep -v grep | head -n 1" 2>/dev/null || true)
+          remote_k6=$(timeout 3s gcloud compute ssh vm-pt-ksix-0 --tunnel-through-iap --project compute-pt --zone asia-southeast2-c --command="ps aux | grep \"[k]6 \" | grep -v grep | head -n 1" 2>/dev/null || true)
         fi
         
         if [[ -n "$remote_k6" ]]; then
-          echo "RUNNING" > /tmp/.k6_target_status
+          local script_name=""
+          script_name=$(echo "$remote_k6" | grep -oE '[^ ]+\.js' | awk -F'/' '{print $NF}' | head -n 1)
+          if [[ -z "$script_name" ]]; then script_name="Unknown Script"; fi
+          echo "RUNNING|${script_name}" > /tmp/.k6_target_status
         else
           echo "IDLE" > /tmp/.k6_target_status
         fi
@@ -242,9 +245,11 @@ banner() {
     fi
   fi
 
-  local k6_running=$(cat /tmp/.k6_target_status 2>/dev/null)
-  if [[ "$k6_running" == "RUNNING" ]]; then
-    run_status="${RED}● RUNNING${RST} ${DIM}| Remote k6 process is executing...${RST}"
+  local k6_status_raw=$(cat /tmp/.k6_target_status 2>/dev/null || echo "IDLE")
+  if [[ "$k6_status_raw" == RUNNING* ]]; then
+    local k6_script="${k6_status_raw#RUNNING|}"
+    if [[ -z "$k6_script" || "$k6_script" == "RUNNING" ]]; then k6_script="k6 process"; fi
+    run_status="${RED}● RUNNING${RST} ${DIM}| ${k6_script} is executing...${RST}"
   else
     run_status=$(python3 "$PROJECT_DIR/bin/pt-lock-status" "${PT_USER:-Unknown}" "$(env_val ENV INT)" 2>/dev/null || echo "${GRN}● Available${RST} ${DIM}| ${PT_USER:-Unknown} [Idle]${RST}")
   fi
@@ -260,7 +265,7 @@ banner() {
 import json,sys
 try:
   d=json.load(open('$_RECENT_FILE'))
-  if d: print(d[0].get('entry','')[:48])
+  if d: print(d[0].get('entry','')[:80])
 except: pass
 " 2>/dev/null)
     [[ -n "$_last" ]] && _last_run="${GRN}✓${RST} $_last"
