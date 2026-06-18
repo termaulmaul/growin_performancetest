@@ -779,6 +779,30 @@ prompt_duration() {
   done
 }
 
+check_k6_blocker() {
+  local current_k6_status=$(cat /tmp/.k6_target_status 2>/dev/null || echo "IDLE")
+  if [[ "$current_k6_status" == RUNNING* ]]; then
+    local running_script="${current_k6_status#RUNNING|}"
+    if [[ -z "$running_script" || "$running_script" == "RUNNING" ]]; then running_script="script"; fi
+    echo -e "\n${RED}┌────────────────────────────────────────────────────────┐${RST}"
+    echo -e "${RED}│                     SYSTEM BUSY                        │${RST}"
+    echo -e "${RED}├────────────────────────────────────────────────────────┤${RST}"
+    echo -e "${RED}│                                                        │${RST}"
+    echo -e "${RED}│  Unable to run. Another process is executing:          │${RST}"
+    local p_text
+    p_text=$(printf "  %-50s" "$running_script")
+    # Truncate if too long to fit in 50 chars
+    if [ ${#p_text} -gt 52 ]; then p_text="${p_text:0:49}..."; fi
+    echo -e "${RED}│${p_text}  │${RST}"
+    echo -e "${RED}│  Please wait until it finishes.                        │${RST}"
+    echo -e "${RED}│                                                        │${RST}"
+    echo -e "${RED}└────────────────────────────────────────────────────────┘${RST}"
+    read -r -p $'\nPress Enter to return...'
+    return 1
+  fi
+  return 0
+}
+
 # Pre-execution confirmation summary. Returns 0=run, 1=cancel
 # Usage: confirm_run "Suite" "Growin_OMO" "Platform" "Web" "VUs" "335" ...
 confirm_run() {
@@ -799,16 +823,7 @@ confirm_run() {
   read -rn1 ans
   echo ""
   case "$ans" in
-    [Yy]|"")
-      local current_k6_status=$(cat /tmp/.k6_target_status 2>/dev/null || echo "IDLE")
-      if [[ "$current_k6_status" == RUNNING* ]]; then
-        local running_script="${current_k6_status#RUNNING|}"
-        if [[ -z "$running_script" || "$running_script" == "RUNNING" ]]; then running_script="script"; fi
-        echo -e "  ${RED}Unable to run Script, ${running_script} is executing, please wait...${RST}"
-        return 1
-      fi
-      return 0
-      ;;
+    [Yy]|"") return 0 ;;
     [Ee])    return 2 ;;
     *)       return 1 ;;
   esac
@@ -1052,6 +1067,7 @@ ssh_menu() {
       local _report_file="../../Report/$_suite/$_plat/$_scen_label/$_runby/${_runby}_${mode}_$(date +%m%d)_$(date +%H%M)_${_scen_label}.html"
 
       # Confirm before re-run
+      check_k6_blocker || continue
       local _confirm_rc=0
       set +e
       confirm_run \
@@ -1130,6 +1146,8 @@ ssh_menu() {
         local file_sel
         file_sel=$(pick_fzf_with_preview "Script file>" "head -40 $suite_dir/{} 2>/dev/null" "${files[@]}")
         [[ -z "$file_sel" || "$file_sel" == "← Back" ]] && continue
+
+        check_k6_blocker || continue
 
         if [[ "$file_sel" == *.sh ]]; then
           run_cmd="cd Script/$suite_name && bash $file_sel"
@@ -2028,6 +2046,8 @@ batch_run_regression() {
   local default_env; default_env=$(env_val ENV INT)
   printf "  ENV [%s]: " "$default_env"; read -r env_name
   env_name="${env_name:-$default_env}"
+
+  check_k6_blocker || return
 
   local _confirm_rc=0
   set +e
