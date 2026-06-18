@@ -1793,7 +1793,7 @@ if not jobs:
     print('  (empty)')
 else:
     for j in jobs:
-        print(f"  {j['id']:<15} | {j['status']:<8} | {j['cron_expr']:<15} | {j['script_path']}")
+        print(f\"  {j['id']:<15} | {j['status']:<8} | {j['cron_expr']:<15} | {j['script_path']}\")
 "
         read -r -p $'
 Press Enter...'
