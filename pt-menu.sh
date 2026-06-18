@@ -2227,7 +2227,7 @@ tools_menu() {
 
     case "$sel" in
       "[1] Resource Monitor"*)
-        python3 "$PROJECT_DIR/bin/pt-resmon" 2>/dev/null || echo -e "  ${YLW}pt-resmon not available${RST}"
+        python3 "$PROJECT_DIR/bin/pt-resmon" snapshot 2>/dev/null || echo -e "  ${YLW}pt-resmon not available${RST}"
         read -r -p $'\nPress Enter...'
         ;;
       "[2] Bootstrap Check"*)
