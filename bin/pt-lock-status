@@ -13,6 +13,8 @@ def main():
     GRN = "\033[0;32m"
     RED = "\033[0;31m"
     YLW = "\033[1;33m"
+    DIM = "\033[2m"
+    RST = "\033[0m"
     
     try:
         conn = get_conn()
@@ -21,11 +23,11 @@ def main():
         else:
             rows = conn.execute("SELECT * FROM locks WHERE status='active'").fetchall()
     except Exception:
-        print(f"{GRN}●{YLW} Available | {current_user} [Idle]")
+        print(f"{GRN}● Available{RST} {DIM}| {current_user} [Idle]{RST}")
         return
 
     if not rows:
-        print(f"{GRN}●{YLW} Available | {current_user} [Idle]")
+        print(f"{GRN}● Available{RST} {DIM}| {current_user} [Idle]{RST}")
         return
 
     r = dict(rows[0])
@@ -43,9 +45,9 @@ def main():
         elapsed_str = "?"
 
     if owner == current_user:
-        print(f"{RED}●{YLW} PT ACTIVE | {script} | {elapsed_str} elapsed")
+        print(f"{RED}● ACTIVE{RST} {DIM}| {script} | {elapsed_str}{RST}")
     else:
-        print(f"{YLW}●{YLW} OCCUPIED | {script} | By: {owner} | since {elapsed_str}")
+        print(f"{YLW}● OCCUPIED{RST} {DIM}| {script} | By: {owner} | {elapsed_str}{RST}")
 
 if __name__ == '__main__':
     main()

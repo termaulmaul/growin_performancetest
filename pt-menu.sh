@@ -206,7 +206,7 @@ banner() {
   fi
   local sep="${DIM}│${RST}"
   local run_status
-  run_status=$(python3 "$PROJECT_DIR/bin/pt-lock-status" "${PT_USER:-Unknown}" "$(env_val ENV INT)" 2>/dev/null || echo "${GRN}●${YLW} Available | ${PT_USER:-Unknown} [Idle]")
+  run_status=$(python3 "$PROJECT_DIR/bin/pt-lock-status" "${PT_USER:-Unknown}" "$(env_val ENV INT)" 2>/dev/null || echo "${GRN}● Available${RST} ${DIM}| ${PT_USER:-Unknown} [Idle]${RST}")
 
   # Webhook indicator
   local _wh_status="${DIM}○ OFF${RST}"
