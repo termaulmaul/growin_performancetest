@@ -782,14 +782,6 @@ prompt_duration() {
 # Pre-execution confirmation summary. Returns 0=run, 1=cancel
 # Usage: confirm_run "Suite" "Growin_OMO" "Platform" "Web" "VUs" "335" ...
 confirm_run() {
-  local current_k6_status=$(cat /tmp/.k6_target_status 2>/dev/null || echo "IDLE")
-  if [[ "$current_k6_status" == RUNNING* ]]; then
-    local running_script="${current_k6_status#RUNNING|}"
-    if [[ -z "$running_script" || "$running_script" == "RUNNING" ]]; then running_script="script"; fi
-    echo -e "\n  ${RED}Unable to run Script, ${running_script} is executing, please wait...${RST}"
-    return 1
-  fi
-
   local term_w; term_w="${COLUMNS:-$(tput cols 2>/dev/null || echo 80)}"
   local w=$(( term_w - 4 ))
   local bar; bar=$(printf '─%.0s' $(seq 1 $w))
@@ -807,7 +799,16 @@ confirm_run() {
   read -rn1 ans
   echo ""
   case "$ans" in
-    [Yy]|"") return 0 ;;
+    [Yy]|"")
+      local current_k6_status=$(cat /tmp/.k6_target_status 2>/dev/null || echo "IDLE")
+      if [[ "$current_k6_status" == RUNNING* ]]; then
+        local running_script="${current_k6_status#RUNNING|}"
+        if [[ -z "$running_script" || "$running_script" == "RUNNING" ]]; then running_script="script"; fi
+        echo -e "  ${RED}Unable to run Script, ${running_script} is executing, please wait...${RST}"
+        return 1
+      fi
+      return 0
+      ;;
     [Ee])    return 2 ;;
     *)       return 1 ;;
   esac
