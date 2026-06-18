@@ -2100,6 +2100,65 @@ batch_run_regression() {
   read -r -p $'\nPress Enter to return...'
 }
 
+# ── Grafana Menu ─────────────────────────────────────────────────────────────
+grafana_menu() {
+  while true; do
+    banner
+    breadcrumb "Main" "Tools / Diagnostics" "Grafana Backend"
+    section_header "Grafana Backend"
+    
+    local stat_str="${RED}○ OFF${RST}"
+    if pgrep -f "backend/app.py" >/dev/null; then
+      stat_str="${GRN}● ON${RST} (PID: $(pgrep -f "backend/app.py" | head -n 1))"
+    fi
+    echo -e "  ${DIM}Status:${RST} $stat_str\n"
+
+    local choices=(
+      "[1] Start Backend"
+      "[2] Stop Backend"
+      "[3] View Logs (/tmp/grafana_backend.log)"
+      "[0] Back"
+    )
+    local sel; sel=$(pick_fzf "Grafana>" "${choices[@]}")
+    [[ -z "$sel" || "$sel" == "[0] Back" ]] && return 0
+
+    case "$sel" in
+      "[1] Start Backend"*)
+        if pgrep -f "backend/app.py" >/dev/null; then
+          echo -e "\n  ${YLW}Backend is already running.${RST}"
+        else
+          echo -e "\n  ${CYN}Starting Grafana Backend in background...${RST}"
+          cd "$PROJECT_DIR/get_grafana_data" || true
+          nohup bash "start_backend.sh" > /tmp/grafana_backend.log 2>&1 &
+          echo -e "  ${GRN}Backend started! (PID: $!)${RST}"
+          echo -e "  ${DIM}Logs: /tmp/grafana_backend.log${RST}"
+          cd "$PROJECT_DIR" || true
+        fi
+        read -r -p $'\nPress Enter...'
+        ;;
+      "[2] Stop Backend"*)
+        if pgrep -f "backend/app.py" >/dev/null; then
+          echo -e "\n  ${YLW}Stopping Grafana Backend...${RST}"
+          pkill -f "backend/app.py" || true
+          echo -e "  ${GRN}Backend stopped.${RST}"
+        else
+          echo -e "\n  ${DIM}Backend is not running.${RST}"
+        fi
+        read -r -p $'\nPress Enter...'
+        ;;
+      "[3] View Logs"*)
+        echo -e "\n${CYN}${BLD}  ── Grafana Logs ──${RST}\n"
+        if [[ -f "/tmp/grafana_backend.log" ]]; then
+          tail -n 20 "/tmp/grafana_backend.log"
+        else
+          echo -e "  ${DIM}No logs found.${RST}"
+        fi
+        read -r -p $'\nPress Enter...'
+        ;;
+    esac
+  done
+}
+
 # ── Tools / Diagnostics Menu (added by feat/ux-tui-improvements) ────────────
 tools_menu() {
   while true; do
@@ -2115,7 +2174,7 @@ tools_menu() {
       "[5] Audit Log Tail (pt-audit — last 20 entries)"
       "[6] Lock Status (pt-lock-status — env locks)"
       "[7] Show Recent Runs"
-      "[8] Toggle Grafana Backend (Start/Stop)"
+      "[8] Grafana Backend Menu"
       "[S] Skip Auth (15 min)"
       "[P] Skip Auth (Permanent)"
       "[?] Help / Keymap"
@@ -2163,20 +2222,8 @@ tools_menu() {
         fi
         read -r -p $'\nPress Enter...'
         ;;
-      "[8] Toggle Grafana Backend"*)
-        if pgrep -f "backend/app.py" >/dev/null; then
-          echo -e "\n  ${YLW}Stopping Grafana Backend...${RST}"
-          pkill -f "backend/app.py" || true
-          echo -e "  ${GRN}Backend stopped.${RST}"
-        else
-          echo -e "\n  ${CYN}Starting Grafana Backend in background...${RST}"
-          cd "$PROJECT_DIR/get_grafana_data" || true
-          nohup bash "start_backend.sh" > /tmp/grafana_backend.log 2>&1 &
-          echo -e "  ${GRN}Backend started! (PID: $!)${RST}"
-          echo -e "  ${DIM}Logs: /tmp/grafana_backend.log${RST}"
-          cd "$PROJECT_DIR" || true
-        fi
-        read -r -p $'\nPress Enter...'
+      "[8] Grafana Backend Menu"*)
+        grafana_menu
         ;;
       "[S] Skip Auth (15 min)")
         if [[ "$PT_ROLE" != "god" ]]; then
