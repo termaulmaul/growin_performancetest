@@ -205,7 +205,7 @@ banner() {
   local sep="${DIM}│${RST}"
   local run_status
   local k6_running
-  k6_running=$(ps aux | grep "[k]6 " | grep -v "pt-lock-status" | head -n 1)
+  k6_running=$(ps aux | grep "[k]6 " | grep -v "pt-lock-status" | head -n 1 || true)
   if [[ -n "$k6_running" ]]; then
     run_status="${RED}● RUNNING${RST} ${DIM}| Local k6 process is executing...${RST}"
   else
