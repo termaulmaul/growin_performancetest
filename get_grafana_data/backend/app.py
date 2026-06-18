@@ -720,7 +720,6 @@ def get_metrics():
     return jsonify({"data": results})
 
 
-@app.route('/health', methods=['GET'])
 @app.route("/report/<path:filename>", methods=["GET"])
 def serve_report(filename):
     """Serve static HTML reports"""
@@ -729,6 +728,7 @@ def serve_report(filename):
     return send_from_directory(report_dir, filename)
 
 
+@app.route('/health', methods=['GET'])
 def health():
     """Health check endpoint"""
     return jsonify({"status": "healthy"})
