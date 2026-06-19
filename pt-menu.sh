@@ -245,16 +245,16 @@ banner() {
         if [[ -n "$pass" ]]; then
           remote_k6=$(timeout 5s sshpass -p "$pass" ssh -q -o StrictHostKeyChecking=no -o ConnectTimeout=5 \
             -o ProxyCommand="sshpass -p \"$pass\" ssh -q -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72" \
-            qa@10.184.120.48 'ps auxww' 2>/dev/null | grep "[k]6 " | grep -v "grep" | grep -v "bash -c" | head -n 1)
+            qa@10.184.120.48 'ps auxww' 2>/dev/null | grep "[k]6 run" | grep -v "grep" | grep -v "bash -c" | head -n 1)
         fi
         # Check Oncloud
         if [[ -z "$remote_k6" ]]; then
-          remote_k6=$(timeout 3s gcloud compute ssh vm-pt-ksix-0 --tunnel-through-iap --project compute-pt --zone asia-southeast2-c --command="ps auxww" 2>/dev/null | grep "[k]6 " | grep -v "grep" | grep -v "bash -c" | head -n 1 || true)
+          remote_k6=$(timeout 3s gcloud compute ssh vm-pt-ksix-0 --tunnel-through-iap --project compute-pt --zone asia-southeast2-c --command="ps auxww" 2>/dev/null | grep "[k]6 run" | grep -v "grep" | grep -v "bash -c" | head -n 1 || true)
         fi
         
         if [[ -n "$remote_k6" ]]; then
           local script_name=""
-          script_name=$(echo "$remote_k6" | awk '{for(i=1;i<=NF;i++) if($i ~ /\.js$/ && $i !~ /=/) print $i}' | awk -F'/' '{print $NF}' | head -n 1)
+          script_name=$(echo "$remote_k6" | awk '{for(i=1;i<=NF;i++) if($i ~ /\.js$/ && $i !~ /=/ && $i !~ /^-/) print $i}' | awk -F'/' '{print $NF}' | head -n 1)
           if [[ -z "$script_name" ]]; then script_name="Unknown Script"; fi
           echo "RUNNING|${script_name}" > /tmp/.k6_target_status
         else
