@@ -22,24 +22,48 @@ DEFAULT_BACKEND = "http://localhost:5000"
 
 
 def fetch_metrics(backend_url, from_iso, to_iso):
-    """Call /api/metrics on get_grafana_data backend."""
-    url = f"{backend_url}/api/metrics"
+    """Call /api/metrics and /api/node-metrics on get_grafana_data backend."""
+    import json
+    from urllib.request import Request, urlopen
+    from urllib.error import URLError
+    
     payload = json.dumps({
         "from_date": from_iso,
         "to_date": to_iso,
         "group_pods": True
     }).encode("utf-8")
-    req = Request(url, data=payload, headers={"Content-Type": "application/json"})
-    req.method = "POST"
+    
+    headers = {"Content-Type": "application/json"}
+    result = {"data": [], "node_data": []}
+    
+    # Fetch Pod metrics
+    req_pods = Request(f"{backend_url}/api/metrics", data=payload, headers=headers)
+    req_pods.method = "POST"
     try:
-        with urlopen(req, timeout=30) as resp:
-            return json.loads(resp.read().decode("utf-8"))
+        with urlopen(req_pods, timeout=30) as resp:
+            pod_data = json.loads(resp.read().decode("utf-8"))
+            result["data"] = pod_data.get("data", [])
     except URLError as e:
-        print(f"[pt-grafana-report] Backend unreachable ({backend_url}): {e}", file=sys.stderr)
-        return None
+        print(f"[pt-grafana-report] Backend unreachable for pod metrics: {e}", file=sys.stderr)
     except Exception as e:
-        print(f"[pt-grafana-report] Error: {e}", file=sys.stderr)
+        print(f"[pt-grafana-report] Error fetching pod metrics: {e}", file=sys.stderr)
+
+    # Fetch Node metrics
+    req_nodes = Request(f"{backend_url}/api/node-metrics", data=payload, headers=headers)
+    req_nodes.method = "POST"
+    try:
+        with urlopen(req_nodes, timeout=30) as resp:
+            node_data = json.loads(resp.read().decode("utf-8"))
+            result["node_data"] = node_data.get("data", [])
+    except URLError as e:
+        print(f"[pt-grafana-report] Backend unreachable for node metrics: {e}", file=sys.stderr)
+    except Exception as e:
+        print(f"[pt-grafana-report] Error fetching node metrics: {e}", file=sys.stderr)
+        
+    if not result["data"] and not result["node_data"]:
         return None
+        
+    return result
 
 
 def render_html(data, from_ts, to_ts, summary_file=None):
@@ -92,12 +116,13 @@ def render_html(data, from_ts, to_ts, summary_file=None):
 
     node_rows = ""
     for n in node_metrics:
-        ip = "Unknown IP"
-        # Mocking IP if not provided by backend, based on node name
+        # Use instance (IP:Port) and hostname from the backend
+        ip = n.get('instance', 'Unknown IP').split(':')[0]
+        node_name = n.get('hostname', n.get('node', 'unknown'))
         node_rows += f"""
         <tr>
             <td style="font-weight: 700;">{ip}</td>
-            <td style="font-weight: 700;">{n.get('node', 'unknown')}</td>
+            <td style="font-weight: 700;">{node_name}</td>
             <td class="num-val">{n.get('avg_cpu', 0):.2f}</td>
             <td class="num-val">{n.get('max_cpu', 0):.2f}</td>
             <td class="num-val">{n.get('avg_memory', 0):.2f}</td>
