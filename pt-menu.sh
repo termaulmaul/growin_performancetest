@@ -58,13 +58,20 @@ print_run_header() {
   _RUN_LABEL="$label"
   _RUN_TARGET="$target"
   _RUN_MODE="$mode"
-  local term_w; term_w="${COLUMNS:-$(tput cols 2>/dev/null || echo 80)}"
-  local w=$(( term_w - 4 ))
-  local bar; bar=$(printf '─%.0s' $(seq 1 $w))
-  echo -e "\n${CYN}${BLD}┌─ ▶  $label${RST}"
-  [[ -n "$target" ]] && echo -e "${CYN}${BLD}│${RST}${DIM}     Target : ${RST}${YLW}$target${RST}"
-  echo -e "${CYN}${BLD}│${RST}${DIM}     Start  : $(date '+%H:%M:%S')${RST}"
-  echo -e "${CYN}${BLD}└${bar}${RST}\n"
+  if command -v gum &>/dev/null; then
+    local content="▶  $label"
+    [[ -n "$target" ]] && content+=$'\n'"Target : $target"
+    content+=$'\n'"Start  : $(date '+%H:%M:%S')"
+    gum style --border rounded --margin "1 2" --padding "0 2" --border-foreground 212 "$content"
+  else
+    local term_w; term_w="${COLUMNS:-$(tput cols 2>/dev/null || echo 80)}"
+    local w=$(( term_w - 4 ))
+    local bar; bar=$(printf '─%.0s' $(seq 1 $w))
+    echo -e "\n${CYN}${BLD}┌─ ▶  $label${RST}"
+    [[ -n "$target" ]] && echo -e "${CYN}${BLD}│${RST}${DIM}     Target : ${RST}${YLW}$target${RST}"
+    echo -e "${CYN}${BLD}│${RST}${DIM}     Start  : $(date '+%H:%M:%S')${RST}"
+    echo -e "${CYN}${BLD}└${bar}${RST}\n"
+  fi
 }
 
 print_run_footer() {
@@ -76,26 +83,40 @@ print_run_footer() {
   elif [[ $elapsed -ge 60 ]]; then
     dur_str="$(( elapsed/60 ))m $(( elapsed%60 ))s"
   fi
-  local term_w; term_w="${COLUMNS:-$(tput cols 2>/dev/null || echo 80)}"
-  local w=$(( term_w - 4 ))
-  local bar; bar=$(printf '─%.0s' $(seq 1 $w))
-  echo -e "\n${CYN}${BLD}┌${bar}${RST}"
-  echo -e "${CYN}${BLD}│${RST}${DIM}     End    : $(date '+%H:%M:%S')  (+${dur_str})${RST}"
-  if [[ "$rc" -eq 0 ]]; then
-    echo -e "${CYN}${BLD}│${RST}     Status : ${GRN}${BLD}✓  PASS${RST}"
-  else
-    echo -e "${CYN}${BLD}│${RST}     Status : ${RED}${BLD}✘  FAIL${RST}  ${DIM}(exit $rc)${RST}"
-    if [[ -n "$tmplog" && -f "$tmplog" ]]; then
+  if command -v gum &>/dev/null; then
+    local status_str="✓ PASS"
+    local border_col="212"
+    if [[ "$rc" -ne 0 ]]; then status_str="✘ FAIL (exit $rc)"; border_col="196"; fi
+    gum style --border rounded --margin "1 2" --padding "0 2" --border-foreground "$border_col" "End: $(date '+%H:%M:%S') (+${dur_str})" "Status: $status_str"
+    if [[ "$rc" -ne 0 && -n "$tmplog" && -f "$tmplog" ]]; then
       local errs; errs=$(grep -iE "level=error|ERRO\[|panic|fatal|error:" "$tmplog" | grep -v "^$" | tail -6 || true)
       if [[ -n "$errs" ]]; then
-        echo -e "${CYN}${BLD}│${RST}     ${RED}── Errors:${RST}"
-        while IFS= read -r line; do
-          echo -e "  ${RED}│  $line${RST}"
-        done <<< "$errs"
+        echo -e "${RED}── Errors:${RST}"
+        echo "$errs" | sed 's/^/  │  /'
       fi
     fi
+  else
+    local term_w; term_w="${COLUMNS:-$(tput cols 2>/dev/null || echo 80)}"
+    local w=$(( term_w - 4 ))
+    local bar; bar=$(printf '─%.0s' $(seq 1 $w))
+    echo -e "\n${CYN}${BLD}┌${bar}${RST}"
+    echo -e "${CYN}${BLD}│${RST}${DIM}     End    : $(date '+%H:%M:%S')  (+${dur_str})${RST}"
+    if [[ "$rc" -eq 0 ]]; then
+      echo -e "${CYN}${BLD}│${RST}     Status : ${GRN}${BLD}✓  PASS${RST}"
+    else
+      echo -e "${CYN}${BLD}│${RST}     Status : ${RED}${BLD}✘  FAIL${RST}  ${DIM}(exit $rc)${RST}"
+      if [[ -n "$tmplog" && -f "$tmplog" ]]; then
+        local errs; errs=$(grep -iE "level=error|ERRO\[|panic|fatal|error:" "$tmplog" | grep -v "^$" | tail -6 || true)
+        if [[ -n "$errs" ]]; then
+          echo -e "${CYN}${BLD}│${RST}     ${RED}── Errors:${RST}"
+          while IFS= read -r line; do
+            echo -e "  ${RED}│  $line${RST}"
+          done <<< "$errs"
+        fi
+      fi
+    fi
+    echo -e "${CYN}${BLD}└${bar}${RST}"
   fi
-  echo -e "${CYN}${BLD}└${bar}${RST}"
 
   # Webhook Summary Send
   if [[ "$skip_webhook" != "true" ]] && [[ "$(env_val NOTIFY_TEAMS 'false')" == "true" || -n "$(env_val TELEGRAM_WEBHOOK '')" || -n "$(env_val DISCORD_WEBHOOK '')" || -n "$(env_val TEAMS_WEBHOOK '')" || -n "$(env_val BRRR_WEBHOOK '')" ]]; then
@@ -199,7 +220,7 @@ banner() {
   local grafana_port=5000
   [[ -f /tmp/grafana_backend_port ]] && grafana_port=$(cat /tmp/grafana_backend_port 2>/dev/null)
   local grafana_status="${RED}○ OFF${RST}"
-  if curl -s -f -m 1 "http://127.0.0.1:${grafana_port}/health" >/dev/null 2>&1; then
+  if curl --noproxy "*" -s -f -m 1 "http://127.0.0.1:${grafana_port}/health" >/dev/null 2>&1; then
     grafana_status="${GRN}● ON${RST}"
   fi
   local sep="${DIM}│${RST}"
@@ -233,7 +254,7 @@ banner() {
         
         if [[ -n "$remote_k6" ]]; then
           local script_name=""
-          script_name=$(echo "$remote_k6" | grep -oE '[^ ]+\.js' | awk -F'/' '{print $NF}' | head -n 1)
+          script_name=$(echo "$remote_k6" | grep -oE '[^ ]+\.js\b' | awk -F'/' '{print $NF}' | head -n 1)
           if [[ -z "$script_name" ]]; then script_name="Unknown Script"; fi
           echo "RUNNING|${script_name}" > /tmp/.k6_target_status
         else
@@ -747,8 +768,12 @@ prompt_int() {
   local label="$1" min="$2" max="$3" default="$4"
   local val=""
   while true; do
-    printf "  %s [%s] (range %s-%s): " "$label" "$default" "$min" "$max" >&2
-    read -r val
+    if command -v gum &>/dev/null; then
+      val=$(gum input --prompt "  $label [$default] (range $min-$max): " --placeholder "$default")
+    else
+      printf "  %s [%s] (range %s-%s): " "$label" "$default" "$min" "$max" >&2
+      read -r val
+    fi
     val="${val:-$default}"
     if [[ ! "$val" =~ ^[0-9]+$ ]]; then
       echo -e "  ${RED}✘ must be a positive integer${RST}" >&2
@@ -768,8 +793,12 @@ prompt_duration() {
   local label="$1" default="$2"
   local val=""
   while true; do
-    printf "  %s [%s] (e.g. 30s, 5m, 1h, 1h30m): " "$label" "$default" >&2
-    read -r val
+    if command -v gum &>/dev/null; then
+      val=$(gum input --prompt "  $label [$default] (e.g. 30s, 5m, 1h): " --placeholder "$default")
+    else
+      printf "  %s [%s] (e.g. 30s, 5m, 1h, 1h30m): " "$label" "$default" >&2
+      read -r val
+    fi
     val="${val:-$default}"
     if [[ ! "$val" =~ ^[0-9]+(h|m|s)?([0-9]+(m|s))?$ ]]; then
       echo -e "  ${RED}✘ invalid k6 duration format${RST}" >&2
@@ -898,14 +927,18 @@ EOF
 # Usage: spinner_with_timeout 30 "Connecting to onprem"
 spinner_with_timeout() {
   local timeout="${1:-30}" msg="${2:-Working}"
-  local sp='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
-  local i=0 t=0
-  while (( t < timeout )); do
-    printf "\r  \033[36m${sp:i++%${#sp}:1}\033[0m  %s... %ds / %ds  ${DIM}(ESC to cancel)${RST}" "$msg" "$t" "$timeout" >&2
-    sleep 1
-    t=$(( t + 1 ))
-  done
-  printf "\r\033[K" >&2
+  if command -v gum &>/dev/null; then
+    gum spin --spinner dot --title "$msg... (${timeout}s) (ESC to cancel)" -- sleep "$timeout" || true
+  else
+    local sp='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+    local i=0 t=0
+    while (( t < timeout )); do
+      printf "\r  \033[36m${sp:i++%${#sp}:1}\033[0m  %s... %ds / %ds  ${DIM}(ESC to cancel)${RST}" "$msg" "$t" "$timeout" >&2
+      sleep 1
+      t=$(( t + 1 ))
+    done
+    printf "\r\033[K" >&2
+  fi
 }
 # ── /UX Helpers ─────────────────────────────────────────────────────────────
 
@@ -1145,7 +1178,7 @@ ssh_menu() {
         fi
 
         local file_sel
-        file_sel=$(pick_fzf_with_preview "Script file>" "head -40 $suite_dir/{} 2>/dev/null" "${files[@]}")
+        file_sel=$(pick_fzf_with_preview "Script file>" "bat --style=numbers --color=always --line-range :40 $suite_dir/{} 2>/dev/null || head -40 $suite_dir/{} 2>/dev/null" "${files[@]}")
         [[ -z "$file_sel" || "$file_sel" == "← Back" ]] && continue
 
         check_k6_blocker || continue
@@ -1692,7 +1725,7 @@ for d in data:
       fi
 
       local js_sel
-      js_sel=$(pick_fzf_with_preview "Script>" "head -40 $PROJECT_DIR/{} 2>/dev/null" "${js_files[@]}")
+      js_sel=$(pick_fzf_with_preview "Script>" "bat --style=numbers --color=always --line-range :40 $PROJECT_DIR/{} 2>/dev/null || head -40 $PROJECT_DIR/{} 2>/dev/null" "${js_files[@]}")
       [[ -z "$js_sel" ]] && { rm -f "$_local_log"; return; }
 
       # Config
@@ -2138,7 +2171,7 @@ grafana_menu() {
     local g_pid=""
     if [[ -f "/tmp/grafana_backend_port" ]]; then
       g_port=$(cat /tmp/grafana_backend_port 2>/dev/null || true)
-      if [[ -n "$g_port" ]] && curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${g_port}/health" | grep -q "200"; then
+      if [[ -n "$g_port" ]] && curl --noproxy "*" -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${g_port}/health" | grep -q "200"; then
         is_running=true
         g_pid=$(lsof -t -iTCP:"$g_port" -sTCP:LISTEN 2>/dev/null | head -n 1)
         if [[ -n "$g_pid" ]]; then
@@ -2169,7 +2202,20 @@ grafana_menu() {
           cd "$PROJECT_DIR/get_grafana_data" || true
           nohup bash "start_backend.sh" > /tmp/grafana_backend.log 2>&1 &
           echo -e "  ${GRN}Backend start sequence initiated!${RST}"
-          echo -e "  ${DIM}It may take a few seconds to boot up and assign a port.${RST}"
+          echo -e -n "  ${DIM}Waiting for backend to boot up...${RST}"
+          for i in {1..15}; do
+            if [[ -f "/tmp/grafana_backend_port" ]]; then
+              local tmp_port
+              tmp_port=$(cat /tmp/grafana_backend_port 2>/dev/null || true)
+              if [[ -n "$tmp_port" ]] && curl --noproxy "*" -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${tmp_port}/health" | grep -q "200"; then
+                echo -e " ${GRN}Ready!${RST}"
+                break
+              fi
+            fi
+            echo -n "."
+            sleep 1
+          done
+          echo ""
           echo -e "  ${DIM}Logs: /tmp/grafana_backend.log${RST}"
           cd "$PROJECT_DIR" || true
         fi
