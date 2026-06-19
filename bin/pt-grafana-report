@@ -142,6 +142,10 @@ def render_html(data, from_ts, to_ts, summary_file=None):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
   :root {{
     --phi: 1.618;
@@ -176,7 +180,6 @@ def render_html(data, from_ts, to_ts, summary_file=None):
     overflow-x: hidden;
   }}
   
-  /* Background glowing orbs */
   body::before, body::after {{
     content: ''; position: fixed; border-radius: 50%; filter: blur(120px); z-index: -1; pointer-events: none;
   }}
@@ -207,11 +210,55 @@ def render_html(data, from_ts, to_ts, summary_file=None):
   }}
   .meta span {{ display: flex; align-items: center; gap: 0.5rem; }}
   
-  .table-wrapper {{
+  .controls-section {{
+    background: var(--card-bg); border-radius: 16px; padding: var(--space-3);
+    border: 1px solid var(--border); backdrop-filter: blur(12px);
+    margin-bottom: var(--space-4); display: flex; gap: var(--space-3); flex-wrap: wrap;
+    align-items: flex-end;
+  }}
+
+  .form-group {{ flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: var(--space-1); }}
+  .form-group label {{ font-family: var(--font-heading); color: var(--accent); font-weight: 600; font-size: 0.85rem; letter-spacing: 0.05em; text-transform: uppercase; }}
+  
+  input[type="datetime-local"], select {{
+    background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: var(--text-primary);
+    padding: var(--space-2); border-radius: 8px; font-family: var(--font-mono); font-size: 0.85rem;
+    transition: all 0.2s ease;
+  }}
+  
+  input[type="datetime-local"]:focus, select:focus {{ outline: none; border-color: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }}
+  
+  select[multiple] {{ min-height: 100px; }}
+  select[multiple] option {{ padding: 4px 8px; border-radius: 4px; }}
+  select[multiple] option:checked {{ background: var(--accent); color: #000; }}
+
+  .helper-text {{ font-size: 0.75rem; color: var(--text-muted); opacity: 0.8; }}
+  
+  .btn-primary {{
+    background: var(--accent); color: #000; border: none; padding: var(--space-2) var(--space-3);
+    border-radius: 8px; font-family: var(--font-heading); font-weight: 700; font-size: 0.95rem;
+    cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.05em;
+  }}
+  .btn-primary:hover {{ transform: translateY(-2px); box-shadow: 0 5px 15px var(--accent-glow); }}
+  
+  .btn-outline {{
+    background: transparent; color: var(--text-primary); border: 1px solid var(--border);
+    padding: var(--space-2) var(--space-3); border-radius: 8px; font-family: var(--font-heading);
+    font-weight: 600; cursor: pointer; transition: all 0.2s ease;
+  }}
+  .btn-outline:hover {{ background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }}
+  
+  .table-wrapper, .chart-wrapper {{
     background: var(--card-bg); border-radius: 16px; overflow: hidden; 
     border: 1px solid var(--border); backdrop-filter: blur(12px);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-4); overflow-x: auto;
+  }}
+  
+  .chart-wrapper {{
+    padding: var(--space-3);
+    position: relative;
+    height: 400px;
   }}
   
   table {{ width: 100%; border-collapse: collapse; text-align: left; }}
@@ -220,8 +267,9 @@ def render_html(data, from_ts, to_ts, summary_file=None):
     padding: var(--space-2) var(--space-3); 
     font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; 
     border-bottom: 1px solid var(--border); 
-    white-space: nowrap;
+    white-space: nowrap; cursor: pointer;
   }}
+  th:hover {{ background: rgba(34, 211, 238, 0.05); }}
   td {{ 
     padding: var(--space-2) var(--space-3); 
     border-bottom: 1px solid rgba(255,255,255,0.02); 
@@ -237,7 +285,17 @@ def render_html(data, from_ts, to_ts, summary_file=None):
   .unit {{ color: var(--text-muted); font-size: 0.75em; margin-left: 3px; }}
   .badge {{ background: rgba(34, 211, 238, 0.1); color: var(--accent); padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; }}
   
+  .high-cpu {{ background-color: rgba(220, 38, 38, 0.2) !important; color: #fca5a5 !important; }}
+  .high-memory {{ background-color: rgba(234, 179, 8, 0.2) !important; color: #fde047 !important; }}
+  
   .footer {{ margin-top: var(--space-5); color: var(--text-muted); font-size: 0.75rem; text-align: center; padding-top: var(--space-3); border-top: 1px solid var(--border); opacity: 0.6; }}
+  
+  .file-upload {{
+    border: 1px dashed var(--border); padding: var(--space-3); border-radius: 8px; text-align: center;
+    background: rgba(0,0,0,0.2); cursor: pointer; transition: all 0.2s ease;
+  }}
+  .file-upload:hover {{ border-color: var(--accent); background: rgba(34, 211, 238, 0.05); }}
+  .file-upload input {{ display: none; }}
   
   @keyframes slideUp {{ from {{ opacity: 0; transform: translateY(20px); }} to {{ opacity: 1; transform: translateY(0); }} }}
   .animate-1 {{ animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }}
@@ -261,9 +319,58 @@ def render_html(data, from_ts, to_ts, summary_file=None):
         </div>
     </div>
 
-    <h2 class="animate-2">☸️ Kubernetes Pod Metrics <span class="badge">growin</span></h2>
-    <div class="table-wrapper animate-2">
-        <table>
+    <div class="controls-section animate-1">
+        <div class="form-group">
+            <label for="fromDate">From Date & Time</label>
+            <input type="datetime-local" id="fromDate" value="{datetime.fromtimestamp(from_ts, tz=timezone.utc).strftime('%Y-%m-%dT%H:%M')}">
+        </div>
+        <div class="form-group">
+            <label for="toDate">To Date & Time</label>
+            <input type="datetime-local" id="toDate" value="{datetime.fromtimestamp(to_ts, tz=timezone.utc).strftime('%Y-%m-%dT%H:%M')}">
+        </div>
+        <div class="form-group">
+            <label for="containers">Containers (Ctrl/Cmd+Click)</label>
+            <select id="containers" multiple>
+                <option value="" disabled>Static Report Mode</option>
+            </select>
+            <div class="helper-text">Leave empty for default</div>
+        </div>
+        <div class="form-group" style="flex: 0 0 auto; justify-content: flex-end; padding-bottom: 6px;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="groupPods">
+                <span style="color:var(--text-primary); font-family:var(--font-mono); font-weight:400; text-transform:none;">Group Pods</span>
+            </label>
+            <div class="helper-text">Consolidate by deployment</div>
+        </div>
+        <div class="form-group" style="flex: 0 0 auto; justify-content: flex-end; padding-bottom: 6px;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="showPercentage">
+                <span style="color:var(--text-primary); font-family:var(--font-mono); font-weight:400; text-transform:none;">Show %</span>
+            </label>
+            <div class="helper-text">Display CPU & Mem as %</div>
+        </div>
+        <button id="fetchBtn" class="btn-primary">Fetch Metrics</button>
+    </div>
+
+    <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4);" class="animate-1">
+        <button class="btn-outline" onclick="window.print()">📄 Export to PDF</button>
+        <button class="btn-outline" onclick="alert('Export to Excel requires backend API connection.')">📊 Export to Excel</button>
+    </div>
+
+    <div class="file-upload animate-1" onclick="document.getElementById('k6Upload').click()">
+        <input type="file" id="k6Upload" accept=".html,.json">
+        <h3 style="font-family:var(--font-heading); color:var(--accent);">📁 Upload K6 HTML Report</h3>
+        <p class="helper-text" style="margin-top: 8px;">Upload K6 HTML report to include load test metrics in the export</p>
+    </div>
+
+    <h2 class="animate-2">📊 Metrics Overview</h2>
+    <div class="chart-wrapper animate-2">
+        <canvas id="metricsChart"></canvas>
+    </div>
+
+    <h2 class="animate-3">☸️ Kubernetes Pod Metrics <span class="badge">growin</span></h2>
+    <div class="table-wrapper animate-3">
+        <table id="metricsTable">
             <thead>
                 <tr>
                     <th>#</th>
@@ -286,6 +393,110 @@ def render_html(data, from_ts, to_ts, summary_file=None):
         growin_performancetest — Grafana Utilization Report — auto-generated by pt-grafana-report
     </div>
 </div>
+<script>
+    // Chart.js rendering using injected data
+    const chartData = {chart_data_json};
+    
+    if (chartData && chartData.length > 0) {{
+        const ctx = document.getElementById('metricsChart').getContext('2d');
+        
+        // Set Chart.js defaults to match dark glassmorphism theme
+        Chart.defaults.color = '#8b949e';
+        Chart.defaults.font.family = "'JetBrains Mono', monospace";
+        
+        const gradientCPU = ctx.createLinearGradient(0, 0, 0, 400);
+        gradientCPU.addColorStop(0, 'rgba(34, 211, 238, 0.8)');
+        gradientCPU.addColorStop(1, 'rgba(34, 211, 238, 0.1)');
+        
+        const gradientMem = ctx.createLinearGradient(0, 0, 0, 400);
+        gradientMem.addColorStop(0, 'rgba(139, 92, 246, 0.8)');
+        gradientMem.addColorStop(1, 'rgba(139, 92, 246, 0.1)');
+
+        new Chart(ctx, {{
+            type: 'bar',
+            data: {{
+                labels: chartData.map(d => d.pod.length > 20 ? d.pod.substring(0, 20) + '...' : d.pod),
+                datasets: [
+                    {{
+                        label: 'Avg CPU (m)',
+                        data: chartData.map(d => d.avg_cpu),
+                        backgroundColor: gradientCPU,
+                        borderColor: '#22d3ee',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        yAxisID: 'y'
+                    }},
+                    {{
+                        label: 'Avg Memory (MB)',
+                        data: chartData.map(d => d.avg_mem),
+                        backgroundColor: gradientMem,
+                        borderColor: '#8b5cf6',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        yAxisID: 'y1'
+                    }}
+                ]
+            }},
+            options: {{
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {{
+                    mode: 'index',
+                    intersect: false,
+                }},
+                plugins: {{
+                    tooltip: {{
+                        backgroundColor: 'rgba(9, 9, 11, 0.9)',
+                        titleFont: {{ family: "'Bricolage Grotesque', sans-serif", size: 14 }},
+                        bodyFont: {{ family: "'JetBrains Mono', monospace", size: 12 }},
+                        borderColor: 'rgba(255,255,255,0.1)',
+                        borderWidth: 1,
+                        padding: 12
+                    }},
+                    legend: {{
+                        labels: {{ font: {{ family: "'Bricolage Grotesque', sans-serif" }} }}
+                    }}
+                }},
+                scales: {{
+                    x: {{
+                        grid: {{ color: 'rgba(255,255,255,0.05)' }},
+                        ticks: {{ maxRotation: 45, minRotation: 45 }}
+                    }},
+                    y: {{
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {{ display: true, text: 'CPU (m)' }},
+                        grid: {{ color: 'rgba(255,255,255,0.05)' }}
+                    }},
+                    y1: {{
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {{ display: true, text: 'Memory (MB)' }},
+                        grid: {{ drawOnChartArea: false }}
+                    }}
+                }}
+            }}
+        }});
+    }}
+
+    // Minimal interactivity for the static report
+    document.getElementById('fetchBtn').addEventListener('click', () => {{
+        alert('This is a static report snapshot. To fetch new data, start the backend from the TUI and use the interactive dashboard at http://localhost:5000.');
+    }});
+    
+    document.getElementById('showPercentage').addEventListener('change', (e) => {{
+        alert('Percentage view toggle requires a live backend connection. Currently viewing absolute metrics snapshot.');
+        e.target.checked = false;
+    }});
+
+    document.getElementById('k6Upload').addEventListener('change', (e) => {{
+        if(e.target.files.length > 0) {{
+            alert('K6 report ' + e.target.files[0].name + ' selected. Interactive merging requires backend parsing.');
+        }}
+    }});
+</script>
 </body>
 </html>"""
     return html
