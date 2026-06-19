@@ -58,9 +58,11 @@ def render_html(data, from_ts, to_ts, summary_file=None):
                 custom_metrics = sum_data.get("custom_metrics", {})
                 unique_names = set()
                 for key in custom_metrics.keys():
+                    # Strip prefixes like duration_, error_rate_, and numeric patterns (e.g. 001_01_01_)
                     name = re.sub(r'^(duration|error_rate|error_count|sample|rps|waiting)_(?:\d{3}_(?:\d{2}_)+)?', '', key)
                     if name:
                         unique_names.add(name)
+                        # Extract the first word before underscore to match with pod name
                         prefix = name.split('_')[0].lower()
                         if prefix:
                             prefixes.add(prefix)
@@ -72,30 +74,23 @@ def render_html(data, from_ts, to_ts, summary_file=None):
     metrics = data.get("data", [])
     node_metrics = data.get("node_data", [])
 
+    # Filter metrics to only include pods matching the K6 custom metric prefix
     filtered_metrics = []
     if prefixes:
         for m in metrics:
             pod = m.get("pod", m.get("deployment", "unknown")).lower()
             if any(p in pod for p in prefixes):
                 filtered_metrics.append(m)
+        # We strictly do not fallback. If a pod doesn't match the test scenario, it shouldn't be shown.
     else:
         filtered_metrics = metrics
 
-    chart_data = []
     rows = ""
     for i, m in enumerate(filtered_metrics, 1):
         pod = m.get("pod", m.get("deployment", "unknown"))
         
-        avg_cpu = m.get('avg_cpu_millicores', 0)
-        avg_mem = m.get('avg_memory_mb', 0)
-        
-        chart_data.append({
-            "pod": pod,
-            "avg_cpu": avg_cpu,
-            "avg_mem": avg_mem
-        })
-        
-        matched_apis = [name for name in unique_names if name.split('_')[0].lower() in pod.lower()] if prefixes else []
+        # Match the specific API name(s) that caused this pod to be included
+        matched_apis = [name for name in unique_names if name.split('_')[0].lower() in pod.lower()]
         display_api = " / ".join(sorted(matched_apis))
         
         if display_api:
@@ -103,31 +98,25 @@ def render_html(data, from_ts, to_ts, summary_file=None):
         else:
             display_name = f"<span class='api-name'>{pod}</span>"
 
-        # Brutalist styling logic
-        cpu_class = "critical" if avg_cpu > 500 else "normal"
-        mem_class = "critical" if avg_mem > 512 else "normal"
-
         rows += f"""
-        <tr class="data-row">
-            <td class="row-index">{i:02d}</td>
+        <tr>
+            <td style="color:var(--text-muted)">{i}</td>
             <td>{display_name}</td>
-            <td class="num-val {cpu_class}">{avg_cpu:.2f}<span class="unit">m</span></td>
+            <td class="num-val">{m.get('avg_cpu_millicores', 0):.2f}<span class="unit">m</span></td>
             <td class="num-val">{m.get('min_cpu_millicores', 0):.2f}<span class="unit">m</span></td>
             <td class="num-val">{m.get('max_cpu_millicores', 0):.2f}<span class="unit">m</span></td>
-            <td class="num-val {mem_class}">{avg_mem:.1f}<span class="unit">MB</span></td>
+            <td class="num-val">{m.get('avg_memory_mb', 0):.1f}<span class="unit">MB</span></td>
             <td class="num-val">{m.get('min_memory_mb', 0):.1f}<span class="unit">MB</span></td>
             <td class="num-val">{m.get('max_memory_mb', 0):.1f}<span class="unit">MB</span></td>
         </tr>"""
 
     if not rows:
-        rows = '<tr><td colspan="8" class="empty-state">No Telemetry Data Acquired</td></tr>'
-
-    chart_data_json = json.dumps(chart_data)
+        rows = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:var(--space-4);">No data returned from Grafana</td></tr>'
 
     node_rows = ""
     for n in node_metrics:
         node_rows += f"""
-        <tr class="data-row">
+        <tr>
             <td><span class='api-name'>{n.get('node', 'unknown')}</span></td>
             <td class="num-val">{n.get('avg_cpu', 0):.2f}<span class="unit">%</span></td>
             <td class="num-val">{n.get('avg_memory', 0):.1f}<span class="unit">MB</span></td>
@@ -136,538 +125,377 @@ def render_html(data, from_ts, to_ts, summary_file=None):
     node_section = ""
     if node_rows:
         node_section = f"""
-        <div class="panel node-panel reveal">
-            <div class="panel-header">
-                <h2>Node Hardware Utilization</h2>
-                <div class="panel-badge">Bare Metal</div>
-            </div>
-            <div class="table-container">
-                <table>
-                    <thead><tr><th>Node ID</th><th>Avg CPU</th><th>Avg Memory</th></tr></thead>
-                    <tbody>{node_rows}</tbody>
-                </table>
-            </div>
-        </div>"""
+    <h2 class="animate-3">🖥️ Node Utilization</h2>
+    <div class="table-wrapper animate-3">
+        <table>
+            <thead><tr><th>Node</th><th>Avg CPU</th><th>Avg Memory</th></tr></thead>
+            <tbody>{node_rows}</tbody>
+        </table>
+    </div>"""
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GROWIN PT // Utilization Report</title>
+<title>Grafana Utilization Report</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-    :root {{
-        --bg-base: #0f1115;
-        --bg-panel: #161920;
-        --bg-panel-hover: #1c2028;
-        --border-color: #272c36;
-        --border-light: rgba(255, 255, 255, 0.08);
-        --text-main: #f3f4f6;
-        --text-dim: #9ca3af;
-        --accent-primary: #3b82f6; /* Elegant Blue */
-        --accent-hover: #60a5fa;
-        --accent-secondary: #14b8a6; /* Teal */
-        --critical: #ef4444;
-        --critical-bg: rgba(239, 68, 68, 0.1);
-        --normal: #10b981;
-        --font-display: 'Outfit', sans-serif;
-        --font-mono: 'Fira Code', monospace;
-    }}
+  :root {{
+    --phi: 1.618;
+    --space-1: calc(1rem / var(--phi));
+    --space-2: 1rem;
+    --space-3: calc(1rem * var(--phi));
+    --space-4: calc(1rem * var(--phi) * var(--phi));
+    --space-5: calc(1rem * var(--phi) * var(--phi) * var(--phi));
 
-    * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-    
-    body {{
-        background-color: var(--bg-base);
-        color: var(--text-main);
-        font-family: var(--font-display);
-        font-size: 14px;
-        line-height: 1.6;
-        padding: 40px 24px;
-        -webkit-font-smoothing: antialiased;
-    }}
+    --bg-color: #09090b;
+    --card-bg: rgba(255, 255, 255, 0.03);
+    --border: rgba(255, 255, 255, 0.06);
+    --text-primary: #f8fafc;
+    --text-muted: #8b949e;
+    --accent: #22d3ee;
+    --accent-glow: rgba(34, 211, 238, 0.2);
+    --font-heading: 'Bricolage Grotesque', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }}
+  
+  * {{ margin:0; padding:0; box-sizing:border-box; }}
+  
+  body {{ 
+    font-family: var(--font-mono); 
+    background-color: var(--bg-color); 
+    color: var(--text-primary); 
+    padding: var(--space-4) var(--space-3); 
+    line-height: var(--phi); 
+    font-size: 0.9rem;
+    position: relative;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }}
+  
+  body::before, body::after {{
+    content: ''; position: fixed; border-radius: 50%; filter: blur(120px); z-index: -1; pointer-events: none;
+  }}
+  body::before {{ top: -10vw; left: -10vw; width: 40vw; height: 40vw; background: rgba(56, 189, 248, 0.08); }}
+  body::after {{ bottom: -10vw; right: -10vw; width: 30vw; height: 30vw; background: rgba(139, 92, 246, 0.08); }}
 
-    .layout-container {{
-        max-width: 1280px;
-        margin: 0 auto;
-        display: flex;
-        flex-direction: column;
-        gap: 32px;
-    }}
+  .container {{ max-width: 1400px; margin: 0 auto; }}
+  
+  .header-wrapper {{
+    display: flex; flex-direction: column; gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    position: relative;
+  }}
+  
+  .header {{ display: flex; align-items: center; gap: var(--space-2); }}
+  .header svg {{ width: var(--space-4); height: var(--space-4); color: var(--accent); filter: drop-shadow(0 0 10px var(--accent-glow)); }}
+  h1 {{ font-family: var(--font-heading); color: var(--text-primary); font-size: calc(1rem * var(--phi) * var(--phi)); font-weight: 700; letter-spacing: -0.03em; margin: 0; text-transform: uppercase; }}
+  
+  h2 {{ font-family: var(--font-heading); color: var(--text-primary); margin: var(--space-5) 0 var(--space-3); font-size: calc(1rem * var(--phi)); font-weight: 600; display: flex; align-items: center; gap: var(--space-1); letter-spacing: -0.02em; }}
+  
+  .meta {{ 
+    color: var(--text-muted); font-size: 0.85rem; 
+    display: inline-flex; gap: var(--space-3); flex-wrap: wrap;
+    background: var(--card-bg); padding: var(--space-1) var(--space-2); 
+    border-radius: 999px; border: 1px solid var(--border); 
+    backdrop-filter: blur(12px);
+    width: max-content;
+  }}
+  .meta span {{ display: flex; align-items: center; gap: 0.5rem; }}
+  
+  .controls-section {{
+    background: var(--card-bg); border-radius: 16px; padding: var(--space-3);
+    border: 1px solid var(--border); backdrop-filter: blur(12px);
+    margin-bottom: var(--space-4); display: flex; gap: var(--space-3); flex-wrap: wrap;
+    align-items: flex-end;
+  }}
 
-    h1, h2, h3 {{ font-weight: 600; text-wrap: balance; }}
-    p {{ text-wrap: pretty; }}
-    
-    .hero-header {{
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        border-bottom: 1px solid var(--border-color);
-        padding-bottom: 24px;
-        flex-wrap: wrap;
-        gap: 20px;
-    }}
-    
-    .hero-title h1 {{
-        font-size: 2.25rem;
-        letter-spacing: -0.02em;
-        color: #ffffff;
-    }}
-    
-    .hero-title .subtitle {{
-        color: var(--text-dim);
-        font-size: 1.1rem;
-        margin-top: 4px;
-    }}
+  .form-group {{ flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: var(--space-1); }}
+  .form-group label {{ font-family: var(--font-heading); color: var(--accent); font-weight: 600; font-size: 0.85rem; letter-spacing: 0.05em; text-transform: uppercase; }}
+  
+  input[type="datetime-local"], select {{
+    background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: var(--text-primary);
+    padding: var(--space-2); border-radius: 8px; font-family: var(--font-mono); font-size: 0.85rem;
+    transition: all 0.2s ease;
+  }}
+  
+  input[type="datetime-local"]:focus, select:focus {{ outline: none; border-color: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }}
+  
+  select[multiple] {{ min-height: 100px; }}
+  select[multiple] option {{ padding: 4px 8px; border-radius: 4px; }}
+  select[multiple] option:checked {{ background: var(--accent); color: #000; }}
 
-    .meta-blocks {{
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-    }}
-    
-    .meta-block {{
-        background: var(--bg-panel);
-        border: 1px solid var(--border-light);
-        border-radius: 8px;
-        padding: 12px 16px;
-        min-width: 140px;
-    }}
-    
-    .meta-label {{
-        color: var(--text-dim);
-        font-size: 11px;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 4px;
-    }}
-    
-    .meta-value {{
-        color: var(--text-main);
-        font-family: var(--font-mono);
-        font-size: 13px;
-    }}
-
-    .control-board {{
-        background: var(--bg-panel);
-        border: 1px solid var(--border-light);
-        border-radius: 12px;
-        padding: 24px;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 24px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }}
-
-    .input-group {{
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }}
-    
-    .input-group label {{
-        color: var(--text-dim);
-        font-size: 12px;
-        font-weight: 500;
-    }}
-    
-    input, select, button {{
-        background: var(--bg-base);
-        border: 1px solid var(--border-color);
-        color: var(--text-main);
-        font-family: var(--font-display);
-        font-size: 14px;
-        padding: 10px 14px;
-        border-radius: 6px;
-        transition: border-color 0.2s, box-shadow 0.2s;
-    }}
-    
-    input[type="datetime-local"], select {{
-        font-family: var(--font-mono);
-        font-size: 13px;
-    }}
-    
-    input:focus, select:focus {{
-        outline: none;
-        border-color: var(--accent-primary);
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-    }}
-    
-    .btn {{
-        background: var(--bg-panel);
-        color: var(--text-main);
-        cursor: pointer;
-        font-weight: 500;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-    }}
-    
-    .btn-primary {{
-        background: var(--accent-primary);
-        color: #ffffff;
-        border-color: var(--accent-primary);
-        font-weight: 600;
-    }}
-    
-    .btn:hover {{
-        background: var(--bg-panel-hover);
-        border-color: var(--text-dim);
-    }}
-    
-    .btn-primary:hover {{
-        background: var(--accent-hover);
-        border-color: var(--accent-hover);
-    }}
-
-    .action-bar {{
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-    }}
-    
-    .upload-zone {{
-        border: 1px dashed var(--border-color);
-        border-radius: 6px;
-        padding: 10px 16px;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex: 1;
-        background: var(--bg-panel);
-        color: var(--text-dim);
-        font-weight: 500;
-    }}
-    
-    .upload-zone:hover {{
-        border-color: var(--accent-primary);
-        background: rgba(59, 130, 246, 0.05);
-        color: var(--accent-primary);
-    }}
-
-    .panel {{
-        background: var(--bg-panel);
-        border: 1px solid var(--border-light);
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }}
-    
-    .panel-header {{
-        border-bottom: 1px solid var(--border-light);
-        padding: 20px 24px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }}
-    
-    .panel-header h2 {{
-        font-size: 1.1rem;
-        color: var(--text-main);
-    }}
-    
-    .panel-badge {{
-        background: rgba(139, 92, 246, 0.1);
-        color: var(--accent-secondary);
-        padding: 4px 10px;
-        border-radius: 12px;
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
-    }}
-    
-    .chart-container {{
-        padding: 24px;
-        height: 420px;
-    }}
-
-    .table-container {{
-        overflow-x: auto;
-    }}
-    
-    table {{
-        width: 100%;
-        border-collapse: collapse;
-        text-align: left;
-    }}
-    
-    th {{
-        padding: 14px 24px;
-        font-size: 12px;
-        font-weight: 500;
-        color: var(--text-dim);
-        border-bottom: 1px solid var(--border-light);
-        background: rgba(0,0,0,0.2);
-    }}
-    
-    td {{
-        padding: 16px 24px;
-        border-bottom: 1px solid var(--border-color);
-        font-size: 13px;
-    }}
-    
-    .data-row {{
-        transition: background-color 0.15s;
-    }}
-    
-    .data-row:hover {{
-        background-color: var(--bg-panel-hover);
-    }}
-    
-    .data-row:last-child td {{
-        border-bottom: none;
-    }}
-    
-    .api-name {{
-        color: var(--text-main);
-        font-weight: 600;
-        display: block;
-    }}
-    
-    .pod-name {{
-        color: var(--text-dim);
-        font-family: var(--font-mono);
-        font-size: 11px;
-        margin-top: 4px;
-        display: block;
-    }}
-    
-    .num-val {{ 
-        font-family: var(--font-mono);
-        font-variant-numeric: tabular-nums; 
-    }}
-    
-    .num-val.critical {{ 
-        color: var(--critical); 
-        background: var(--critical-bg);
-        padding: 2px 6px;
-        border-radius: 4px;
-    }}
-    
-    .unit {{ 
-        color: var(--text-dim); 
-        margin-left: 2px; 
-        font-size: 11px; 
-    }}
-    
-    .row-index {{ 
-        color: var(--text-dim); 
-        font-family: var(--font-mono);
-    }}
-    
-    .empty-state {{
-        text-align: center;
-        padding: 64px 20px;
-        color: var(--text-dim);
-        font-size: 15px;
-    }}
-
-    /* Animations */
-    .reveal {{
-        opacity: 0;
-        transform: translateY(10px);
-        animation: revealAnim 0.5s ease-out forwards;
-    }}
-    @keyframes revealAnim {{
-        to {{ opacity: 1; transform: translateY(0); }}
-    }}
-    .d-1 {{ animation-delay: 0.1s; }}
-    .d-2 {{ animation-delay: 0.2s; }}
-    .d-3 {{ animation-delay: 0.3s; }}
-    .d-4 {{ animation-delay: 0.4s; }}
+  .helper-text {{ font-size: 0.75rem; color: var(--text-muted); opacity: 0.8; }}
+  
+  .btn-primary {{
+    background: var(--accent); color: #000; border: none; padding: var(--space-2) var(--space-3);
+    border-radius: 8px; font-family: var(--font-heading); font-weight: 700; font-size: 0.95rem;
+    cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.05em;
+  }}
+  .btn-primary:hover {{ transform: translateY(-2px); box-shadow: 0 5px 15px var(--accent-glow); }}
+  
+  .btn-outline {{
+    background: transparent; color: var(--text-primary); border: 1px solid var(--border);
+    padding: var(--space-2) var(--space-3); border-radius: 8px; font-family: var(--font-heading);
+    font-weight: 600; cursor: pointer; transition: all 0.2s ease;
+  }}
+  .btn-outline:hover {{ background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }}
+  
+  .table-wrapper, .chart-wrapper {{
+    background: var(--card-bg); border-radius: 16px; overflow: hidden; 
+    border: 1px solid var(--border); backdrop-filter: blur(12px);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    margin-bottom: var(--space-4); overflow-x: auto;
+  }}
+  
+  .chart-wrapper {{
+    padding: var(--space-3);
+    position: relative;
+    height: 400px;
+  }}
+  
+  table {{ width: 100%; border-collapse: collapse; text-align: left; }}
+  th {{ 
+    background: rgba(0,0,0,0.4); color: var(--accent); 
+    padding: var(--space-2) var(--space-3); 
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; 
+    border-bottom: 1px solid var(--border); 
+    white-space: nowrap; cursor: pointer;
+  }}
+  th:hover {{ background: rgba(34, 211, 238, 0.05); }}
+  td {{ 
+    padding: var(--space-2) var(--space-3); 
+    border-bottom: 1px solid rgba(255,255,255,0.02); 
+    transition: all 0.3s ease; 
+  }}
+  tr:last-child td {{ border-bottom: none; }}
+  tr:hover td {{ background: rgba(255,255,255,0.04); color: #fff; }}
+  
+  .api-name {{ font-family: var(--font-heading); font-size: 1.1rem; font-weight: 500; letter-spacing: -0.01em; color: #fff; display: block; }}
+  .pod-name {{ font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono); margin-top: 4px; display: block; opacity: 0.7; }}
+  
+  .num-val {{ font-variant-numeric: tabular-nums; }}
+  .unit {{ color: var(--text-muted); font-size: 0.75em; margin-left: 3px; }}
+  .badge {{ background: rgba(34, 211, 238, 0.1); color: var(--accent); padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; }}
+  
+  .high-cpu {{ background-color: rgba(220, 38, 38, 0.2) !important; color: #fca5a5 !important; }}
+  .high-memory {{ background-color: rgba(234, 179, 8, 0.2) !important; color: #fde047 !important; }}
+  
+  .footer {{ margin-top: var(--space-5); color: var(--text-muted); font-size: 0.75rem; text-align: center; padding-top: var(--space-3); border-top: 1px solid var(--border); opacity: 0.6; }}
+  
+  .file-upload {{
+    border: 1px dashed var(--border); padding: var(--space-3); border-radius: 8px; text-align: center;
+    background: rgba(0,0,0,0.2); cursor: pointer; transition: all 0.2s ease;
+  }}
+  .file-upload:hover {{ border-color: var(--accent); background: rgba(34, 211, 238, 0.05); }}
+  .file-upload input {{ display: none; }}
+  
+  @keyframes slideUp {{ from {{ opacity: 0; transform: translateY(20px); }} to {{ opacity: 1; transform: translateY(0); }} }}
+  .animate-1 {{ animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }}
+  .animate-2 {{ opacity: 0; animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards; }}
+  .animate-3 {{ opacity: 0; animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards; }}
 </style>
 </head>
 <body>
-<div class="layout-container">
-    
-    <header class="hero-header reveal">
-        <div class="hero-title">
-            <h1>Utilization Report</h1>
-            <div class="subtitle">Growin Performance Test</div>
+<div class="container">
+    <div class="header-wrapper animate-1">
+        <div class="header">
+            <svg viewBox="0 0 120 119" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                <path d="M59.9 0l59.6 34.3v68.5l-59.6 34.4L.4 102.8V34.3L59.9 0zm0 18.2L16.2 43.4v50.4L59.9 119l43.7-25.2V43.4L59.9 18.2zm28.7 34.4c.5-2.2 2-3.8 4-4.5 2-.8 4.3-.4 6 .9.6.5 1 1 1.4 1.7L96 61l-5.6-3.8c-1-.7-2.3-.9-3.5-.5-.8.3-1.4 1-1.7 1.8L79.6 77.2l-3.3-8.8 12.3-15.8zm-57.4 0l12.3 15.8-3.3 8.8-5.6-18.7c-.3-.8-.9-1.5-1.7-1.8-1.2-.4-2.5-.2-3.5.5L14.6 61l4.1-10.3c.4-.7.9-1.3 1.4-1.7 1.7-1.3 4-1.7 6-.9 2 .7 3.5 2.3 4 4.5v-.1zM60 21.6c1 0 1.9.4 2.5 1.1.7.6 1.1 1.5 1.1 2.5v16.1l9.6-1.7 5.6-8.5c.8-.9 2-1.4 3.2-1.3 1 .1 1.8.6 2.5 1.3.8.8 1.1 1.9 1 3l-.6 10-15.2-1.4-5.2 6.7 8.3 8.3 12.9-7.5h.1c1.8-1 4.1-.7 5.7.5 1.5 1.2 2.2 3.1 1.8 5l-4.1 14.2-11.8 2.1-4.7 9.8 4.7 9.8 11.8 2.1 4.1 14.2c.4 1.9-.3 3.8-1.8 5-1.6 1.2-3.9 1.5-5.7.5L81.2 92l-8.3 8.3 5.2 6.7 15.2-1.4.6 10c.1 1.1-.2 2.2-1 3-.7.7-1.5 1.2-2.5 1.3-1.2.1-2.4-.4-3.2-1.3l-5.6-8.5-9.6-1.7v16.1c0 1-.4 1.9-1.1 2.5-.6.7-1.5 1.1-2.5 1.1-1 0-1.9-.4-2.5-1.1-.7-.6-1.1-1.5-1.1-2.5V108l-9.6 1.7-5.6 8.5c-.8.9-2 1.4-3.2 1.3-1-.1-1.8-.6-2.5-1.3-.8-.8-1.1-1.9-1-3l.6-10 15.2 1.4 5.2-6.7-8.3-8.3-12.9 7.5c-1.8 1-4.1.7-5.7-.5-1.5-1.2-2.2-3.1-1.8-5l4.1-14.2 11.8-2.1 4.7-9.8-4.7-9.8-11.8-2.1-4.1-14.2c-.4-1.9.3-3.8 1.8-5 1.6-1.2 3.9-1.5 5.7-.5l12.9 7.5 8.3-8.3-5.2-6.7L33.7 34l-.6-10c-.1-1.1.2-2.2 1-3 .7-.7 1.5-1.2 2.5-1.3 1.2-.1 2.4.4 3.2 1.3l5.6 8.5 9.6 1.7V25.2c0-1 .4-1.9 1.1-2.5.6-.7 1.5-1.1 2.5-1.1z"/>
+            </svg>
+            <h1>Grafana Utilization Report</h1>
         </div>
-        <div class="meta-blocks">
-            <div class="meta-block">
-                <div class="meta-label">Time Start</div>
-                <div class="meta-value">{from_dt}</div>
-            </div>
-            <div class="meta-block">
-                <div class="meta-label">Time End</div>
-                <div class="meta-value">{to_dt}</div>
-            </div>
-            <div class="meta-block">
-                <div class="meta-label">Generated</div>
-                <div class="meta-value">{generated}</div>
-            </div>
+        <div class="meta">
+            <span><span class="badge">START</span> {from_dt}</span>
+            <span><span class="badge">END</span> {to_dt}</span>
+            <span><span class="badge">GEN</span> {generated}</span>
         </div>
-    </header>
+    </div>
 
-    <div class="control-board reveal d-1">
-        <div class="input-group">
-            <label>From Datetime</label>
+    <div class="controls-section animate-1">
+        <div class="form-group">
+            <label for="fromDate">From Date & Time</label>
             <input type="datetime-local" id="fromDate" value="{datetime.fromtimestamp(from_ts, tz=timezone.utc).strftime('%Y-%m-%dT%H:%M')}">
         </div>
-        <div class="input-group">
-            <label>To Datetime</label>
+        <div class="form-group">
+            <label for="toDate">To Date & Time</label>
             <input type="datetime-local" id="toDate" value="{datetime.fromtimestamp(to_ts, tz=timezone.utc).strftime('%Y-%m-%dT%H:%M')}">
         </div>
-        <div class="input-group">
-            <label>Target Containers</label>
+        <div class="form-group">
+            <label for="containers">Containers (Ctrl/Cmd+Click)</label>
             <select id="containers" multiple>
-                <option value="" disabled>Static Mode Only</option>
+                <option value="" disabled>Static Report Mode</option>
             </select>
+            <div class="helper-text">Leave empty for default</div>
         </div>
-        <div class="input-group" style="justify-content: flex-end; flex-direction: row; align-items: center; gap: 16px;">
-            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                <input type="checkbox" id="groupPods"> Group Pods
+        <div class="form-group" style="flex: 0 0 auto; justify-content: flex-end; padding-bottom: 6px;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="groupPods">
+                <span style="color:var(--text-primary); font-family:var(--font-mono); font-weight:400; text-transform:none;">Group Pods</span>
             </label>
-            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                <input type="checkbox" id="showPercentage"> Show %
+            <div class="helper-text">Consolidate by deployment</div>
+        </div>
+        <div class="form-group" style="flex: 0 0 auto; justify-content: flex-end; padding-bottom: 6px;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="showPercentage">
+                <span style="color:var(--text-primary); font-family:var(--font-mono); font-weight:400; text-transform:none;">Show %</span>
             </label>
+            <div class="helper-text">Display CPU & Mem as %</div>
         </div>
-        <div class="input-group" style="justify-content: flex-end;">
-            <button class="btn btn-primary" id="fetchBtn">Execute Fetch</button>
-        </div>
+        <button id="fetchBtn" class="btn-primary">Fetch Metrics</button>
     </div>
 
-    <div class="action-bar reveal d-2">
-        <button class="btn" onclick="window.print()">Export PDF</button>
-        <button class="btn" onclick="alert('Requires live backend connection.')">Export XLS</button>
-        <div class="upload-zone" onclick="document.getElementById('k6Upload').click()">
-            <input type="file" id="k6Upload" accept=".html,.json" style="display:none;">
-            <span>Upload K6 Summary</span>
-        </div>
+    <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4);" class="animate-1">
+        <button class="btn-outline" onclick="window.print()">📄 Export to PDF</button>
+        <button class="btn-outline" onclick="alert('Export to Excel requires backend API connection.')">📊 Export to Excel</button>
     </div>
 
-    <div class="panel reveal d-3">
-        <div class="panel-header">
-            <h2>Resource Metrics Visualization</h2>
-            <div class="panel-badge">Aggregated</div>
-        </div>
-        <div class="chart-container">
-            <canvas id="metricsChart"></canvas>
-        </div>
+    <div class="file-upload animate-1" onclick="document.getElementById('k6Upload').click()">
+        <input type="file" id="k6Upload" accept=".html,.json">
+        <h3 style="font-family:var(--font-heading); color:var(--accent);">📁 Upload K6 HTML Report</h3>
+        <p class="helper-text" style="margin-top: 8px;">Upload K6 HTML report to include load test metrics in the export</p>
     </div>
 
-    <div class="panel reveal d-4">
-        <div class="panel-header">
-            <h2>Kubernetes Workload Telemetry</h2>
-            <div class="panel-badge">Pod Level</div>
-        </div>
-        <div class="table-container">
-            <table id="metricsTable">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Target Scenario</th>
-                        <th>Avg CPU</th>
-                        <th>Min CPU</th>
-                        <th>Max CPU</th>
-                        <th>Avg Mem</th>
-                        <th>Min Mem</th>
-                        <th>Max Mem</th>
-                    </tr>
-                </thead>
-                <tbody>{rows}</tbody>
-            </table>
-        </div>
+    <h2 class="animate-2">📊 Metrics Overview</h2>
+    <div class="chart-wrapper animate-2">
+        <canvas id="metricsChart"></canvas>
+    </div>
+
+    <h2 class="animate-3">☸️ Kubernetes Pod Metrics <span class="badge">growin</span></h2>
+    <div class="table-wrapper animate-3">
+        <table id="metricsTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>API Scenario / Deployment</th>
+                    <th>Avg CPU</th>
+                    <th>Min CPU</th>
+                    <th>Max CPU</th>
+                    <th>Avg Mem</th>
+                    <th>Min Mem</th>
+                    <th>Max Mem</th>
+                </tr>
+            </thead>
+            <tbody>{rows}</tbody>
+        </table>
     </div>
 
     {node_section}
 
+    <div class="footer animate-3">
+        growin_performancetest — Grafana Utilization Report — auto-generated by pt-grafana-report
+    </div>
 </div>
-
 <script>
+    // Chart.js rendering using injected data
     const chartData = {chart_data_json};
     
-    if (chartData && chartData.length > 0) {{{{
+    if (chartData && chartData.length > 0) {{
         const ctx = document.getElementById('metricsChart').getContext('2d');
         
-        Chart.defaults.color = '#9ca3af';
-        Chart.defaults.font.family = "'Fira Code', monospace";
-        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.05)';
+        // Set Chart.js defaults to match dark glassmorphism theme
+        Chart.defaults.color = '#8b949e';
+        Chart.defaults.font.family = "'JetBrains Mono', monospace";
         
-        new Chart(ctx, {{{{
+        const gradientCPU = ctx.createLinearGradient(0, 0, 0, 400);
+        gradientCPU.addColorStop(0, 'rgba(34, 211, 238, 0.8)');
+        gradientCPU.addColorStop(1, 'rgba(34, 211, 238, 0.1)');
+        
+        const gradientMem = ctx.createLinearGradient(0, 0, 0, 400);
+        gradientMem.addColorStop(0, 'rgba(139, 92, 246, 0.8)');
+        gradientMem.addColorStop(1, 'rgba(139, 92, 246, 0.1)');
+
+        new Chart(ctx, {{
             type: 'bar',
-            data: {{{{
-                labels: chartData.map(d => d.pod.length > 25 ? d.pod.substring(0, 25) + '...' : d.pod),
+            data: {{
+                labels: chartData.map(d => d.pod.length > 20 ? d.pod.substring(0, 20) + '...' : d.pod),
                 datasets: [
-                    {{{{
-                        label: 'AVG CPU (m)',
+                    {{
+                        label: 'Avg CPU (m)',
                         data: chartData.map(d => d.avg_cpu),
-                        backgroundColor: '#3b82f6',
+                        backgroundColor: gradientCPU,
+                        borderColor: '#22d3ee',
+                        borderWidth: 1,
                         borderRadius: 4,
                         yAxisID: 'y'
-                    }}}},
-                    {{{{
-                        label: 'AVG MEM (MB)',
+                    }},
+                    {{
+                        label: 'Avg Memory (MB)',
                         data: chartData.map(d => d.avg_mem),
-                        backgroundColor: '#14b8a6',
+                        backgroundColor: gradientMem,
+                        borderColor: '#8b5cf6',
+                        borderWidth: 1,
                         borderRadius: 4,
                         yAxisID: 'y1'
-                    }}}}
+                    }}
                 ]
-            }}}},
-            options: {{{{
+            }},
+            options: {{
                 responsive: true,
                 maintainAspectRatio: false,
-                interaction: {{{{
+                interaction: {{
                     mode: 'index',
                     intersect: false,
-                }}}},
-                plugins: {{{{
-                    tooltip: {{{{
-                        backgroundColor: '#161920',
-                        titleFont: {{{{ family: "'Outfit', sans-serif", size: 14 }}}},
-                        bodyFont: {{{{ family: "'Fira Code', monospace", size: 12 }}}},
-                        borderColor: '#272c36',
+                }},
+                plugins: {{
+                    tooltip: {{
+                        backgroundColor: 'rgba(9, 9, 11, 0.9)',
+                        titleFont: {{ family: "'Bricolage Grotesque', sans-serif", size: 14 }},
+                        bodyFont: {{ family: "'JetBrains Mono', monospace", size: 12 }},
+                        borderColor: 'rgba(255,255,255,0.1)',
                         borderWidth: 1,
-                        padding: 12,
-                        cornerRadius: 8,
-                        boxPadding: 4
-                    }}}},
-                    legend: {{{{
-                        labels: {{{{ font: {{{{ family: "'Outfit', sans-serif", size: 12 }}}}, usePointStyle: true, boxWidth: 8 }}}}
-                    }}}}
-                }}}},
-                scales: {{{{
-                    x: {{{{
-                        grid: {{{{ display: false }}}},
-                        ticks: {{{{ maxRotation: 45, minRotation: 45 }}}}
-                    }}}},
-                    y: {{{{
+                        padding: 12
+                    }},
+                    legend: {{
+                        labels: {{ font: {{ family: "'Bricolage Grotesque', sans-serif" }} }}
+                    }}
+                }},
+                scales: {{
+                    x: {{
+                        grid: {{ color: 'rgba(255,255,255,0.05)' }},
+                        ticks: {{ maxRotation: 45, minRotation: 45 }}
+                    }},
+                    y: {{
                         type: 'linear',
                         display: true,
                         position: 'left',
-                        title: {{{{ display: true, text: 'CPU (m)', color: '#3b82f6', font: {{{{ family: "'Outfit', sans-serif" }}}} }}}},
-                        grid: {{{{ color: 'rgba(255, 255, 255, 0.05)' }}}}
-                    }}}},
-                    y1: {{{{
+                        title: {{ display: true, text: 'CPU (m)' }},
+                        grid: {{ color: 'rgba(255,255,255,0.05)' }}
+                    }},
+                    y1: {{
                         type: 'linear',
                         display: true,
                         position: 'right',
-                        title: {{ display: true, text: 'MEMORY (MB)', color: '#14b8a6', font: {{ family: "'Outfit', sans-serif" }} }},
-                        grid: {{{{ drawOnChartArea: false }}}}
-                    }}}}
-                }}}}
-            }}}}
-        }}}});
-    }}}}
+                        title: {{ display: true, text: 'Memory (MB)' }},
+                        grid: {{ drawOnChartArea: false }}
+                    }}
+                }}
+            }}
+        }});
+    }}
 
-    document.getElementById('fetchBtn').addEventListener('click', () => {{{{
-        alert('Static Mode Only. Boot backend via TUI for live telemetry.');
-    }}}});
+    // Minimal interactivity for the static report
+    document.getElementById('fetchBtn').addEventListener('click', () => {{
+        alert('This is a static report snapshot. To fetch new data, start the backend from the TUI and use the interactive dashboard at http://localhost:5000.');
+    }});
+    
+    document.getElementById('showPercentage').addEventListener('change', (e) => {{
+        alert('Percentage view toggle requires a live backend connection. Currently viewing absolute metrics snapshot.');
+        e.target.checked = false;
+    }});
+
+    document.getElementById('k6Upload').addEventListener('change', (e) => {{
+        if(e.target.files.length > 0) {{
+            alert('K6 report ' + e.target.files[0].name + ' selected. Interactive merging requires backend parsing.');
+        }}
+    }});
 </script>
 </body>
 </html>"""
