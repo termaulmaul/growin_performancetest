@@ -254,7 +254,7 @@ banner() {
         
         if [[ -n "$remote_k6" ]]; then
           local script_name=""
-          script_name=$(echo "$remote_k6" | grep -oE '[^ ]+\.js\b' | awk -F'/' '{print $NF}' | head -n 1)
+          script_name=$(echo "$remote_k6" | awk '{for(i=1;i<=NF;i++) if($i ~ /\.js$/ && $i !~ /=/) print $i}' | awk -F'/' '{print $NF}' | head -n 1)
           if [[ -z "$script_name" ]]; then script_name="Unknown Script"; fi
           echo "RUNNING|${script_name}" > /tmp/.k6_target_status
         else
