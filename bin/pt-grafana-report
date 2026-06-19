@@ -75,45 +75,65 @@ def render_html(data, from_ts, to_ts, summary_file=None):
     from_dt = datetime.fromtimestamp(from_ts, tz=timezone.utc).strftime("%d/%m/%Y, %H.%M")
     to_dt = datetime.fromtimestamp(to_ts, tz=timezone.utc).strftime("%d/%m/%Y, %H.%M")
 
+    # Extract keywords from custom metrics in summary.json
+    keywords = set()
+    if summary_file and os.path.isfile(summary_file):
+        try:
+            with open(summary_file, 'r', encoding='utf-8') as f:
+                sum_data = json.load(f)
+                custom_metrics = sum_data.get("custom_metrics", {})
+                for key in custom_metrics.keys():
+                    name = re.sub(r'^(duration|error_rate|error_count|sample|rps|waiting)_(?:\d{3}_(?:\d{2}_)+)?', '', key)
+                    if name:
+                        words = [w.lower() for w in name.split('_') if len(w) > 2]
+                        keywords.update(words)
+        except Exception as e:
+            print(f"[pt-grafana-report] Warning: Failed to parse summary file: {e}", file=sys.stderr)
+
     metrics = data.get("data", [])
-    node_metrics = data.get("node_data", [])
+    
+    # Filter pods based on keywords
+    filtered_metrics = []
+    if keywords:
+        for m in metrics:
+            pod = m.get("pod", m.get("deployment", "unknown")).lower()
+            if any(k in pod for k in keywords):
+                filtered_metrics.append(m)
+        if not filtered_metrics:
+            filtered_metrics = metrics # fallback to all if none matched
+    else:
+        filtered_metrics = metrics
 
     rows = ""
-    for m in metrics:
+    for m in filtered_metrics:
         pod = m.get("pod", m.get("deployment", "unknown"))
-        node = m.get("node", "")
-        if not node and "tremappl" in pod: # basic fallback
-            node = pod
-            
+        node = m.get("node", "unknown")
         pod_count = m.get("pod_count", 1)
         
-        # We need CPU and Memory %
-        avg_cpu = m.get('avg_cpu_percent')
-        min_cpu = m.get('min_cpu_percent')
-        max_cpu = m.get('max_cpu_percent')
-        avg_mem = m.get('avg_memory_percent')
+        # Determine which keyword matched
+        display_api = ""
+        if keywords:
+            matched = [k for k in keywords if k in pod.lower()]
+            if matched:
+                display_api = f"<strong>Match: {', '.join(matched)}</strong><br>"
         
-        if avg_cpu is None:
-            # Fallback to absolute if % is missing (though the design expects %)
-            avg_cpu = m.get('avg_cpu_millicores', 0) / 10.0 # Just dummy calc or use raw
-            min_cpu = m.get('min_cpu_millicores', 0) / 10.0
-            max_cpu = m.get('max_cpu_millicores', 0) / 10.0
-            avg_mem = m.get('avg_memory_mb', 0) / 10.0
+        display_name = f"{display_api}{pod}"
 
         rows += f"""
         <tr>
             <td style="color:var(--text-primary); font-weight: 700;">{node}</td>
-            <td style="font-weight: 700;">{pod}</td>
+            <td style="font-weight: 700;">{display_name}</td>
             <td style="color:var(--text-primary); font-weight: 600;">{pod_count}</td>
-            <td class="num-val">{avg_cpu:.2f}</td>
-            <td class="num-val">{min_cpu:.2f}</td>
-            <td class="num-val">{max_cpu:.2f}</td>
-            <td class="num-val">{avg_mem:.1f}</td>
+            <td class="num-val">{m.get('avg_cpu_percent', 0):.2f}</td>
+            <td class="num-val">{m.get('min_cpu_percent', 0):.2f}</td>
+            <td class="num-val">{m.get('max_cpu_percent', 0):.2f}</td>
+            <td class="num-val">{m.get('avg_memory_percent', 0):.2f}</td>
         </tr>"""
 
     if not rows:
         rows = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem;">No data returned from Grafana</td></tr>'
 
+    node_metrics = data.get("node_data", [])
     node_rows = ""
     for n in node_metrics:
         # Use instance (IP:Port) and hostname from the backend
@@ -241,21 +261,11 @@ def render_html(data, from_ts, to_ts, summary_file=None):
     padding: 1.2rem 0.5rem; 
     border-bottom: 1px solid var(--border); 
     font-size: 1rem;
-  }}
-  
   .num-val {{ color: var(--num-color); font-family: 'Inter', monospace; font-weight: 600; }}
   
   h2 {{ 
-    font-size: 1.6rem; font-weight: 700; color: #1e293b; margin: 0 0 1rem 0; 
-  }}
+    font-size: 1.6rem; font-weight: 700; color: #1e293b; margin: 0 0 1rem 0;  }}
   .h2-divider {{ border-bottom: 3px solid #6366f1; width: 100%; margin-bottom: 2rem; }}
-  
-  .k6-upload {{
-    border: 2px dashed #93c5fd; padding: 3rem; border-radius: 8px; text-align: center;
-    background: transparent; margin-top: 2rem; cursor: pointer;
-  }}
-  .k6-upload h3 {{ color: #94a3b8; font-size: 1.2rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }}
-  .k6-upload p {{ color: #475569; margin-top: 1rem; font-size: 1rem; }}
 </style>
 </head>
 <body>
@@ -271,39 +281,6 @@ def render_html(data, from_ts, to_ts, summary_file=None):
             <label>To Date & Time</label>
             <input type="text" value="{to_dt}">
         </div>
-    </div>
-    
-    <div class="controls-grid" style="grid-template-columns: 3fr 2fr;">
-        <div class="form-group">
-            <label>Containers (Ctrl/Cmd+Click for multiple)</label>
-            <select multiple disabled>
-                <option selected>growin-autoorderservice</option>
-                <option selected>growin-bondservice</option>
-                <option selected>growin-cms</option>
-                <option selected>growin-eiposervice</option>
-            </select>
-            <div class="helper-text" style="margin-top: 0.5rem;">Leave empty to use default containers</div>
-        </div>
-        <div class="form-group" style="justify-content: flex-start; padding-top: 1rem;">
-            <div class="checkbox-group">
-                <input type="checkbox" checked disabled>
-                <label>Group Pods</label>
-            </div>
-            <div class="helper-text" style="margin-left: 1.7rem;">Consolidate pods by deployment name</div>
-            
-            <div class="checkbox-group" style="margin-top: 2rem;">
-                <input type="checkbox" checked disabled>
-                <label>Show Percentage</label>
-            </div>
-            <div class="helper-text" style="margin-left: 1.7rem;">Display CPU & Memory as % (requires limits)</div>
-            
-            <button class="fetch-btn" style="margin-left: 1.7rem; text-align: left;">Fetch Metrics</button>
-        </div>
-    </div>
-    
-    <div class="actions-row">
-        <a href="#" class="action-link">📊 Export All Metrics to Excel</a>
-        <a href="#" class="action-link" style="color: #cbd5e1;">📄 Export All Metrics to PDF</a>
     </div>
     
     <table>
@@ -340,14 +317,6 @@ def render_html(data, from_ts, to_ts, summary_file=None):
             {node_rows}
         </tbody>
     </table>
-    
-    <h2>K6 Metrics Import</h2>
-    <div class="h2-divider"></div>
-    
-    <div class="k6-upload">
-        <h3>📁 Upload K6 HTML Report</h3>
-        <p>Upload K6 HTML report to include load test metrics in the export</p>
-    </div>
 </div>
 </body>
 </html>"""
