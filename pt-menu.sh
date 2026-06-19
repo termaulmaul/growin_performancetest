@@ -2154,6 +2154,7 @@ grafana_menu() {
       "[1] Start Backend"
       "[2] Stop Backend"
       "[3] View Logs (/tmp/grafana_backend.log)"
+      "[4] Open Dummy Report"
       "[0] Back"
     )
     local sel; sel=$(pick_fzf "Grafana>" "${choices[@]}")
@@ -2195,6 +2196,20 @@ grafana_menu() {
           tail -n 20 "/tmp/grafana_backend.log"
         else
           echo -e "  ${DIM}No logs found.${RST}"
+        fi
+        read -r -p $'\nPress Enter...'
+        ;;
+      "[4] Open Dummy Report"*)
+        echo -e "\n  ${CYN}Generating and opening dummy Grafana report...${RST}"
+        local start_ts end_ts
+        start_ts=$(date -v-1H +%s 2>/dev/null || date -d '1 hour ago' +%s)
+        end_ts=$(date +%s)
+        python3 bin/pt-grafana-report --start "$start_ts" --end "$end_ts" --output /tmp/dummy_grafana_report.html
+        if [[ -f /tmp/dummy_grafana_report.html ]]; then
+          echo -e "  ${GRN}Opening report in browser...${RST}"
+          open /tmp/dummy_grafana_report.html 2>/dev/null || xdg-open /tmp/dummy_grafana_report.html 2>/dev/null || echo -e "  ${YLW}Could not automatically open browser. File is at /tmp/dummy_grafana_report.html${RST}"
+        else
+          echo -e "  ${RED}Failed to generate report.${RST}"
         fi
         read -r -p $'\nPress Enter...'
         ;;
