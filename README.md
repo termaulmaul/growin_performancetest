@@ -258,6 +258,51 @@ Or use `./pt-menu.sh` → Run Test for interactive selection.
 
 ---
 
+## Web UI (pt-webui)
+
+Growin PT now includes a modern, terminal-inspired Web UI (`pt-webui`) built with React and Bun. It provides an alternative to the `pt-menu.sh` TUI.
+
+### Setup & Installation
+
+1. **Prerequisites**: Ensure you have [Bun](https://bun.sh/) installed.
+2. **Install Dependencies**:
+   ```bash
+   cd pt-webui
+   bun install
+   ```
+
+### Running the Web UI
+
+The Web UI requires both the frontend dev server and the backend API server.
+
+**Option 1: Using ui-skills (Recommended)**
+```bash
+# From the project root
+npx ui-skills start
+```
+
+**Option 2: Manual Start**
+1. Start the UI Backend (handles `k6` execution, system status, and report serving):
+   ```bash
+   cd pt-webui
+   bun run server.ts
+   ```
+   *(Runs on port `3001`)*
+2. Start the Frontend:
+   ```bash
+   cd pt-webui
+   bun run dev
+   ```
+   *(Runs on port `5173`, access via `http://localhost:5173`)*
+
+### Key Features
+- **Run Tests**: Interactive form to trigger `k6` test suites with live execution status.
+- **Global Footer**: Displays current IP, Webhook status, Grafana backend status, and K6 Engine state.
+- **Grafana Reports**: Easily view the latest generated Grafana utilization `.html` report directly from the Settings tab.
+- **Service Controls**: Start and stop the Grafana Python backend directly from the UI.
+
+---
+
 ## Webhooks
 
 Multi-channel notifications after each run. Configured in `configs/pt.env`.

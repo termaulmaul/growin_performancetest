@@ -1183,17 +1183,15 @@ ssh_menu() {
 
         check_k6_blocker || continue
 
-        if [[ "$file_sel" == *.sh ]]; then
-          run_cmd="cd Script/$suite_name && bash $file_sel"
-          _run_label="$suite_name / $file_sel"
+        # --- Run Configuration Variables ---
+        local vus="" dur="" env_name="" runby="" platform="" scenario=""
 
-        elif [[ "$file_sel" == *.js ]]; then
+        # 1. Ask for Platform & Scenario (only for .js files)
+        if [[ "$file_sel" == *.js ]]; then
           echo -e "\n${CYN}${BLD}  ── K6 Run Configuration ──${RST}"
-          # Declare all run vars local here to prevent scope leak between iterations
-          local vus="" dur="" env_name="" runby="" platform="" scenario=""
 
           local plat_choices=("Web" "iOS" "Android" "← Back")
-          local platform; platform=$(pick_fzf "Platform>" "${plat_choices[@]}")
+          platform=$(pick_fzf "Platform>" "${plat_choices[@]}")
           [[ -z "$platform" || "$platform" == "← Back" ]] && continue
 
           # Extract BPs from platform subfolder first (accurate)
@@ -1215,7 +1213,6 @@ ssh_menu() {
             done < <(grep -E '^export function BP[0-9]+' "$suite_dir/$file_sel" 2>/dev/null | awk '{print $3}' | cut -d'(' -f1 | sort -u)
           fi
 
-          local scenario=""
           if [[ ${#bps[@]} -gt 0 ]]; then
             local scen_choices=("All" "${bps[@]}")
             echo -e "  ${DIM}TAB=mark multiple  ENTER=confirm  All=run every BP${RST}"
@@ -1238,22 +1235,35 @@ ssh_menu() {
             printf "  Scenario (BP) [BP001]: "; read -r scenario
             scenario="${scenario:-BP001}"
           fi
+        else
+          # For .sh files, default platform/scenario as they are wrappers
+          platform="Wrapper"
+          scenario="AllBP"
+        fi
 
-          local default_vus; default_vus=$(env_val K6_USERS 100)
-          vus=$(prompt_int "VUs / Users" 1 5000 "$default_vus")
+        # 2. Ask for VUs, Duration, Env, Runby (Common for both .js and .sh)
+        local default_vus; default_vus=$(env_val K6_USERS 100)
+        vus=$(prompt_int "VUs / Users" 1 5000 "$default_vus")
 
-          local default_dur; default_dur=$(env_val DURATION 5m)
-          dur=$(prompt_duration "Duration" "$default_dur")
-          dur=$(normalize_duration "$dur")
+        local default_dur; default_dur=$(env_val DURATION 5m)
+        dur=$(prompt_duration "Duration" "$default_dur")
+        dur=$(normalize_duration "$dur")
 
-          local default_env; default_env=$(env_val ENV INT)
-          printf "  ENV [%s]: " "$default_env"; read -r env_name
-          env_name="${env_name:-$default_env}"
+        local default_env; default_env=$(env_val ENV INT)
+        printf "  ENV [%s]: " "$default_env"; read -r env_name
+        env_name="${env_name:-$default_env}"
 
-          local runby_choices=("Manual" "Regression" "LoadTest" "← Back")
-          local runby; runby=$(pick_fzf "RUNBY>" "${runby_choices[@]}")
-          [[ -z "$runby" || "$runby" == "← Back" ]] && continue
+        local runby_choices=("Manual" "Regression" "LoadTest" "← Back")
+        runby=$(pick_fzf "RUNBY>" "${runby_choices[@]}")
+        [[ -z "$runby" || "$runby" == "← Back" ]] && continue
 
+        # 3. Construct the run command
+        if [[ "$file_sel" == *.sh ]]; then
+          # For .sh, pass variables as ENV vars to bash
+          run_cmd="cd Script/$suite_name && ENV=$env_name USER=$vus DURATION=$dur RUNBY=$runby bash $file_sel"
+          _run_label="$suite_name / $file_sel  [$mode · ${vus}VU · $dur]"
+          python3 "$PROJECT_DIR/pt-data/auth.py" set_run "$PT_USER" "$file_sel" "$dur" 2>/dev/null || true
+        elif [[ "$file_sel" == *.js ]]; then
           local scen_label="${scenario:-AllBP}"
           # For report path: replace commas with dashes (BP001,BP002 → BP001-BP002)
           scen_label="${scen_label//,/-}"
