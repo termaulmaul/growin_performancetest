@@ -296,7 +296,9 @@ npx ui-skills start
    *(Runs on port `5173`, access via `http://localhost:5173`)*
 
 ### Key Features
-- **Run Tests**: Interactive form to trigger `k6` test suites with live execution status.
+- **Run Tests**: Interactive form to trigger `k6` test suites with live execution status. Fully supports **Target Routing** (Onprem, Oncloud, Sandbox) to mirror `pt-menu.sh` remote execution.
+- **Dynamic Script Picker**: Fetches test scripts dynamically from the `Script/` directory via the Bun API.
+- **Management Parity**: Mirrors `pt-menu.sh` functionality for Webhooks, Cron Scheduler, User Management, Dashboard, and Tools.
 - **Global Footer**: Displays current IP, Webhook status, Grafana backend status, and K6 Engine state.
 - **Grafana Reports**: Easily view the latest generated Grafana utilization `.html` report directly from the Settings tab.
 - **Service Controls**: Start and stop the Grafana Python backend directly from the UI.
