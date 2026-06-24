@@ -168,14 +168,14 @@ EOF
     local _util_arg=""
     [[ -n "$_util_url" ]] && _util_arg="--utilization-url $_util_url"
     
-    [[ -n "$(env_val TELEGRAM_WEBHOOK '')" ]] && node "$PROJECT_DIR/lib/webhook/send-summary-webhook.mjs" "$res" --type telegram --webhook "$(env_val TELEGRAM_WEBHOOK '')" $_util_arg 2>/dev/null
-    [[ -n "$(env_val DISCORD_WEBHOOK '')" ]] && node "$PROJECT_DIR/lib/webhook/send-summary-webhook.mjs" "$res" --type discord --webhook "$(env_val DISCORD_WEBHOOK '')" $_util_arg 2>/dev/null
-    [[ -n "$(env_val BRRR_WEBHOOK '')" ]] && node "$PROJECT_DIR/lib/webhook/send-summary-webhook.mjs" "$res" --type brrr --webhook "$(env_val BRRR_WEBHOOK '')" $_util_arg 2>/dev/null
+    [[ -n "$(env_val TELEGRAM_WEBHOOK '')" ]] && node "$PROJECT_DIR/lib/webhook/send-summary-webhook.mjs" "$res" --type telegram --webhook "$(env_val TELEGRAM_WEBHOOK '')" $_util_arg >/dev/null 2>&1 &
+    [[ -n "$(env_val DISCORD_WEBHOOK '')" ]] && node "$PROJECT_DIR/lib/webhook/send-summary-webhook.mjs" "$res" --type discord --webhook "$(env_val DISCORD_WEBHOOK '')" $_util_arg >/dev/null 2>&1 &
+    [[ -n "$(env_val BRRR_WEBHOOK '')" ]] && node "$PROJECT_DIR/lib/webhook/send-summary-webhook.mjs" "$res" --type brrr --webhook "$(env_val BRRR_WEBHOOK '')" $_util_arg >/dev/null 2>&1 &
     
     local tm; tm=$(env_val TEAMS_WEBHOOK '')
     if [[ -n "$tm" || "$(env_val NOTIFY_TEAMS 'false')" == "true" ]]; then
       [[ -z "$tm" ]] && tm=$(env_val TEAMS_WEBHOOK '')
-      [[ -n "$tm" ]] && node "$PROJECT_DIR/lib/webhook/send-summary-webhook.mjs" "$res" --type teams --webhook "$tm" $_util_arg 2>/dev/null
+      [[ -n "$tm" ]] && node "$PROJECT_DIR/lib/webhook/send-summary-webhook.mjs" "$res" --type teams --webhook "$tm" $_util_arg >/dev/null 2>&1 &
     fi
   fi
 }
@@ -1351,74 +1351,26 @@ ls -d Script/'$suite_name' 2>&1 | head -1 || { echo "FATAL: Script/'$suite_name'
           fi
           recent_runs_add "Onprem · $suite_name · $platform · ${scenario:-AllBP} · ${vus}VU · $dur"
 
-          local _stamp; _stamp="$(uuidgen 2>/dev/null || printf '%s_%s' "$$" "$(date +%s%N)")"
-          local _tarball="/tmp/pt-upload-${_stamp}.tar.gz"
-          local _remote_dir="/tmp/pt-run-${_stamp}"
-
-          echo -e "${DIM}[local] Packing Script/$suite_name + Helper + k6-linux binaries...${RST}"
-          local _tar_k6=()
-          [[ -f "$PROJECT_DIR/k6-linux-amd64" ]] && _tar_k6+=("k6-linux-amd64")
-          [[ -f "$PROJECT_DIR/k6-linux-arm64" ]] && _tar_k6+=("k6-linux-arm64")
-          [[ ${#_tar_k6[@]} -eq 0 ]] && echo -e "${DIM}[local] k6 binaries not found locally — remote will use system k6${RST}"
-          tar -czf "$_tarball" -C "$PROJECT_DIR" \
-            "Script/$suite_name" Helper ${_tar_k6[@]+"${_tar_k6[@]}"} 2>&1 || {
-              echo -e "${RED}FATAL: tar failed${RST}"
-              read -r -p $'\nPress Enter...'; continue;
-            }
-
           print_run_header "$_run_label" "Onprem  10.82.15.72 → 10.184.120.48" "Onprem"
-          echo -e "${DIM}[local] Uploading to qa@10.184.120.48:${_remote_dir}/...${RST}"
+          echo -e "${DIM}[local] Executing directly via ssh...${RST}"
 
-          # Upload via scp through jump host
-          set +e
-          _sshpass_cmd "$pass" scp -o StrictHostKeyChecking=no \
-            -o ProxyCommand="sshpass -p \"$pass\" ssh -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72" \
-            "$_tarball" qa@10.184.120.48:/tmp/ 2>&1 | tail -3
-          local _scp_rc=${PIPESTATUS[0]}
-          set -e
-          if [[ $_scp_rc -ne 0 ]]; then
-            echo -e "${RED}FATAL: scp upload failed (rc=$_scp_rc)${RST}"
-            rm -f "$_tarball"
-            print_run_footer "$_scp_rc" "$_run_log"
-            read -r -p $'\nPress Enter...'; continue
-          fi
-
-          # Extract + run on remote (uses bundled k6 v1.4.0 from tarball)
+          # Extract + run on remote
           local _test_pwd; _test_pwd=$(env_val TEST_PASSWORD '')
           local _test_pin; _test_pin=$(env_val TEST_PIN '')
           local _remote_cmd="set -e
-mkdir -p $_remote_dir
-cd $_remote_dir
-tar -xzf /tmp/$(basename $_tarball)
-echo '[remote] Extracted at:' \$(pwd)
-ls -la Script/ | head -5
-# Detect arch and pick bundled k6 binary (uploaded with tarball)
-REPO_K6=''
-for _d in ~/growin_performancetest ~/mostng_performancetest_api /home/qa/growin_performancetest /home/qa/mostng_performancetest_api; do
-  if [ -x \"\$_d/k6\" ]; then REPO_K6=\"\$_d/k6\"; break; fi
+REPO_DIR=\"\"
+for _d in ~/growin_performancetest /home/qa/growin_performancetest ~/mostng_performancetest_api /home/qa/mostng_performancetest_api; do
+  if [ -d \"\$_d/.git\" ]; then REPO_DIR=\"\$_d\"; break; fi
 done
-ARCH=\$(uname -m)
-if [ -n \"\$REPO_K6\" ]; then
-  K6_BIN=\"\$REPO_K6\"
-  echo \"[remote] Using repo k6: \$K6_BIN (\$(\$K6_BIN version | head -1))\"
-elif [ \"\$ARCH\" = \"x86_64\" ] && [ -x ./k6-linux-amd64 ]; then
-  K6_BIN=./k6-linux-amd64
-elif [ \"\$ARCH\" = \"aarch64\" ] && [ -x ./k6-linux-arm64 ]; then
-  K6_BIN=./k6-linux-arm64
-elif command -v k6 >/dev/null; then
-  K6_BIN=\$(command -v k6)
-  echo '[remote] WARN: Using system k6 (may have outdated Babel). Bundled k6 not found for arch:' \$ARCH
-else
-  echo 'FATAL: No k6 binary available for arch:' \$ARCH
-  exit 127
-fi
-chmod +x \$K6_BIN 2>/dev/null || true
-echo '[remote] Arch:' \$ARCH ' | Using k6:' \$K6_BIN \"(\$(\$K6_BIN version | head -1))\"
+if [ -z \"\$REPO_DIR\" ]; then echo 'FATAL: Repo not found on remote'; exit 1; fi
+cd \"\$REPO_DIR\"
+git pull --ff-only origin main >/dev/null 2>&1 || true
+if [ -x ./k6 ]; then K6_BIN=./k6; elif command -v k6 >/dev/null; then K6_BIN=\$(command -v k6); else echo 'FATAL: k6 not found'; exit 127; fi
+echo '[remote] Using k6:' \$K6_BIN
 cd Script/$suite_name
 mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
 echo '[remote] Running k6...'
 set -o pipefail
-echo '[remote] Running k6...'
 \$K6_BIN run --compatibility-mode=extended --summary-export=/tmp/k6-export-\$\$.json $file_sel -e RUNBY=$runby -e ENV=$env_name -e USER=$vus -e K6_USERS=$vus -e DURATION=$dur -e SCENARIO=$scenario -e PLATFORM=$platform -e NUMSTART=1 -e TEST_PASSWORD=$_test_pwd -e TEST_PIN=$_test_pin --out dashboard=export=$report_file 2>&1
 RC=\$?
 echo '[remote] k6 exit code:' \$RC
@@ -1428,7 +1380,6 @@ if [ -f /tmp/k6-export-\$\$.json ]; then
   echo 'K6_SUMMARY_JSON_END'
   rm -f /tmp/k6-export-\$\$.json
 fi
-cd /tmp && rm -rf $_remote_dir $(basename $_tarball)
 exit \$RC"
 
           set +e
@@ -1437,7 +1388,6 @@ exit \$RC"
             qa@10.184.120.48 "$_remote_cmd" 2>&1 | tee "$_run_log"
           _run_rc=${PIPESTATUS[0]}; set -e
           print_run_footer "$_run_rc" "$_run_log"
-          rm -f "$_tarball"
         fi
         ;;
 
@@ -1458,57 +1408,21 @@ exit \$RC"
           fi
         else
           # Suite run — UPLOAD script + Helper, then execute via gcloud
-          local _stamp; _stamp="$(uuidgen 2>/dev/null || printf '%s_%s' "$$" "$(date +%s%N)")"
-          local _tarball="/tmp/pt-upload-${_stamp}.tar.gz"
-          local _remote_dir="/tmp/pt-run-${_stamp}"
-
-          echo -e "${DIM}[local] Packing Script/$suite_name + Helper + k6-linux binaries...${RST}"
-          local _tar_k6=()
-          [[ -f "$PROJECT_DIR/k6-linux-amd64" ]] && _tar_k6+=("k6-linux-amd64")
-          [[ -f "$PROJECT_DIR/k6-linux-arm64" ]] && _tar_k6+=("k6-linux-arm64")
-          [[ ${#_tar_k6[@]} -eq 0 ]] && echo -e "${DIM}[local] k6 binaries not found locally — remote will use system k6${RST}"
-          tar -czf "$_tarball" -C "$PROJECT_DIR" \
-            "Script/$suite_name" Helper ${_tar_k6[@]+"${_tar_k6[@]}"} 2>&1 || {
-              echo -e "${RED}FATAL: tar failed${RST}"
-              read -r -p $'\nPress Enter...'; continue;
-            }
-
           print_run_header "$_run_label" "Oncloud  GCP IAP → vm-pt-ksix-0" "Oncloud"
-          echo -e "${DIM}[local] Uploading via gcloud scp to vm-pt-ksix-0:/tmp/...${RST}"
-
-          set +e
-          gcloud compute scp --zone "asia-southeast2-c" \
-            --tunnel-through-iap --project "compute-pt" \
-            "$_tarball" "vm-pt-ksix-0:/tmp/" 2>&1 | tail -3
-          local _scp_rc=${PIPESTATUS[0]}
-          set -e
-          if [[ $_scp_rc -ne 0 ]]; then
-            echo -e "${RED}FATAL: gcloud scp upload failed (rc=$_scp_rc)${RST}"
-            rm -f "$_tarball"
-            print_run_footer "$_scp_rc" "$_run_log"
-            read -r -p $'\nPress Enter...'; continue
-          fi
+          echo -e "${DIM}[local] Executing directly via gcloud ssh...${RST}"
 
           local _test_pwd; _test_pwd=$(env_val TEST_PASSWORD '')
           local _test_pin; _test_pin=$(env_val TEST_PIN '')
           local _remote_cmd="set -e
-mkdir -p $_remote_dir
-cd $_remote_dir
-tar -xzf /tmp/$(basename $_tarball)
-echo '[remote] Extracted at:' \$(pwd)
-REPO_K6=''
-for _d in ~/growin_performancetest ~/mostng_performancetest_api /home/qa/growin_performancetest /home/qa/mostng_performancetest_api; do
-  if [ -x \"\$_d/k6\" ]; then REPO_K6=\"\$_d/k6\"; break; fi
+REPO_DIR=\"\"
+for _d in ~/growin_performancetest /home/qa/growin_performancetest ~/mostng_performancetest_api /home/qa/mostng_performancetest_api; do
+  if [ -d \"\$_d/.git\" ]; then REPO_DIR=\"\$_d\"; break; fi
 done
-ARCH=\$(uname -m)
-if [ -n \"\$REPO_K6\" ]; then K6_BIN=\"\$REPO_K6\"
-elif [ \"\$ARCH\" = \"x86_64\" ] && [ -x ./k6-linux-amd64 ]; then K6_BIN=./k6-linux-amd64
-elif [ \"\$ARCH\" = \"aarch64\" ] && [ -x ./k6-linux-arm64 ]; then K6_BIN=./k6-linux-arm64
-elif command -v k6 >/dev/null; then K6_BIN=\$(command -v k6)
-else echo 'FATAL: k6 not found'; exit 127
-fi
-chmod +x \$K6_BIN 2>/dev/null || true
-echo '[remote] Arch:' \$ARCH '| k6:' \$K6_BIN
+if [ -z \"\$REPO_DIR\" ]; then echo 'FATAL: Repo not found on remote'; exit 1; fi
+cd \"\$REPO_DIR\"
+git pull --ff-only origin main >/dev/null 2>&1 || true
+if [ -x ./k6 ]; then K6_BIN=./k6; elif command -v k6 >/dev/null; then K6_BIN=\$(command -v k6); else echo 'FATAL: k6 not found'; exit 127; fi
+echo '[remote] Using k6:' \$K6_BIN
 cd Script/$suite_name
 mkdir -p ../../Report/$suite_name/$platform/$scen_label/$runby
 set -o pipefail
@@ -1520,7 +1434,6 @@ if [ -f /tmp/k6-export-\$\$.json ]; then
   echo 'K6_SUMMARY_JSON_END'
   rm -f /tmp/k6-export-\$\$.json
 fi
-cd /tmp && rm -rf $_remote_dir $(basename $_tarball)
 exit \$RC"
 
           set +e
@@ -1529,7 +1442,6 @@ exit \$RC"
             --command="$_remote_cmd" 2>&1 | tee "$_run_log"
           _run_rc=${PIPESTATUS[0]}; set -e
           print_run_footer "$_run_rc" "$_run_log"
-          rm -f "$_tarball"
         fi
         ;;
 
