@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Terminal } from 'lucide-react';
 
 interface TerminalPanelProps {
@@ -8,8 +8,16 @@ interface TerminalPanelProps {
 }
 
 export function TerminalPanel({ logs, isRunning, logsEndRef }: TerminalPanelProps) {
+  useEffect(() => {
+    if (logsEndRef.current) {
+      logsEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [logs, logsEndRef]);
+
   return (
-    <section className="mt-8 border-2 border-[#333] bg-[#0a0a0a] flex flex-col h-72">
+    <section className="space-y-3 font-mono h-full flex flex-col min-h-0">
+      <label className="text-xs font-bold text-emerald-500 tracking-widest flex-none">[TTY_01_STDOUT]</label>
+      <div className="border-2 border-[#333] bg-[#0a0a0a] flex flex-col flex-1 min-h-0">
       <div className="flex items-center justify-between px-4 py-1 bg-[#1a1a1a] border-b-2 border-[#333]">
         <div className="flex items-center gap-2">
           <Terminal className="w-4 h-4 text-emerald-500" />
@@ -22,7 +30,7 @@ export function TerminalPanel({ logs, isRunning, logsEndRef }: TerminalPanelProp
           <div className={`w-2 h-2 ${isRunning ? 'bg-emerald-500 animate-pulse' : 'bg-[#555]'}`}></div>
         </div>
       </div>
-      <div className="p-4 text-xs overflow-y-auto flex-1 text-emerald-400">
+      <div className="p-4 text-xs overflow-y-auto flex-1 text-emerald-400 min-h-0">
         {logs.length === 0 ? (
           <span className="text-[#555]">AWAITING CMD...</span>
         ) : (
@@ -40,6 +48,7 @@ export function TerminalPanel({ logs, isRunning, logsEndRef }: TerminalPanelProp
           ))
         )}
         <div ref={logsEndRef} />
+      </div>
       </div>
     </section>
   );

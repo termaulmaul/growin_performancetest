@@ -1,15 +1,30 @@
 import React from 'react';
-import { Play, Activity, History, Settings, Wrench, Webhook } from 'lucide-react';
+import { Play, Activity, History, Settings, Wrench, Webhook, LogOut, Users, Clock } from 'lucide-react';
 
-export function Sidebar({ activeTab, setActiveTab }: { activeTab: string, setActiveTab: (t: string) => void }) {
+export function Sidebar({ activeTab, setActiveTab, user }: { activeTab: string, setActiveTab: (t: string) => void, user: { username: string, role: string } }) {
   const tabs = [
-    { id: 'run', label: 'EXECUTE_TEST', icon: Play },
-    { id: 'dashboard', label: 'METRICS_DASHBOARD', icon: Activity },
-    { id: 'history', label: 'AUDIT_TRAIL', icon: History },
-    { id: 'tools', label: 'SYS_DIAGNOSTICS', icon: Wrench },
-    { id: 'webhooks', label: 'WEBHOOK_MGR', icon: Webhook },
-    { id: 'settings', label: 'SYS_CONFIG', icon: Settings },
-  ];
+    { id: 'run', label: 'EXECUTE_TEST', icon: Play, allowed: ['god', 'admin', 'operator'] },
+    { id: 'dashboard', label: 'METRICS_DASHBOARD', icon: Activity, allowed: ['god', 'admin', 'operator', 'readonly', 'guest'] },
+    { id: 'history', label: 'AUDIT_TRAIL', icon: History, allowed: ['god', 'admin', 'operator', 'readonly', 'guest'] },
+    { id: 'diagnostics', label: 'SYS_DIAGNOSTICS', icon: Wrench, allowed: ['god', 'admin', 'operator', 'readonly'] },
+    { id: 'integrations', label: 'WEBHOOK_MGR', icon: Webhook, allowed: ['god', 'admin'] },
+    { id: 'settings', label: 'SYS_CONFIG', icon: Settings, allowed: ['god', 'admin', 'operator'] },
+    { id: 'users', label: 'USER_MGR', icon: Users, allowed: ['god', 'admin'] },
+    { id: 'cron', label: 'CRON_SCHEDULER', icon: Clock, allowed: ['god', 'admin'] },
+  ].filter(t => t.allowed.includes(user.role));
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: user.username })
+      });
+    } catch(e) {}
+    localStorage.removeItem("pt_token");
+    localStorage.removeItem("pt_username");
+    window.location.reload();
+  };
 
   return (
     <div className="w-64 bg-[#050505] border-r-2 border-[#333] flex flex-col font-mono relative z-20">
@@ -41,6 +56,16 @@ export function Sidebar({ activeTab, setActiveTab }: { activeTab: string, setAct
           );
         })}
       </nav>
+      
+      <div className="p-4 border-t-2 border-[#333]">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-4 py-3 text-xs transition-colors text-red-500 hover:bg-[#111] border-l-2 border-transparent hover:border-red-500"
+        >
+          <LogOut className="w-4 h-4" />
+          <span className="font-bold tracking-widest uppercase">[LOGOUT]</span>
+        </button>
+      </div>
     </div>
   );
 }

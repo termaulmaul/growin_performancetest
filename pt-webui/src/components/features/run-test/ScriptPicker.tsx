@@ -13,10 +13,16 @@ export function ScriptPicker({ script, setScript, handleConfigChange }: ScriptPi
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const modules = import.meta.glob('../../../../../Script/**/*.{js,sh}', { query: '?url', import: 'default' });
-  const realScripts = Object.keys(modules)
-    .map(p => p.replace('../../../../../Script/', ''))
-    .filter(p => !p.includes('copy') && !p.includes('?'));
+  const [realScripts, setRealScripts] = useState<string[]>([]);
+
+  React.useEffect(() => {
+    fetch('/api/scripts')
+      .then(res => res.json())
+      .then(data => {
+        if (data.scripts) setRealScripts(data.scripts);
+      })
+      .catch(console.error);
+  }, []);
 
   const filteredScripts = realScripts.filter(s => s.toLowerCase().includes(searchTerm.toLowerCase()));
 

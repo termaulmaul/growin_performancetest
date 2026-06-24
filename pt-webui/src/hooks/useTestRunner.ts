@@ -34,9 +34,13 @@ export function useTestRunner() {
     ]);
 
     try {
-      const res = await fetch("http://localhost:3001/api/run-test", {
+      const res = await fetch('/api/run-test', {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem('pt_token')}`,
+          "x-username": localStorage.getItem('pt_username') || ''
+        },
         body: JSON.stringify({ script, config, target })
       });
 

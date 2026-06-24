@@ -6,7 +6,13 @@ export function Webhooks() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/config')
+    fetch('/api/config', {
+      cache: 'no-store',
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("pt_token")}`,
+        "x-username": localStorage.getItem("pt_username") || ""
+      }
+    })
       .then(res => res.json())
       .then(data => {
         setHooks([
@@ -34,9 +40,13 @@ export function Webhooks() {
     });
 
     try {
-      const res = await fetch('http://localhost:3001/api/config', {
+      const res = await fetch('/api/config', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          "Authorization": `Bearer ${localStorage.getItem("pt_token")}`,
+          "x-username": localStorage.getItem("pt_username") || ""
+        },
         body: JSON.stringify(payload)
       });
       if (res.ok) {
@@ -56,9 +66,13 @@ export function Webhooks() {
     }
     
     try {
-      const res = await fetch('http://localhost:3001/api/test-webhook', {
+      const res = await fetch('/api/test-webhook', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          "Authorization": `Bearer ${localStorage.getItem("pt_token")}`,
+          "x-username": localStorage.getItem("pt_username") || ""
+        },
         body: JSON.stringify({ name, targetUrl: url })
       });
       const data = await res.json();
@@ -73,7 +87,7 @@ export function Webhooks() {
   };
 
   return (
-    <div className="space-y-6 font-mono">
+    <div className="space-y-6 max-w-6xl mx-auto w-full font-mono">
       <header className="border-b-2 border-[#333] pb-4 flex justify-between items-end">
         <div>
           <h2 className="text-2xl font-bold text-emerald-500 mb-1 tracking-widest uppercase">WEBHOOK_MGR.SYS</h2>
