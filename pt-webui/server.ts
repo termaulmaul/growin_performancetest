@@ -227,12 +227,14 @@ serve({
           }
         }
 
+        const remoteBase = `REPO_DIR=""; for d in growin_performancetest mostng_performancetest_api /home/qa/growin_performancetest /home/qa/mostng_performancetest_api; do if [ -d "$d" ]; then REPO_DIR="$d"; break; fi; done; if [ -z "$REPO_DIR" ]; then echo "FATAL: repo not found."; exit 1; fi; cd "$REPO_DIR" || exit 1; git pull --ff-only origin main >/dev/null 2>&1 || true; `;
+
         if (target === 'Oncloud') {
-          cmd = ["gcloud", "compute", "ssh", "--zone", "asia-southeast2-c", "vm-pt-ksix-0", "--tunnel-through-iap", "--project", "compute-pt", "--command", bashCmd];
+          cmd = ["gcloud", "compute", "ssh", "--zone", "asia-southeast2-c", "vm-pt-ksix-0", "--tunnel-through-iap", "--project", "compute-pt", "--command", `${remoteBase} ${bashCmd}`];
         } else if (target === 'Onprem') {
-          cmd = ["bash", "-c", `ssh -o StrictHostKeyChecking=no -o ProxyCommand="ssh -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72" qa@10.184.120.48 '${bashCmd}'`];
+          cmd = ["bash", "-c", `ssh -o StrictHostKeyChecking=no -o ProxyCommand="ssh -o StrictHostKeyChecking=no -W %h:%p qa@10.82.15.72" qa@10.184.120.48 '${remoteBase} ${bashCmd}'`];
         } else if (target === 'Sandbox') {
-          cmd = ["bash", "-c", `ssh -o StrictHostKeyChecking=no -p 2222 root@127.0.0.1 '${bashCmd}'`];
+          cmd = ["bash", "-c", `ssh -o StrictHostKeyChecking=no -p 2222 root@127.0.0.1 '${remoteBase} ${bashCmd}'`];
         } else {
           cmd = ["bash", "-c", bashCmd];
         }
@@ -268,9 +270,27 @@ serve({
           stderr: "pipe",
         });
 
+        const [stream1, stream2] = proc.stdout.tee();
+        const logFilePath = `/tmp/k6-webui-${Date.now()}.log`;
+        Bun.write(logFilePath, stream2);
+
         // Add async post-execution hooks
-        proc.exited.then(async () => {
+        proc.exited.then(async (exitCode) => {
           console.log(`[Backend] Test completed: ${scriptPath}. Running post-execution hooks...`);
+
+          const runLabel = `${suiteName} / ${scriptRelPath} [${envVars.PLATFORM} · ${envVars.SCENARIO || 'AllBP'} · ${envVars.VUS}VU · ${envVars.DURATION}]`;
+
+          // 0. Parse results
+          try {
+            const summaryJsonPath = `${PROJECT_ROOT}/artifacts/results/summary.json`;
+            const parseProc = Bun.spawn(["python3", "lib/webhook/parse-k6-log.py", logFilePath, summaryJsonPath, runLabel, target, "WebUI"], {
+               cwd: PROJECT_ROOT,
+            });
+            await parseProc.exited;
+            console.log(`[Backend] parsed k6 log.`);
+          } catch(e) {
+             console.error(`[Backend] Failed to parse k6 log:`, e);
+          }
 
           // 0. Release pt-lock
           try {
@@ -374,7 +394,7 @@ serve({
         });
 
         // Use a Response stream to pipe logs to the frontend
-        return new Response(proc.stdout, {
+        return new Response(stream1, {
           headers: {
             "Content-Type": "text/plain",
             "Access-Control-Allow-Origin": "*",
