@@ -73,7 +73,8 @@ def log(user, action, resource, detail):
 
 @cli.command()
 @click.option('--limit', default=20, type=int, help='Number of recent entries to show')
-def tail(limit):
+@click.option('--json', 'as_json', is_flag=True, help='Output as JSON array')
+def tail(limit, as_json):
     """Show the last N audit log entries (default 20)."""
     conn = get_conn()
     c = conn.cursor()
@@ -83,6 +84,10 @@ def tail(limit):
         ORDER BY id DESC
         LIMIT ?
     """, (limit,)).fetchall()
+
+    if as_json:
+        print(json.dumps([dict(r) for r in rows]))
+        return
 
     if not rows:
         print("(no audit entries)")

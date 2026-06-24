@@ -102,9 +102,13 @@ def unlock_user(by, username):
 @cli.command('reset-password')
 @click.option('--by', required=True)
 @click.option('--username', required=True)
-def reset_password(by, username):
+@click.option('--password-stdin', is_flag=True, help="Read password from stdin instead of tty prompt")
+def reset_password(by, username, password_stdin):
     require_role(by)
-    password = getpass.getpass(f"New password for '{username}': ")
+    if password_stdin:
+        password = sys.stdin.read().strip()
+    else:
+        password = getpass.getpass(f"New password for '{username}': ")
     if len(password) < 8:
         out("error", error="Password too short")
     hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt(12)).decode()
