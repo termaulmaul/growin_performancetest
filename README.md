@@ -307,13 +307,8 @@ npx ui-skills start
 
 | Page | Preview |
 |------|---------|
-| **Run Test** | ![Run Test](./docs/images/webui-run-test.png) |
-| **Dashboard** | ![Dashboard](./docs/images/webui-dashboard.png) |
-| **Cron Scheduler** | ![Cron Scheduler](./docs/images/webui-cron.png) |
-| **Webhooks** | ![Webhooks](./docs/images/webui-webhooks.png) |
-| **User Mgmt** | ![User Management](./docs/images/webui-users.png) |
-| **Tools** | ![Tools](./docs/images/webui-tools.png) |
-| **Settings** | ![Settings](./docs/images/webui-settings.png) |
+| **Login** | ![Login](./docs/screenshots/webui-login.png) |
+| **Dashboard** | ![Dashboard](./docs/screenshots/webui-dashboard.png) |
 
 ---
 
