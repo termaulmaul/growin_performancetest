@@ -303,6 +303,18 @@ npx ui-skills start
 - **Grafana Reports**: Easily view the latest generated Grafana utilization `.html` report directly from the Settings tab.
 - **Service Controls**: Start and stop the Grafana Python backend directly from the UI.
 
+### Web UI Screenshots
+
+| Page | Preview |
+|------|---------|
+| **Run Test** | ![Run Test](./docs/images/webui-run-test.png) |
+| **Dashboard** | ![Dashboard](./docs/images/webui-dashboard.png) |
+| **Cron Scheduler** | ![Cron Scheduler](./docs/images/webui-cron.png) |
+| **Webhooks** | ![Webhooks](./docs/images/webui-webhooks.png) |
+| **User Mgmt** | ![User Management](./docs/images/webui-users.png) |
+| **Tools** | ![Tools](./docs/images/webui-tools.png) |
+| **Settings** | ![Settings](./docs/images/webui-settings.png) |
+
 ---
 
 ## Webhooks
